@@ -18,13 +18,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     rect.iter()
         .for_each(|x| println!("Image rectangle is {:?}", x));
 
-    let filepath = Path::new(&filename);
-    if !filepath.is_file() {
-        Err(format!(
-            "Image file {} does not exist in the filesystem.",
-            filename
-        ))?
-    }
+    let filepath = check_input_path(&filename)?;
+
     let output_filename = format!(
         "{}_out{}",
         filepath
@@ -125,5 +120,17 @@ fn parse_args() -> Result<(String, Option<Rectangle>), Box<dyn Error>> {
         }
     } else {
         Ok((filename, None))
+    }
+}
+
+fn check_input_path(filename: &String) -> Result<&Path, Box<dyn Error>> {
+    let filepath = Path::new(filename);
+    if !filepath.is_file() {
+        Err(format!(
+            "Image file {} does not exist in the filesystem.",
+            filename
+        ))?
+    } else {
+        Ok(filepath)
     }
 }
