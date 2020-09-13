@@ -1,12 +1,19 @@
 use std::env;
 use std::error::Error;
 use std::fmt;
+use std::process;
 
 use std::path::Path;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (filename, rect) = parse_args()?;
+    let parse_result = parse_args();
+    if let Err(err) = parse_result {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    }
+
+    let (filename, rect) = parse_result.unwrap();
 
     rect.iter()
         .for_each(|x| println!("Image rectangle is {:?}", x));
