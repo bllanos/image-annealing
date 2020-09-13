@@ -19,30 +19,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .for_each(|x| println!("Image rectangle is {:?}", x));
 
     let filepath = check_input_path(&filename)?;
-
-    let output_filename = format!(
-        "{}_out{}",
-        filepath
-            .file_stem()
-            .unwrap()
-            .to_str()
-            .expect("The path should be valid UTF-8 because it is from std::env::args()."),
-        match filepath.extension() {
-            Some(val) => format!(
-                ".{}",
-                val.to_str().expect(
-                    "The extension should be valid UTF-8 because it is from std::env::args()."
-                )
-            ),
-            None => String::new(),
-        }
-    );
-    let mut output_path = PathBuf::new();
-    if let Some(parent) = filepath.parent() {
-        output_path.push(parent);
-    }
-    output_path.push(output_filename);
-
+    let output_path = make_output_filepath(&filepath)?;
     let img = image::open(filepath)?;
 
     println!("Saving image to: {}", output_path.to_str().unwrap());
@@ -133,4 +110,30 @@ fn check_input_path(filename: &String) -> Result<&Path, Box<dyn Error>> {
     } else {
         Ok(filepath)
     }
+}
+
+fn make_output_filepath(input_filepath: &Path) -> Result<PathBuf, Box<dyn Error>> {
+    let output_filename = format!(
+        "{}_out{}",
+        input_filepath
+            .file_stem()
+            .ok_or("The input filepath is expected to have a stem.")?
+            .to_str()
+            .ok_or("The file stem of the input filepath is expected to be valid UTF-8.")?,
+        match input_filepath.extension() {
+            Some(val) => format!(
+                ".{}",
+                val.to_str().ok_or(
+                    "The file extension of the input filepath is expected to be valid UTF-8."
+                )?
+            ),
+            None => String::new(),
+        }
+    );
+    let mut output_path = PathBuf::new();
+    if let Some(parent) = input_filepath.parent() {
+        output_path.push(parent);
+    }
+    output_path.push(output_filename);
+    Ok(output_path)
 }
