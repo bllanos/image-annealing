@@ -1,3 +1,4 @@
+use std::cmp::Eq;
 use std::error::Error;
 use std::fmt;
 
@@ -19,7 +20,7 @@ impl Error for InvalidCornersError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 pub struct Rectangle {
     x: u32,
     y: u32,
@@ -46,5 +47,18 @@ impl Rectangle {
         } else {
             Err(InvalidCornersError)
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.width == 0 || self.height == 0
+    }
+}
+
+impl PartialEq for Rectangle {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x
+            && self.y == other.y
+            && self.width == other.width
+            && self.height == other.height
     }
 }
