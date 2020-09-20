@@ -1,19 +1,22 @@
 use crate::image_utils::rectangle::{self, Rectangle};
-use std::env;
 use std::error::Error;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub fn parse_args() -> Result<(String, Option<Rectangle>), Box<dyn Error>> {
-    let mut args = env::args();
-    args.next()
-        .expect("No command-line arguments (not even the program name)");
-    let filename = args
+pub fn parse_args<T>(args: T) -> Result<(String, Option<Rectangle>), Box<dyn Error>>
+where
+    T: IntoIterator<Item = String>,
+{
+    let mut args_iter = args.into_iter();
+    args_iter
         .next()
-        .ok_or("Expected at least one command-line argument for an image filename.")?;
-    if let Some(arg) = args.next() {
+        .expect("No arguments (not even the program name)");
+    let filename = args_iter
+        .next()
+        .ok_or("Expected at least one argument for an image filename.")?;
+    if let Some(arg) = args_iter.next() {
         if arg == "--rect" {
-            let v: Vec<_> = args
+            let v: Vec<_> = args_iter
                 .take(rectangle::N_CORNERS)
                 .map(|x| x.parse::<u32>())
                 .filter(|x| x.is_ok())
@@ -23,7 +26,7 @@ pub fn parse_args() -> Result<(String, Option<Rectangle>), Box<dyn Error>> {
                 let rect = Rectangle::from_corners(v[0], v[1], v[2], v[3])?;
                 Ok((filename, Some(rect)))
             } else {
-                Err("Failed to parse corners for image rectangle")?
+                Err("Failed to parse corners for image rectangle from arguments")?
             }
         } else {
             Ok((filename, None))
@@ -66,6 +69,7 @@ pub fn make_output_filepath(input_filepath: &Path) -> Result<PathBuf, Box<dyn Er
     let mut output_path = PathBuf::new();
     if let Some(parent) = input_filepath.parent() {
         output_path.push(parent);
-    }    output_path.push(output_filename);
+    }
+    output_path.push(output_filename);
     Ok(output_path)
 }

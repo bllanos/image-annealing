@@ -1,9 +1,10 @@
 use image_annealing::config;
+use std::env;
 use std::error::Error;
 use std::process;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let parse_result = config::parse_args();
+    let parse_result = config::parse_args(env::args());
     if let Err(err) = parse_result {
         println!("Problem parsing arguments: {}", err);
         process::exit(1);
