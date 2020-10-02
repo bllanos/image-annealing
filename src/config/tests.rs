@@ -95,3 +95,39 @@ mod parse_args {
         Ok(())
     }
 }
+
+mod check_input_path {
+    use crate::config::check_input_path;
+    use std::error::Error;
+    use std::path::PathBuf;
+
+    #[test]
+    fn absent_file() {
+        let mut path = PathBuf::new();
+        path.push("data");
+        path.push("none.png");
+        let filename = String::from(path.to_str().unwrap());
+        let r = check_input_path(&filename);
+        r.expect_err("A non-existing file should trigger an error");
+    }
+
+    #[test]
+    fn not_a_file() {
+        let mut path = PathBuf::new();
+        path.push("data");
+        let filename = String::from(path.to_str().unwrap());
+        let r = check_input_path(&filename);
+        r.expect_err("A directory instead of a file should trigger an error");
+    }
+
+    #[test]
+    fn valid_file() -> Result<(), Box<dyn Error>> {
+        let mut path = PathBuf::new();
+        path.push("data");
+        path.push("radial_gradient_rg.png");
+        let filename = String::from(path.to_str().unwrap());
+        let path_out = check_input_path(&filename)?;
+        assert_eq!(path, path_out);
+        Ok(())
+    }
+}
