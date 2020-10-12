@@ -62,3 +62,6 @@ impl PartialEq for Rectangle {
             && self.height == other.height
     }
 }
+
+#[cfg(test)]
+mod tests;
