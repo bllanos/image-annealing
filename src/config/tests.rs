@@ -131,3 +131,45 @@ mod check_input_path {
         Ok(())
     }
 }
+
+mod make_output_filepath {
+    use crate::config::make_output_filepath;
+    use std::error::Error;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn empty_input() {
+        let path = PathBuf::new();
+        let r = make_output_filepath(&path);
+        r.expect_err("An empty input path should trigger an error");
+    }
+
+    #[test]
+    fn empty_extension() -> Result<(), Box<dyn Error>> {
+        let path = Path::new("test");
+        let r = make_output_filepath(&path)?;
+        let path_out = Path::new("test_out");
+        assert_eq!(r, path_out);
+        Ok(())
+    }
+
+    #[test]
+    fn with_extension() -> Result<(), Box<dyn Error>> {
+        let path = Path::new("test.jpg");
+        let r = make_output_filepath(&path)?;
+        let path_out = Path::new("test_out.jpg");
+        assert_eq!(r, path_out);
+        Ok(())
+    }
+
+    #[test]
+    fn with_path() -> Result<(), Box<dyn Error>> {
+        let mut path = PathBuf::new();
+        path.push("parent");
+        path.push("test.jpg");
+        let r = make_output_filepath(&path)?;
+        let path_out = Path::new("parent/test_out.jpg");
+        assert_eq!(r, path_out);
+        Ok(())
+    }
+}
