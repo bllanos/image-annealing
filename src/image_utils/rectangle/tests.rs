@@ -123,3 +123,73 @@ mod eq {
         Ok(())
     }
 }
+
+mod encloses {
+    use crate::image_utils::rectangle::Rectangle;
+    use std::error::Error;
+
+    #[test]
+    fn empty() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 1, 3)?;
+        let s = Rectangle::from_corners(1, 2, 1, 2)?;
+        assert!(r.encloses(&s));
+        assert!(!s.encloses(&r));
+        Ok(())
+    }
+
+    #[test]
+    fn empty_equal() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 1, 1, 3)?;
+        assert!(r.encloses(&r));
+        Ok(())
+    }
+
+    #[test]
+    fn shifted_x() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 2, 4)?;
+        let s = Rectangle::from_corners(3, 2, 5, 4)?;
+        assert!(!r.encloses(&s));
+        assert!(!s.encloses(&r));
+        Ok(())
+    }
+
+    #[test]
+    fn shifted_y() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 2, 4)?;
+        let s = Rectangle::from_corners(1, 3, 2, 5)?;
+        assert!(!r.encloses(&s));
+        assert!(!s.encloses(&r));
+        Ok(())
+    }
+
+    #[test]
+    fn nonempty() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 4, 7)?;
+        let s = Rectangle::from_corners(3, 3, 4, 4)?;
+        assert!(r.encloses(&s));
+        assert!(!s.encloses(&r));
+        Ok(())
+    }
+
+    #[test]
+    fn nonempty_equal() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 3, 5)?;
+        assert!(r.encloses(&r));
+        Ok(())
+    }
+}
+
+mod accessors {
+    use crate::image_utils::rectangle::Rectangle;
+    use std::error::Error;
+
+    #[test]
+    fn accessors() -> Result<(), Box<dyn Error>> {
+        let r = Rectangle::from_corners(1, 2, 4, 6)?;
+        assert_eq!(r.x(), 1);
+        assert_eq!(r.y(), 2);
+        assert_eq!(r.width(), 3);
+        assert_eq!(r.height(), 4);
+        Ok(())
+    }
+}

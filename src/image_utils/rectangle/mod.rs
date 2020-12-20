@@ -47,6 +47,29 @@ impl Rectangle {
     pub fn is_empty(&self) -> bool {
         self.width == 0 || self.height == 0
     }
+
+    pub fn encloses(&self, other: &Self) -> bool {
+        self.x <= other.x
+            && self.y <= other.y
+            && self.x + self.width >= other.x + other.width
+            && self.y + self.height >= other.y + other.height
+    }
+
+    pub fn x(&self) -> u32 {
+        self.x
+    }
+
+    pub fn y(&self) -> u32 {
+        self.y
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
 }
 
 impl PartialEq for Rectangle {
