@@ -110,7 +110,7 @@ mod make_output_filepath {
     fn empty_extension() -> Result<(), Box<dyn Error>> {
         let path = Path::new("test");
         let r = make_output_filepath(&path)?;
-        let path_out = Path::new("test_out");
+        let path_out = Path::new("test_out.tiff");
         assert_eq!(r, path_out);
         Ok(())
     }
@@ -119,7 +119,7 @@ mod make_output_filepath {
     fn with_extension() -> Result<(), Box<dyn Error>> {
         let path = Path::new("test.jpg");
         let r = make_output_filepath(&path)?;
-        let path_out = Path::new("test_out.jpg");
+        let path_out = Path::new("test_out.tiff");
         assert_eq!(r, path_out);
         Ok(())
     }
@@ -130,7 +130,7 @@ mod make_output_filepath {
         path.push("parent");
         path.push("test.jpg");
         let r = make_output_filepath(&path)?;
-        let path_out = Path::new("parent/test_out.jpg");
+        let path_out = Path::new("parent/test_out.tiff");
         assert_eq!(r, path_out);
         Ok(())
     }

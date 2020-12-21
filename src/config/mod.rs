@@ -60,15 +60,7 @@ pub fn make_output_filepath(input_filepath: &Path) -> Result<PathBuf, Box<dyn Er
             .ok_or("The input filepath is expected to have a stem.")?
             .to_str()
             .ok_or("The file stem of the input filepath is expected to be valid UTF-8.")?,
-        match input_filepath.extension() {
-            Some(val) => format!(
-                ".{}",
-                val.to_str().ok_or(
-                    "The file extension of the input filepath is expected to be valid UTF-8."
-                )?
-            ),
-            None => String::new(),
-        }
+        ".tiff"
     );
     let mut output_path = PathBuf::new();
     if let Some(parent) = input_filepath.parent() {
