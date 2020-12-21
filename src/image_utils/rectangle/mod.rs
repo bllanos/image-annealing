@@ -44,6 +44,15 @@ impl Rectangle {
         }
     }
 
+    pub fn from_dimensions(width_height: (u32, u32)) -> Self {
+        Rectangle {
+            x: 0,
+            y: 0,
+            width: width_height.0,
+            height: width_height.1,
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.width == 0 || self.height == 0
     }
