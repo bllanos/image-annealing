@@ -7,7 +7,7 @@ use std::process;
 fn main() -> Result<(), Box<dyn Error>> {
     let parse_result = config::parse_args(env::args());
     if let Err(err) = parse_result {
-        println!("Problem parsing arguments: {}", err);
+        eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);
     }
     let (filename, rect) = parse_result.unwrap();
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let prepare_result = annealing::prepare_image(&img, rect.as_ref());
     if let Err(err) = prepare_result {
-        println!(
+        eprintln!(
             "Problem preparing the image file {} for processing: {}",
             filename, err
         );
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let process_result = annealing::process_image(&prepared_img);
     if let Err(err) = process_result {
-        println!("Problem processing the image file {}: {}", filename, err);
+        eprintln!("Problem processing the image file {}: {}", filename, err);
         process::exit(1);
     }
     let processed_img = process_result.unwrap();
