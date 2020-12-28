@@ -5,6 +5,8 @@ use image::ImageBuffer;
 use std::error::Error;
 use std::fmt;
 
+mod compute;
+
 #[derive(Debug, Clone)]
 pub struct InvalidRegionError;
 
@@ -41,6 +43,8 @@ pub fn prepare_image(
 }
 
 pub fn process_image(img: &TextureImageBuffer) -> Result<TextureImageBuffer, Box<dyn Error>> {
+    let output = futures::executor::block_on(compute::execute_gpu(vec![5, 23, 10, 9]))?;
+    println!("Output: {:?}", output);
     Ok(img.clone())
 }
 
