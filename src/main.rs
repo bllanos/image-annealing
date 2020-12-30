@@ -1,4 +1,3 @@
-use image_annealing::annealing;
 use image_annealing::config;
 use std::env;
 use std::error::Error;
@@ -19,25 +18,25 @@ fn main() -> Result<(), Box<dyn Error>> {
     let output_path = config::make_output_filepath(&filepath)?;
     let img = image::open(filepath)?;
 
-    let prepare_result = annealing::prepare_image(&img, rect.as_ref());
-    if let Err(err) = prepare_result {
-        eprintln!(
-            "Problem preparing the image file {} for processing: {}",
-            filename, err
-        );
-        process::exit(1);
-    }
-    let prepared_img = prepare_result.unwrap();
+    // let prepare_result = annealing::prepare_image(&img, rect.as_ref());
+    // if let Err(err) = prepare_result {
+    //     eprintln!(
+    //         "Problem preparing the image file {} for processing: {}",
+    //         filename, err
+    //     );
+    //     process::exit(1);
+    // }
+    // let prepared_img = prepare_result.unwrap();
 
-    let process_result = annealing::process_image(&prepared_img);
-    if let Err(err) = process_result {
-        eprintln!("Problem processing the image file {}: {}", filename, err);
-        process::exit(1);
-    }
-    let processed_img = process_result.unwrap();
+    // let process_result = annealing::process_image(&prepared_img);
+    // if let Err(err) = process_result {
+    //     eprintln!("Problem processing the image file {}: {}", filename, err);
+    //     process::exit(1);
+    // }
+    // let processed_img = process_result.unwrap();
 
     println!("Saving image to: {}", output_path.to_str().unwrap());
-    processed_img.save(output_path)?;
+    img.save(output_path)?;
 
     Ok(())
 }

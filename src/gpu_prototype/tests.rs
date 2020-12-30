@@ -1,5 +1,5 @@
 mod prepare_image {
-    use crate::annealing::prepare_image;
+    use crate::gpu_prototype::prepare_image;
     use crate::image_utils::rectangle::Rectangle;
     use image::DynamicImage;
     use image::GenericImageView;
@@ -36,8 +36,8 @@ mod prepare_image {
 }
 
 mod process_image {
-    use crate::annealing::process_image;
-    use crate::annealing::TextureImageBuffer;
+    use crate::gpu_prototype::process_image;
+    use crate::gpu_prototype::TextureImageBuffer;
     use std::error::Error;
 
     #[test]
