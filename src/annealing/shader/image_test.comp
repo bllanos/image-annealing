@@ -1,0 +1,14 @@
+#version 450
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, rgba16) uniform restrict image2D image_inout;
+
+void main() {
+    ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = imageSize(image_inout);
+    if(coords.x < size.x && coords.y < size.y) {
+        vec4 to_write = imageLoad(image_inout, coords);
+        to_write *= vec4(1, 0.5, 1, 1);
+        imageStore(image_inout, coords, to_write);
+    }
+}

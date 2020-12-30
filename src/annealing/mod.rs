@@ -22,7 +22,9 @@ impl Error for InvalidRegionError {
     }
 }
 
-type TextureImageBuffer = ImageBuffer<image::Rgba<u16>, Vec<u16>>;
+type TextureComponent = u16;
+const N_TEXTURE_COMPONENTS: usize = 4;
+type TextureImageBuffer = ImageBuffer<image::Rgba<TextureComponent>, Vec<TextureComponent>>;
 
 pub fn prepare_image(
     img: &DynamicImage,
@@ -43,9 +45,9 @@ pub fn prepare_image(
 }
 
 pub fn process_image(img: &TextureImageBuffer) -> Result<TextureImageBuffer, Box<dyn Error>> {
-    let output = futures::executor::block_on(compute::execute_gpu(vec![5, 23, 10, 9]))?;
-    println!("Output: {:?}", output);
-    Ok(img.clone())
+    let output = futures::executor::block_on(compute::execute_gpu(img, vec![5, 23, 10, 9]))?;
+    println!("Output: {:?}", output.1);
+    Ok(output.0)
 }
 
 // The module could also be implemented in this file
