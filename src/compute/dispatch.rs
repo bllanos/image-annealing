@@ -56,16 +56,14 @@ impl DispatcherImplementation {
 
 impl Dispatcher for DispatcherImplementation {
     fn create_permutation(
-        self: Box<Self>,
+        mut self: Box<Self>,
         input: &CreatePermutationInput,
         parameters: &CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm> {
-        let mut mutable_self = self;
-        mutable_self
-            .operations
-            .create_permutation(&mutable_self.resources, &mutable_self.device);
-        mutable_self.create_permutation = Some(CreatePermutation::new(input, parameters));
-        mutable_self
+        self.operations
+            .create_permutation(&self.resources, &self.device);
+        self.create_permutation = Some(CreatePermutation::new(input, parameters));
+        self
     }
 }
 
@@ -82,9 +80,8 @@ impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
     fn full_output(&self) -> Option<&PermutationImageBuffer> {
         self.create_permutation.as_ref().unwrap().full_output()
     }
-    fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-        let mut mutable_self = self;
-        mutable_self.create_permutation = None;
-        mutable_self
+    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
+        self.create_permutation = None;
+        self
     }
 }
