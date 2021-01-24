@@ -1,16 +1,16 @@
-use super::buffer::PermutationStagingBuffer;
+use super::buffer::PermutationOutputBuffer;
 use super::texture::PermutationTexture;
 use crate::image_utils::ImageDimensions;
 
 pub struct ResourceManager {
-    permutation_staging_buffer: PermutationStagingBuffer,
+    permutation_output_buffer: PermutationOutputBuffer,
     permutation_texture: PermutationTexture,
 }
 
 impl ResourceManager {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
         Self {
-            permutation_staging_buffer: PermutationStagingBuffer::new(device, image_dimensions),
+            permutation_output_buffer: PermutationOutputBuffer::new(device, image_dimensions),
             permutation_texture: PermutationTexture::new(device, image_dimensions),
         }
     }
@@ -19,7 +19,7 @@ impl ResourceManager {
         &self.permutation_texture
     }
 
-    pub fn permutation_staging_buffer(&self) -> &PermutationStagingBuffer {
-        &self.permutation_staging_buffer
+    pub fn permutation_output_buffer(&self) -> &PermutationOutputBuffer {
+        &self.permutation_output_buffer
     }
 }

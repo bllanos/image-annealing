@@ -1,5 +1,5 @@
 use super::super::dispatch::DispatcherImplementation;
-use super::super::resource::buffer::MappableBuffer;
+use super::super::resource::buffer::ReadMappableBuffer;
 use super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
 use super::OutputStatus;
 use std::convert::TryInto;
@@ -24,8 +24,8 @@ impl CreatePermutation {
     ) -> Result<OutputStatus, Box<dyn Error>> {
         let mut mapped_buffer = dispatcher
             .resources()
-            .permutation_staging_buffer()
-            .request_map();
+            .permutation_output_buffer()
+            .request_map_read();
 
         dispatcher.poll_device();
 

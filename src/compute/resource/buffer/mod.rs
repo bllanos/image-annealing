@@ -73,16 +73,22 @@ impl Drop for MappedBuffer<'_> {
     }
 }
 
-pub trait MappableBuffer {
-    fn request_map(&self) -> MappedBuffer;
+pub trait ReadMappableBuffer {
+    fn request_map_read(&self) -> MappedBuffer;
 }
+
+pub trait OutputBuffer {}
 
 pub struct TextureCopyBuffer<T> {
     buffer_dimensions: TextureCopyBufferDimensions,
     buffer: wgpu::Buffer,
     phantom: PhantomData<T>,
 }
-pub type PermutationStagingBuffer = TextureCopyBuffer<super::Permutation>;
+
+pub struct PermutationOutput {}
+impl OutputBuffer for PermutationOutput {}
+
+pub type PermutationOutputBuffer = TextureCopyBuffer<PermutationOutput>;
 
 impl<T> TextureCopyBuffer<T> {
     fn create_buffer(
@@ -112,8 +118,8 @@ impl<T> TextureCopyBuffer<T> {
     }
 }
 
-impl<T> MappableBuffer for TextureCopyBuffer<T> {
-    fn request_map(&self) -> MappedBuffer {
+impl<T: OutputBuffer> ReadMappableBuffer for TextureCopyBuffer<T> {
+    fn request_map_read(&self) -> MappedBuffer {
         let buffer_slice = self.buffer.slice(..);
         let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
         MappedBuffer::new(
@@ -125,16 +131,13 @@ impl<T> MappableBuffer for TextureCopyBuffer<T> {
     }
 }
 
-impl PermutationStagingBuffer {
+impl PermutationOutputBuffer {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
         Self::create_buffer(
             device,
             image_dimensions,
             PermutationTexture::pixel_size(),
-            wgpu::BufferUsage::MAP_READ
-                | wgpu::BufferUsage::MAP_WRITE
-                | wgpu::BufferUsage::COPY_SRC
-                | wgpu::BufferUsage::COPY_DST,
+            wgpu::BufferUsage::MAP_READ | wgpu::BufferUsage::COPY_DST,
             Some("permutation_staging_buffer"),
         )
     }

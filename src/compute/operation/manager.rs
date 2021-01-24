@@ -21,7 +21,7 @@ impl OperationManager {
         self.pipelines.create_permutation(&mut encoder);
         encoder.copy_texture_to_buffer(
             resources.permutation_texture().copy_view(),
-            resources.permutation_staging_buffer().copy_view(),
+            resources.permutation_output_buffer().copy_view(),
             resources.permutation_texture().dimensions(),
         );
         device.queue().submit(Some(encoder.finish()));
