@@ -50,10 +50,16 @@ fn include_directive_callback(
         shaderc::IncludeType::Relative => {
             let path = Path::new(Path::new(source_file).parent().unwrap()).join(name);
             match std::fs::read_to_string(&path) {
-                Ok(glsl_code) => Ok(shaderc::ResolvedInclude {
-                    resolved_name: String::from(name),
-                    content: glsl_code,
-                }),
+                Ok(glsl_code) => {
+                    println!(
+                        "cargo:rerun-if-changed={}",
+                        path.as_os_str().to_str().unwrap()
+                    );
+                    Ok(shaderc::ResolvedInclude {
+                        resolved_name: String::from(name),
+                        content: glsl_code,
+                    })
+                }
                 Err(err) => Err(format!(
                     "Failed to resolve include to {} in {} (was looking for {:?}): {}",
                     name, source_file, path, err
