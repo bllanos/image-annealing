@@ -16,6 +16,7 @@ impl Error for InvalidDimensionError {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct ImageDimensions {
     width: usize,
     height: usize,
@@ -42,3 +43,6 @@ impl ImageDimensions {
         self.width.checked_mul(self.height).unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests;

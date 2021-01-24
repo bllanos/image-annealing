@@ -1,7 +1,7 @@
 #ifndef DEFS
 #define DEFS
 
-// Matches `WORKGROUP_SIZE` in src/compute/operation/shader/mod.rs
+// Matches `WORKGROUP_SIZE` in src/compute/operation/shader/workgroup/mod.rs
 #define WORKGROUP_SIZE_X 32
 #define WORKGROUP_SIZE_Y 32
 #define WORKGROUP_SIZE_Z 1
