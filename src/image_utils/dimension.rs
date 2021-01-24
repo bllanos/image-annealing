@@ -37,4 +37,8 @@ impl ImageDimensions {
     pub fn height(&self) -> usize {
         self.height
     }
+
+    pub fn count(&self) -> usize {
+        self.width.checked_mul(self.height).unwrap()
+    }
 }

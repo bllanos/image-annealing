@@ -1,9 +1,11 @@
 use super::dispatch::Dispatcher;
 use std::error::Error;
 
+pub mod conversion;
 pub mod create_permutation;
 pub mod format;
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum OutputStatus {
     NoNewOutput,
     NewPartialOutput,
