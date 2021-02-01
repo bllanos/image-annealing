@@ -1,0 +1,7 @@
+{
+  "CreatePermutationConfig": {
+    "image_width": 0,
+    "image_height": 25,
+    "permutation_output_path_no_extension": "permutation_out"
+  }
+}

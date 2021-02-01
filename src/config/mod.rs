@@ -1,9 +1,28 @@
-use crate::image_utils::rectangle::{self, Rectangle};
+use crate::image_utils::ImageDimensions;
+use serde::Deserialize;
 use std::error::Error;
+use std::fs::File;
+use std::io::BufReader;
 use std::path::Path;
-use std::path::PathBuf;
 
-pub fn parse_args<T>(args: T) -> Result<(String, Option<Rectangle>), Box<dyn Error>>
+#[derive(Deserialize)]
+enum UnverifiedConfig {
+    CreatePermutationConfig {
+        image_width: usize,
+        image_height: usize,
+        permutation_output_path_no_extension: String,
+    },
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Config {
+    CreatePermutationConfig {
+        image_dimensions: ImageDimensions,
+        permutation_output_path_no_extension: String,
+    },
+}
+
+pub fn parse_args<T>(args: T) -> Result<Config, Box<dyn Error>>
 where
     T: IntoIterator<Item = String>,
 {
@@ -13,61 +32,39 @@ where
         .expect("No arguments (not even the program name)");
     let filename = args_iter
         .next()
-        .ok_or("Expected at least one argument for an image filename.")?;
-    if let Some(arg) = args_iter.next() {
-        if arg == "--rect" {
-            let v: Vec<_> = args_iter
-                .take(rectangle::N_CORNERS)
-                .map(|x| x.parse::<u32>())
-                .filter(|x| x.is_ok())
-                .map(Result::unwrap)
-                .collect();
-            if v.len() == rectangle::N_CORNERS {
-                let rect = Rectangle::from_corners(v[0], v[1], v[2], v[3])?;
-                if rect.is_empty() {
-                    Err("Image rectangle corners specify an empty rectangle")?
-                } else {
-                    Ok((filename, Some(rect)))
-                }
-            } else {
-                Err("Failed to parse corners for image rectangle from arguments")?
-            }
-        } else {
-            Ok((filename, None))
-        }
-    } else {
-        Ok((filename, None))
-    }
+        .ok_or("Expected at least one argument for a configuration file's path.")?;
+    parse_config_file(&filename)
 }
 
-pub fn check_input_path(filename: &String) -> Result<&Path, Box<dyn Error>> {
+pub fn parse_config_file(filename: &str) -> Result<Config, Box<dyn Error>> {
+    check_input_path(filename)?;
+    let file = File::open(filename)?;
+    let reader = BufReader::new(file);
+    let unverified_config = serde_json::from_reader(reader)?;
+
+    let config = match unverified_config {
+        UnverifiedConfig::CreatePermutationConfig {
+            image_width,
+            image_height,
+            permutation_output_path_no_extension,
+        } => Config::CreatePermutationConfig {
+            image_dimensions: ImageDimensions::new(image_width, image_height)?,
+            permutation_output_path_no_extension,
+        },
+    };
+    Ok(config)
+}
+
+fn check_input_path(filename: &str) -> Result<(), Box<dyn Error>> {
     let filepath = Path::new(filename);
     if !filepath.is_file() {
         Err(format!(
-            "Image file {} does not exist in the filesystem.",
+            "File {} does not exist in the filesystem.",
             filename
         ))?
     } else {
-        Ok(filepath)
+        Ok(())
     }
-}
-
-pub fn make_output_filepath(input_filepath: &Path) -> Result<PathBuf, Box<dyn Error>> {
-    let output_filename = format!(
-        "{}_out{}",
-        input_filepath
-            .file_stem()
-            .ok_or("The input filepath is expected to have a stem.")?
-            .to_str()
-            .ok_or("The file stem of the input filepath is expected to be valid UTF-8.")?,
-        ".tiff"
-    );
-    let mut output_path = PathBuf::new();
-    if let Some(parent) = input_filepath.parent() {
-        output_path.push(parent);
-    }
-    output_path.push(output_filename);
-    Ok(output_path)
 }
 
 // The module could also be implemented in this file
