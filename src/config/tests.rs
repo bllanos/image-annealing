@@ -8,7 +8,7 @@ mod parse_args {
     #[should_panic(expected = "No arguments (not even the program name)")]
     fn empty_input() {
         let v: Vec<String> = Vec::new();
-        dbg!(parse_args(v));
+        let _ = parse_args(v);
     }
 
     #[test]
@@ -59,9 +59,8 @@ mod parse_config_file {
 
     #[test]
     fn valid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
-        let path =
-            test_utils::make_test_data_path_string(&["config", "create_permutation", "valid.json"]);
-        let r = parse_config_file(&path)?;
+        let path = test_utils::make_test_data_path(&["config", "create_permutation", "valid.json"]);
+        let r = parse_config_file(path)?;
         assert_eq!(
             r,
             Config::CreatePermutationConfig {
@@ -74,12 +73,12 @@ mod parse_config_file {
 
     #[test]
     fn invalid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path_string(&[
+        let path = test_utils::make_test_data_path(&[
             "config",
             "create_permutation",
             "invalid_dimensions.json",
         ]);
-        parse_config_file(&path).expect_err(
+        parse_config_file(path).expect_err(
             "A configuration file with invalid image dimensions should trigger an error",
         );
         Ok(())
@@ -90,24 +89,25 @@ mod check_input_path {
     use super::super::check_input_path;
     use crate::test_utils;
     use std::error::Error;
+    use std::path::Path;
 
     #[test]
     fn absent_file() {
-        let path = test_utils::make_test_data_path_string(&["none.png"]);
-        let r = check_input_path(&path);
+        let path = test_utils::make_test_data_path(&["none.png"]);
+        let r = check_input_path(path);
         r.expect_err("A non-existing file should trigger an error");
     }
 
     #[test]
     fn not_a_file() {
-        let path = test_utils::make_test_data_path_string::<Vec<&str>, &str>(Vec::new());
-        let r = check_input_path(&path);
+        let path = test_utils::make_test_data_path::<Vec<&Path>, &Path>(Vec::new());
+        let r = check_input_path(path);
         r.expect_err("A directory instead of a file should trigger an error");
     }
 
     #[test]
     fn valid_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path_string(&["image", "radial_gradient_rg.png"]);
-        check_input_path(&path)
+        let path = test_utils::make_test_data_path(&["image", "radial_gradient_rg.png"]);
+        Ok(check_input_path(path)?)
     }
 }

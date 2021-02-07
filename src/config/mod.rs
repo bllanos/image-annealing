@@ -1,9 +1,27 @@
 use crate::image_utils::ImageDimensions;
 use serde::Deserialize;
 use std::error::Error;
+use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+#[derive(Debug, Clone)]
+pub struct FileNotFoundError {
+    filepath: PathBuf,
+}
+
+impl fmt::Display for FileNotFoundError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "File {} does not exist in the filesystem.",
+            self.filepath.display()
+        )
+    }
+}
+
+impl Error for FileNotFoundError {}
 
 #[derive(Deserialize)]
 enum UnverifiedConfig {
@@ -36,8 +54,8 @@ where
     parse_config_file(&filename)
 }
 
-pub fn parse_config_file(filename: &str) -> Result<Config, Box<dyn Error>> {
-    check_input_path(filename)?;
+pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn Error>> {
+    check_input_path(&filename)?;
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
     let unverified_config = serde_json::from_reader(reader)?;
@@ -55,13 +73,12 @@ pub fn parse_config_file(filename: &str) -> Result<Config, Box<dyn Error>> {
     Ok(config)
 }
 
-fn check_input_path(filename: &str) -> Result<(), Box<dyn Error>> {
-    let filepath = Path::new(filename);
+fn check_input_path<P: AsRef<Path>>(filepath: P) -> Result<(), FileNotFoundError> {
+    let filepath = filepath.as_ref();
     if !filepath.is_file() {
-        Err(format!(
-            "File {} does not exist in the filesystem.",
-            filename
-        ))?
+        Err(FileNotFoundError {
+            filepath: filepath.to_path_buf(),
+        })
     } else {
         Ok(())
     }
