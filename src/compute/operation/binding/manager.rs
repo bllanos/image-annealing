@@ -1,6 +1,6 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::shader::WorkgroupDimensions;
-use super::binding::CreatePermutationBinding;
+use super::CreatePermutationBinding;
 
 pub struct BindingManager {
     create_permutation_binding: CreatePermutationBinding,

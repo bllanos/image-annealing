@@ -29,9 +29,11 @@ impl TextureCopyBufferDimensions {
     }
 }
 
+type BufferFuture = Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>;
+
 pub struct MappedBuffer<'a> {
     buffer_slice: wgpu::BufferSlice<'a>,
-    buffer_future: Option<Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>>,
+    buffer_future: Option<BufferFuture>,
     buffer_dimensions: &'a TextureCopyBufferDimensions,
     buffer: &'a wgpu::Buffer,
 }
@@ -39,7 +41,7 @@ pub struct MappedBuffer<'a> {
 impl<'a> MappedBuffer<'a> {
     pub fn new(
         slice: wgpu::BufferSlice<'a>,
-        buffer_future: Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>,
+        buffer_future: BufferFuture,
         buffer_dimensions: &'a TextureCopyBufferDimensions,
         buffer: &'a wgpu::Buffer,
     ) -> Self {
@@ -55,7 +57,6 @@ impl<'a> MappedBuffer<'a> {
         match self.buffer_future.take() {
             Some(fut) => {
                 futures::executor::block_on(async move { fut.await.unwrap() });
-                ()
             }
             None => panic!("The buffer data has already been collected."),
         }

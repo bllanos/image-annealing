@@ -8,7 +8,7 @@ mod parse_args {
     #[should_panic(expected = "No arguments (not even the program name)")]
     fn empty_input() {
         let v: Vec<String> = Vec::new();
-        println!("{:?}", parse_args(v));
+        dbg!(parse_args(v));
     }
 
     #[test]
