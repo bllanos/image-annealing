@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "image_annealing",
+    "image_annealing_build_utils",
     "image_annealing_cli",
     "image_annealing_cli_bin",
     "test_utils",

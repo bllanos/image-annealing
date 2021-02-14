@@ -107,7 +107,7 @@ fn main() -> Result<()> {
             &shader.src,
             shader.kind,
             &shader.src_path.to_str().unwrap(),
-            "main",
+            image_annealing_build_utils::SHADER_ENTRY_POINT,
             Some(&options),
         )?;
         write(shader.spv_path, compiled.as_binary_u8())?;

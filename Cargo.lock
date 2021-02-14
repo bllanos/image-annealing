@@ -576,10 +576,15 @@ dependencies = [
  "futures",
  "glob",
  "image",
+ "image_annealing_build_utils",
  "rayon",
  "shaderc",
  "wgpu",
 ]
+
+[[package]]
+name = "image_annealing_build_utils"
+version = "0.1.0"
 
 [[package]]
 name = "image_annealing_cli"

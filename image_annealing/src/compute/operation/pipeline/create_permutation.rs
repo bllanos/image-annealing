@@ -18,7 +18,7 @@ impl CreatePermutationPipeline {
             layout: Some(&layout),
             compute_stage: wgpu::ProgrammableStageDescriptor {
                 module: shader.shader(),
-                entry_point: shader.entry_point(),
+                entry_point: image_annealing_build_utils::SHADER_ENTRY_POINT,
             },
         });
         Self { pipeline }

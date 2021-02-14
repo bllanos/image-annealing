@@ -7,10 +7,6 @@ pub struct Shader {
 }
 
 impl Shader {
-    pub fn entry_point(&self) -> &'static str {
-        "main"
-    }
-
     pub fn shader(&self) -> &wgpu::ShaderModule {
         &self.shader
     }
