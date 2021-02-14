@@ -1,8 +1,8 @@
 mod parse_args {
     use super::super::{parse_args, Config};
-    use crate::image_utils::ImageDimensions;
-    use crate::test_utils;
+    use image_annealing::image_utils::ImageDimensions;
     use std::error::Error;
+    use test_utils;
 
     #[test]
     #[should_panic(expected = "No arguments (not even the program name)")]
@@ -53,9 +53,9 @@ mod parse_args {
 
 mod parse_config_file {
     use super::super::{parse_config_file, Config};
-    use crate::image_utils::ImageDimensions;
-    use crate::test_utils;
+    use image_annealing::image_utils::ImageDimensions;
     use std::error::Error;
+    use test_utils;
 
     #[test]
     fn valid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
@@ -87,9 +87,9 @@ mod parse_config_file {
 
 mod check_input_path {
     use super::super::check_input_path;
-    use crate::test_utils;
     use std::error::Error;
     use std::path::Path;
+    use test_utils;
 
     #[test]
     fn absent_file() {

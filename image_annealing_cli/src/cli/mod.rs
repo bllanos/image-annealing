@@ -1,8 +1,8 @@
-use crate::compute::format::ImageFileWriter;
-use crate::compute::{
+use crate::config::Config;
+use image_annealing::compute::format::ImageFileWriter;
+use image_annealing::compute::{
     self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, OutputStatus,
 };
-use crate::config::Config;
 use std::error::Error;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {

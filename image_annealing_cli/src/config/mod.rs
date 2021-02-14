@@ -1,4 +1,4 @@
-use crate::image_utils::ImageDimensions;
+use image_annealing::image_utils::ImageDimensions;
 use serde::Deserialize;
 use std::error::Error;
 use std::fmt;

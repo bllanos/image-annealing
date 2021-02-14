@@ -1,9 +1,9 @@
-use image_annealing::cli;
 use image_annealing::compute::format::{ImageFileWriter, PermutationImageBuffer};
-use image_annealing::config::Config;
 use image_annealing::image_utils::ImageDimensions;
-use image_annealing::test_utils;
+use image_annealing_cli::cli;
+use image_annealing_cli::config::Config;
 use std::error::Error;
+use test_utils;
 
 #[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {

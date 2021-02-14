@@ -6,6 +6,7 @@ where
     P: AsRef<Path>,
 {
     let mut path = PathBuf::new();
+    path.push("..");
     path.push("test_data");
     for c in components.into_iter() {
         path.push(c);
@@ -28,6 +29,7 @@ where
     P: AsRef<Path>,
 {
     let mut path = PathBuf::new();
+    path.push("..");
     path.push("test_output");
     for c in components.into_iter() {
         path.push(c);

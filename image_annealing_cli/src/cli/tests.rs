@@ -1,7 +1,7 @@
 mod create_dispatcher {
     use super::super::create_dispatcher;
     use crate::config::Config;
-    use crate::image_utils::ImageDimensions;
+    use image_annealing::image_utils::ImageDimensions;
     use std::error::Error;
 
     #[test]

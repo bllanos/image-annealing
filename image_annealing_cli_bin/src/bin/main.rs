@@ -1,10 +1,8 @@
-use image_annealing::cli;
-use image_annealing::config;
+use image_annealing_cli::{cli, config};
 use std::env;
-use std::error::Error;
 use std::process;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
     let parse_result = config::parse_args(env::args());
     match parse_result {
         Err(err) => {
@@ -18,5 +16,4 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    Ok(())
 }

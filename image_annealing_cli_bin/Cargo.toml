@@ -1,0 +1,11 @@
+[package]
+name = "image_annealing_cli_bin"
+version = "0.1.0"
+authors = ["Bernard Llanos"]
+edition = "2018"
+description = "Command-line programs for the image_annealing crate"
+keywords = ["image","graphics"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+image_annealing_cli = { path = "../image_annealing_cli" }
