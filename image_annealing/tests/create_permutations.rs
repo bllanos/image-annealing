@@ -14,7 +14,7 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     let result = algorithm.step()?;
     assert_eq!(result, OutputStatus::FinalFullOutput);
     let output = algorithm.full_output().unwrap();
-    let converted_output = conversion::to_vec(output);
+    let converted_output = conversion::as_vec(output);
     let mut expected: Vec<conversion::PermutationEntry> = Vec::with_capacity(dim.count());
     expected.resize(dim.count(), conversion::PermutationEntry(0, 0));
     assert_eq!(converted_output, expected);
@@ -40,7 +40,7 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
     assert_eq!(result, OutputStatus::FinalFullOutput);
 
     let output = algorithm.full_output().unwrap();
-    let converted_output = conversion::to_vec(output);
+    let converted_output = conversion::as_vec(output);
     let mut expected: Vec<conversion::PermutationEntry> = Vec::with_capacity(dim.count());
     expected.resize(dim.count(), conversion::PermutationEntry(0, 0));
     assert_eq!(converted_output, expected);
