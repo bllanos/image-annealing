@@ -8,8 +8,9 @@ fn identity() -> Result<(), Box<dyn Error>> {
     let dim = ImageDimensions::new(3, 5)?;
     let v = vec![PermutationEntry(0, 0); dim.count()];
     let p = conversion::as_image(&dim, &v);
-    let q = validate_permutation(&p)?;
-    assert_eq!(p, *q.0);
+    let expected = p.clone();
+    let q = validate_permutation(p)?;
+    assert_eq!(*q, expected);
     Ok(())
 }
 
@@ -23,7 +24,7 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
             PermutationEntry(1, -1),
         ],
     );
-    let r = validate_permutation(&image);
+    let r = validate_permutation(image);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -40,7 +41,7 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(&image);
+    let r = validate_permutation(image);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -57,7 +58,7 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(&image);
+    let r = validate_permutation(image);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -74,7 +75,7 @@ fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(&image);
+    let r = validate_permutation(image);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -91,7 +92,7 @@ fn duplicate() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(&image);
+    let r = validate_permutation(image);
     match r {
         Ok(_) => panic!("An error should be raised for a conflicting mapping"),
         Err(_) => Ok(()),
@@ -111,6 +112,8 @@ fn non_identity() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    validate_permutation(&image)?;
+    let expected = image.clone();
+    let validated = validate_permutation(image)?;
+    assert_eq!(*validated, expected);
     Ok(())
 }

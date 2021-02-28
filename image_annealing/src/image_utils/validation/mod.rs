@@ -4,6 +4,7 @@ use crate::compute::format::PermutationImageBuffer;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
+use std::ops::Deref;
 use std::ops::IndexMut;
 
 #[derive(Debug, Clone, Copy)]
@@ -65,12 +66,20 @@ impl Error for PermutationFlaw {
     }
 }
 
-pub struct ValidatedPermutation<'a>(&'a PermutationImageBuffer);
+pub struct ValidatedPermutation(PermutationImageBuffer);
+
+impl Deref for ValidatedPermutation {
+    type Target = PermutationImageBuffer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub fn validate_permutation(
-    image: &PermutationImageBuffer,
+    image: PermutationImageBuffer,
 ) -> Result<ValidatedPermutation, Box<dyn Error>> {
-    let dimensions = ImageDimensions::from_image(image)?;
+    let dimensions = ImageDimensions::from_image(&image)?;
     let mut sources: Vec<Option<PermutationPixelData>> = vec![None; dimensions.count()];
     for (x_in, y_in, px) in image.enumerate_pixels() {
         let x = x_in as i64;
