@@ -26,7 +26,7 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
             ..
         } => {
             let mut algorithm = dispatcher
-                .create_permutation(&CreatePermutationInput {}, &CreatePermutationParameters {});
+                .create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
             if let OutputStatus::FinalFullOutput = algorithm.step()? {
                 let img = algorithm.full_output().unwrap();
                 let output_path = img.save_add_extension(path)?;

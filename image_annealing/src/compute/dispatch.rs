@@ -20,8 +20,8 @@ pub type CreatePermutationAlgorithm = dyn Algorithm<(), PermutationImageBuffer>;
 pub trait Dispatcher {
     fn create_permutation(
         self: Box<Self>,
-        input: &CreatePermutationInput,
-        parameters: &CreatePermutationParameters,
+        input: CreatePermutationInput,
+        parameters: CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm>;
 }
 
@@ -57,8 +57,8 @@ impl DispatcherImplementation {
 impl Dispatcher for DispatcherImplementation {
     fn create_permutation(
         mut self: Box<Self>,
-        input: &CreatePermutationInput,
-        parameters: &CreatePermutationParameters,
+        input: CreatePermutationInput,
+        parameters: CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm> {
         self.operations
             .create_permutation(&self.resources, &self.device);

@@ -15,7 +15,7 @@ pub struct CreatePermutation {
 }
 
 impl CreatePermutation {
-    pub fn new(_input: &CreatePermutationInput, _parameters: &CreatePermutationParameters) -> Self {
+    pub fn new(_input: CreatePermutationInput, _parameters: CreatePermutationParameters) -> Self {
         Self { full_output: None }
     }
 
