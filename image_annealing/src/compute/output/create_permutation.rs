@@ -1,5 +1,6 @@
 use super::super::dispatch::DispatcherImplementation;
 use super::super::resource::buffer::ReadMappableBuffer;
+use super::conversion::PermutationEntryComponent;
 use super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
 use super::OutputStatus;
 use std::convert::TryInto;
@@ -31,7 +32,7 @@ impl CreatePermutation {
 
         let buffer_dimensions = mapped_buffer.buffer_dimensions();
         let data = mapped_buffer.collect_mapped_buffer();
-        let result: Vec<PermutationImageBufferComponent> = data
+        let mut result: Vec<PermutationImageBufferComponent> = data
             .chunks(buffer_dimensions.padded_bytes_per_row)
             .flat_map(|c| {
                 c[..buffer_dimensions.unpadded_bytes_per_row]
@@ -39,6 +40,16 @@ impl CreatePermutation {
             })
             .map(|b| PermutationImageBufferComponent::from_ne_bytes(b.try_into().unwrap()))
             .collect::<Vec<PermutationImageBufferComponent>>();
+
+        for component_bytes in result
+            .as_mut_slice()
+            .chunks_exact_mut(std::mem::size_of::<PermutationEntryComponent>())
+        {
+            let reordered_bytes =
+                PermutationEntryComponent::from_ne_bytes(component_bytes[..].try_into().unwrap())
+                    .to_be_bytes();
+            component_bytes.copy_from_slice(&reordered_bytes[..]);
+        }
 
         self.full_output = Some(
             PermutationImageBuffer::from_vec(

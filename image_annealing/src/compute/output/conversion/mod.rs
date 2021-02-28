@@ -13,8 +13,8 @@ pub fn as_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
         .enumerate_pixels()
         .map(|(.., px)| -> PermutationEntry {
             PermutationEntry(
-                PermutationEntryComponent::from_ne_bytes([px[0], px[1]]),
-                PermutationEntryComponent::from_ne_bytes([px[2], px[3]]),
+                PermutationEntryComponent::from_be_bytes([px[0], px[1]]),
+                PermutationEntryComponent::from_be_bytes([px[2], px[3]]),
             )
         })
         .collect()
@@ -25,8 +25,8 @@ pub fn as_image(dimensions: &ImageDimensions, v: &Vec<PermutationEntry>) -> Perm
         let image_vec = v
             .into_iter()
             .flat_map(|PermutationEntry(delta_x, delta_y)| {
-                let first = delta_x.to_ne_bytes();
-                let second = delta_y.to_ne_bytes();
+                let first = delta_x.to_be_bytes();
+                let second = delta_y.to_be_bytes();
                 [first, second].concat()
             })
             .collect();
