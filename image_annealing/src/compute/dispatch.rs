@@ -1,12 +1,12 @@
 use super::device::DeviceManager;
 use super::operation::manager::OperationManager;
-use super::output::create_permutation::{
+use super::output::algorithm::create_permutation::{
     CreatePermutation, CreatePermutationInput, CreatePermutationParameters,
 };
-use super::output::format::PermutationImageBuffer;
-use super::output::validate_permutation::{
+use super::output::algorithm::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
+use super::output::format::PermutationImageBuffer;
 use super::output::{Algorithm, OutputStatus};
 use super::resource::manager::ResourceManager;
 use crate::image_utils::validation::ValidatedPermutation;

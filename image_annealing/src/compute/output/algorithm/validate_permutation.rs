@@ -1,6 +1,6 @@
-use super::super::dispatch::{DimensionsMismatchError, DispatcherImplementation};
-use super::format::PermutationImageBuffer;
-use super::{AlreadyFailedError, OutputStatus};
+use super::super::super::dispatch::{DimensionsMismatchError, DispatcherImplementation};
+use super::super::format::PermutationImageBuffer;
+use super::super::{AlreadyFailedError, OutputStatus};
 use crate::image_utils::validation::{self, ValidatedPermutation};
 use crate::image_utils::ImageDimensions;
 use std::error::Error;

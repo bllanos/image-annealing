@@ -2,10 +2,9 @@ use super::dispatch::Dispatcher;
 use std::error::Error;
 use std::fmt;
 
+pub mod algorithm;
 pub mod conversion;
-pub mod create_permutation;
 pub mod format;
-pub mod validate_permutation;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum OutputStatus {

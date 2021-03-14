@@ -1,8 +1,8 @@
-use super::super::dispatch::DispatcherImplementation;
-use super::super::resource::buffer::ReadMappableBuffer;
-use super::conversion::PermutationEntryComponent;
-use super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
-use super::OutputStatus;
+use super::super::super::dispatch::DispatcherImplementation;
+use super::super::super::resource::buffer::ReadMappableBuffer;
+use super::super::conversion::PermutationEntryComponent;
+use super::super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
+use super::super::OutputStatus;
 use std::convert::TryInto;
 use std::error::Error;
 
