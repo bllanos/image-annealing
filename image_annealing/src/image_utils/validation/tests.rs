@@ -17,7 +17,7 @@ fn identity() -> Result<(), Box<dyn Error>> {
 fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
     let image = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
-        &vec![
+        &[
             PermutationEntry(0, 0),
             PermutationEntry(0, 1),
             PermutationEntry(1, -1),
@@ -34,7 +34,7 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
 fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
     let image = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
-        &vec![
+        &[
             PermutationEntry(0, -1),
             PermutationEntry(0, 1),
             PermutationEntry(0, -1),
@@ -51,7 +51,7 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
 fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
     let image = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
-        &vec![
+        &[
             PermutationEntry(0, 0),
             PermutationEntry(-2, 1),
             PermutationEntry(0, -1),
@@ -68,7 +68,7 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
 fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
     let image = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
-        &vec![
+        &[
             PermutationEntry(0, 3),
             PermutationEntry(0, 1),
             PermutationEntry(0, -1),

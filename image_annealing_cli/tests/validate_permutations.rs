@@ -1,7 +1,6 @@
 use image_annealing_cli::cli;
 use image_annealing_cli::config::Config;
 use std::error::Error;
-use test_utils;
 
 #[test]
 fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {

@@ -41,26 +41,23 @@ mod from_corners {
 
 mod from_dimensions {
     use crate::image_utils::rectangle::Rectangle;
-    use std::error::Error;
 
     #[test]
-    fn empty_rect() -> Result<(), Box<dyn Error>> {
+    fn empty_rect() {
         let r = Rectangle::from_dimensions((0, 0));
         assert_eq!(r.x, 0);
         assert_eq!(r.y, 0);
         assert_eq!(r.width, 0);
         assert_eq!(r.height, 0);
-        Ok(())
     }
 
     #[test]
-    fn nonempty_rect() -> Result<(), Box<dyn Error>> {
+    fn nonempty_rect() {
         let r = Rectangle::from_dimensions((2, 3));
         assert_eq!(r.x, 0);
         assert_eq!(r.y, 0);
         assert_eq!(r.width, 2);
         assert_eq!(r.height, 3);
-        Ok(())
     }
 }
 
@@ -104,7 +101,8 @@ mod eq {
     #[test]
     fn equal_self() -> Result<(), Box<dyn Error>> {
         let r = Rectangle::from_corners(1, 2, 3, 4)?;
-        assert_eq!(r, r);
+        let r2 = r;
+        assert_eq!(r, r2);
         Ok(())
     }
 

@@ -2,7 +2,6 @@ mod parse_args {
     use super::super::{parse_args, Config};
     use image_annealing::image_utils::ImageDimensions;
     use std::error::Error;
-    use test_utils;
 
     #[test]
     #[should_panic(expected = "No arguments (not even the program name)")]
@@ -55,14 +54,12 @@ mod parse_config_file {
     use super::super::{parse_config_file, Config};
     use image_annealing::image_utils::ImageDimensions;
     use std::error::Error;
-    use test_utils;
 
     #[test]
-    fn malformed_config_file() -> Result<(), Box<dyn Error>> {
+    fn malformed_config_file() {
         let path = test_utils::make_test_data_path(&["config", "empty.json"]);
         parse_config_file(path)
             .expect_err("A configuration file that cannot be deserialized should trigger an error");
-        Ok(())
     }
 
     #[test]
@@ -80,7 +77,7 @@ mod parse_config_file {
     }
 
     #[test]
-    fn invalid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
+    fn invalid_create_permutation_config_file() {
         let path = test_utils::make_test_data_path(&[
             "config",
             "create_permutation",
@@ -89,7 +86,6 @@ mod parse_config_file {
         parse_config_file(path).expect_err(
             "A configuration file with invalid image dimensions should trigger an error",
         );
-        Ok(())
     }
 
     #[test]
@@ -111,7 +107,7 @@ mod parse_config_file {
     }
 
     #[test]
-    fn invalid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
+    fn invalid_validate_permutation_config_file() {
         let path = test_utils::make_test_data_path(&[
             "config",
             "create_permutation",
@@ -120,7 +116,6 @@ mod parse_config_file {
         parse_config_file(path).expect_err(
             "A configuration file with an invalid candidate permutation path should trigger an error",
         );
-        Ok(())
     }
 }
 
@@ -128,7 +123,6 @@ mod check_input_path {
     use super::super::check_input_path;
     use std::error::Error;
     use std::path::Path;
-    use test_utils;
 
     #[test]
     fn absent_file() {

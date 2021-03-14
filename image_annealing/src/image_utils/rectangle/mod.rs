@@ -19,7 +19,7 @@ impl Error for InvalidCornersError {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Rectangle {
     x: u32,
     y: u32,
