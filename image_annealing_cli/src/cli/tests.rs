@@ -12,4 +12,31 @@ mod create_dispatcher {
         })?;
         Ok(())
     }
+
+    #[test]
+    fn valid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
+        create_dispatcher(&Config::ValidatePermutationConfig {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]),
+        })?;
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
+        let r = create_dispatcher(&Config::ValidatePermutationConfig {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "not_found.png",
+            ]),
+        });
+        match r {
+            Ok(_) => panic!("A non-existant candidate permutation should trigger an error"),
+            Err(_) => Ok(()),
+        }
+    }
 }

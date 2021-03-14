@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::path::{self, Path, PathBuf};
 
 #[derive(Debug, Clone)]
 pub struct FileNotFoundError {
@@ -30,6 +30,9 @@ enum UnverifiedConfig {
         image_height: usize,
         permutation_output_path_no_extension: String,
     },
+    ValidatePermutationConfig {
+        candidate_permutation_path: String,
+    },
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -37,6 +40,9 @@ pub enum Config {
     CreatePermutationConfig {
         image_dimensions: ImageDimensions,
         permutation_output_path_no_extension: String,
+    },
+    ValidatePermutationConfig {
+        candidate_permutation_path: String,
     },
 }
 
@@ -67,7 +73,14 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
             permutation_output_path_no_extension,
         } => Config::CreatePermutationConfig {
             image_dimensions: ImageDimensions::new(image_width, image_height)?,
-            permutation_output_path_no_extension,
+            permutation_output_path_no_extension: convert_path_separators(
+                permutation_output_path_no_extension,
+            ),
+        },
+        UnverifiedConfig::ValidatePermutationConfig {
+            candidate_permutation_path,
+        } => Config::ValidatePermutationConfig {
+            candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
         },
     };
     Ok(config)
@@ -82,6 +95,21 @@ fn check_input_path<P: AsRef<Path>>(filepath: P) -> Result<(), FileNotFoundError
     } else {
         Ok(())
     }
+}
+
+fn convert_path_separators(filepath: String) -> String {
+    if <String as AsRef<Path>>::as_ref(&filepath).is_absolute() {
+        filepath
+    } else {
+        let new_separator = path::MAIN_SEPARATOR.to_string();
+        filepath.replace(&['\\', '/'][..], &new_separator)
+    }
+}
+
+fn convert_and_check_input_path(filepath: String) -> Result<String, FileNotFoundError> {
+    let new_path = convert_path_separators(filepath);
+    check_input_path(&new_path)?;
+    Ok(new_path)
 }
 
 // The module could also be implemented in this file

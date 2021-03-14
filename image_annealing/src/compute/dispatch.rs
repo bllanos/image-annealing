@@ -4,10 +4,30 @@ use super::output::create_permutation::{
     CreatePermutation, CreatePermutationInput, CreatePermutationParameters,
 };
 use super::output::format::PermutationImageBuffer;
+use super::output::validate_permutation::{
+    ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
+};
 use super::output::{Algorithm, OutputStatus};
 use super::resource::manager::ResourceManager;
+use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
+use std::fmt;
+
+#[derive(Debug, Clone)]
+pub struct DimensionsMismatchError;
+
+impl fmt::Display for DimensionsMismatchError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Mismatch in image dimensions")
+    }
+}
+
+impl Error for DimensionsMismatchError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
 
 pub fn create_dispatcher(
     image_dimensions: &ImageDimensions,
@@ -16,6 +36,7 @@ pub fn create_dispatcher(
 }
 
 pub type CreatePermutationAlgorithm = dyn Algorithm<(), PermutationImageBuffer>;
+pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatedPermutation>;
 
 pub trait Dispatcher {
     fn create_permutation(
@@ -23,13 +44,20 @@ pub trait Dispatcher {
         input: CreatePermutationInput,
         parameters: CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm>;
+    fn validate_permutation(
+        self: Box<Self>,
+        input: ValidatePermutationInput,
+        parameters: ValidatePermutationParameters,
+    ) -> Box<ValidatePermutationAlgorithm>;
 }
 
 pub struct DispatcherImplementation {
     device: DeviceManager,
     resources: ResourceManager,
     operations: OperationManager,
+    image_dimensions: ImageDimensions,
     create_permutation: Option<CreatePermutation>,
+    validate_permutation: Option<ValidatePermutation>,
 }
 
 impl DispatcherImplementation {
@@ -41,7 +69,9 @@ impl DispatcherImplementation {
             device,
             resources,
             operations,
+            image_dimensions: *image_dimensions,
             create_permutation: None,
+            validate_permutation: None,
         })
     }
 
@@ -51,6 +81,10 @@ impl DispatcherImplementation {
 
     pub fn resources(&self) -> &ResourceManager {
         &self.resources
+    }
+
+    pub fn image_dimensions(&self) -> &ImageDimensions {
+        &self.image_dimensions
     }
 }
 
@@ -63,6 +97,15 @@ impl Dispatcher for DispatcherImplementation {
         self.operations
             .create_permutation(&self.resources, &self.device);
         self.create_permutation = Some(CreatePermutation::new(input, parameters));
+        self
+    }
+
+    fn validate_permutation(
+        mut self: Box<Self>,
+        input: ValidatePermutationInput,
+        parameters: ValidatePermutationParameters,
+    ) -> Box<ValidatePermutationAlgorithm> {
+        self.validate_permutation = Some(ValidatePermutation::new(input, parameters));
         self
     }
 }
@@ -82,6 +125,25 @@ impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.create_permutation = None;
+        self
+    }
+}
+
+impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
+    fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
+        let mut validate_permutation = self.validate_permutation.take().unwrap();
+        let result = validate_permutation.step(self);
+        self.validate_permutation = Some(validate_permutation);
+        result
+    }
+    fn partial_output(&self) -> Option<&()> {
+        self.validate_permutation.as_ref().unwrap().partial_output()
+    }
+    fn full_output(&self) -> Option<&ValidatedPermutation> {
+        self.validate_permutation.as_ref().unwrap().full_output()
+    }
+    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
+        self.validate_permutation = None;
         self
     }
 }

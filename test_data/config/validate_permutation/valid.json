@@ -1,0 +1,5 @@
+{
+  "ValidatePermutationConfig": {
+    "candidate_permutation_path": "../test_data/image/permutation/identity_permutation.png"
+  }
+}

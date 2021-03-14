@@ -58,6 +58,14 @@ mod parse_config_file {
     use test_utils;
 
     #[test]
+    fn malformed_config_file() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_data_path(&["config", "empty.json"]);
+        parse_config_file(path)
+            .expect_err("A configuration file that cannot be deserialized should trigger an error");
+        Ok(())
+    }
+
+    #[test]
     fn valid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_data_path(&["config", "create_permutation", "valid.json"]);
         let r = parse_config_file(path)?;
@@ -80,6 +88,37 @@ mod parse_config_file {
         ]);
         parse_config_file(path).expect_err(
             "A configuration file with invalid image dimensions should trigger an error",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn valid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
+        let path =
+            test_utils::make_test_data_path(&["config", "validate_permutation", "valid.json"]);
+        let r = parse_config_file(path)?;
+        assert_eq!(
+            r,
+            Config::ValidatePermutationConfig {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "identity_permutation.png"
+                ]),
+            }
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "create_permutation",
+            "candidate_permutation_not_found.json",
+        ]);
+        parse_config_file(path).expect_err(
+            "A configuration file with an invalid candidate permutation path should trigger an error",
         );
         Ok(())
     }
@@ -109,5 +148,44 @@ mod check_input_path {
     fn valid_file() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_data_path(&["image", "radial_gradient_rg.png"]);
         Ok(check_input_path(path)?)
+    }
+}
+
+mod convert_path_separators {
+    use super::super::convert_path_separators;
+    use std::path::MAIN_SEPARATOR;
+
+    #[test]
+    fn windows_path() {
+        let filepath = String::from("one\\two\\three\\..\\.\\end.txt");
+        let expected = filepath.clone();
+        let converted = convert_path_separators(filepath);
+        if MAIN_SEPARATOR == '\\' {
+            assert_eq!(converted, expected);
+        } else {
+            assert!(converted.find('\\').is_none());
+            assert!(converted.find(MAIN_SEPARATOR).is_some());
+        }
+    }
+
+    #[test]
+    fn unix_path() {
+        let filepath = String::from("one/two/three/.././end.txt");
+        let expected = filepath.clone();
+        let converted = convert_path_separators(filepath);
+        if MAIN_SEPARATOR == '/' {
+            assert_eq!(converted, expected);
+        } else {
+            assert!(converted.find('/').is_none());
+            assert!(converted.find(MAIN_SEPARATOR).is_some());
+        }
+    }
+
+    #[test]
+    fn no_separators() {
+        let filepath = String::from("end.txt");
+        let expected = filepath.clone();
+        let converted = convert_path_separators(filepath);
+        assert_eq!(converted, expected);
     }
 }

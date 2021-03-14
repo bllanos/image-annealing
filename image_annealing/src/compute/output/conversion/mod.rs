@@ -20,10 +20,10 @@ pub fn as_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
         .collect()
 }
 
-pub fn as_image(dimensions: &ImageDimensions, v: &Vec<PermutationEntry>) -> PermutationImageBuffer {
+pub fn as_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> PermutationImageBuffer {
     if v.len() == dimensions.count() {
         let image_vec = v
-            .into_iter()
+            .iter()
             .flat_map(|PermutationEntry(delta_x, delta_y)| {
                 let first = delta_x.to_be_bytes();
                 let second = delta_y.to_be_bytes();

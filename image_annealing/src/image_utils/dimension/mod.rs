@@ -41,11 +41,16 @@ pub struct ImageDimensions {
 }
 
 impl ImageDimensions {
-    pub fn new(width: usize, height: usize) -> Result<Self, InvalidDimensionError> {
-        if width == 0 || height == 0 {
+    pub fn new<T: TryInto<usize>>(width: T, height: T) -> Result<Self, InvalidDimensionError> {
+        let width_usize = width.try_into().or(Err(InvalidDimensionError))?;
+        let height_usize = height.try_into().or(Err(InvalidDimensionError))?;
+        if width_usize == 0 || height_usize == 0 {
             Err(InvalidDimensionError)
         } else {
-            Ok(ImageDimensions { width, height })
+            Ok(ImageDimensions {
+                width: width_usize,
+                height: height_usize,
+            })
         }
     }
 

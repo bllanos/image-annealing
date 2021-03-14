@@ -590,6 +590,7 @@ version = "0.1.0"
 name = "image_annealing_cli"
 version = "0.1.0"
 dependencies = [
+ "image",
  "image_annealing",
  "serde",
  "serde_json",
