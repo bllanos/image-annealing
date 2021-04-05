@@ -37,11 +37,7 @@ pub fn as_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> Permuta
         )
         .unwrap()
     } else {
-        panic!(format!(
-            "A vector of length {} cannot be converted to an image of dimensions {}.",
-            v.len(),
-            dimensions
-        ))
+        panic!("Vector length and image dimensions are incompatible.");
     }
 }
 
