@@ -78,9 +78,7 @@ impl PermutationTexture {
             device,
             image_dimensions,
             Self::format(),
-            wgpu::TextureUsage::STORAGE
-                | wgpu::TextureUsage::COPY_DST
-                | wgpu::TextureUsage::COPY_SRC,
+            wgpu::TextureUsage::STORAGE | wgpu::TextureUsage::COPY_SRC,
             Some("permutation_texture"),
             Some("permutation_texture_view"),
         )
@@ -95,7 +93,7 @@ impl TextureDatatype for PermutationTexture {
 
     /// Matches `PERMUTATION_FORMAT` in src/compute/operation/shader/glsl/defs.glsl
     fn format() -> wgpu::TextureFormat {
-        wgpu::TextureFormat::Rg16Sint
+        wgpu::TextureFormat::Rgba8Uint
     }
 }
 

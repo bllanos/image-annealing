@@ -4,12 +4,12 @@
 
 layout(local_size_x = WORKGROUP_SIZE_X, local_size_y = WORKGROUP_SIZE_Y, local_size_z = WORKGROUP_SIZE_Z) in;
 
-layout(set = 0, binding = 0, PERMUTATION_FORMAT) uniform restrict writeonly iimage2D permutation;
+layout(set = 0, binding = 0, PERMUTATION_FORMAT) uniform restrict writeonly uimage2D permutation;
 
 void main() {
     ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
     ivec2 size = imageSize(permutation);
     if(coords.x < size.x && coords.y < size.y) {
-        imageStore(permutation, coords, ivec4(0, 0, 0, 0));
+        imageStore(permutation, coords, uvec4(0, 0, 0, 0));
     }
 }

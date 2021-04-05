@@ -7,6 +7,6 @@
 #define WORKGROUP_SIZE_Z 1
 
 // Matches `<PermutationTexture as TextureDatatype>::format()` in src/compute/resource/texture/mod.rs
-#define PERMUTATION_FORMAT rg16i
+#define PERMUTATION_FORMAT rgba8ui
 
 #endif // DEFS
