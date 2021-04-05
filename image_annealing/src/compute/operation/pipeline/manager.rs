@@ -19,7 +19,9 @@ impl PipelineManager {
     }
 
     pub fn create_permutation(&self, encoder: &mut wgpu::CommandEncoder) {
-        let mut cpass = encoder.begin_compute_pass();
+        let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+            label: Some("create_permutation_compute_pass"),
+        });
         self.create_permutation_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_create_permutation(&mut cpass);
         let &WorkgroupDimensions(x, y, z) = self.bindings.create_permutation_dimensions();

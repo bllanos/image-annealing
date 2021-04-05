@@ -1,6 +1,8 @@
 use super::texture::{PermutationTexture, TextureDatatype};
 use crate::image_utils::ImageDimensions;
 use core::future::Future;
+use core::num::NonZeroU32;
+use std::convert::TryInto;
 use std::marker::PhantomData;
 use std::pin::Pin;
 
@@ -114,7 +116,7 @@ impl<T> TextureCopyBuffer<T> {
         }
     }
 
-    pub fn copy_view(&self) -> wgpu::BufferCopyView {
+    pub fn copy_view(&self) -> wgpu::ImageCopyBuffer {
         create_buffer_copy_view(&self.buffer, &self.buffer_dimensions)
     }
 }
@@ -147,13 +149,15 @@ impl PermutationOutputBuffer {
 fn create_buffer_copy_view<'a, 'b>(
     buffer: &'a wgpu::Buffer,
     dimensions: &'b TextureCopyBufferDimensions,
-) -> wgpu::BufferCopyView<'a> {
-    wgpu::BufferCopyView {
+) -> wgpu::ImageCopyBuffer<'a> {
+    wgpu::ImageCopyBuffer {
         buffer,
-        layout: wgpu::TextureDataLayout {
+        layout: wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: dimensions.padded_bytes_per_row as u32,
-            rows_per_image: 0,
+            bytes_per_row: Some(
+                NonZeroU32::new(dimensions.padded_bytes_per_row.try_into().unwrap()).unwrap(),
+            ),
+            rows_per_image: None,
         },
     }
 }

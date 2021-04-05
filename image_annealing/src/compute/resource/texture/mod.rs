@@ -25,7 +25,7 @@ pub struct Texture<T> {
 pub type PermutationTexture = Texture<super::Permutation>;
 
 const TEXTURE_DIMENSION: wgpu::TextureDimension = wgpu::TextureDimension::D2;
-const TEXTURE_DEPTH: usize = 1;
+const TEXTURE_ARRAY_LAYERS: usize = 1;
 
 impl<T> Texture<T> {
     fn create_texture(
@@ -39,7 +39,7 @@ impl<T> Texture<T> {
         let dimensions = wgpu::Extent3d {
             width: image_dimensions.width() as u32,
             height: image_dimensions.height() as u32,
-            depth: TEXTURE_DEPTH as u32,
+            depth_or_array_layers: TEXTURE_ARRAY_LAYERS as u32,
         };
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label,
@@ -67,7 +67,7 @@ impl<T> Texture<T> {
         self.dimensions
     }
 
-    pub fn copy_view(&self) -> wgpu::TextureCopyView {
+    pub fn copy_view(&self) -> wgpu::ImageCopyTexture {
         create_texture_copy_view(&self.texture)
     }
 }
@@ -106,8 +106,8 @@ fn create_texture_view(texture: &wgpu::Texture, label: Option<&str>) -> wgpu::Te
     })
 }
 
-fn create_texture_copy_view(texture: &wgpu::Texture) -> wgpu::TextureCopyView {
-    wgpu::TextureCopyView {
+fn create_texture_copy_view(texture: &wgpu::Texture) -> wgpu::ImageCopyTexture {
+    wgpu::ImageCopyTexture {
         texture: &texture,
         mip_level: 0,
         origin: wgpu::Origin3d::ZERO,

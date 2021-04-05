@@ -39,9 +39,9 @@ impl CreatePermutationBinding {
                 binding: 0,
                 visibility: wgpu::ShaderStage::COMPUTE,
                 ty: wgpu::BindingType::StorageTexture {
-                    dimension: PermutationTexture::view_dimension(),
+                    access: wgpu::StorageTextureAccess::WriteOnly,
                     format: PermutationTexture::format(),
-                    readonly: false,
+                    view_dimension: PermutationTexture::view_dimension(),
                 },
                 count: None,
             }],

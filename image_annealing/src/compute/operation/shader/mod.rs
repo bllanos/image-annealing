@@ -14,7 +14,7 @@ impl Shader {
 
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
     Shader {
-        shader: device.create_shader_module(wgpu::include_spirv!(
+        shader: device.create_shader_module(&wgpu::include_spirv!(
             "./glsl/main/create_permutation.comp.spv"
         )),
     }

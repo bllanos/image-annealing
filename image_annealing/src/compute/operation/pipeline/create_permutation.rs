@@ -16,10 +16,8 @@ impl CreatePermutationPipeline {
         let pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("create_permutation_pipeline"),
             layout: Some(&layout),
-            compute_stage: wgpu::ProgrammableStageDescriptor {
-                module: shader.shader(),
-                entry_point: image_annealing_build_utils::SHADER_ENTRY_POINT,
-            },
+            module: shader.shader(),
+            entry_point: image_annealing_build_utils::SHADER_ENTRY_POINT,
         });
         Self { pipeline }
     }
