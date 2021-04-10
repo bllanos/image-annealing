@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 pub mod workgroup;
 
 pub use workgroup::WorkgroupDimensions;
@@ -13,9 +15,13 @@ impl Shader {
 }
 
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
-    let mut shader_descriptor = wgpu::include_spirv!("./glsl/main/create_permutation.comp.spv");
-    shader_descriptor.flags = wgpu::ShaderFlags::empty(); // TODO Re-enable validation
     Shader {
-        shader: device.create_shader_module(&shader_descriptor),
+        shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+            label: Some("create_permutation_shader_module"),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
+                "./wgsl/create_permutation.wgsl"
+            ))),
+            flags: wgpu::ShaderFlags::all(),
+        }),
     }
 }

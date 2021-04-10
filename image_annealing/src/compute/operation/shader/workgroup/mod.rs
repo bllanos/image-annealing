@@ -1,7 +1,6 @@
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct WorkgroupDimensions(pub u32, pub u32, pub u32);
 
-// Matches src/compute/operation/shader/glsl/defs.glsl
 const WORKGROUP_SIZE: WorkgroupDimensions = WorkgroupDimensions(32, 32, 1);
 
 impl WorkgroupDimensions {

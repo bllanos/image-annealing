@@ -91,7 +91,6 @@ impl TextureDatatype for PermutationTexture {
         2
     }
 
-    /// Matches `PERMUTATION_FORMAT` in src/compute/operation/shader/glsl/defs.glsl
     fn format() -> wgpu::TextureFormat {
         wgpu::TextureFormat::Rgba8Uint
     }
