@@ -112,15 +112,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
-name = "cmake"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb6210b637171dfba4cda12e579ac6dc73f5165ad56133e5d72ef3131f320855"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "cocoa-foundation"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -285,12 +276,6 @@ name = "foreign-types-shared"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
-
-[[package]]
-name = "fs_extra"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2022715d62ab30faffd124d40b76f4134a550a87792276512b18d63272333394"
 
 [[package]]
 name = "futures"
@@ -469,7 +454,7 @@ dependencies = [
  "khronos-egl",
  "libloading",
  "log",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "parking_lot",
  "raw-window-handle",
  "wasm-bindgen",
@@ -491,7 +476,7 @@ dependencies = [
  "gfx-hal",
  "log",
  "metal",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "objc",
  "parking_lot",
  "range-alloc",
@@ -511,7 +496,7 @@ dependencies = [
  "gfx-hal",
  "inplace_it",
  "log",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "objc",
  "parking_lot",
  "raw-window-handle",
@@ -525,7 +510,7 @@ version = "0.7.0"
 source = "git+https://github.com/gfx-rs/gfx?rev=2a93d52661aafcbd6441ea83e739c8ced906cd21#2a93d52661aafcbd6441ea83e739c8ced906cd21"
 dependencies = [
  "bitflags",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "raw-window-handle",
  "thiserror",
 ]
@@ -638,13 +623,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "fs_extra",
  "futures",
  "glob",
  "image",
  "image_annealing_build_utils",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga.git)",
  "rayon",
- "shaderc",
  "wgpu",
 ]
 
@@ -847,6 +831,20 @@ dependencies = [
  "num-traits",
  "petgraph",
  "spirv_headers",
+ "thiserror",
+]
+
+[[package]]
+name = "naga"
+version = "0.3.1"
+source = "git+https://github.com/gfx-rs/naga.git#98252cf5d29790f85cc4397e0cf7a5b6cfaac614"
+dependencies = [
+ "bit-set",
+ "bitflags",
+ "codespan-reporting",
+ "fxhash",
+ "log",
+ "num-traits",
  "thiserror",
 ]
 
@@ -1113,26 +1111,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shaderc"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ca37955a53b37fa20380c414aec5343ab76b6993ebfd86e74facd7209bac577"
-dependencies = [
- "libc",
- "shaderc-sys",
-]
-
-[[package]]
-name = "shaderc-sys"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da6962db4d543df2fb613d76e6f4c7bcf58ff3300709c92f2349239955ce0a9f"
-dependencies = [
- "cmake",
- "libc",
-]
-
-[[package]]
 name = "slab"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1343,7 +1321,7 @@ dependencies = [
  "arrayvec",
  "js-sys",
  "log",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "parking_lot",
  "profiling",
  "raw-window-handle",
@@ -1375,7 +1353,7 @@ dependencies = [
  "gpu-alloc",
  "gpu-descriptor",
  "log",
- "naga",
+ "naga 0.3.1 (git+https://github.com/gfx-rs/naga?tag=gfx-20)",
  "parking_lot",
  "profiling",
  "raw-window-handle",

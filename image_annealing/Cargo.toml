@@ -16,8 +16,6 @@ wgpu = { git = "https://github.com/gfx-rs/wgpu-rs.git" }
 
 [build-dependencies]
 anyhow = "1.0"
-fs_extra = "1.2"
 glob = "0.3"
-image_annealing_build_utils = { path = "../image_annealing_build_utils" }
+naga = { git = "https://github.com/gfx-rs/naga.git", features = ["wgsl-in"] }
 rayon = "1.5"
-shaderc = "0.7"
