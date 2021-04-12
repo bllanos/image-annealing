@@ -626,15 +626,10 @@ dependencies = [
  "futures",
  "glob",
  "image",
- "image_annealing_build_utils",
  "naga 0.3.1 (git+https://github.com/gfx-rs/naga.git)",
  "rayon",
  "wgpu",
 ]
-
-[[package]]
-name = "image_annealing_build_utils"
-version = "0.1.0"
 
 [[package]]
 name = "image_annealing_cli"

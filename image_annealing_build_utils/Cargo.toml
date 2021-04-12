@@ -1,7 +1,0 @@
-[package]
-name = "image_annealing_build_utils"
-version = "0.1.0"
-authors = ["Bernard Llanos"]
-edition = "2018"
-description = "Build utilities for the image_annealing crate"
-license = "MIT OR Apache-2.0"

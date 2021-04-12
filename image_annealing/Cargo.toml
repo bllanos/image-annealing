@@ -11,7 +11,6 @@ license = "MIT OR Apache-2.0"
 bytemuck = "1.4"
 futures = "0.3"
 image = "0.23"
-image_annealing_build_utils = { path = "../image_annealing_build_utils" }
 wgpu = { git = "https://github.com/gfx-rs/wgpu-rs.git" }
 
 [build-dependencies]

@@ -14,6 +14,8 @@ impl Shader {
     }
 }
 
+pub const SHADER_ENTRY_POINT: &str = "main";
+
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
     Shader {
         shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {

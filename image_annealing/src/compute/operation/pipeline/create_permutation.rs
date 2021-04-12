@@ -17,7 +17,7 @@ impl CreatePermutationPipeline {
             label: Some("create_permutation_pipeline"),
             layout: Some(&layout),
             module: shader.shader(),
-            entry_point: image_annealing_build_utils::SHADER_ENTRY_POINT,
+            entry_point: shader::SHADER_ENTRY_POINT,
         });
         Self { pipeline }
     }
