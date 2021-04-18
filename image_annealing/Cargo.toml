@@ -8,7 +8,7 @@ keywords = ["image","graphics"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-bytemuck = "1.4"
+bytemuck = "1.5"
 futures = "0.3"
 image = "0.23"
 wgpu = { git = "https://github.com/gfx-rs/wgpu-rs.git" }
