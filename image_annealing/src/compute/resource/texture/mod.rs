@@ -1,6 +1,12 @@
 use crate::image_utils::ImageDimensions;
 use std::marker::PhantomData;
 
+mod permutation;
+
+pub use permutation::PermutationInputTexture;
+pub use permutation::PermutationOutputTexture;
+pub use permutation::PermutationTexture;
+
 pub trait TextureDatatype {
     type Component;
     fn n_components() -> usize;
@@ -22,7 +28,6 @@ pub struct Texture<T> {
     view: wgpu::TextureView,
     phantom: PhantomData<T>,
 }
-pub type PermutationTexture = Texture<super::Permutation>;
 
 const TEXTURE_DIMENSION: wgpu::TextureDimension = wgpu::TextureDimension::D2;
 const TEXTURE_ARRAY_LAYERS: usize = 1;
@@ -59,6 +64,29 @@ impl<T> Texture<T> {
         }
     }
 
+    fn create_storage_texture(
+        device: &wgpu::Device,
+        image_dimensions: &ImageDimensions,
+        format: wgpu::TextureFormat,
+        is_input: bool,
+        label: Option<&str>,
+        view_label: Option<&str>,
+    ) -> Self {
+        let copy_usage = if is_input {
+            wgpu::TextureUsage::COPY_DST
+        } else {
+            wgpu::TextureUsage::COPY_SRC
+        };
+        Self::create_texture(
+            device,
+            image_dimensions,
+            format,
+            wgpu::TextureUsage::STORAGE | copy_usage,
+            label,
+            view_label,
+        )
+    }
+
     pub fn view(&self) -> &wgpu::TextureView {
         &self.view
     }
@@ -69,30 +97,6 @@ impl<T> Texture<T> {
 
     pub fn copy_view(&self) -> wgpu::ImageCopyTexture {
         create_texture_copy_view(&self.texture)
-    }
-}
-
-impl PermutationTexture {
-    pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self::create_texture(
-            device,
-            image_dimensions,
-            Self::format(),
-            wgpu::TextureUsage::STORAGE | wgpu::TextureUsage::COPY_SRC,
-            Some("permutation_texture"),
-            Some("permutation_texture_view"),
-        )
-    }
-}
-
-impl TextureDatatype for PermutationTexture {
-    type Component = i16;
-    fn n_components() -> usize {
-        2
-    }
-
-    fn format() -> wgpu::TextureFormat {
-        wgpu::TextureFormat::Rgba8Uint
     }
 }
 

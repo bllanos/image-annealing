@@ -31,7 +31,7 @@ impl<T> Binding<T> {
 
 impl CreatePermutationBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
-        let texture = resources.permutation_texture();
+        let texture = resources.permutation_output_texture();
 
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("create_permutation_bind_group_layout"),

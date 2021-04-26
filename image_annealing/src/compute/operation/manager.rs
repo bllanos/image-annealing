@@ -20,9 +20,9 @@ impl OperationManager {
             });
         self.pipelines.create_permutation(&mut encoder);
         encoder.copy_texture_to_buffer(
-            resources.permutation_texture().copy_view(),
+            resources.permutation_output_texture().copy_view(),
             resources.permutation_output_buffer().copy_view(),
-            resources.permutation_texture().dimensions(),
+            resources.permutation_output_texture().dimensions(),
         );
         device.queue().submit(Some(encoder.finish()));
     }
