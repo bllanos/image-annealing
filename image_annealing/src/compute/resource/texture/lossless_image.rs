@@ -12,7 +12,7 @@ impl TextureDatatype for LosslessImageTexture {
     }
 
     fn format() -> wgpu::TextureFormat {
-        wgpu::TextureFormat::Rgba32ui
+        wgpu::TextureFormat::Rgba32Uint
     }
 }
 

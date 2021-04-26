@@ -1,8 +1,12 @@
 use crate::image_utils::ImageDimensions;
 use std::marker::PhantomData;
 
+mod lossless_image;
 mod permutation;
 
+pub use lossless_image::LosslessImageInputTexture;
+pub use lossless_image::LosslessImageOutputTexture;
+pub use lossless_image::LosslessImageTexture;
 pub use permutation::PermutationInputTexture;
 pub use permutation::PermutationOutputTexture;
 pub use permutation::PermutationTexture;
