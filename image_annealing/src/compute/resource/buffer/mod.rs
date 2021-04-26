@@ -1,10 +1,14 @@
-use super::texture::{PermutationTexture, TextureDatatype};
 use crate::image_utils::ImageDimensions;
 use core::future::Future;
 use core::num::NonZeroU32;
 use std::convert::TryInto;
 use std::marker::PhantomData;
 use std::pin::Pin;
+
+mod permutation;
+
+pub use permutation::PermutationOutput;
+pub use permutation::PermutationOutputBuffer;
 
 /// From https://github.com/gfx-rs/wgpu-rs/blob/master/examples/capture/main.rs
 #[derive(Copy, Clone)]
@@ -88,11 +92,6 @@ pub struct TextureCopyBuffer<T> {
     phantom: PhantomData<T>,
 }
 
-pub struct PermutationOutput {}
-impl OutputBuffer for PermutationOutput {}
-
-pub type PermutationOutputBuffer = TextureCopyBuffer<PermutationOutput>;
-
 impl<T> TextureCopyBuffer<T> {
     fn create_buffer(
         device: &wgpu::Device,
@@ -116,6 +115,21 @@ impl<T> TextureCopyBuffer<T> {
         }
     }
 
+    fn create_output_buffer(
+        device: &wgpu::Device,
+        image_dimensions: &ImageDimensions,
+        bytes_per_pixel: usize,
+        label: Option<&str>,
+    ) -> Self {
+        Self::create_buffer(
+            device,
+            image_dimensions,
+            bytes_per_pixel,
+            wgpu::BufferUsage::MAP_READ | wgpu::BufferUsage::COPY_DST,
+            label,
+        )
+    }
+
     pub fn copy_view(&self) -> wgpu::ImageCopyBuffer {
         create_buffer_copy_view(&self.buffer, &self.buffer_dimensions)
     }
@@ -130,18 +144,6 @@ impl<T: OutputBuffer> ReadMappableBuffer for TextureCopyBuffer<T> {
             buffer_future,
             &self.buffer_dimensions,
             &self.buffer,
-        )
-    }
-}
-
-impl PermutationOutputBuffer {
-    pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self::create_buffer(
-            device,
-            image_dimensions,
-            PermutationTexture::pixel_size(),
-            wgpu::BufferUsage::MAP_READ | wgpu::BufferUsage::COPY_DST,
-            Some("permutation_staging_buffer"),
         )
     }
 }
