@@ -5,8 +5,11 @@ use std::convert::TryInto;
 use std::marker::PhantomData;
 use std::pin::Pin;
 
+mod lossless_image;
 mod permutation;
 
+pub use lossless_image::LosslessImageOutput;
+pub use lossless_image::LosslessImageOutputBuffer;
 pub use permutation::PermutationOutput;
 pub use permutation::PermutationOutputBuffer;
 
