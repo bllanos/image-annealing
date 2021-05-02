@@ -4,6 +4,7 @@ use std::marker::PhantomData;
 
 mod create_permutation;
 pub mod manager;
+mod permute;
 
 struct Binding<T> {
     layout: wgpu::BindGroupLayout,
