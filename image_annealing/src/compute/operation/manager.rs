@@ -1,18 +1,42 @@
 use super::super::device::DeviceManager;
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
+use crate::image_utils::validation::ValidatedPermutation;
+
+pub struct PermuteInput<'a> {
+    pub permutation: Option<&'a ValidatedPermutation>,
+    pub image: Option<&'a image::DynamicImage>,
+}
+
+struct PastOperationState {
+    valid_lossless_image_input_texture: bool,
+    valid_output_permutation_texture: bool,
+}
+
+impl PastOperationState {
+    fn new() -> Self {
+        Self {
+            valid_lossless_image_input_texture: false,
+            valid_output_permutation_texture: false,
+        }
+    }
+}
 
 pub struct OperationManager {
     pipelines: PipelineManager,
+    history: PastOperationState,
 }
 
 impl OperationManager {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
         let pipelines = PipelineManager::new(device, resources);
-        OperationManager { pipelines }
+        OperationManager {
+            pipelines,
+            history: PastOperationState::new(),
+        }
     }
 
-    pub fn create_permutation(&self, resources: &ResourceManager, device: &DeviceManager) {
+    pub fn create_permutation(&mut self, resources: &ResourceManager, device: &DeviceManager) {
         let mut encoder = device
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -25,5 +49,48 @@ impl OperationManager {
             resources.permutation_output_texture().dimensions(),
         );
         device.queue().submit(Some(encoder.finish()));
+        self.history.valid_output_permutation_texture = true;
+    }
+
+    pub fn permute(
+        &mut self,
+        resources: &ResourceManager,
+        device: &DeviceManager,
+        input: &PermuteInput,
+    ) {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("permute_command_encoder"),
+            });
+        let queue = device.queue();
+        match input.permutation {
+            Some(permutation) => resources
+                .permutation_input_texture()
+                .load(queue, permutation),
+            None => {
+                assert!(self.history.valid_output_permutation_texture);
+                encoder.copy_texture_to_texture(
+                    resources.permutation_output_texture().copy_view(),
+                    resources.permutation_input_texture().copy_view(),
+                    resources.permutation_output_texture().dimensions(),
+                );
+            }
+        }
+        match input.image {
+            Some(image) => {
+                resources.lossless_image_input_texture().load(queue, image);
+                self.history.valid_lossless_image_input_texture = true;
+            }
+            None => assert!(self.history.valid_lossless_image_input_texture),
+        }
+
+        self.pipelines.forward_permute(&mut encoder);
+        encoder.copy_texture_to_buffer(
+            resources.lossless_image_output_texture().copy_view(),
+            resources.lossless_image_output_buffer().copy_view(),
+            resources.lossless_image_output_texture().dimensions(),
+        );
+        queue.submit(Some(encoder.finish()));
     }
 }

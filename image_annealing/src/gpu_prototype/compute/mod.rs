@@ -26,21 +26,6 @@ pub async fn execute_gpu(
             | wgpu::BufferUsage::COPY_SRC,
     });
 
-    queue.write_texture(
-        wgpu::TextureCopyView {
-            texture: &texture,
-            mip_level: 0,
-            origin: wgpu::Origin3d::ZERO,
-        },
-        bytemuck::cast_slice(img.as_raw().as_slice()),
-        wgpu::TextureDataLayout {
-            offset: 0,
-            bytes_per_row: (IMAGE_TEXTURE_PIXEL_SIZE as u32 * img.width()),
-            rows_per_image: img.height(),
-        },
-        texture_size,
-    );
-
     let bind_group_layout1 = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("storage_buffer_bind_group_layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
