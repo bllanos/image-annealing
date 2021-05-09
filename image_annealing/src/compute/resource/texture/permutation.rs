@@ -51,6 +51,13 @@ impl PermutationInputTexture {
             own_dimensions,
         );
     }
+
+    pub fn copy(&self, encoder: &mut wgpu::CommandEncoder, permutation: &PermutationOutputTexture) {
+        let own_dimensions = self.dimensions();
+        assert!(own_dimensions == permutation.dimensions());
+
+        encoder.copy_texture_to_texture(permutation.copy_view(), self.copy_view(), own_dimensions);
+    }
 }
 
 impl Deref for PermutationInputTexture {

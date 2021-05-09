@@ -1,3 +1,4 @@
+use super::texture::{Texture, TEXTURE_ARRAY_LAYERS};
 use crate::image_utils::ImageDimensions;
 use core::future::Future;
 use core::num::NonZeroU32;
@@ -48,7 +49,7 @@ pub struct MappedBuffer<'a> {
 }
 
 impl<'a> MappedBuffer<'a> {
-    pub fn new(
+    fn new(
         slice: wgpu::BufferSlice<'a>,
         buffer_future: BufferFuture,
         buffer_dimensions: &'a TextureCopyBufferDimensions,
@@ -133,7 +134,16 @@ impl<T> TextureCopyBuffer<T> {
         )
     }
 
-    pub fn copy_view(&self) -> wgpu::ImageCopyBuffer {
+    fn assert_same_dimensions<U>(buffer: &Self, texture: &Texture<U>) {
+        let dimensions = texture.dimensions();
+        assert!(
+            buffer.buffer_dimensions.width == dimensions.width.try_into().unwrap()
+                && buffer.buffer_dimensions.height == dimensions.height.try_into().unwrap()
+                && TEXTURE_ARRAY_LAYERS == dimensions.depth_or_array_layers.try_into().unwrap()
+        );
+    }
+
+    fn copy_view(&self) -> wgpu::ImageCopyBuffer {
         create_buffer_copy_view(&self.buffer, &self.buffer_dimensions)
     }
 }

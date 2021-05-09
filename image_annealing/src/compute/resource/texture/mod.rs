@@ -34,7 +34,7 @@ pub struct Texture<T> {
 }
 
 const TEXTURE_DIMENSION: wgpu::TextureDimension = wgpu::TextureDimension::D2;
-const TEXTURE_ARRAY_LAYERS: usize = 1;
+pub(super) const TEXTURE_ARRAY_LAYERS: usize = 1;
 
 impl<T> Texture<T> {
     fn create_texture(
@@ -99,7 +99,7 @@ impl<T> Texture<T> {
         self.dimensions
     }
 
-    pub fn copy_view(&self) -> wgpu::ImageCopyTexture {
+    pub(super) fn copy_view(&self) -> wgpu::ImageCopyTexture {
         create_texture_copy_view(&self.texture)
     }
 }

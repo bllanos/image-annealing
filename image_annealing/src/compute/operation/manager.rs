@@ -43,11 +43,9 @@ impl OperationManager {
                 label: Some("create_permutation_command_encoder"),
             });
         self.pipelines.create_permutation(&mut encoder);
-        encoder.copy_texture_to_buffer(
-            resources.permutation_output_texture().copy_view(),
-            resources.permutation_output_buffer().copy_view(),
-            resources.permutation_output_texture().dimensions(),
-        );
+        resources
+            .permutation_output_buffer()
+            .load(&mut encoder, resources.permutation_output_texture());
         device.queue().submit(Some(encoder.finish()));
         self.history.valid_output_permutation_texture = true;
     }
@@ -70,11 +68,9 @@ impl OperationManager {
                 .load(queue, permutation),
             None => {
                 assert!(self.history.valid_output_permutation_texture);
-                encoder.copy_texture_to_texture(
-                    resources.permutation_output_texture().copy_view(),
-                    resources.permutation_input_texture().copy_view(),
-                    resources.permutation_output_texture().dimensions(),
-                );
+                resources
+                    .permutation_input_texture()
+                    .copy(&mut encoder, resources.permutation_output_texture())
             }
         }
         match input.image {
@@ -86,11 +82,9 @@ impl OperationManager {
         }
 
         self.pipelines.forward_permute(&mut encoder);
-        encoder.copy_texture_to_buffer(
-            resources.lossless_image_output_texture().copy_view(),
-            resources.lossless_image_output_buffer().copy_view(),
-            resources.lossless_image_output_texture().dimensions(),
-        );
+        resources
+            .lossless_image_output_buffer()
+            .load(&mut encoder, resources.lossless_image_output_texture());
         queue.submit(Some(encoder.finish()));
     }
 }
