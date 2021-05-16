@@ -121,10 +121,7 @@ impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
         self.create_permutation.as_ref().unwrap().partial_output()
     }
     fn full_output(&mut self) -> Option<PermutationImageBuffer> {
-        let mut create_permutation = self.create_permutation.take().unwrap();
-        let result = create_permutation.full_output();
-        self.create_permutation = Some(create_permutation);
-        result
+        self.create_permutation.as_mut().unwrap().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.create_permutation = None;
@@ -143,10 +140,7 @@ impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
         self.validate_permutation.as_ref().unwrap().partial_output()
     }
     fn full_output(&mut self) -> Option<ValidatedPermutation> {
-        let mut validate_permutation = self.validate_permutation.take().unwrap();
-        let result = validate_permutation.full_output();
-        self.validate_permutation = Some(validate_permutation);
-        result
+        self.validate_permutation.as_mut().unwrap().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.validate_permutation = None;
