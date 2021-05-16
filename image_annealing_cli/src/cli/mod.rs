@@ -37,11 +37,10 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
         } => {
             let mut algorithm = dispatcher
                 .create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-            if let OutputStatus::FinalFullOutput = algorithm.step()? {
-                let img = algorithm.full_output().unwrap();
-                let output_path = img.save_add_extension(path)?;
-                println!("Wrote permutation to: {}", output_path.display());
-            }
+            algorithm.step_until(OutputStatus::FinalFullOutput)?;
+            let img = algorithm.full_output().unwrap();
+            let output_path = img.save_add_extension(path)?;
+            println!("Wrote permutation to: {}", output_path.display());
         }
         Config::ValidatePermutationConfig {
             candidate_permutation_path,
@@ -55,12 +54,11 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
                 },
                 ValidatePermutationParameters {},
             );
-            match algorithm.step() {
-                Ok(OutputStatus::FinalFullOutput) => println!(
+            match algorithm.step_until(OutputStatus::FinalFullOutput) {
+                Ok(()) => println!(
                     "Candidate permutation '{}' is valid",
                     candidate_permutation_path
                 ),
-                Ok(status) => panic!("Unexpected output status {:?}", status),
                 Err(e) => return Err(e),
             }
         }

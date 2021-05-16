@@ -18,8 +18,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    let result = algorithm.step()?;
-    assert_eq!(result, OutputStatus::FinalFullOutput);
+    algorithm.step_until(OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output, expected);
     assert!(algorithm.partial_output().is_none());
@@ -40,11 +39,11 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    let mut result = algorithm.step();
+    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
     result.expect_err("An invalid candidate permutation should trigger an error");
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
-    result = algorithm.step();
+    result = algorithm.step_until(OutputStatus::FinalFullOutput);
     result.expect_err("Attempting to repeat the validation should trigger an error");
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
@@ -56,8 +55,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    result = algorithm.step();
-    assert_eq!(result?, OutputStatus::FinalFullOutput);
+    algorithm.step_until(OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output, expected);
     assert!(algorithm.partial_output().is_none());
@@ -77,11 +75,11 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    let mut result = algorithm.step();
+    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
     result.expect_err("A mismatch in image dimensions should trigger an error");
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
-    result = algorithm.step();
+    result = algorithm.step_until(OutputStatus::FinalFullOutput);
     result.expect_err("Attempting to repeat the validation should trigger an error");
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());

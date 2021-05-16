@@ -58,4 +58,9 @@ pub trait Algorithm<PartialOutput, FullOutput> {
     fn partial_output(&mut self) -> Option<PartialOutput>;
     fn full_output(&mut self) -> Option<FullOutput>;
     fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher>;
+
+    fn step_until(&mut self, status: OutputStatus) -> Result<(), Box<dyn Error>> {
+        while self.step()? != status {}
+        Ok(())
+    }
 }

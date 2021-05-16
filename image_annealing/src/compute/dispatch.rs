@@ -86,6 +86,11 @@ impl DispatcherImplementation {
     pub fn image_dimensions(&self) -> &ImageDimensions {
         &self.image_dimensions
     }
+
+    pub fn operation_create_permutation(&mut self) {
+        self.operations
+            .create_permutation(&self.resources, &self.device);
+    }
 }
 
 impl Dispatcher for DispatcherImplementation {
@@ -94,8 +99,6 @@ impl Dispatcher for DispatcherImplementation {
         input: CreatePermutationInput,
         parameters: CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm> {
-        self.operations
-            .create_permutation(&self.resources, &self.device);
         self.create_permutation = Some(CreatePermutation::new(input, parameters));
         self
     }

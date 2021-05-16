@@ -11,8 +11,7 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dim)?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    let result = algorithm.step()?;
-    assert_eq!(result, OutputStatus::FinalFullOutput);
+    algorithm.step_until(OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     let converted_output = conversion::as_vec(&output);
     let mut expected: Vec<conversion::PermutationEntry> = Vec::with_capacity(dim.count());
@@ -29,15 +28,13 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    let result = algorithm.step()?;
-    assert_eq!(result, OutputStatus::FinalFullOutput);
+    algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     dispatcher = algorithm.return_to_dispatcher();
 
     algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    let result = algorithm.step()?;
-    assert_eq!(result, OutputStatus::FinalFullOutput);
+    algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     let converted_output = conversion::as_vec(&output);
