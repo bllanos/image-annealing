@@ -1,8 +1,7 @@
-use image::{ImageBuffer, Pixel};
+use image::GenericImageView;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
-use std::ops::Deref;
 
 #[derive(Debug, Clone)]
 pub struct InvalidDimensionError;
@@ -54,13 +53,9 @@ impl ImageDimensions {
         }
     }
 
-    pub fn from_image<P: Pixel, Container>(
-        image: &ImageBuffer<P, Container>,
-    ) -> Result<Self, InvalidDimensionError>
+    pub fn from_image<T>(image: &T) -> Result<Self, InvalidDimensionError>
     where
-        P: Pixel + 'static,
-        P::Subpixel: 'static,
-        Container: Deref<Target = [P::Subpixel]>,
+        T: GenericImageView,
     {
         let (width, height) = image.dimensions();
         Self::new(width as usize, height as usize)
