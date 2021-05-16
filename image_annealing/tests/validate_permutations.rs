@@ -21,7 +21,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let result = algorithm.step()?;
     assert_eq!(result, OutputStatus::FinalFullOutput);
     let output = algorithm.full_output().unwrap();
-    assert_eq!(**output, expected);
+    assert_eq!(*output, expected);
     assert!(algorithm.partial_output().is_none());
     Ok(())
 }
@@ -59,7 +59,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     result = algorithm.step();
     assert_eq!(result?, OutputStatus::FinalFullOutput);
     let output = algorithm.full_output().unwrap();
-    assert_eq!(**output, expected);
+    assert_eq!(*output, expected);
     assert!(algorithm.partial_output().is_none());
     Ok(())
 }

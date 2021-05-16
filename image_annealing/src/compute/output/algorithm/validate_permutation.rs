@@ -1,6 +1,7 @@
 use super::super::super::dispatch::{DimensionsMismatchError, DispatcherImplementation};
 use super::super::format::PermutationImageBuffer;
-use super::super::{AlreadyFailedError, OutputStatus};
+use super::super::OutputStatus;
+use super::CompletionStatus;
 use crate::image_utils::validation::{self, ValidatedPermutation};
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
@@ -12,6 +13,7 @@ pub struct ValidatePermutationInput {
 }
 
 pub struct ValidatePermutation {
+    completion_status: CompletionStatus,
     input: Option<ValidatePermutationInput>,
     full_output: Option<ValidatedPermutation>,
 }
@@ -22,6 +24,7 @@ impl ValidatePermutation {
         _parameters: ValidatePermutationParameters,
     ) -> Self {
         Self {
+            completion_status: CompletionStatus::new(),
             input: Some(input),
             full_output: None,
         }
@@ -31,29 +34,43 @@ impl ValidatePermutation {
         &mut self,
         dispatcher: &DispatcherImplementation,
     ) -> Result<OutputStatus, Box<dyn Error>> {
-        if let Some(ValidatePermutationInput {
+        self.completion_status.ok_if_pending()?;
+        debug_assert!(self.full_output.is_none());
+
+        let ValidatePermutationInput {
             candidate_permutation,
-        }) = self.input.take()
-        {
-            if *dispatcher.image_dimensions()
-                == ImageDimensions::from_image(&candidate_permutation)?
-            {
-                self.full_output = Some(validation::validate_permutation(candidate_permutation)?);
-            } else {
-                return Err(Box::new(DimensionsMismatchError));
+        } = self.input.take().unwrap();
+        match ImageDimensions::from_image(&candidate_permutation) {
+            Ok(dimensions) => {
+                if *dispatcher.image_dimensions() == dimensions {
+                    match validation::validate_permutation(candidate_permutation) {
+                        Ok(validated_permutation) => {
+                            self.full_output = Some(validated_permutation);
+                            self.completion_status = CompletionStatus::Finished;
+                            Ok(OutputStatus::FinalFullOutput)
+                        }
+                        Err(e) => {
+                            self.completion_status = CompletionStatus::Failed;
+                            Err(e)
+                        }
+                    }
+                } else {
+                    self.completion_status = CompletionStatus::Failed;
+                    Err(Box::new(DimensionsMismatchError))
+                }
             }
-        }
-        match self.full_output.as_ref() {
-            Some(_) => Ok(OutputStatus::FinalFullOutput),
-            None => Err(Box::new(AlreadyFailedError)),
+            Err(e) => {
+                self.completion_status = CompletionStatus::Failed;
+                Err(Box::new(e))
+            }
         }
     }
 
-    pub fn partial_output(&self) -> Option<&()> {
+    pub fn partial_output(&self) -> Option<()> {
         None
     }
 
-    pub fn full_output(&self) -> Option<&ValidatedPermutation> {
-        self.full_output.as_ref()
+    pub fn full_output(&mut self) -> Option<ValidatedPermutation> {
+        self.full_output.take()
     }
 }

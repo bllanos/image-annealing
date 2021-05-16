@@ -64,12 +64,11 @@ impl<'a> MappedBuffer<'a> {
     }
 
     pub fn collect_mapped_buffer(&mut self) -> wgpu::BufferView {
-        match self.buffer_future.take() {
-            Some(fut) => {
-                futures::executor::block_on(async move { fut.await.unwrap() });
-            }
-            None => panic!("The buffer data has already been collected."),
-        }
+        let fut = self
+            .buffer_future
+            .take()
+            .expect("The buffer data has already been collected.");
+        futures::executor::block_on(async move { fut.await.unwrap() });
         self.buffer_slice.get_mapped_range()
     }
 
