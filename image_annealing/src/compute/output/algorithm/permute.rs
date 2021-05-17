@@ -18,27 +18,28 @@ use std::error::Error;
 
 pub struct PermuteParameters {}
 
-pub struct PermuteInput<'a> {
+pub struct PermuteInput {
     pub candidate_permutation: Option<PermutationImageBuffer>,
-    pub image: Option<&'a DynamicImage>,
+    pub original_image: Option<DynamicImage>,
 }
 
 pub struct PermuteOutput {
     pub permutation: Option<ValidatedPermutation>,
-    pub image: LosslessImageBuffer,
+    pub original_image: Option<DynamicImage>,
+    pub permuted_image: LosslessImageBuffer,
 }
 
-pub struct Permute<'a> {
+pub struct Permute {
     completion_status: CompletionStatus,
-    input: Option<PermuteInput<'a>>,
+    input: PermuteInput,
     validator: Option<ValidatePermutation>,
     invoked_operation: bool,
     permutation: Option<ValidatedPermutation>,
     image_output: Option<LosslessImageBuffer>,
 }
 
-impl<'a> Permute<'a> {
-    pub fn new(mut input: PermuteInput<'a>, _parameters: PermuteParameters) -> Self {
+impl Permute {
+    pub fn new(mut input: PermuteInput, _parameters: PermuteParameters) -> Self {
         let validator = match input.candidate_permutation.take() {
             Some(permutation) => Some(ValidatePermutation::new(
                 ValidatePermutationInput {
@@ -50,7 +51,7 @@ impl<'a> Permute<'a> {
         };
         Self {
             completion_status: CompletionStatus::new(),
-            input: Some(input),
+            input,
             validator,
             invoked_operation: false,
             permutation: None,
@@ -95,11 +96,8 @@ impl<'a> Permute<'a> {
             }
             None => {
                 if !self.invoked_operation {
-                    let PermuteInput {
-                        image: image_option,
-                        ..
-                    } = self.input.take().unwrap();
-                    if let Some(image) = image_option {
+                    let image_option = self.input.original_image.take();
+                    if let Some(ref image) = image_option {
                         match ImageDimensions::from_image(image) {
                             Ok(dimensions) => {
                                 if *dispatcher.image_dimensions() != dimensions {
@@ -116,8 +114,9 @@ impl<'a> Permute<'a> {
 
                     dispatcher.operation_permute(&PermuteOperationInput {
                         permutation: self.permutation.as_ref(),
-                        image: image_option,
+                        image: image_option.as_ref(),
                     });
+                    self.input.original_image = image_option;
                     self.invoked_operation = true;
                     Ok(OutputStatus::NoNewOutput)
                 } else {
@@ -157,10 +156,7 @@ impl<'a> Permute<'a> {
                         .unwrap(),
                     );
                     self.completion_status = CompletionStatus::Finished;
-                    match self.permutation {
-                        Some(_) => Ok(OutputStatus::FinalPartialAndFullOutput),
-                        None => Ok(OutputStatus::FinalFullOutput),
-                    }
+                    Ok(OutputStatus::FinalFullOutput)
                 }
             }
         }
@@ -174,7 +170,8 @@ impl<'a> Permute<'a> {
         match self.image_output.take() {
             Some(image) => Some(PermuteOutput {
                 permutation: self.permutation.take(),
-                image,
+                original_image: self.input.original_image.take(),
+                permuted_image: image,
             }),
             None => None,
         }

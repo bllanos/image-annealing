@@ -6,10 +6,11 @@ mod resource;
 
 pub use dispatch::create_dispatcher;
 pub use dispatch::Dispatcher;
-pub use dispatch::{CreatePermutationAlgorithm, ValidatePermutationAlgorithm};
+pub use dispatch::{CreatePermutationAlgorithm, PermuteAlgorithm, ValidatePermutationAlgorithm};
 pub use output::algorithm::create_permutation::{
     CreatePermutationInput, CreatePermutationParameters,
 };
+pub use output::algorithm::permute::{PermuteInput, PermuteOutput, PermuteParameters};
 pub use output::algorithm::validate_permutation::{
     ValidatePermutationInput, ValidatePermutationParameters,
 };
