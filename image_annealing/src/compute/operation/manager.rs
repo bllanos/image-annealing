@@ -3,7 +3,7 @@ use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::ValidatedPermutation;
 
-pub struct PermuteInput<'a> {
+pub struct PermuteOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
     pub image: Option<&'a image::DynamicImage>,
 }
@@ -54,7 +54,7 @@ impl OperationManager {
         &mut self,
         resources: &ResourceManager,
         device: &DeviceManager,
-        input: &PermuteInput,
+        input: &PermuteOperationInput,
     ) {
         let mut encoder = device
             .device()

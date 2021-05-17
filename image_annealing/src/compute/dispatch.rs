@@ -14,6 +14,8 @@ use crate::image_utils::ImageDimensions;
 use std::error::Error;
 use std::fmt;
 
+pub use super::operation::manager::PermuteOperationInput;
+
 #[derive(Debug, Clone)]
 pub struct DimensionsMismatchError;
 
@@ -90,6 +92,11 @@ impl DispatcherImplementation {
     pub fn operation_create_permutation(&mut self) {
         self.operations
             .create_permutation(&self.resources, &self.device);
+    }
+
+    pub fn operation_permute(&mut self, input: &PermuteOperationInput) {
+        self.operations
+            .permute(&self.resources, &self.device, input);
     }
 }
 

@@ -2,6 +2,7 @@ use super::{AlreadyFailedError, AlreadyFinishedError};
 use std::error::Error;
 
 pub mod create_permutation;
+pub mod permute;
 pub mod validate_permutation;
 
 enum CompletionStatus {

@@ -6,6 +6,10 @@ pub type PermutationImageBufferComponent = u8;
 pub type PermutationImageBuffer =
     ImageBuffer<image::Rgba<PermutationImageBufferComponent>, Vec<PermutationImageBufferComponent>>;
 
+pub type LosslessImageBufferComponent = u16;
+pub type LosslessImageBuffer =
+    ImageBuffer<image::Rgba<LosslessImageBufferComponent>, Vec<LosslessImageBufferComponent>>;
+
 pub trait ImageFileWriter {
     const EXTENSION: &'static str;
     fn make_filename<P: AsRef<Path>>(path_no_extension: P) -> PathBuf {
@@ -19,6 +23,18 @@ pub trait ImageFileWriter {
 
 impl ImageFileWriter for ImageBuffer<image::Rgba<u8>, Vec<u8>> {
     const EXTENSION: &'static str = "png";
+    fn save_add_extension<P: AsRef<Path>>(
+        &self,
+        path_no_extension: P,
+    ) -> Result<PathBuf, Box<dyn Error>> {
+        let output_path = Self::make_filename(path_no_extension);
+        self.save(&output_path)?;
+        Ok(output_path)
+    }
+}
+
+impl ImageFileWriter for ImageBuffer<image::Rgba<u16>, Vec<u16>> {
+    const EXTENSION: &'static str = "tiff";
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
