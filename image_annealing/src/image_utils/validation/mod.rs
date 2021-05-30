@@ -129,7 +129,5 @@ pub fn validate_permutation(
     Ok(ValidatedPermutation(image))
 }
 
-pub mod test_utils;
-
 #[cfg(test)]
 mod tests;

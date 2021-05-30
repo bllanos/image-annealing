@@ -1,5 +1,7 @@
 use std::path::{Path, PathBuf};
 
+pub mod permutation;
+
 pub fn make_test_data_path<T, P>(components: T) -> PathBuf
 where
     T: IntoIterator<Item = P>,

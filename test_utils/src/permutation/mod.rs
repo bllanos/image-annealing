@@ -1,6 +1,6 @@
-use crate::compute::conversion::{self, PermutationEntry};
-use crate::compute::format::PermutationImageBuffer;
-use crate::image_utils::ImageDimensions;
+use image_annealing::compute::conversion::{self, PermutationEntry};
+use image_annealing::compute::format::PermutationImageBuffer;
+use image_annealing::image_utils::ImageDimensions;
 
 pub struct DimensionsAndImage {
     pub image: PermutationImageBuffer,

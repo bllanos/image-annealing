@@ -44,7 +44,10 @@ fn main() -> Result<()> {
 
     // Shader validation might be parallelized in the future.
     // Ideally, only changed shaders would be validated.
-    let mut validator = naga::valid::Validator::new(naga::valid::ValidationFlags::all());
+    let mut validator = naga::valid::Validator::new(
+        naga::valid::ValidationFlags::all(),
+        naga::valid::Capabilities::empty(),
+    );
     for shader in shaders {
         println!(
             "cargo:rerun-if-changed={}",

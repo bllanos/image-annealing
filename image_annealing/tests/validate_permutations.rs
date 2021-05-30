@@ -3,13 +3,13 @@ use image_annealing::compute;
 use image_annealing::compute::{
     OutputStatus, ValidatePermutationInput, ValidatePermutationParameters,
 };
-use image_annealing::image_utils::validation::test_utils::{self, DimensionsAndImage};
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
+use test_utils::permutation::{self, DimensionsAndImage};
 
 #[test]
 fn run_once_identity() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, dimensions } = test_utils::identity();
+    let DimensionsAndImage { image, dimensions } = permutation::identity();
     let expected = image.clone();
     let dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.validate_permutation(
@@ -27,7 +27,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, dimensions } = test_utils::non_identity();
+    let DimensionsAndImage { image, dimensions } = permutation::non_identity();
     let expected = image.clone();
     let mut invalid_image = image.clone();
     invalid_image.get_pixel_mut(0, 0).channels_mut()[0] = 255;
@@ -64,7 +64,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, dimensions } = test_utils::non_identity();
+    let DimensionsAndImage { image, dimensions } = permutation::non_identity();
     let invalid_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
 

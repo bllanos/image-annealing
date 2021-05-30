@@ -5,3 +5,6 @@ authors = ["Bernard Llanos"]
 edition = "2018"
 description = "Test helper utilities for the workspace"
 license = "MIT OR Apache-2.0"
+
+[dependencies]
+image_annealing = { path = "../image_annealing" }
