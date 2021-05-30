@@ -2,20 +2,20 @@ use super::validate_permutation;
 use crate::compute::conversion::{self, PermutationEntry};
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
-use test_utils::permutation::{self, DimensionsAndImage};
+use test_utils::permutation::{self, DimensionsAndPermutation};
 
 #[test]
 fn identity() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, .. } = permutation::identity();
-    let expected = image.clone();
-    let image = validate_permutation(image)?;
-    assert_eq!(*image, expected);
+    let DimensionsAndPermutation { permutation, .. } = permutation::identity();
+    let expected = permutation.clone();
+    let permutation = validate_permutation(permutation)?;
+    assert_eq!(*permutation, expected);
     Ok(())
 }
 
 #[test]
 fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
-    let image = conversion::as_image(
+    let permutation = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 0),
@@ -23,7 +23,7 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
             PermutationEntry(1, -1),
         ],
     );
-    let r = validate_permutation(image);
+    let r = validate_permutation(permutation);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -32,7 +32,7 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
-    let image = conversion::as_image(
+    let permutation = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, -1),
@@ -40,7 +40,7 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(image);
+    let r = validate_permutation(permutation);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -49,7 +49,7 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
-    let image = conversion::as_image(
+    let permutation = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 0),
@@ -57,7 +57,7 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(image);
+    let r = validate_permutation(permutation);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -66,7 +66,7 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
-    let image = conversion::as_image(
+    let permutation = conversion::as_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 3),
@@ -74,7 +74,7 @@ fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
             PermutationEntry(0, -1),
         ],
     );
-    let r = validate_permutation(image);
+    let r = validate_permutation(permutation);
     match r {
         Ok(_) => panic!("An error should be raised for an out-of-bounds mapping"),
         Err(_) => Ok(()),
@@ -83,8 +83,8 @@ fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn duplicate() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, .. } = permutation::duplicate();
-    let r = validate_permutation(image);
+    let DimensionsAndPermutation { permutation, .. } = permutation::duplicate();
+    let r = validate_permutation(permutation);
     match r {
         Ok(_) => panic!("An error should be raised for a conflicting mapping"),
         Err(_) => Ok(()),
@@ -93,9 +93,9 @@ fn duplicate() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn non_identity() -> Result<(), Box<dyn Error>> {
-    let DimensionsAndImage { image, .. } = permutation::non_identity();
-    let expected = image.clone();
-    let image = validate_permutation(image)?;
-    assert_eq!(*image, expected);
+    let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+    let expected = permutation.clone();
+    let permutation = validate_permutation(permutation)?;
+    assert_eq!(*permutation, expected);
     Ok(())
 }

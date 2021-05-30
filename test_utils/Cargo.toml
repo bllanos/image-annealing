@@ -7,4 +7,5 @@ description = "Test helper utilities for the workspace"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+image = "0.23"
 image_annealing = { path = "../image_annealing" }
