@@ -10,9 +10,10 @@ var input_image : [[access(read)]] texture_storage_2d<rgba32uint>;
 [[group(0), binding(2)]]
 var output_image : [[access(write)]] texture_storage_2d<rgba32uint>;
 
-// Reinterpret the two values as the first and second bytes of a 16-bit two's-complement value
+// Reinterpret the two values as the first and second bytes of a big-endian
+// 16-bit two's-complement value
 fn u16_to_i32(x1 : u32, x2 : u32) -> i32 {
-    let x : u32 = x1 | (x2 << 8u);
+    let x : u32 = (x1 << 8u) | x2;
     if((x & (1u << 15u)) == 0u) {
         return i32(x);
     } else {
