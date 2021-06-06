@@ -2,12 +2,12 @@ use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
     LosslessImageTexture, PermutationTexture, Texture, TextureDatatype,
 };
-use super::Binding;
-use std::marker::PhantomData;
+use super::super::shader::WorkgroupDimensions;
+use super::{Binding, BindingData};
 
-pub struct Permute {}
+pub struct PermuteBinding(BindingData);
 
-impl Binding<Permute> {
+impl PermuteBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
         let permutation_texture = resources.permutation_input_texture();
         let image_input_texture = resources.lossless_image_input_texture();
@@ -68,11 +68,22 @@ impl Binding<Permute> {
             ],
         });
 
-        Self {
+        Self(BindingData {
             layout,
             bind_group,
             workgroup_dimensions: super::get_workgroup_dimensions(permutation_texture),
-            phantom: PhantomData,
-        }
+        })
+    }
+}
+
+impl Binding for PermuteBinding {
+    fn layout(&self) -> &wgpu::BindGroupLayout {
+        &self.0.layout
+    }
+    fn workgroup_dimensions(&self) -> &WorkgroupDimensions {
+        &self.0.workgroup_dimensions
+    }
+    fn bind<'a: 'b, 'b>(&'a self, index: u32, cpass: &mut wgpu::ComputePass<'b>) {
+        self.0.bind(index, cpass)
     }
 }
