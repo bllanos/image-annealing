@@ -9,7 +9,7 @@ pub struct DimensionsAndPermutation {
 }
 
 pub fn identity() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(3, 5).unwrap();
+    let dimensions = ImageDimensions::new(2, 3).unwrap();
     let v = vec![PermutationEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
         permutation: conversion::as_image(&dimensions, &v),
