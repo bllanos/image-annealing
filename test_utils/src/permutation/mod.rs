@@ -22,11 +22,14 @@ pub fn identity_permute(image: &LosslessImageBuffer) -> LosslessImageBuffer {
 }
 
 pub fn duplicate() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(1, 3).unwrap();
+    let dimensions = ImageDimensions::new(2, 3).unwrap();
     let v = vec![
         PermutationEntry(0, 1),
+        PermutationEntry(0, 0),
         PermutationEntry(0, 1),
+        PermutationEntry(0, 0),
         PermutationEntry(0, -1),
+        PermutationEntry(0, 0),
     ];
     DimensionsAndPermutation {
         permutation: conversion::as_image(&dimensions, &v),

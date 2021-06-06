@@ -1,4 +1,3 @@
-use image::Pixel;
 use image_annealing::compute;
 use image_annealing::compute::{
     OutputStatus, ValidatePermutationInput, ValidatePermutationParameters,
@@ -35,8 +34,11 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = permutation::non_identity();
     let expected = permutation.clone();
-    let mut invalid_image = permutation.clone();
-    invalid_image.get_pixel_mut(0, 0).channels_mut()[0] = 255;
+    let DimensionsAndPermutation {
+        permutation: invalid_image,
+        dimensions: other_dimensions,
+    } = permutation::duplicate();
+    assert_eq!(dimensions, other_dimensions);
 
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.validate_permutation(
