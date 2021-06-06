@@ -1,11 +1,9 @@
-use super::Texture;
-use super::TextureDatatype;
+use super::{Texture, TextureData, TextureDatatype};
 use crate::image_utils::ImageDimensions;
 use core::num::NonZeroU32;
 use image::DynamicImage;
-use std::ops::Deref;
 
-pub type LosslessImageTexture = Texture<super::super::LosslessImage>;
+pub struct LosslessImageTexture {}
 
 impl TextureDatatype for LosslessImageTexture {
     type Component = u32;
@@ -18,12 +16,36 @@ impl TextureDatatype for LosslessImageTexture {
     }
 }
 
-pub struct LosslessImageInputTexture(LosslessImageTexture);
-pub struct LosslessImageOutputTexture(LosslessImageTexture);
+pub struct LosslessImageInputTexture(TextureData);
+pub struct LosslessImageOutputTexture(TextureData);
+
+impl Texture for LosslessImageInputTexture {
+    fn view(&self) -> &wgpu::TextureView {
+        &self.0.view
+    }
+    fn dimensions(&self) -> wgpu::Extent3d {
+        self.0.dimensions
+    }
+    fn copy_view(&self) -> wgpu::ImageCopyTexture {
+        self.0.copy_view()
+    }
+}
+
+impl Texture for LosslessImageOutputTexture {
+    fn view(&self) -> &wgpu::TextureView {
+        &self.0.view
+    }
+    fn dimensions(&self) -> wgpu::Extent3d {
+        self.0.dimensions
+    }
+    fn copy_view(&self) -> wgpu::ImageCopyTexture {
+        self.0.copy_view()
+    }
+}
 
 impl LosslessImageInputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(LosslessImageTexture::create_storage_texture(
+        Self(TextureData::create_storage_texture(
             device,
             image_dimensions,
             LosslessImageTexture::format(),
@@ -62,17 +84,9 @@ impl LosslessImageInputTexture {
     }
 }
 
-impl Deref for LosslessImageInputTexture {
-    type Target = LosslessImageTexture;
-
-    fn deref(&self) -> &LosslessImageTexture {
-        &self.0
-    }
-}
-
 impl LosslessImageOutputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(LosslessImageTexture::create_storage_texture(
+        Self(TextureData::create_storage_texture(
             device,
             image_dimensions,
             LosslessImageTexture::format(),
@@ -80,13 +94,5 @@ impl LosslessImageOutputTexture {
             Some("lossless_image_output_texture"),
             Some("lossless_image_output_texture_view"),
         ))
-    }
-}
-
-impl Deref for LosslessImageOutputTexture {
-    type Target = LosslessImageTexture;
-
-    fn deref(&self) -> &LosslessImageTexture {
-        &self.0
     }
 }

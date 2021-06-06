@@ -27,7 +27,7 @@ impl<T> Binding<T> {
     }
 }
 
-fn get_workgroup_dimensions<T>(texture: &Texture<T>) -> WorkgroupDimensions {
+fn get_workgroup_dimensions<T: Texture>(texture: &T) -> WorkgroupDimensions {
     let dimensions = texture.dimensions();
     WorkgroupDimensions::new(dimensions.width, dimensions.height)
 }

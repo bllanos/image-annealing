@@ -1,4 +1,6 @@
-use super::super::texture::{LosslessImageOutputTexture, LosslessImageTexture, TextureDatatype};
+use super::super::texture::{
+    LosslessImageOutputTexture, LosslessImageTexture, Texture, TextureDatatype,
+};
 use super::{OutputBuffer, TextureCopyBuffer};
 use crate::image_utils::ImageDimensions;
 

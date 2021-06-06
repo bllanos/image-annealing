@@ -1,11 +1,9 @@
-use super::Texture;
-use super::TextureDatatype;
+use super::{Texture, TextureData, TextureDatatype};
 use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use core::num::NonZeroU32;
-use std::ops::Deref;
 
-pub type PermutationTexture = Texture<super::super::Permutation>;
+pub struct PermutationTexture {}
 
 impl TextureDatatype for PermutationTexture {
     type Component = i16;
@@ -18,12 +16,36 @@ impl TextureDatatype for PermutationTexture {
     }
 }
 
-pub struct PermutationInputTexture(PermutationTexture);
-pub struct PermutationOutputTexture(PermutationTexture);
+pub struct PermutationInputTexture(TextureData);
+pub struct PermutationOutputTexture(TextureData);
+
+impl Texture for PermutationInputTexture {
+    fn view(&self) -> &wgpu::TextureView {
+        &self.0.view
+    }
+    fn dimensions(&self) -> wgpu::Extent3d {
+        self.0.dimensions
+    }
+    fn copy_view(&self) -> wgpu::ImageCopyTexture {
+        self.0.copy_view()
+    }
+}
+
+impl Texture for PermutationOutputTexture {
+    fn view(&self) -> &wgpu::TextureView {
+        &self.0.view
+    }
+    fn dimensions(&self) -> wgpu::Extent3d {
+        self.0.dimensions
+    }
+    fn copy_view(&self) -> wgpu::ImageCopyTexture {
+        self.0.copy_view()
+    }
+}
 
 impl PermutationInputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(PermutationTexture::create_storage_texture(
+        Self(TextureData::create_storage_texture(
             device,
             image_dimensions,
             PermutationTexture::format(),
@@ -34,21 +56,20 @@ impl PermutationInputTexture {
     }
 
     pub fn load(&self, queue: &wgpu::Queue, permutation: &ValidatedPermutation) {
-        let (width, height) = permutation.dimensions();
-        let own_dimensions = self.dimensions();
-        assert!(width == own_dimensions.width && height == own_dimensions.height);
+        let dimensions = self.dimensions();
+        TextureData::assert_same_dimensions(&self.0, &permutation.dimensions());
 
         queue.write_texture(
             self.copy_view(),
-            bytemuck::cast_slice(permutation.as_raw().as_slice()),
+            bytemuck::cast_slice(permutation.data().as_raw().as_slice()),
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
-                    <PermutationTexture as TextureDatatype>::pixel_size() as u32 * width,
+                    <PermutationTexture as TextureDatatype>::pixel_size() as u32 * dimensions.width,
                 ),
-                rows_per_image: NonZeroU32::new(height),
+                rows_per_image: NonZeroU32::new(dimensions.height),
             },
-            own_dimensions,
+            dimensions,
         );
     }
 
@@ -60,17 +81,9 @@ impl PermutationInputTexture {
     }
 }
 
-impl Deref for PermutationInputTexture {
-    type Target = PermutationTexture;
-
-    fn deref(&self) -> &PermutationTexture {
-        &self.0
-    }
-}
-
 impl PermutationOutputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(PermutationTexture::create_storage_texture(
+        Self(TextureData::create_storage_texture(
             device,
             image_dimensions,
             PermutationTexture::format(),
@@ -78,13 +91,5 @@ impl PermutationOutputTexture {
             Some("permutation_output_texture"),
             Some("permutation_output_texture_view"),
         ))
-    }
-}
-
-impl Deref for PermutationOutputTexture {
-    type Target = PermutationTexture;
-
-    fn deref(&self) -> &PermutationTexture {
-        &self.0
     }
 }

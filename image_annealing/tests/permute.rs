@@ -28,7 +28,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*(output.permutation.unwrap()), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -79,7 +79,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     );
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*(output.permutation.unwrap()), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -170,7 +170,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*(output.permutation.unwrap()), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -229,7 +229,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
-    assert_eq!(*(output.permutation.unwrap()), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -253,7 +253,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
-    assert_eq!(*(output.permutation.unwrap()), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
     assert!(output.original_image.is_none());
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());

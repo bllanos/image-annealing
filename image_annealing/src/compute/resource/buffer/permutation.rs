@@ -1,4 +1,6 @@
-use super::super::texture::{PermutationOutputTexture, PermutationTexture, TextureDatatype};
+use super::super::texture::{
+    PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
+};
 use super::{OutputBuffer, TextureCopyBuffer};
 use crate::image_utils::ImageDimensions;
 

@@ -1,5 +1,5 @@
 use crate::image_utils::ImageDimensions;
-use std::marker::PhantomData;
+use std::convert::TryInto;
 
 mod lossless_image;
 mod permutation;
@@ -26,17 +26,22 @@ pub trait TextureDatatype {
     }
 }
 
-pub struct Texture<T> {
+pub trait Texture {
+    fn view(&self) -> &wgpu::TextureView;
+    fn dimensions(&self) -> wgpu::Extent3d;
+    fn copy_view(&self) -> wgpu::ImageCopyTexture;
+}
+
+struct TextureData {
     dimensions: wgpu::Extent3d,
     texture: wgpu::Texture,
     view: wgpu::TextureView,
-    phantom: PhantomData<T>,
 }
 
 const TEXTURE_DIMENSION: wgpu::TextureDimension = wgpu::TextureDimension::D2;
 pub(super) const TEXTURE_ARRAY_LAYERS: usize = 1;
 
-impl<T> Texture<T> {
+impl TextureData {
     fn create_texture(
         device: &wgpu::Device,
         image_dimensions: &ImageDimensions,
@@ -64,7 +69,6 @@ impl<T> Texture<T> {
             dimensions,
             texture,
             view,
-            phantom: PhantomData,
         }
     }
 
@@ -91,15 +95,14 @@ impl<T> Texture<T> {
         )
     }
 
-    pub fn view(&self) -> &wgpu::TextureView {
-        &self.view
+    fn assert_same_dimensions(texture: &Self, dimensions: &ImageDimensions) {
+        assert!(
+            texture.dimensions.width == dimensions.width().try_into().unwrap()
+                && texture.dimensions.height == dimensions.height().try_into().unwrap()
+        );
     }
 
-    pub fn dimensions(&self) -> wgpu::Extent3d {
-        self.dimensions
-    }
-
-    pub(super) fn copy_view(&self) -> wgpu::ImageCopyTexture {
+    fn copy_view(&self) -> wgpu::ImageCopyTexture {
         create_texture_copy_view(&self.texture)
     }
 }

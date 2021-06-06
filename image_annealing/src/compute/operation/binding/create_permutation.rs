@@ -1,5 +1,5 @@
 use super::super::super::resource::manager::ResourceManager;
-use super::super::super::resource::texture::{PermutationTexture, TextureDatatype};
+use super::super::super::resource::texture::{PermutationTexture, Texture, TextureDatatype};
 use super::Binding;
 use std::marker::PhantomData;
 

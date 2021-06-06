@@ -9,7 +9,7 @@ fn identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation { permutation, .. } = permutation::identity();
     let expected = permutation.clone();
     let permutation = validate_permutation(permutation)?;
-    assert_eq!(*permutation, expected);
+    assert_eq!(*permutation.data(), expected);
     Ok(())
 }
 
@@ -96,6 +96,6 @@ fn non_identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
     let expected = permutation.clone();
     let permutation = validate_permutation(permutation)?;
-    assert_eq!(*permutation, expected);
+    assert_eq!(*permutation.data(), expected);
     Ok(())
 }

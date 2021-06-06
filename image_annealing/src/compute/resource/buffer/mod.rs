@@ -133,7 +133,7 @@ impl<T> TextureCopyBuffer<T> {
         )
     }
 
-    fn assert_same_dimensions<U>(buffer: &Self, texture: &Texture<U>) {
+    fn assert_same_dimensions<U: Texture>(buffer: &Self, texture: &U) {
         let dimensions = texture.dimensions();
         assert!(
             buffer.buffer_dimensions.width == dimensions.width.try_into().unwrap()

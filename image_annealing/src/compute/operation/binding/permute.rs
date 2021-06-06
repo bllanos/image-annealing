@@ -1,6 +1,6 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
-    LosslessImageTexture, PermutationTexture, TextureDatatype,
+    LosslessImageTexture, PermutationTexture, Texture, TextureDatatype,
 };
 use super::Binding;
 use std::marker::PhantomData;
