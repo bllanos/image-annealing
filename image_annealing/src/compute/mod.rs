@@ -5,6 +5,7 @@ mod output;
 mod resource;
 
 pub use dispatch::create_dispatcher;
+pub use dispatch::DimensionsMismatchError;
 pub use dispatch::Dispatcher;
 pub use dispatch::{CreatePermutationAlgorithm, PermuteAlgorithm, ValidatePermutationAlgorithm};
 pub use output::algorithm::create_permutation::{

@@ -2,6 +2,7 @@ use image::GenericImageView;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
+use std::path::Path;
 
 #[derive(Debug, Clone)]
 pub struct InvalidDimensionError;
@@ -59,6 +60,11 @@ impl ImageDimensions {
     {
         let (width, height) = image.dimensions();
         Self::new(width as usize, height as usize)
+    }
+
+    pub fn from_image_path<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+        let (width, height) = image::image_dimensions(path)?;
+        Ok(Self::new(width, height)?)
     }
 
     pub fn width(&self) -> usize {

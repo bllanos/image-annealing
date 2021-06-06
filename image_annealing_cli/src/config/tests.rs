@@ -117,6 +117,62 @@ mod parse_config_file {
             "A configuration file with an invalid candidate permutation path should trigger an error",
         );
     }
+
+    #[test]
+    fn valid_permute_config_file() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_data_path(&["config", "permute", "valid.json"]);
+        let r = parse_config_file(path)?;
+        assert_eq!(
+            r,
+            Config::PermuteConfig {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "identity_permutation.png"
+                ]),
+                original_image_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "image",
+                    "stripes.png"
+                ]),
+                permuted_image_output_path_no_extension: String::from("permuted_image_out"),
+            }
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_permute_config_file_permutation() {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "permute",
+            "candidate_permutation_not_found.json",
+        ]);
+        parse_config_file(path).expect_err(
+            "A configuration file with an invalid candidate permutation path should trigger an error",
+        );
+    }
+
+    #[test]
+    fn invalid_permute_config_file_image() {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "permute",
+            "original_image_not_found.json",
+        ]);
+        parse_config_file(path).expect_err(
+            "A configuration file with an invalid original image path should trigger an error",
+        );
+    }
+
+    #[test]
+    fn invalid_permute_config_file_dimensions() {
+        let path =
+            test_utils::make_test_data_path(&["config", "permute", "dimensions_mismatch.json"]);
+        parse_config_file(path).expect_err(
+            "A configuration file referring to a candidate permutation and an original image of mismatched dimensions should trigger an error",
+        );
+    }
 }
 
 mod check_input_path {
@@ -140,7 +196,7 @@ mod check_input_path {
 
     #[test]
     fn valid_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(&["image", "radial_gradient_rg.png"]);
+        let path = test_utils::make_test_data_path(&["image", "image", "radial_gradient_rg.png"]);
         Ok(check_input_path(path)?)
     }
 }

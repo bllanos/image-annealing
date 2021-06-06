@@ -1,12 +1,14 @@
 use crate::config::Config;
 use image::io::Reader as ImageReader;
-use image_annealing::compute::format::ImageFileWriter;
+use image::DynamicImage;
+use image_annealing::compute::format::{ImageFileWriter, PermutationImageBuffer};
 use image_annealing::compute::{
     self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, OutputStatus,
-    ValidatePermutationInput, ValidatePermutationParameters,
+    PermuteInput, PermuteParameters, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
+use std::path::Path;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let dispatcher = create_dispatcher(&config)?;
@@ -19,14 +21,23 @@ fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Err
         Config::CreatePermutationConfig {
             image_dimensions, ..
         } => *image_dimensions,
+        Config::PermuteConfig {
+            original_image_path,
+            ..
+        } => ImageDimensions::from_image_path(original_image_path)?,
         Config::ValidatePermutationConfig {
             candidate_permutation_path,
-        } => {
-            let (width, height) = image::image_dimensions(&candidate_permutation_path)?;
-            ImageDimensions::new(width, height)?
-        }
+        } => ImageDimensions::from_image_path(candidate_permutation_path)?,
     };
     compute::create_dispatcher(&dimensions)
+}
+
+fn load_permutation<P: AsRef<Path>>(path: P) -> Result<PermutationImageBuffer, Box<dyn Error>> {
+    Ok(ImageReader::open(path)?.decode()?.to_rgba8())
+}
+
+fn load_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Box<dyn Error>> {
+    Ok(ImageReader::open(path)?.decode()?)
 }
 
 fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), Box<dyn Error>> {
@@ -42,15 +53,29 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
             let output_path = img.save_add_extension(path)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
+        Config::PermuteConfig {
+            candidate_permutation_path,
+            original_image_path,
+            permuted_image_output_path_no_extension: path,
+        } => {
+            let mut algorithm = dispatcher.permute(
+                PermuteInput {
+                    candidate_permutation: Some(load_permutation(candidate_permutation_path)?),
+                    original_image: Some(load_image(original_image_path)?),
+                },
+                PermuteParameters {},
+            );
+            algorithm.step_until(OutputStatus::FinalFullOutput)?;
+            let img = algorithm.full_output().unwrap().permuted_image;
+            let output_path = img.save_add_extension(path)?;
+            println!("Wrote permuted image to: {}", output_path.display());
+        }
         Config::ValidatePermutationConfig {
             candidate_permutation_path,
         } => {
-            let candidate_permutation = ImageReader::open(candidate_permutation_path)?
-                .decode()?
-                .to_rgba8();
             let mut algorithm = dispatcher.validate_permutation(
                 ValidatePermutationInput {
-                    candidate_permutation,
+                    candidate_permutation: load_permutation(candidate_permutation_path)?,
                 },
                 ValidatePermutationParameters {},
             );

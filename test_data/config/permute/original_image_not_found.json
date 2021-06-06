@@ -1,0 +1,7 @@
+{
+  "PermuteConfig": {
+    "candidate_permutation_path": "../test_data/image/permutation/identity_permutation.png",
+    "original_image_path": "../test_data/image/image/not_found.png",
+    "permuted_image_output_path_no_extension": "permuted_image_out"
+  }
+}

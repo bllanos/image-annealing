@@ -1,3 +1,4 @@
+use image_annealing::compute::DimensionsMismatchError;
 use image_annealing::image_utils::ImageDimensions;
 use serde::Deserialize;
 use std::error::Error;
@@ -30,6 +31,11 @@ enum UnverifiedConfig {
         image_height: usize,
         permutation_output_path_no_extension: String,
     },
+    PermuteConfig {
+        candidate_permutation_path: String,
+        original_image_path: String,
+        permuted_image_output_path_no_extension: String,
+    },
     ValidatePermutationConfig {
         candidate_permutation_path: String,
     },
@@ -40,6 +46,11 @@ pub enum Config {
     CreatePermutationConfig {
         image_dimensions: ImageDimensions,
         permutation_output_path_no_extension: String,
+    },
+    PermuteConfig {
+        candidate_permutation_path: String,
+        original_image_path: String,
+        permuted_image_output_path_no_extension: String,
     },
     ValidatePermutationConfig {
         candidate_permutation_path: String,
@@ -77,6 +88,28 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
                 permutation_output_path_no_extension,
             ),
         },
+        UnverifiedConfig::PermuteConfig {
+            candidate_permutation_path,
+            original_image_path,
+            permuted_image_output_path_no_extension,
+        } => {
+            let candidate_permutation_path_checked =
+                convert_and_check_input_path(candidate_permutation_path)?;
+            let original_image_path_checked = convert_and_check_input_path(original_image_path)?;
+            if ImageDimensions::from_image_path(&candidate_permutation_path_checked)?
+                == ImageDimensions::from_image_path(&original_image_path_checked)?
+            {
+                Config::PermuteConfig {
+                    candidate_permutation_path: candidate_permutation_path_checked,
+                    original_image_path: original_image_path_checked,
+                    permuted_image_output_path_no_extension: convert_path_separators(
+                        permuted_image_output_path_no_extension,
+                    ),
+                }
+            } else {
+                return Err(Box::new(DimensionsMismatchError));
+            }
+        }
         UnverifiedConfig::ValidatePermutationConfig {
             candidate_permutation_path,
         } => Config::ValidatePermutationConfig {

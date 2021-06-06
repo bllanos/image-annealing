@@ -35,7 +35,46 @@ mod create_dispatcher {
             ]),
         });
         match r {
-            Ok(_) => panic!("A non-existant candidate permutation should trigger an error"),
+            Ok(_) => panic!("A non-existing candidate permutation should trigger an error"),
+            Err(_) => Ok(()),
+        }
+    }
+
+    #[test]
+    fn valid_permute_config() -> Result<(), Box<dyn Error>> {
+        create_dispatcher(&Config::PermuteConfig {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]),
+            original_image_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "image",
+                "stripes.png",
+            ]),
+            permuted_image_output_path_no_extension: String::from("none"),
+        })?;
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_permute_config() -> Result<(), Box<dyn Error>> {
+        let r = create_dispatcher(&Config::PermuteConfig {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "not_found.png",
+            ]),
+            original_image_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "image",
+                "not_found.png",
+            ]),
+            permuted_image_output_path_no_extension: String::from("none"),
+        });
+        match r {
+            Ok(_) => panic!("Non-existing file inputs should trigger an error"),
             Err(_) => Ok(()),
         }
     }
