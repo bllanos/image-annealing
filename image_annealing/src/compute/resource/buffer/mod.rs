@@ -3,15 +3,12 @@ use crate::image_utils::ImageDimensions;
 use core::future::Future;
 use core::num::NonZeroU32;
 use std::convert::TryInto;
-use std::marker::PhantomData;
 use std::pin::Pin;
 
 mod lossless_image;
 mod permutation;
 
-pub use lossless_image::LosslessImageOutput;
 pub use lossless_image::LosslessImageOutputBuffer;
-pub use permutation::PermutationOutput;
 pub use permutation::PermutationOutputBuffer;
 
 /// From https://github.com/gfx-rs/wgpu-rs/blob/master/examples/capture/main.rs
@@ -87,15 +84,12 @@ pub trait ReadMappableBuffer {
     fn request_map_read(&self) -> MappedBuffer;
 }
 
-pub trait OutputBuffer {}
-
-pub struct TextureCopyBuffer<T> {
+struct TextureCopyBufferData {
     buffer_dimensions: TextureCopyBufferDimensions,
     buffer: wgpu::Buffer,
-    phantom: PhantomData<T>,
 }
 
-impl<T> TextureCopyBuffer<T> {
+impl TextureCopyBufferData {
     fn create_buffer(
         device: &wgpu::Device,
         image_dimensions: &ImageDimensions,
@@ -114,7 +108,6 @@ impl<T> TextureCopyBuffer<T> {
         Self {
             buffer_dimensions,
             buffer,
-            phantom: PhantomData,
         }
     }
 
@@ -147,7 +140,7 @@ impl<T> TextureCopyBuffer<T> {
     }
 }
 
-impl<T: OutputBuffer> ReadMappableBuffer for TextureCopyBuffer<T> {
+impl ReadMappableBuffer for TextureCopyBufferData {
     fn request_map_read(&self) -> MappedBuffer {
         let buffer_slice = self.buffer.slice(..);
         let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
