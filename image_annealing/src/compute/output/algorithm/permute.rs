@@ -40,15 +40,14 @@ pub struct Permute {
 
 impl Permute {
     pub fn new(mut input: PermuteInput, _parameters: PermuteParameters) -> Self {
-        let validator = match input.candidate_permutation.take() {
-            Some(permutation) => Some(ValidatePermutation::new(
+        let validator = input.candidate_permutation.take().map(|permutation| {
+            ValidatePermutation::new(
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
                 ValidatePermutationParameters {},
-            )),
-            None => None,
-        };
+            )
+        });
         Self {
             completion_status: CompletionStatus::new(),
             input,

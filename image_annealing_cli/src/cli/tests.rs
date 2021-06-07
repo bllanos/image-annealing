@@ -6,7 +6,7 @@ mod create_dispatcher {
 
     #[test]
     fn create_permutation_config() -> Result<(), Box<dyn Error>> {
-        create_dispatcher(&Config::CreatePermutationConfig {
+        create_dispatcher(&Config::CreatePermutation {
             image_dimensions: ImageDimensions::new(5, 6)?,
             permutation_output_path_no_extension: String::from("none"),
         })?;
@@ -15,7 +15,7 @@ mod create_dispatcher {
 
     #[test]
     fn valid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
-        create_dispatcher(&Config::ValidatePermutationConfig {
+        create_dispatcher(&Config::ValidatePermutation {
             candidate_permutation_path: test_utils::make_test_data_path_string(&[
                 "image",
                 "permutation",
@@ -27,7 +27,7 @@ mod create_dispatcher {
 
     #[test]
     fn invalid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
-        let r = create_dispatcher(&Config::ValidatePermutationConfig {
+        let r = create_dispatcher(&Config::ValidatePermutation {
             candidate_permutation_path: test_utils::make_test_data_path_string(&[
                 "image",
                 "permutation",
@@ -42,7 +42,7 @@ mod create_dispatcher {
 
     #[test]
     fn valid_permute_config() -> Result<(), Box<dyn Error>> {
-        create_dispatcher(&Config::PermuteConfig {
+        create_dispatcher(&Config::Permute {
             candidate_permutation_path: test_utils::make_test_data_path_string(&[
                 "image",
                 "permutation",
@@ -60,7 +60,7 @@ mod create_dispatcher {
 
     #[test]
     fn invalid_permute_config() -> Result<(), Box<dyn Error>> {
-        let r = create_dispatcher(&Config::PermuteConfig {
+        let r = create_dispatcher(&Config::Permute {
             candidate_permutation_path: test_utils::make_test_data_path_string(&[
                 "image",
                 "permutation",

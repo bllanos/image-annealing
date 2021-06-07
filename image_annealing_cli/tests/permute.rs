@@ -11,7 +11,7 @@ fn permute_valid() -> Result<(), Box<dyn Error>> {
         panic!("Output permuted image already exists in the filesystem.")
     }
 
-    let config = Config::PermuteConfig {
+    let config = Config::Permute {
         candidate_permutation_path: test_utils::make_test_data_path_string(&[
             "image",
             "permutation",
@@ -36,7 +36,7 @@ fn permute_valid() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn permute_invalid() {
-    let config = Config::PermuteConfig {
+    let config = Config::Permute {
         candidate_permutation_path: test_utils::make_test_data_path_string(&[
             "image",
             "permutation",

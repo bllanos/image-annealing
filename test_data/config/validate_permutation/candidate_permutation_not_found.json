@@ -1,5 +1,5 @@
 {
-  "ValidatePermutationConfig": {
+  "ValidatePermutation": {
     "candidate_permutation_path": "../test_data/image/permutation/not_found.png"
   }
 }

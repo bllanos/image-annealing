@@ -12,7 +12,7 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
         panic!("Output permutation already exists in the filesystem.")
     }
 
-    let config = Config::CreatePermutationConfig {
+    let config = Config::CreatePermutation {
         image_dimensions: ImageDimensions::new(3, 4)?,
         permutation_output_path_no_extension: path,
     };

@@ -67,7 +67,7 @@ pub fn non_identity_forward_permute(image: &LosslessImageBuffer) -> LosslessImag
     permuted_image.put_pixel(1, 1, pixel2);
     permuted_image.put_pixel(0, 2, pixel3);
     permuted_image.put_pixel(1, 2, pixel1);
-    return permuted_image;
+    permuted_image
 }
 
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
@@ -143,5 +143,5 @@ pub fn bit_interpretation_cases_forward_permute(
     permuted_image.put_pixel(3, 0, pixel2);
     permuted_image.put_pixel(131, 100, pixel1);
 
-    return permuted_image;
+    permuted_image
 }

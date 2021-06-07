@@ -18,14 +18,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
     let dimensions = match config {
-        Config::CreatePermutationConfig {
+        Config::CreatePermutation {
             image_dimensions, ..
         } => *image_dimensions,
-        Config::PermuteConfig {
+        Config::Permute {
             original_image_path,
             ..
         } => ImageDimensions::from_image_path(original_image_path)?,
-        Config::ValidatePermutationConfig {
+        Config::ValidatePermutation {
             candidate_permutation_path,
         } => ImageDimensions::from_image_path(candidate_permutation_path)?,
     };
@@ -42,7 +42,7 @@ fn load_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Box<dyn Error>> {
 
 fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), Box<dyn Error>> {
     match config {
-        Config::CreatePermutationConfig {
+        Config::CreatePermutation {
             permutation_output_path_no_extension: path,
             ..
         } => {
@@ -53,7 +53,7 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
             let output_path = img.save_add_extension(path)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
-        Config::PermuteConfig {
+        Config::Permute {
             candidate_permutation_path,
             original_image_path,
             permuted_image_output_path_no_extension: path,
@@ -70,7 +70,7 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
             let output_path = img.save_add_extension(path)?;
             println!("Wrote permuted image to: {}", output_path.display());
         }
-        Config::ValidatePermutationConfig {
+        Config::ValidatePermutation {
             candidate_permutation_path,
         } => {
             let mut algorithm = dispatcher.validate_permutation(

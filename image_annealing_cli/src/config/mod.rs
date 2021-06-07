@@ -26,33 +26,33 @@ impl Error for FileNotFoundError {}
 
 #[derive(Deserialize)]
 enum UnverifiedConfig {
-    CreatePermutationConfig {
+    CreatePermutation {
         image_width: usize,
         image_height: usize,
         permutation_output_path_no_extension: String,
     },
-    PermuteConfig {
+    Permute {
         candidate_permutation_path: String,
         original_image_path: String,
         permuted_image_output_path_no_extension: String,
     },
-    ValidatePermutationConfig {
+    ValidatePermutation {
         candidate_permutation_path: String,
     },
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Config {
-    CreatePermutationConfig {
+    CreatePermutation {
         image_dimensions: ImageDimensions,
         permutation_output_path_no_extension: String,
     },
-    PermuteConfig {
+    Permute {
         candidate_permutation_path: String,
         original_image_path: String,
         permuted_image_output_path_no_extension: String,
     },
-    ValidatePermutationConfig {
+    ValidatePermutation {
         candidate_permutation_path: String,
     },
 }
@@ -78,17 +78,17 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
     let unverified_config = serde_json::from_reader(reader)?;
 
     let config = match unverified_config {
-        UnverifiedConfig::CreatePermutationConfig {
+        UnverifiedConfig::CreatePermutation {
             image_width,
             image_height,
             permutation_output_path_no_extension,
-        } => Config::CreatePermutationConfig {
+        } => Config::CreatePermutation {
             image_dimensions: ImageDimensions::new(image_width, image_height)?,
             permutation_output_path_no_extension: convert_path_separators(
                 permutation_output_path_no_extension,
             ),
         },
-        UnverifiedConfig::PermuteConfig {
+        UnverifiedConfig::Permute {
             candidate_permutation_path,
             original_image_path,
             permuted_image_output_path_no_extension,
@@ -99,7 +99,7 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
             if ImageDimensions::from_image_path(&candidate_permutation_path_checked)?
                 == ImageDimensions::from_image_path(&original_image_path_checked)?
             {
-                Config::PermuteConfig {
+                Config::Permute {
                     candidate_permutation_path: candidate_permutation_path_checked,
                     original_image_path: original_image_path_checked,
                     permuted_image_output_path_no_extension: convert_path_separators(
@@ -110,9 +110,9 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
                 return Err(Box::new(DimensionsMismatchError));
             }
         }
-        UnverifiedConfig::ValidatePermutationConfig {
+        UnverifiedConfig::ValidatePermutation {
             candidate_permutation_path,
-        } => Config::ValidatePermutationConfig {
+        } => Config::ValidatePermutation {
             candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
         },
     };

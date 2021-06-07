@@ -275,7 +275,7 @@ fn forget_permutation() {
     let mut algorithm = dispatcher.permute(
         PermuteInput {
             candidate_permutation: None,
-            original_image: Some(dynamic_original_image.clone()),
+            original_image: Some(dynamic_original_image),
         },
         PermuteParameters {},
     );

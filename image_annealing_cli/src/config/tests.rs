@@ -25,7 +25,7 @@ mod parse_args {
         let r = parse_args(v)?;
         assert_eq!(
             r,
-            Config::CreatePermutationConfig {
+            Config::CreatePermutation {
                 image_dimensions: ImageDimensions::new(20, 25)?,
                 permutation_output_path_no_extension: String::from("permutation_out"),
             }
@@ -41,7 +41,7 @@ mod parse_args {
         let r = parse_args(v)?;
         assert_eq!(
             r,
-            Config::CreatePermutationConfig {
+            Config::CreatePermutation {
                 image_dimensions: ImageDimensions::new(20, 25)?,
                 permutation_output_path_no_extension: String::from("permutation_out"),
             }
@@ -68,7 +68,7 @@ mod parse_config_file {
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
-            Config::CreatePermutationConfig {
+            Config::CreatePermutation {
                 image_dimensions: ImageDimensions::new(20, 25)?,
                 permutation_output_path_no_extension: String::from("permutation_out"),
             }
@@ -95,7 +95,7 @@ mod parse_config_file {
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
-            Config::ValidatePermutationConfig {
+            Config::ValidatePermutation {
                 candidate_permutation_path: test_utils::make_test_data_path_string(&[
                     "image",
                     "permutation",
@@ -124,7 +124,7 @@ mod parse_config_file {
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
-            Config::PermuteConfig {
+            Config::Permute {
                 candidate_permutation_path: test_utils::make_test_data_path_string(&[
                     "image",
                     "permutation",
