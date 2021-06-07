@@ -24,6 +24,9 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.data(), expected);
     assert!(algorithm.partial_output().is_none());
+    algorithm
+        .step_until(OutputStatus::FinalFullOutput)
+        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 

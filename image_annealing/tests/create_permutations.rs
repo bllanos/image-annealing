@@ -18,6 +18,9 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     expected.resize(dim.count(), conversion::PermutationEntry(0, 0));
     assert_eq!(converted_output, expected);
     assert!(algorithm.partial_output().is_none());
+    algorithm
+        .step_until(OutputStatus::FinalFullOutput)
+        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 

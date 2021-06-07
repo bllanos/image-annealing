@@ -32,6 +32,9 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
+    algorithm
+        .step_until(OutputStatus::FinalFullOutput)
+        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 

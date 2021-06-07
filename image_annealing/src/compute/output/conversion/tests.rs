@@ -69,3 +69,17 @@ fn vec_to_image() -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
+
+#[test]
+#[should_panic(expected = "Vector length and image dimensions are incompatible")]
+fn vec_to_image_impossible() {
+    super::as_image(
+        &ImageDimensions::new(3, 5).unwrap(),
+        &[
+            PermutationEntry(0, 0),
+            PermutationEntry(257, 257),
+            PermutationEntry(-1, -1),
+            PermutationEntry(0, 1),
+        ],
+    );
+}
