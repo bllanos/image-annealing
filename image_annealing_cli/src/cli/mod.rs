@@ -79,13 +79,11 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
                 },
                 ValidatePermutationParameters {},
             );
-            match algorithm.step_until(OutputStatus::FinalFullOutput) {
-                Ok(()) => println!(
-                    "Candidate permutation '{}' is valid",
-                    candidate_permutation_path
-                ),
-                Err(e) => return Err(e),
-            }
+            algorithm.step_until(OutputStatus::FinalFullOutput)?;
+            println!(
+                "Candidate permutation '{}' is valid",
+                candidate_permutation_path
+            );
         }
     }
     Ok(())
