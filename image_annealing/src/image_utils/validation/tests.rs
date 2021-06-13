@@ -9,13 +9,13 @@ fn identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation { permutation, .. } = permutation::identity();
     let expected = permutation.clone();
     let permutation = validate_permutation(permutation)?;
-    assert_eq!(*permutation.data(), expected);
+    assert_eq!(*permutation.as_ref(), expected);
     Ok(())
 }
 
 #[test]
 fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
-    let permutation = conversion::as_image(
+    let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 0),
@@ -32,7 +32,7 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
-    let permutation = conversion::as_image(
+    let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, -1),
@@ -49,7 +49,7 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
-    let permutation = conversion::as_image(
+    let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 0),
@@ -66,7 +66,7 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
-    let permutation = conversion::as_image(
+    let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
             PermutationEntry(0, 3),
@@ -96,6 +96,6 @@ fn non_identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
     let expected = permutation.clone();
     let permutation = validate_permutation(permutation)?;
-    assert_eq!(*permutation.data(), expected);
+    assert_eq!(*permutation.as_ref(), expected);
     Ok(())
 }

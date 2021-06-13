@@ -3,7 +3,7 @@ use image_annealing::compute::format::LosslessImageBuffer;
 use image_annealing::image_utils::ImageDimensions;
 use std::convert::TryInto;
 
-pub fn coordinates_as_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {
+pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {
     LosslessImageBuffer::from_fn(
         dimensions.width() as u32,
         dimensions.height() as u32,

@@ -8,7 +8,7 @@ pub type PermutationEntryComponent = <PermutationTexture as TextureDatatype>::Co
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct PermutationEntry(pub PermutationEntryComponent, pub PermutationEntryComponent);
 
-pub fn as_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
+pub fn to_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
     image
         .enumerate_pixels()
         .map(|(.., px)| -> PermutationEntry {
@@ -20,7 +20,7 @@ pub fn as_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
         .collect()
 }
 
-pub fn as_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> PermutationImageBuffer {
+pub fn to_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> PermutationImageBuffer {
     if v.len() == dimensions.count() {
         let image_vec = v
             .iter()

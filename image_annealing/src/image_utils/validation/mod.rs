@@ -1,6 +1,6 @@
 use super::ImageDimensions;
 use crate::compute::conversion::{PermutationEntry, PermutationEntryComponent};
-use crate::compute::format::PermutationImageBuffer;
+use crate::compute::format::{PermutationImageBuffer, PermutationImageBufferComponent};
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
@@ -71,11 +71,17 @@ pub struct ValidatedPermutation {
 }
 
 impl ValidatedPermutation {
-    pub fn data(&self) -> &PermutationImageBuffer {
-        &self.data
+    pub fn as_raw_slice(&self) -> &[PermutationImageBufferComponent] {
+        &self.data.as_raw().as_slice()
     }
     pub fn dimensions(&self) -> ImageDimensions {
         self.dimensions
+    }
+}
+
+impl AsRef<PermutationImageBuffer> for ValidatedPermutation {
+    fn as_ref(&self) -> &PermutationImageBuffer {
+        &self.data
     }
 }
 

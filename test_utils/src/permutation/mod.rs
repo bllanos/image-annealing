@@ -12,7 +12,7 @@ pub fn identity() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(2, 3).unwrap();
     let v = vec![PermutationEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
-        permutation: conversion::as_image(&dimensions, &v),
+        permutation: conversion::to_image(&dimensions, &v),
         dimensions,
     }
 }
@@ -32,7 +32,7 @@ pub fn duplicate() -> DimensionsAndPermutation {
         PermutationEntry(0, 0),
     ];
     DimensionsAndPermutation {
-        permutation: conversion::as_image(&dimensions, &v),
+        permutation: conversion::to_image(&dimensions, &v),
         dimensions,
     }
 }
@@ -48,7 +48,7 @@ pub fn non_identity() -> DimensionsAndPermutation {
         PermutationEntry(0, -1),
     ];
     DimensionsAndPermutation {
-        permutation: conversion::as_image(&dimensions, &v),
+        permutation: conversion::to_image(&dimensions, &v),
         dimensions,
     }
 }
@@ -96,7 +96,7 @@ pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     v[51431] = PermutationEntry(-128, -100); // (131, 100) to (3, 0)
 
     DimensionsAndPermutation {
-        permutation: conversion::as_image(&dimensions, &v),
+        permutation: conversion::to_image(&dimensions, &v),
         dimensions,
     }
 }

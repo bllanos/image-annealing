@@ -57,13 +57,13 @@ fn make_vector() -> Vec<PermutationEntry> {
 #[test]
 fn image_to_vec() {
     let image = PermutationImageBuffer::from_fn(3, 5, make_pixels);
-    let v = super::as_vec(&image);
+    let v = super::to_vec(&image);
     assert_eq!(v, make_vector());
 }
 
 #[test]
 fn vec_to_image() -> Result<(), Box<dyn Error>> {
-    let image = super::as_image(&ImageDimensions::new(3, 5)?, &make_vector());
+    let image = super::to_image(&ImageDimensions::new(3, 5)?, &make_vector());
     for (x, y, px) in image.enumerate_pixels() {
         assert_eq!(*px, make_pixels(x, y));
     }
@@ -73,7 +73,7 @@ fn vec_to_image() -> Result<(), Box<dyn Error>> {
 #[test]
 #[should_panic(expected = "Vector length and image dimensions are incompatible")]
 fn vec_to_image_impossible() {
-    super::as_image(
+    super::to_image(
         &ImageDimensions::new(3, 5).unwrap(),
         &[
             PermutationEntry(0, 0),

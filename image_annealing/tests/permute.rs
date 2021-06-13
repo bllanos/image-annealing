@@ -13,7 +13,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_as_colors(&dimensions);
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image = test_utils::permutation::identity_permute(&original_image);
     let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
 
@@ -28,7 +28,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -45,7 +45,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_as_colors(&dimensions);
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
     let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
 
@@ -82,7 +82,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     );
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -97,7 +97,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::non_identity();
     let invalid_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image = DynamicImage::ImageRgba16(test_utils::image::coordinates_as_colors(
+    let image = DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(
         &invalid_dimensions,
     ));
 
@@ -129,7 +129,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let other_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
     let image =
-        DynamicImage::ImageRgba16(test_utils::image::coordinates_as_colors(&other_dimensions));
+        DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(&other_dimensions));
 
     let dispatcher = compute::create_dispatcher(&other_dimensions)?;
     let mut algorithm = dispatcher.permute(
@@ -157,7 +157,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::bit_interpretation_cases();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_as_colors(&dimensions);
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image =
         test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
     let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
@@ -173,7 +173,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
-    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -189,7 +189,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
-    let original_image = test_utils::image::coordinates_as_colors(&dimensions);
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image = test_utils::permutation::identity_permute(&original_image);
     let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
 
@@ -217,7 +217,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::identity();
     let mut expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_as_colors(&dimensions);
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let mut permuted_image = test_utils::permutation::identity_permute(&original_image);
     let dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
 
@@ -232,7 +232,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
-    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -256,7 +256,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     algorithm.step_until(OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
-    assert_eq!(*output.permutation.unwrap().data(), expected_permutation);
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert!(output.original_image.is_none());
     assert_eq!(output.permuted_image, permuted_image);
     assert!(algorithm.partial_output().is_none());
@@ -270,7 +270,7 @@ fn forget_permutation() {
     let dimensions = ImageDimensions::new(3, 4).unwrap();
     let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
     let dynamic_original_image =
-        DynamicImage::ImageRgba16(test_utils::image::coordinates_as_colors(&dimensions));
+        DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(&dimensions));
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {

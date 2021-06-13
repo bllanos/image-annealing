@@ -61,7 +61,7 @@ impl PermutationInputTexture {
 
         queue.write_texture(
             self.copy_view(),
-            bytemuck::cast_slice(permutation.data().as_raw().as_slice()),
+            bytemuck::cast_slice(permutation.as_raw_slice()),
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
