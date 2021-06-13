@@ -4,6 +4,7 @@ use image_annealing::compute::{
 };
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
+use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
 use test_utils::permutation::{self, DimensionsAndPermutation};
 
 #[test]
@@ -20,13 +21,9 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.as_ref(), expected);
-    assert!(algorithm.partial_output().is_none());
-    algorithm
-        .step_until(OutputStatus::FinalFullOutput)
-        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 
@@ -50,14 +47,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("An invalid candidate permutation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
-    result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("Attempting to repeat the validation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
 
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.validate_permutation(
@@ -66,10 +56,9 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.as_ref(), expected);
-    assert!(algorithm.partial_output().is_none());
     Ok(())
 }
 
@@ -89,13 +78,6 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
         },
         ValidatePermutationParameters {},
     );
-    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("A mismatch in image dimensions should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
-    result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("Attempting to repeat the validation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
     Ok(())
 }

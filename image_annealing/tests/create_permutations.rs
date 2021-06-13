@@ -4,6 +4,7 @@ use image_annealing::compute::{
 };
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
+use test_utils::algorithm::assert_step_until_success;
 
 #[test]
 fn run_once() -> Result<(), Box<dyn Error>> {
@@ -11,16 +12,12 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dim)?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     let converted_output = conversion::to_vec(&output);
     let mut expected: Vec<conversion::PermutationEntry> = Vec::with_capacity(dim.count());
     expected.resize(dim.count(), conversion::PermutationEntry(0, 0));
     assert_eq!(converted_output, expected);
-    assert!(algorithm.partial_output().is_none());
-    algorithm
-        .step_until(OutputStatus::FinalFullOutput)
-        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 
@@ -31,19 +28,18 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     dispatcher = algorithm.return_to_dispatcher();
 
     algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     let converted_output = conversion::to_vec(&output);
     let mut expected: Vec<conversion::PermutationEntry> = Vec::with_capacity(dim.count());
     expected.resize(dim.count(), conversion::PermutationEntry(0, 0));
     assert_eq!(converted_output, expected);
-    assert!(algorithm.partial_output().is_none());
     Ok(())
 }

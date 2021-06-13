@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+pub mod algorithm;
 pub mod image;
 pub mod permutation;
 

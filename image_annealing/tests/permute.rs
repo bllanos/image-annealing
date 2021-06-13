@@ -4,6 +4,7 @@ use image_annealing::compute::{CreatePermutationInput, CreatePermutationParamete
 use image_annealing::compute::{OutputStatus, PermuteInput, PermuteParameters};
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
+use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
 use test_utils::permutation::DimensionsAndPermutation;
 
 #[test]
@@ -25,16 +26,12 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
-    algorithm
-        .step_until(OutputStatus::FinalFullOutput)
-        .expect_err("Attempting to step past completion should trigger an error");
     Ok(())
 }
 
@@ -63,14 +60,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("An invalid candidate permutation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
-    result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("Attempting to repeat the failed operation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
 
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.permute(
@@ -80,12 +70,11 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
     Ok(())
 }
 
@@ -109,14 +98,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("A mismatch in image dimensions should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
-    result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("Attempting to repeat the validation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
     Ok(())
 }
 
@@ -139,14 +121,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    let mut result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("A mismatch in image dimensions should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
-    result = algorithm.step_until(OutputStatus::FinalFullOutput);
-    result.expect_err("Attempting to repeat the validation should trigger an error");
-    assert!(algorithm.partial_output().is_none());
-    assert!(algorithm.full_output().is_none());
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
     Ok(())
 }
 
@@ -170,13 +145,12 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
     Ok(())
 }
 
@@ -186,7 +160,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
@@ -200,13 +174,12 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert!(output.permutation.is_none());
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
     Ok(())
 }
 
@@ -229,13 +202,12 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
 
     dispatcher = algorithm.return_to_dispatcher();
     let DimensionsAndPermutation {
@@ -253,13 +225,12 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert!(output.original_image.is_none());
     assert_eq!(output.permuted_image, permuted_image);
-    assert!(algorithm.partial_output().is_none());
 
     Ok(())
 }
