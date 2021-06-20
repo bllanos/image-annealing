@@ -32,14 +32,14 @@ fn from_image() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-mod to_linear_index {
+mod make_linear_index {
     use super::super::ImageDimensions;
     use std::error::Error;
 
     #[test]
     fn negative_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.to_linear_index(-1, 0);
+        let r = dim.make_linear_index(-1, 0);
         r.expect_err("An error should be raised if the x-coordinate is negative");
         Ok(())
     }
@@ -47,7 +47,7 @@ mod to_linear_index {
     #[test]
     fn negative_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.to_linear_index(0, -1);
+        let r = dim.make_linear_index(0, -1);
         r.expect_err("An error should be raised if the y-coordinate is negative");
         Ok(())
     }
@@ -55,7 +55,7 @@ mod to_linear_index {
     #[test]
     fn large_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.to_linear_index(3, 0);
+        let r = dim.make_linear_index(3, 0);
         r.expect_err("An error should be raised if the x-coordinate is too large");
         Ok(())
     }
@@ -63,7 +63,7 @@ mod to_linear_index {
     #[test]
     fn large_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.to_linear_index(0, 5);
+        let r = dim.make_linear_index(0, 5);
         r.expect_err("An error should be raised if the y-coordinate is too large");
         Ok(())
     }
@@ -71,15 +71,15 @@ mod to_linear_index {
     #[test]
     fn valid_coordinates() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let mut i = dim.to_linear_index(0, 0)?;
+        let mut i = dim.make_linear_index(0, 0)?;
         assert_eq!(i, 0);
-        i = dim.to_linear_index(1, 0)?;
+        i = dim.make_linear_index(1, 0)?;
         assert_eq!(i, 1);
-        i = dim.to_linear_index(0, 1)?;
+        i = dim.make_linear_index(0, 1)?;
         assert_eq!(i, 3);
-        i = dim.to_linear_index(1, 1)?;
+        i = dim.make_linear_index(1, 1)?;
         assert_eq!(i, 4);
-        i = dim.to_linear_index(2, 4)?;
+        i = dim.make_linear_index(2, 4)?;
         assert_eq!(i, 3 * 5 - 1);
         Ok(())
     }

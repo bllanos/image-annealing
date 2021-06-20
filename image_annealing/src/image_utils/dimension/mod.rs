@@ -79,7 +79,7 @@ impl ImageDimensions {
         self.width.checked_mul(self.height).unwrap()
     }
 
-    pub fn to_linear_index<T: TryInto<usize>>(
+    pub fn make_linear_index<T: TryInto<usize>>(
         &self,
         x: T,
         y: T,

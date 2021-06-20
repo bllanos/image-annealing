@@ -98,7 +98,7 @@ pub fn validate_permutation(
             PermutationEntryComponent::from_be_bytes([px[2], px[3]]),
         );
         let target = (x + (delta.0 as i64), y + (delta.1 as i64));
-        match dimensions.to_linear_index(target.0, target.1) {
+        match dimensions.make_linear_index(target.0, target.1) {
             Err(_) => {
                 return Err(Box::new(PermutationFlaw::OutOfBounds {
                     dimensions,
