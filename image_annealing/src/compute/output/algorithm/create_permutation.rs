@@ -32,9 +32,14 @@ impl CreatePermutation {
         self.completion_status.ok_if_pending()?;
         debug_assert!(self.full_output.is_none());
         if !self.invoked_operation {
-            dispatcher.operation_create_permutation();
             self.invoked_operation = true;
-            Ok(OutputStatus::NoNewOutput)
+            match dispatcher.operation_create_permutation() {
+                Ok(_) => Ok(OutputStatus::NoNewOutput),
+                Err(e) => {
+                    self.completion_status = CompletionStatus::Failed;
+                    Err(e)
+                }
+            }
         } else {
             let mut mapped_buffer = dispatcher
                 .resources()

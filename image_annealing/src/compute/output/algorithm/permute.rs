@@ -111,13 +111,20 @@ impl Permute {
                         }
                     }
 
-                    dispatcher.operation_permute(&PermuteOperationInput {
+                    self.invoked_operation = true;
+                    match dispatcher.operation_permute(&PermuteOperationInput {
                         permutation: self.permutation.as_ref(),
                         image: image_option.as_ref(),
-                    });
-                    self.input.original_image = image_option;
-                    self.invoked_operation = true;
-                    Ok(OutputStatus::NoNewOutput)
+                    }) {
+                        Ok(_) => {
+                            self.input.original_image = image_option;
+                            Ok(OutputStatus::NoNewOutput)
+                        }
+                        Err(e) => {
+                            self.completion_status = CompletionStatus::Failed;
+                            Err(e)
+                        }
+                    }
                 } else {
                     let mut mapped_buffer = dispatcher
                         .resources()

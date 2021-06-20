@@ -98,14 +98,17 @@ impl DispatcherImplementation {
         &self.image_dimensions
     }
 
-    pub fn operation_create_permutation(&mut self) {
+    pub fn operation_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
         self.operations
-            .create_permutation(&self.resources, &self.device);
+            .create_permutation(&self.resources, &self.device)
     }
 
-    pub fn operation_permute(&mut self, input: &PermuteOperationInput) {
+    pub fn operation_permute(
+        &mut self,
+        input: &PermuteOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
         self.operations
-            .permute(&self.resources, &self.device, input);
+            .permute(&self.resources, &self.device, input)
     }
 }
 

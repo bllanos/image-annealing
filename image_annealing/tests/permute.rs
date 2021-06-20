@@ -236,8 +236,58 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[should_panic(expected = "valid_output_permutation_texture")]
-fn forget_permutation() {
+fn reuse_permutation() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::bit_interpretation_cases();
+    let expected_permutation = permutation.clone();
+    let mut original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let mut permuted_image =
+        test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
+    let mut dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
+
+    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: Some(permutation),
+            original_image: Some(dynamic_original_image.clone()),
+        },
+        PermuteParameters {},
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let mut output = algorithm.full_output().unwrap();
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
+    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
+    assert_eq!(output.permuted_image, permuted_image);
+
+    dispatcher = algorithm.return_to_dispatcher();
+
+    original_image = test_utils::image::coordinates_to_zero_alpha_colors(&dimensions);
+    permuted_image =
+        test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
+    dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
+
+    algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: None,
+            original_image: Some(dynamic_original_image.clone()),
+        },
+        PermuteParameters {},
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    output = algorithm.full_output().unwrap();
+    assert!(output.permutation.is_none());
+    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
+    assert_eq!(output.permuted_image, permuted_image);
+
+    Ok(())
+}
+
+#[test]
+fn forget_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4).unwrap();
     let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
     let dynamic_original_image =
@@ -250,12 +300,12 @@ fn forget_permutation() {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput).unwrap();
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    Ok(())
 }
 
 #[test]
-#[should_panic(expected = "valid_lossless_image_input_texture")]
-fn forget_image() {
+fn forget_image() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
@@ -269,5 +319,6 @@ fn forget_image() {
         },
         PermuteParameters {},
     );
-    algorithm.step_until(OutputStatus::FinalFullOutput).unwrap();
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    Ok(())
 }

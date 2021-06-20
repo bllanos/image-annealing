@@ -17,3 +17,18 @@ pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> LosslessImageBuffe
         },
     )
 }
+
+pub fn coordinates_to_zero_alpha_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {
+    LosslessImageBuffer::from_fn(
+        dimensions.width() as u32,
+        dimensions.height() as u32,
+        |x, y| {
+            Rgba([
+                x.try_into().unwrap(),
+                (x + 1).try_into().unwrap(),
+                y.try_into().unwrap(),
+                0,
+            ])
+        },
+    )
+}
