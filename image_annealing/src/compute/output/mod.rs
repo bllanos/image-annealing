@@ -24,7 +24,7 @@ impl fmt::Display for AlreadyFailedError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Cannot proceed because of an error during the previous call to Algorithm::step."
+            "cannot proceed because of an error during the previous call to Algorithm::step"
         )
     }
 }
@@ -42,7 +42,7 @@ impl fmt::Display for AlreadyFinishedError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Algorithm::step cannot be called after the final output has been computed."
+            "Algorithm::step cannot be called after the final output has been computed"
         )
     }
 }

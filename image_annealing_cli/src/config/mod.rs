@@ -16,7 +16,7 @@ impl fmt::Display for FileNotFoundError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "File {} does not exist in the filesystem.",
+            "file {} does not exist in the filesystem",
             self.filepath.display()
         )
     }

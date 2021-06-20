@@ -6,7 +6,7 @@ pub struct DeviceRequestError;
 
 impl fmt::Display for DeviceRequestError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error requesting device adapter")
+        write!(f, "error requesting device adapter")
     }
 }
 

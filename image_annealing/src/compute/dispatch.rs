@@ -22,7 +22,7 @@ pub struct DimensionsMismatchError;
 
 impl fmt::Display for DimensionsMismatchError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Mismatch in image dimensions")
+        write!(f, "mismatch in image dimensions")
     }
 }
 

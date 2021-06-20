@@ -42,7 +42,7 @@ impl fmt::Display for PermutationFlaw {
         match self {
             PermutationFlaw::OutOfBounds { dimensions, data } => write!(
                 f,
-                "Out of bounds mapping {} for an image of dimensions {}.",
+                "out of bounds mapping {} for an image of dimensions {}",
                 data, dimensions
             ),
             PermutationFlaw::Duplicate {
@@ -52,7 +52,7 @@ impl fmt::Display for PermutationFlaw {
                 second_source,
             } => write!(
                 f,
-                "Entries {} and {} both map to location (x, y) = {}, {}.",
+                "entries {} and {} both map to location (x, y) = {}, {}",
                 first_source, second_source, x, y
             ),
         }
