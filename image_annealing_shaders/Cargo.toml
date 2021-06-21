@@ -1,0 +1,13 @@
+[package]
+name = "image_annealing_shaders"
+version = "0.1.0"
+authors = ["Bernard Llanos"]
+edition = "2018"
+description = "Shaders for the image_annealing crate"
+keywords = ["image","graphics"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+
+[dev-dependencies]
+naga = { git = "https://github.com/gfx-rs/naga.git", features = ["wgsl-in"] }
