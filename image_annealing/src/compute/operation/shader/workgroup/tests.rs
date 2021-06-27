@@ -2,9 +2,9 @@ use super::WorkgroupGridDimensions;
 use wgpu::Extent3d;
 
 #[test]
-#[should_panic(expected = "assertion failed")]
+#[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_width() {
-    WorkgroupGridDimensions::new(Extent3d {
+    WorkgroupGridDimensions::from(Extent3d {
         width: 0,
         height: 1,
         depth_or_array_layers: 1,
@@ -12,9 +12,9 @@ fn zero_width() {
 }
 
 #[test]
-#[should_panic(expected = "assertion failed")]
+#[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_height() {
-    WorkgroupGridDimensions::new(Extent3d {
+    WorkgroupGridDimensions::from(Extent3d {
         width: 1,
         height: 0,
         depth_or_array_layers: 1,
@@ -22,9 +22,9 @@ fn zero_height() {
 }
 
 #[test]
-#[should_panic(expected = "assertion failed")]
+#[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_depth() {
-    WorkgroupGridDimensions::new(Extent3d {
+    WorkgroupGridDimensions::from(Extent3d {
         width: 1,
         height: 1,
         depth_or_array_layers: 0,
@@ -33,24 +33,24 @@ fn zero_depth() {
 
 #[test]
 fn no_remainder() {
-    let dim = WorkgroupGridDimensions::new(Extent3d {
+    let dim = WorkgroupGridDimensions::from(Extent3d {
         width: 64,
         height: 64,
         depth_or_array_layers: 1,
     });
-    assert_eq!(dim.0, 2);
-    assert_eq!(dim.1, 2);
-    assert_eq!(dim.2, 1);
+    assert_eq!(dim.x(), 2);
+    assert_eq!(dim.y(), 2);
+    assert_eq!(dim.z(), 1);
 }
 
 #[test]
 fn remainder() {
-    let dim = WorkgroupGridDimensions::new(Extent3d {
+    let dim = WorkgroupGridDimensions::from(Extent3d {
         width: 63,
         height: 65,
         depth_or_array_layers: 1,
     });
-    assert_eq!(dim.0, 2);
-    assert_eq!(dim.1, 3);
-    assert_eq!(dim.2, 1);
+    assert_eq!(dim.x(), 2);
+    assert_eq!(dim.y(), 3);
+    assert_eq!(dim.z(), 1);
 }

@@ -24,5 +24,5 @@ impl BindingData {
 }
 
 fn get_workgroup_grid_dimensions<T: Texture>(texture: &T) -> WorkgroupGridDimensions {
-    WorkgroupGridDimensions::new(texture.dimensions())
+    WorkgroupGridDimensions::from(texture.dimensions())
 }

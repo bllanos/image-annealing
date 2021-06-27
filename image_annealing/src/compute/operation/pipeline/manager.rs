@@ -1,6 +1,5 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
-use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationPipeline;
 use super::forward_permute::ForwardPermutePipeline;
 
@@ -28,8 +27,9 @@ impl PipelineManager {
         });
         self.create_permutation_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_create_permutation(&mut cpass);
-        let &WorkgroupGridDimensions(x, y, z) = self.bindings.create_permutation_grid_dimensions();
-        cpass.dispatch(x, y, z);
+        self.bindings
+            .create_permutation_grid_dimensions()
+            .dispatch(&mut cpass);
     }
 
     pub fn forward_permute(&self, encoder: &mut wgpu::CommandEncoder) {
@@ -38,7 +38,6 @@ impl PipelineManager {
         });
         self.forward_permute_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_permute(&mut cpass);
-        let &WorkgroupGridDimensions(x, y, z) = self.bindings.permute_grid_dimensions();
-        cpass.dispatch(x, y, z);
+        self.bindings.permute_grid_dimensions().dispatch(&mut cpass);
     }
 }

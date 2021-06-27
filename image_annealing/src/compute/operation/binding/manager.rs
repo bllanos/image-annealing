@@ -18,7 +18,10 @@ impl BindingManager {
     }
 
     pub fn bind_create_permutation<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
-        self.create_permutation_binding.bind(0, cpass);
+        self.create_permutation_binding.bind(
+            image_annealing_shaders::binding::create_permutation::GROUP_INDEX,
+            cpass,
+        );
     }
 
     pub fn create_permutation_layout(&self) -> &wgpu::BindGroupLayout {
