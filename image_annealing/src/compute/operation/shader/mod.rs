@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 pub mod workgroup;
 
-pub use workgroup::WorkgroupDimensions;
+pub use workgroup::WorkgroupGridDimensions;
 
 pub struct Shader {
     shader: wgpu::ShaderModule,

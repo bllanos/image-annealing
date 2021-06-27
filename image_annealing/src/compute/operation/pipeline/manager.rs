@@ -1,6 +1,6 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
-use super::super::shader::WorkgroupDimensions;
+use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationPipeline;
 use super::forward_permute::ForwardPermutePipeline;
 
@@ -28,7 +28,7 @@ impl PipelineManager {
         });
         self.create_permutation_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_create_permutation(&mut cpass);
-        let &WorkgroupDimensions(x, y, z) = self.bindings.create_permutation_dimensions();
+        let &WorkgroupGridDimensions(x, y, z) = self.bindings.create_permutation_grid_dimensions();
         cpass.dispatch(x, y, z);
     }
 
@@ -38,7 +38,7 @@ impl PipelineManager {
         });
         self.forward_permute_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_permute(&mut cpass);
-        let &WorkgroupDimensions(x, y, z) = self.bindings.permute_dimensions();
+        let &WorkgroupGridDimensions(x, y, z) = self.bindings.permute_grid_dimensions();
         cpass.dispatch(x, y, z);
     }
 }

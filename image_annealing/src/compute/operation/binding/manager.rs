@@ -1,5 +1,5 @@
 use super::super::super::resource::manager::ResourceManager;
-use super::super::shader::WorkgroupDimensions;
+use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationBinding;
 use super::permute::PermuteBinding;
 use super::Binding;
@@ -25,8 +25,8 @@ impl BindingManager {
         self.create_permutation_binding.layout()
     }
 
-    pub fn create_permutation_dimensions(&self) -> &WorkgroupDimensions {
-        self.create_permutation_binding.workgroup_dimensions()
+    pub fn create_permutation_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+        self.create_permutation_binding.workgroup_grid_dimensions()
     }
 
     pub fn bind_permute<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
@@ -37,7 +37,7 @@ impl BindingManager {
         self.permute_binding.layout()
     }
 
-    pub fn permute_dimensions(&self) -> &WorkgroupDimensions {
-        self.permute_binding.workgroup_dimensions()
+    pub fn permute_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+        self.permute_binding.workgroup_grid_dimensions()
     }
 }
