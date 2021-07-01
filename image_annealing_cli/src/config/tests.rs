@@ -4,7 +4,7 @@ mod parse_args {
     use std::error::Error;
 
     #[test]
-    #[should_panic(expected = "No arguments (not even the program name)")]
+    #[should_panic(expected = "no arguments (not even the program name)")]
     fn empty_input() {
         let v: Vec<String> = Vec::new();
         let _ = parse_args(v);

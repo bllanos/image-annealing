@@ -64,7 +64,7 @@ impl<'a> MappedBuffer<'a> {
         let fut = self
             .buffer_future
             .take()
-            .expect("The buffer data has already been collected.");
+            .expect("buffer data has already been collected");
         futures::executor::block_on(async move { fut.await.unwrap() });
         self.buffer_slice.get_mapped_range()
     }

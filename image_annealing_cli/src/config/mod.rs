@@ -64,10 +64,10 @@ where
     let mut args_iter = args.into_iter();
     args_iter
         .next()
-        .expect("No arguments (not even the program name)");
+        .expect("no arguments (not even the program name)");
     let filename = args_iter
         .next()
-        .ok_or("Expected at least one argument for a configuration file's path.")?;
+        .ok_or("expected at least one argument for a configuration file's path")?;
     parse_config_file(&filename)
 }
 
