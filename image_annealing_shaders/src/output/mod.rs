@@ -36,6 +36,30 @@ pub struct OutputConfig<'a> {
     create_permutation: Option<Cow<'a, Path>>,
 }
 
+impl<'a> OutputConfig<'a> {
+    pub fn with_base_directory<P: AsRef<Path>>(
+        directory: Option<P>,
+    ) -> Result<Self, Box<dyn Error>> {
+        let default_path = Path::new(".");
+        let path = directory
+            .as_ref()
+            .map_or(default_path, <P as AsRef<Path>>::as_ref);
+        if path.exists() {
+            if path.is_dir() {
+                Ok(Self {
+                    create_permutation: Some(Cow::from(path.join("create_permutation.wgsl"))),
+                })
+            } else {
+                Err(Box::new(OutputDirectoryError::NotADirectory(
+                    path.to_path_buf(),
+                )))
+            }
+        } else {
+            Err(Box::new(OutputDirectoryError::NotFound(path.to_path_buf())))
+        }
+    }
+}
+
 pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
     if let Some(path) = config.create_permutation.as_ref() {
         let mut f = File::create(path)?;
@@ -45,21 +69,5 @@ pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
 }
 
 pub fn write_default_files<P: AsRef<Path>>(directory: Option<P>) -> Result<(), Box<dyn Error>> {
-    let default_path = Path::new(".");
-    let path = directory
-        .as_ref()
-        .map_or(default_path, <P as AsRef<Path>>::as_ref);
-    if path.exists() {
-        if path.is_dir() {
-            Ok(write_files(&OutputConfig {
-                create_permutation: Some(Cow::from(path.join("create_permutation.wgsl"))),
-            })?)
-        } else {
-            Err(Box::new(OutputDirectoryError::NotADirectory(
-                path.to_path_buf(),
-            )))
-        }
-    } else {
-        Err(Box::new(OutputDirectoryError::NotFound(path.to_path_buf())))
-    }
+    Ok(write_files(&OutputConfig::with_base_directory(directory)?)?)
 }
