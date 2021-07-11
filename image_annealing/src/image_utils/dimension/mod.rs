@@ -9,7 +9,7 @@ pub struct InvalidDimensionError;
 
 impl fmt::Display for InvalidDimensionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid dimensions supplied")
+        write!(f, "invalid image dimensions supplied")
     }
 }
 
