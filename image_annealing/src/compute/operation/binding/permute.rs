@@ -4,6 +4,7 @@ use super::super::super::resource::texture::{
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
+use image_annealing_shaders::binding::permute as binding_constants;
 
 pub struct PermuteBinding(BindingData);
 
@@ -17,7 +18,7 @@ impl PermuteBinding {
             label: Some("permute_bind_group_layout"),
             entries: &[
                 wgpu::BindGroupLayoutEntry {
-                    binding: 0,
+                    binding: binding_constants::INPUT_PERMUTATION_INDEX,
                     visibility: wgpu::ShaderStage::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::ReadOnly,
@@ -27,7 +28,7 @@ impl PermuteBinding {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: binding_constants::INPUT_IMAGE_INDEX,
                     visibility: wgpu::ShaderStage::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::ReadOnly,
@@ -37,7 +38,7 @@ impl PermuteBinding {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: binding_constants::OUTPUT_IMAGE_INDEX,
                     visibility: wgpu::ShaderStage::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::WriteOnly,
@@ -54,15 +55,15 @@ impl PermuteBinding {
             layout: &layout,
             entries: &[
                 wgpu::BindGroupEntry {
-                    binding: 0,
+                    binding: binding_constants::INPUT_PERMUTATION_INDEX,
                     resource: wgpu::BindingResource::TextureView(permutation_texture.view()),
                 },
                 wgpu::BindGroupEntry {
-                    binding: 1,
+                    binding: binding_constants::INPUT_IMAGE_INDEX,
                     resource: wgpu::BindingResource::TextureView(image_input_texture.view()),
                 },
                 wgpu::BindGroupEntry {
-                    binding: 2,
+                    binding: binding_constants::OUTPUT_IMAGE_INDEX,
                     resource: wgpu::BindingResource::TextureView(image_output_texture.view()),
                 },
             ],

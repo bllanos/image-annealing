@@ -2,6 +2,7 @@ use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{PermutationTexture, Texture, TextureDatatype};
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
+use image_annealing_shaders::binding::create_permutation as binding_constants;
 
 pub struct CreatePermutationBinding(BindingData);
 
@@ -12,8 +13,7 @@ impl CreatePermutationBinding {
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("create_permutation_bind_group_layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
-                binding:
-                    image_annealing_shaders::binding::create_permutation::OUTPUT_PERMUTATION_INDEX,
+                binding: binding_constants::OUTPUT_PERMUTATION_INDEX,
                 visibility: wgpu::ShaderStage::COMPUTE,
                 ty: wgpu::BindingType::StorageTexture {
                     access: wgpu::StorageTextureAccess::WriteOnly,
@@ -28,8 +28,7 @@ impl CreatePermutationBinding {
             label: Some("create_permutation_bind_group"),
             layout: &layout,
             entries: &[wgpu::BindGroupEntry {
-                binding:
-                    image_annealing_shaders::binding::create_permutation::OUTPUT_PERMUTATION_INDEX,
+                binding: binding_constants::OUTPUT_PERMUTATION_INDEX,
                 resource: wgpu::BindingResource::TextureView(texture.view()),
             }],
         });

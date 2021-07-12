@@ -3,6 +3,7 @@ use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationBinding;
 use super::permute::PermuteBinding;
 use super::Binding;
+use image_annealing_shaders::binding as binding_constants;
 
 pub struct BindingManager {
     create_permutation_binding: CreatePermutationBinding,
@@ -18,10 +19,8 @@ impl BindingManager {
     }
 
     pub fn bind_create_permutation<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
-        self.create_permutation_binding.bind(
-            image_annealing_shaders::binding::create_permutation::GROUP_INDEX,
-            cpass,
-        );
+        self.create_permutation_binding
+            .bind(binding_constants::create_permutation::GROUP_INDEX, cpass);
     }
 
     pub fn create_permutation_layout(&self) -> &wgpu::BindGroupLayout {
@@ -33,7 +32,8 @@ impl BindingManager {
     }
 
     pub fn bind_permute<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
-        self.permute_binding.bind(0, cpass);
+        self.permute_binding
+            .bind(binding_constants::permute::GROUP_INDEX, cpass);
     }
 
     pub fn permute_layout(&self) -> &wgpu::BindGroupLayout {
