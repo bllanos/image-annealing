@@ -34,6 +34,7 @@ impl Error for OutputDirectoryError {
 #[derive(Default)]
 pub struct OutputConfig<'a> {
     pub create_permutation: Option<Cow<'a, Path>>,
+    pub forward_permute: Option<Cow<'a, Path>>,
 }
 
 impl<'a> OutputConfig<'a> {
@@ -48,6 +49,7 @@ impl<'a> OutputConfig<'a> {
             if path.is_dir() {
                 Ok(Self {
                     create_permutation: Some(Cow::from(path.join("create_permutation.wgsl"))),
+                    forward_permute: Some(Cow::from(path.join("forward_permute.wgsl"))),
                 })
             } else {
                 Err(Box::new(OutputDirectoryError::NotADirectory(
@@ -64,6 +66,10 @@ pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
     if let Some(path) = config.create_permutation.as_ref() {
         let mut f = File::create(path)?;
         shader::create_permutation(&mut f)?;
+    }
+    if let Some(path) = config.forward_permute.as_ref() {
+        let mut f = File::create(path)?;
+        shader::forward_permute(&mut f)?;
     }
     Ok(())
 }
