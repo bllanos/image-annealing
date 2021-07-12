@@ -33,7 +33,7 @@ impl Error for OutputDirectoryError {
 
 #[derive(Default)]
 pub struct OutputConfig<'a> {
-    create_permutation: Option<Cow<'a, Path>>,
+    pub create_permutation: Option<Cow<'a, Path>>,
 }
 
 impl<'a> OutputConfig<'a> {
@@ -68,6 +68,10 @@ pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
     Ok(())
 }
 
-pub fn write_default_files<P: AsRef<Path>>(directory: Option<P>) -> Result<(), Box<dyn Error>> {
-    Ok(write_files(&OutputConfig::with_base_directory(directory)?)?)
+pub fn write_default_files<'a, P: AsRef<Path>>(
+    directory: Option<P>,
+) -> Result<OutputConfig<'a>, Box<dyn Error>> {
+    let config = OutputConfig::with_base_directory(directory)?;
+    write_files(&config)?;
+    Ok(config)
 }

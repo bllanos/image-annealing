@@ -15,10 +15,7 @@ image_annealing_shaders = { path = "../image_annealing_shaders" }
 wgpu = { git = "https://github.com/gfx-rs/wgpu-rs.git" }
 
 [build-dependencies]
-anyhow = "1.0"
-glob = "0.3"
-naga = { git = "https://github.com/gfx-rs/naga.git", features = ["wgsl-in"] }
-rayon = "1.5"
+image_annealing_shaders = { path = "../image_annealing_shaders" }
 
 [dev-dependencies]
 test_utils = { path = "../test_utils" }

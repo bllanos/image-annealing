@@ -1,9 +1,12 @@
 use std::io::Write;
 
+pub const SHADER_ENTRY_POINT: &str = "main";
+
 fn global_invocation_id_header<W: Write>(mut writer: W) -> std::io::Result<()> {
     writeln!(
         writer,
-        "fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {{"
+        "fn {}([[builtin(global_invocation_id)]] global_id: vec3<u32>) {{",
+        SHADER_ENTRY_POINT
     )
 }
 

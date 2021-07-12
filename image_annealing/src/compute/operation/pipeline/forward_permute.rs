@@ -1,5 +1,6 @@
 use super::super::binding::manager::BindingManager;
 use super::super::shader;
+use image_annealing_shaders::SHADER_ENTRY_POINT;
 
 pub struct ForwardPermutePipeline {
     pipeline: wgpu::ComputePipeline,
@@ -17,7 +18,7 @@ impl ForwardPermutePipeline {
             label: Some("forward_permute_pipeline"),
             layout: Some(&layout),
             module: shader.shader(),
-            entry_point: shader::SHADER_ENTRY_POINT,
+            entry_point: SHADER_ENTRY_POINT,
         });
         Self { pipeline }
     }

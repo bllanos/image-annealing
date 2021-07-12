@@ -14,15 +14,13 @@ impl Shader {
     }
 }
 
-pub const SHADER_ENTRY_POINT: &str = "main";
-
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
     Shader {
         shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: Some("create_permutation_shader_module"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
-                "./wgsl/create_permutation.wgsl"
-            ))),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!(
+                "CREATE_PERMUTATION_SHADER"
+            )))),
             flags: wgpu::ShaderFlags::all(),
         }),
     }
