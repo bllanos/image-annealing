@@ -1,23 +1,23 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
 use super::create_permutation::CreatePermutationPipeline;
-use super::forward_permute::ForwardPermutePipeline;
+use super::permute::PermutePipeline;
 
 pub struct PipelineManager {
     bindings: BindingManager,
     create_permutation_pipeline: CreatePermutationPipeline,
-    forward_permute_pipeline: ForwardPermutePipeline,
+    permute_pipeline: PermutePipeline,
 }
 
 impl PipelineManager {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
         let bindings = BindingManager::new(device, resources);
         let create_permutation_pipeline = CreatePermutationPipeline::new(device, &bindings);
-        let forward_permute_pipeline = ForwardPermutePipeline::new(device, &bindings);
+        let permute_pipeline = PermutePipeline::new(device, &bindings);
         Self {
             bindings,
             create_permutation_pipeline,
-            forward_permute_pipeline,
+            permute_pipeline,
         }
     }
 
@@ -32,11 +32,11 @@ impl PipelineManager {
             .dispatch(&mut cpass);
     }
 
-    pub fn forward_permute(&self, encoder: &mut wgpu::CommandEncoder) {
+    pub fn permute(&self, encoder: &mut wgpu::CommandEncoder) {
         let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
-            label: Some("forward_permute_compute_pass"),
+            label: Some("permute_compute_pass"),
         });
-        self.forward_permute_pipeline.set_pipeline(&mut cpass);
+        self.permute_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_permute(&mut cpass);
         self.bindings.permute_grid_dimensions().dispatch(&mut cpass);
     }

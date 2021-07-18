@@ -17,7 +17,7 @@ fn permute_common<W: Write>(mut writer: W) -> std::io::Result<()> {
     compute::compute_shader_annotation(&mut writer, Default::default())
 }
 
-pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
+pub fn permute<W: Write>(mut writer: W) -> std::io::Result<()> {
     permute_common(&mut writer)?;
     main::forward_permute(&mut writer)
 }

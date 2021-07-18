@@ -58,7 +58,7 @@ impl OperationManager {
         let queue = device.queue();
         self.state
             .prepare_permute(resources, queue, &mut encoder, input)?;
-        self.pipelines.forward_permute(&mut encoder);
+        self.pipelines.permute(&mut encoder);
         self.state.finish_permute(resources, &mut encoder)?;
         queue.submit(Some(encoder.finish()));
         Ok(())
