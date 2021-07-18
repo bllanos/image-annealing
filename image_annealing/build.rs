@@ -8,6 +8,10 @@ fn main() {
         "cargo:rustc-env=CREATE_PERMUTATION_SHADER={}",
         config.create_permutation.take().unwrap().display()
     );
+    println!(
+        "cargo:rustc-env=PERMUTE_SHADER={}",
+        config.permute.take().unwrap().display()
+    );
 
     println!("cargo:rerun-if-changed=build.rs");
 }

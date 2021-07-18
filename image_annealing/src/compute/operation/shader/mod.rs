@@ -30,9 +30,7 @@ pub fn permute_shader(device: &wgpu::Device) -> Shader {
     Shader {
         shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: Some("permute_shader_module"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
-                "./wgsl/forward_permute.wgsl"
-            ))),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!("PERMUTE_SHADER")))),
             flags: wgpu::ShaderFlags::all(),
         }),
     }
