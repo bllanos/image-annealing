@@ -43,3 +43,10 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
     shader::create_permutation(&mut v)?;
     validate_shader(&String::from_utf8(v)?)
 }
+
+#[test]
+fn permute() -> Result<(), Box<dyn Error>> {
+    let mut v: Vec<u8> = Vec::new();
+    shader::permute(&mut v)?;
+    validate_shader(&String::from_utf8(v)?)
+}
