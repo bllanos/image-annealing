@@ -1,8 +1,6 @@
-use super::super::super::dispatch::{
-    DimensionsMismatchError, DispatcherImplementation, PermuteOperationInput,
-};
 use super::super::super::resource::buffer::ReadMappableBuffer;
 use super::super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
+use super::super::super::system::{DimensionsMismatchError, PermuteOperationInput, System};
 use super::super::format::PermutationImageBuffer;
 use super::super::format::{LosslessImageBuffer, LosslessImageBufferComponent};
 use super::super::OutputStatus;
@@ -58,10 +56,7 @@ impl Permute {
         }
     }
 
-    pub fn step(
-        &mut self,
-        dispatcher: &mut DispatcherImplementation,
-    ) -> Result<OutputStatus, Box<dyn Error>> {
+    pub fn step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
         self.completion_status.ok_if_pending()?;
         debug_assert!(self.image_output.is_none());
 
@@ -70,7 +65,7 @@ impl Permute {
                 debug_assert!(!self.invoked_operation);
                 debug_assert!(self.permutation.is_none());
 
-                match v.step(dispatcher) {
+                match v.step(system) {
                     Ok(status) => {
                         match status {
                             OutputStatus::NoNewOutput
@@ -99,7 +94,7 @@ impl Permute {
                     if let Some(ref image) = image_option {
                         match ImageDimensions::from_image(image) {
                             Ok(dimensions) => {
-                                if *dispatcher.image_dimensions() != dimensions {
+                                if *system.image_dimensions() != dimensions {
                                     self.completion_status = CompletionStatus::Failed;
                                     return Err(Box::new(DimensionsMismatchError));
                                 }
@@ -112,7 +107,7 @@ impl Permute {
                     }
 
                     self.invoked_operation = true;
-                    match dispatcher.operation_permute(&PermuteOperationInput {
+                    match system.operation_permute(&PermuteOperationInput {
                         permutation: self.permutation.as_ref(),
                         image: image_option.as_ref(),
                     }) {
@@ -126,12 +121,12 @@ impl Permute {
                         }
                     }
                 } else {
-                    let mut mapped_buffer = dispatcher
+                    let mut mapped_buffer = system
                         .resources()
                         .lossless_image_output_buffer()
                         .request_map_read();
 
-                    dispatcher.poll_device();
+                    system.poll_device();
 
                     let buffer_dimensions = mapped_buffer.buffer_dimensions();
                     let data = mapped_buffer.collect_mapped_buffer();

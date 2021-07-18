@@ -3,9 +3,9 @@ mod dispatch;
 mod operation;
 mod output;
 mod resource;
+mod system;
 
 pub use dispatch::create_dispatcher;
-pub use dispatch::DimensionsMismatchError;
 pub use dispatch::Dispatcher;
 pub use dispatch::{CreatePermutationAlgorithm, PermuteAlgorithm, ValidatePermutationAlgorithm};
 pub use output::algorithm::create_permutation::{
@@ -19,3 +19,4 @@ pub use output::conversion;
 pub use output::format;
 pub use output::Algorithm;
 pub use output::OutputStatus;
+pub use system::DimensionsMismatchError;

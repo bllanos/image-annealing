@@ -1,5 +1,5 @@
-use super::super::super::dispatch::DispatcherImplementation;
 use super::super::super::resource::buffer::ReadMappableBuffer;
+use super::super::super::system::System;
 use super::super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
 use super::super::OutputStatus;
 use super::CompletionStatus;
@@ -25,15 +25,12 @@ impl CreatePermutation {
         }
     }
 
-    pub fn step(
-        &mut self,
-        dispatcher: &mut DispatcherImplementation,
-    ) -> Result<OutputStatus, Box<dyn Error>> {
+    pub fn step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
         self.completion_status.ok_if_pending()?;
         debug_assert!(self.full_output.is_none());
         if !self.invoked_operation {
             self.invoked_operation = true;
-            match dispatcher.operation_create_permutation() {
+            match system.operation_create_permutation() {
                 Ok(_) => Ok(OutputStatus::NoNewOutput),
                 Err(e) => {
                     self.completion_status = CompletionStatus::Failed;
@@ -41,12 +38,12 @@ impl CreatePermutation {
                 }
             }
         } else {
-            let mut mapped_buffer = dispatcher
+            let mut mapped_buffer = system
                 .resources()
                 .permutation_output_buffer()
                 .request_map_read();
 
-            dispatcher.poll_device();
+            system.poll_device();
 
             let buffer_dimensions = mapped_buffer.buffer_dimensions();
             let data = mapped_buffer.collect_mapped_buffer();

@@ -1,4 +1,4 @@
-use super::super::super::dispatch::{DimensionsMismatchError, DispatcherImplementation};
+use super::super::super::system::{DimensionsMismatchError, System};
 use super::super::format::PermutationImageBuffer;
 use super::super::OutputStatus;
 use super::CompletionStatus;
@@ -30,10 +30,7 @@ impl ValidatePermutation {
         }
     }
 
-    pub fn step(
-        &mut self,
-        dispatcher: &DispatcherImplementation,
-    ) -> Result<OutputStatus, Box<dyn Error>> {
+    pub fn step(&mut self, system: &System) -> Result<OutputStatus, Box<dyn Error>> {
         self.completion_status.ok_if_pending()?;
         debug_assert!(self.full_output.is_none());
 
@@ -42,7 +39,7 @@ impl ValidatePermutation {
         } = self.input.take().unwrap();
         match ImageDimensions::from_image(&candidate_permutation) {
             Ok(dimensions) => {
-                if *dispatcher.image_dimensions() == dimensions {
+                if *system.image_dimensions() == dimensions {
                     match validation::validate_permutation(candidate_permutation) {
                         Ok(validated_permutation) => {
                             self.full_output = Some(validated_permutation);
