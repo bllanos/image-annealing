@@ -8,11 +8,17 @@ use std::fmt;
 pub use super::operation::manager::PermuteOperationInput;
 
 #[derive(Debug, Clone)]
-pub struct DimensionsMismatchError;
+pub struct DimensionsMismatchError(ImageDimensions, ImageDimensions);
+
+impl DimensionsMismatchError {
+    pub fn new(first: ImageDimensions, second: ImageDimensions) -> Self {
+        Self(first, second)
+    }
+}
 
 impl fmt::Display for DimensionsMismatchError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "mismatch in image dimensions")
+        write!(f, "mismatch in image dimensions, {} and {}", self.0, self.1)
     }
 }
 

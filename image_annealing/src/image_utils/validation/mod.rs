@@ -52,7 +52,7 @@ impl fmt::Display for PermutationFlaw {
                 second_source,
             } => write!(
                 f,
-                "entries {} and {} both map to location (x, y) = {}, {}",
+                "entries {} and {} both map to location (x, y) = ({}, {})",
                 first_source, second_source, x, y
             ),
         }
@@ -65,6 +65,7 @@ impl Error for PermutationFlaw {
     }
 }
 
+#[derive(Debug)]
 pub struct ValidatedPermutation {
     data: PermutationImageBuffer,
     dimensions: ImageDimensions,

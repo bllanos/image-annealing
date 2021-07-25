@@ -37,7 +37,7 @@ pub fn to_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> Permuta
         )
         .unwrap()
     } else {
-        panic!("Vector length and image dimensions are incompatible.");
+        panic!("vector length and image dimensions are incompatible.");
     }
 }
 

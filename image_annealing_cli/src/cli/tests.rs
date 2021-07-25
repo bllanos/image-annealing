@@ -27,17 +27,17 @@ mod create_dispatcher {
 
     #[test]
     fn invalid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
-        let r = create_dispatcher(&Config::ValidatePermutation {
-            candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                "image",
-                "permutation",
-                "not_found.png",
-            ]),
-        });
-        match r {
-            Ok(_) => panic!("A non-existing candidate permutation should trigger an error"),
-            Err(_) => Ok(()),
-        }
+        test_utils::assert_error_contains(
+            create_dispatcher(&Config::ValidatePermutation {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "not_found.png",
+                ]),
+            }),
+            "No such file or directory",
+        );
+        Ok(())
     }
 
     #[test]
@@ -60,22 +60,22 @@ mod create_dispatcher {
 
     #[test]
     fn invalid_permute_config() -> Result<(), Box<dyn Error>> {
-        let r = create_dispatcher(&Config::Permute {
-            candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                "image",
-                "permutation",
-                "not_found.png",
-            ]),
-            original_image_path: test_utils::make_test_data_path_string(&[
-                "image",
-                "image",
-                "not_found.png",
-            ]),
-            permuted_image_output_path_no_extension: String::from("none"),
-        });
-        match r {
-            Ok(_) => panic!("Non-existing file inputs should trigger an error"),
-            Err(_) => Ok(()),
-        }
+        test_utils::assert_error_contains(
+            create_dispatcher(&Config::Permute {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "not_found.png",
+                ]),
+                original_image_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "image",
+                    "not_found.png",
+                ]),
+                permuted_image_output_path_no_extension: String::from("none"),
+            }),
+            "No such file or directory",
+        );
+        Ok(())
     }
 }

@@ -24,6 +24,5 @@ fn validate_permutation_invalid() {
             "invalid_permutation.png",
         ]),
     };
-    cli::run(config)
-        .expect_err("An error should be raised if the candidate permutation is invalid");
+    test_utils::assert_error_contains(cli::run(config), "out of bounds mapping (x, y, delta_x, delta_y) = (3, 10, 257, 511) for an image of dimensions (width, height) = (20, 25)");
 }

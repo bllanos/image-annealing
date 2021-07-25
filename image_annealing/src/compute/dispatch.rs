@@ -11,6 +11,7 @@ use super::system::System;
 use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
+use std::fmt;
 
 pub fn create_dispatcher(
     image_dimensions: &ImageDimensions,
@@ -38,6 +39,12 @@ pub trait Dispatcher {
         input: ValidatePermutationInput,
         parameters: ValidatePermutationParameters,
     ) -> Box<ValidatePermutationAlgorithm>;
+}
+
+impl fmt::Debug for dyn Dispatcher {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Dispatcher").finish_non_exhaustive()
+    }
 }
 
 struct DispatcherImplementation {
@@ -127,7 +134,7 @@ impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
         self.validate_permutation
             .as_mut()
             .unwrap()
-            .step(&mut self.system)
+            .step(&self.system)
     }
     fn partial_output(&mut self) -> Option<()> {
         self.validate_permutation.as_ref().unwrap().partial_output()

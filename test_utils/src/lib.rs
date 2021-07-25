@@ -49,3 +49,15 @@ where
     let path = make_test_output_path(components);
     String::from(path.to_str().unwrap())
 }
+
+pub fn assert_error_contains<T: std::fmt::Debug, E: std::fmt::Display>(
+    result: Result<T, E>,
+    message: &str,
+) {
+    let e = result.unwrap_err();
+    if !e.to_string().contains(message) {
+        eprintln!("error message: {}", e);
+        eprintln!("expected substring: {}", message);
+        panic!("error message does not contain the expected substring")
+    }
+}

@@ -53,7 +53,10 @@ impl ValidatePermutation {
                     }
                 } else {
                     self.completion_status = CompletionStatus::Failed;
-                    Err(Box::new(DimensionsMismatchError))
+                    Err(Box::new(DimensionsMismatchError::new(
+                        *system.image_dimensions(),
+                        dimensions,
+                    )))
                 }
             }
             Err(e) => {

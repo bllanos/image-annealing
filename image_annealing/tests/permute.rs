@@ -60,7 +60,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
 
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.permute(
@@ -98,7 +98,11 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "mismatch in image dimensions, (width, height) = (2, 3) and (width, height) = (3, 3)",
+    );
     Ok(())
 }
 
@@ -121,7 +125,11 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "mismatch in image dimensions, (width, height) = (3, 3) and (width, height) = (2, 3)",
+    );
     Ok(())
 }
 
@@ -300,7 +308,11 @@ fn forget_permutation() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "an input permutation must be provided as there is none to reuse",
+    );
     Ok(())
 }
 
@@ -319,6 +331,10 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
         },
         PermuteParameters {},
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput);
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "an input image must be provided as there is none to reuse",
+    );
     Ok(())
 }

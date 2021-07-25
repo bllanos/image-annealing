@@ -3,15 +3,29 @@ use image::RgbaImage;
 use std::error::Error;
 
 #[test]
+fn negative_width() {
+    test_utils::assert_error_contains(
+        ImageDimensions::new(-1, 1),
+        "failed to convert -1 to the required type for dimensions",
+    )
+}
+
+#[test]
+fn negative_height() {
+    test_utils::assert_error_contains(
+        ImageDimensions::new(1, -1),
+        "failed to convert -1 to the required type for dimensions",
+    )
+}
+
+#[test]
 fn zero_width() {
-    let r = ImageDimensions::new(0, 1);
-    r.expect_err("An error should be raised if the width is zero");
+    test_utils::assert_error_contains(ImageDimensions::new(0, 1), "width is zero")
 }
 
 #[test]
 fn zero_height() {
-    let r = ImageDimensions::new(1, 0);
-    r.expect_err("An error should be raised if the height is zero");
+    test_utils::assert_error_contains(ImageDimensions::new(1, 0), "height is zero")
 }
 
 #[test]
@@ -39,32 +53,40 @@ mod make_linear_index {
     #[test]
     fn negative_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.make_linear_index(-1, 0);
-        r.expect_err("An error should be raised if the x-coordinate is negative");
+        test_utils::assert_error_contains(
+            dim.make_linear_index(-1, 0),
+            "failed to convert -1 to the required type for coordinates",
+        );
         Ok(())
     }
 
     #[test]
     fn negative_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.make_linear_index(0, -1);
-        r.expect_err("An error should be raised if the y-coordinate is negative");
+        test_utils::assert_error_contains(
+            dim.make_linear_index(0, -1),
+            "failed to convert -1 to the required type for coordinates",
+        );
         Ok(())
     }
 
     #[test]
     fn large_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.make_linear_index(3, 0);
-        r.expect_err("An error should be raised if the x-coordinate is too large");
+        test_utils::assert_error_contains(
+            dim.make_linear_index(3, 0),
+            "x = 3 is out of bounds (width, height) = (3, 5)",
+        );
         Ok(())
     }
 
     #[test]
     fn large_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::new(3, 5)?;
-        let r = dim.make_linear_index(0, 5);
-        r.expect_err("An error should be raised if the y-coordinate is too large");
+        test_utils::assert_error_contains(
+            dim.make_linear_index(0, 5),
+            "y = 5 is out of bounds (width, height) = (3, 5)",
+        );
         Ok(())
     }
 

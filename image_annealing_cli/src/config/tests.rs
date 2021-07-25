@@ -13,8 +13,10 @@ mod parse_args {
     #[test]
     fn no_config_file() {
         let v = vec![String::from("one")];
-        let r = parse_args(v);
-        r.expect_err("At least one argument should be required");
+        test_utils::assert_error_contains(
+            parse_args(v),
+            "expected at least one argument for a configuration file's path",
+        );
     }
 
     #[test]
@@ -58,8 +60,10 @@ mod parse_config_file {
     #[test]
     fn malformed_config_file() {
         let path = test_utils::make_test_data_path(&["config", "empty.json"]);
-        parse_config_file(path)
-            .expect_err("A configuration file that cannot be deserialized should trigger an error");
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "configuration file deserialization error",
+        );
     }
 
     #[test]
@@ -83,9 +87,7 @@ mod parse_config_file {
             "create_permutation",
             "invalid_dimensions.json",
         ]);
-        parse_config_file(path).expect_err(
-            "A configuration file with invalid image dimensions should trigger an error",
-        );
+        test_utils::assert_error_contains(parse_config_file(path), "width is zero");
     }
 
     #[test]
@@ -113,8 +115,9 @@ mod parse_config_file {
             "create_permutation",
             "candidate_permutation_not_found.json",
         ]);
-        parse_config_file(path).expect_err(
-            "A configuration file with an invalid candidate permutation path should trigger an error",
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
         );
     }
 
@@ -148,8 +151,9 @@ mod parse_config_file {
             "permute",
             "candidate_permutation_not_found.json",
         ]);
-        parse_config_file(path).expect_err(
-            "A configuration file with an invalid candidate permutation path should trigger an error",
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
         );
     }
 
@@ -160,8 +164,9 @@ mod parse_config_file {
             "permute",
             "original_image_not_found.json",
         ]);
-        parse_config_file(path).expect_err(
-            "A configuration file with an invalid original image path should trigger an error",
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
         );
     }
 
@@ -169,8 +174,9 @@ mod parse_config_file {
     fn invalid_permute_config_file_dimensions() {
         let path =
             test_utils::make_test_data_path(&["config", "permute", "dimensions_mismatch.json"]);
-        parse_config_file(path).expect_err(
-            "A configuration file referring to a candidate permutation and an original image of mismatched dimensions should trigger an error",
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "mismatch in image dimensions, (width, height) = (200, 200) and (width, height) = (20, 25)",
         );
     }
 }
@@ -183,15 +189,16 @@ mod check_input_path {
     #[test]
     fn absent_file() {
         let path = test_utils::make_test_data_path(&["none.png"]);
-        let r = check_input_path(path);
-        r.expect_err("A non-existing file should trigger an error");
+        test_utils::assert_error_contains(
+            check_input_path(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+        );
     }
 
     #[test]
     fn not_a_file() {
         let path = test_utils::make_test_data_path::<Vec<&Path>, &Path>(Vec::new());
-        let r = check_input_path(path);
-        r.expect_err("A directory instead of a file should trigger an error");
+        test_utils::assert_error_contains(check_input_path(path), "file");
     }
 
     #[test]

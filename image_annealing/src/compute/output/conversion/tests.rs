@@ -71,7 +71,7 @@ fn vec_to_image() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[should_panic(expected = "Vector length and image dimensions are incompatible")]
+#[should_panic(expected = "vector length and image dimensions are incompatible")]
 fn vec_to_image_impossible() {
     super::to_image(
         &ImageDimensions::new(3, 5).unwrap(),

@@ -96,7 +96,10 @@ impl Permute {
                             Ok(dimensions) => {
                                 if *system.image_dimensions() != dimensions {
                                     self.completion_status = CompletionStatus::Failed;
-                                    return Err(Box::new(DimensionsMismatchError));
+                                    return Err(Box::new(DimensionsMismatchError::new(
+                                        *system.image_dimensions(),
+                                        dimensions,
+                                    )));
                                 }
                             }
                             Err(e) => {

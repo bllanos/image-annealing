@@ -75,7 +75,8 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
     check_input_path(&filename)?;
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
-    let unverified_config = serde_json::from_reader(reader)?;
+    let unverified_config = serde_json::from_reader(reader)
+        .map_err(|e| format!("configuration file deserialization error, \"{}\"", e))?;
 
     let config = match unverified_config {
         UnverifiedConfig::CreatePermutation {
@@ -96,9 +97,10 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
             let candidate_permutation_path_checked =
                 convert_and_check_input_path(candidate_permutation_path)?;
             let original_image_path_checked = convert_and_check_input_path(original_image_path)?;
-            if ImageDimensions::from_image_path(&candidate_permutation_path_checked)?
-                == ImageDimensions::from_image_path(&original_image_path_checked)?
-            {
+            let image_dimensions = ImageDimensions::from_image_path(&original_image_path_checked)?;
+            let permutation_dimensions =
+                ImageDimensions::from_image_path(&candidate_permutation_path_checked)?;
+            if image_dimensions == permutation_dimensions {
                 Config::Permute {
                     candidate_permutation_path: candidate_permutation_path_checked,
                     original_image_path: original_image_path_checked,
@@ -107,7 +109,10 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
                     ),
                 }
             } else {
-                return Err(Box::new(DimensionsMismatchError));
+                return Err(Box::new(DimensionsMismatchError::new(
+                    image_dimensions,
+                    permutation_dimensions,
+                )));
             }
         }
         UnverifiedConfig::ValidatePermutation {

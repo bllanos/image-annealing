@@ -34,9 +34,10 @@ pub fn assert_step_until_success<PartialOutput, FullOutput>(
         OutputStatus::FinalPartialOutput
         | OutputStatus::FinalFullOutput
         | OutputStatus::FinalPartialAndFullOutput => {
-            algorithm
-                .step()
-                .expect_err("Attempting to step past completion should trigger an error");
+            crate::assert_error_contains(
+                algorithm.step(),
+                "Algorithm::step cannot be called after the final output has been computed",
+            );
             Ok(())
         }
     }
@@ -45,13 +46,15 @@ pub fn assert_step_until_success<PartialOutput, FullOutput>(
 pub fn assert_step_until_error<PartialOutput, FullOutput>(
     algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
     status: OutputStatus,
+    message: &str,
 ) {
-    algorithm.step_until(status).unwrap_err();
+    crate::assert_error_contains(algorithm.step_until(status), message);
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
-    algorithm
-        .step()
-        .expect_err("Attempting to step past failure should trigger an error");
+    crate::assert_error_contains(
+        algorithm.step(),
+        "cannot proceed because of an error during the previous call to Algorithm::step",
+    );
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
 }
