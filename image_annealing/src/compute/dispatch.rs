@@ -47,21 +47,68 @@ impl fmt::Debug for dyn Dispatcher {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
+enum AlgorithmChoice {
+    None,
+    CreatePermutation(CreatePermutation),
+    Permute(Permute),
+    ValidatePermutation(ValidatePermutation),
+}
+
+impl AlgorithmChoice {
+    fn as_ref_create_permutation(&self) -> &CreatePermutation {
+        match self {
+            AlgorithmChoice::CreatePermutation(inner) => inner,
+            _ => panic!("expected AlgorithmChoice::CreatePermutation"),
+        }
+    }
+    fn as_mut_create_permutation(&mut self) -> &mut CreatePermutation {
+        match self {
+            AlgorithmChoice::CreatePermutation(ref mut inner) => inner,
+            _ => panic!("expected AlgorithmChoice::CreatePermutation"),
+        }
+    }
+    fn as_ref_permute(&self) -> &Permute {
+        match self {
+            AlgorithmChoice::Permute(inner) => inner,
+            _ => panic!("expected AlgorithmChoice::Permute"),
+        }
+    }
+    fn as_mut_permute(&mut self) -> &mut Permute {
+        match self {
+            AlgorithmChoice::Permute(ref mut inner) => inner,
+            _ => panic!("expected AlgorithmChoice::Permute"),
+        }
+    }
+    fn as_ref_validate_permutation(&self) -> &ValidatePermutation {
+        match self {
+            AlgorithmChoice::ValidatePermutation(inner) => inner,
+            _ => panic!("expected AlgorithmChoice::ValidatePermutation"),
+        }
+    }
+    fn as_mut_validate_permutation(&mut self) -> &mut ValidatePermutation {
+        match self {
+            AlgorithmChoice::ValidatePermutation(ref mut inner) => inner,
+            _ => panic!("expected AlgorithmChoice::ValidatePermutation"),
+        }
+    }
+}
+
 struct DispatcherImplementation {
     system: System,
-    create_permutation: Option<CreatePermutation>,
-    permute: Option<Permute>,
-    validate_permutation: Option<ValidatePermutation>,
+    algorithm: AlgorithmChoice,
 }
 
 impl DispatcherImplementation {
     fn new(image_dimensions: &ImageDimensions) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
             system: System::new(image_dimensions)?,
-            create_permutation: None,
-            permute: None,
-            validate_permutation: None,
+            algorithm: AlgorithmChoice::None,
         })
+    }
+
+    fn clear_algorithm(&mut self) {
+        self.algorithm = AlgorithmChoice::None;
     }
 }
 
@@ -71,7 +118,8 @@ impl Dispatcher for DispatcherImplementation {
         input: CreatePermutationInput,
         parameters: CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm> {
-        self.create_permutation = Some(CreatePermutation::new(input, parameters));
+        self.algorithm =
+            AlgorithmChoice::CreatePermutation(CreatePermutation::new(input, parameters));
         self
     }
 
@@ -80,7 +128,7 @@ impl Dispatcher for DispatcherImplementation {
         input: PermuteInput,
         parameters: PermuteParameters,
     ) -> Box<PermuteAlgorithm> {
-        self.permute = Some(Permute::new(input, parameters));
+        self.algorithm = AlgorithmChoice::Permute(Permute::new(input, parameters));
         self
     }
 
@@ -89,61 +137,62 @@ impl Dispatcher for DispatcherImplementation {
         input: ValidatePermutationInput,
         parameters: ValidatePermutationParameters,
     ) -> Box<ValidatePermutationAlgorithm> {
-        self.validate_permutation = Some(ValidatePermutation::new(input, parameters));
+        self.algorithm =
+            AlgorithmChoice::ValidatePermutation(ValidatePermutation::new(input, parameters));
         self
     }
 }
 
 impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
-        self.create_permutation
-            .as_mut()
-            .unwrap()
+        self.algorithm
+            .as_mut_create_permutation()
             .step(&mut self.system)
     }
     fn partial_output(&mut self) -> Option<()> {
-        self.create_permutation.as_ref().unwrap().partial_output()
+        self.algorithm.as_ref_create_permutation().partial_output()
     }
     fn full_output(&mut self) -> Option<PermutationImageBuffer> {
-        self.create_permutation.as_mut().unwrap().full_output()
+        self.algorithm.as_mut_create_permutation().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.create_permutation = None;
+        self.clear_algorithm();
         self
     }
 }
 
 impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
-        self.permute.as_mut().unwrap().step(&mut self.system)
+        self.algorithm.as_mut_permute().step(&mut self.system)
     }
     fn partial_output(&mut self) -> Option<()> {
-        self.permute.as_ref().unwrap().partial_output()
+        self.algorithm.as_ref_permute().partial_output()
     }
     fn full_output(&mut self) -> Option<PermuteOutput> {
-        self.permute.as_mut().unwrap().full_output()
+        self.algorithm.as_mut_permute().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.permute = None;
+        self.clear_algorithm();
         self
     }
 }
 
 impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
-        self.validate_permutation
-            .as_mut()
-            .unwrap()
+        self.algorithm
+            .as_mut_validate_permutation()
             .step(&self.system)
     }
     fn partial_output(&mut self) -> Option<()> {
-        self.validate_permutation.as_ref().unwrap().partial_output()
+        self.algorithm
+            .as_ref_validate_permutation()
+            .partial_output()
     }
     fn full_output(&mut self) -> Option<ValidatedPermutation> {
-        self.validate_permutation.as_mut().unwrap().full_output()
+        self.algorithm.as_mut_validate_permutation().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.validate_permutation = None;
+        self.clear_algorithm();
         self
     }
 }
