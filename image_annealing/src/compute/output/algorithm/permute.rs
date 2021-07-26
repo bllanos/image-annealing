@@ -12,10 +12,12 @@ use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use image::DynamicImage;
 use std::convert::TryInto;
+use std::default::Default;
 use std::error::Error;
 
 pub struct PermuteParameters {}
 
+#[derive(Default)]
 pub struct PermuteInput {
     pub candidate_permutation: Option<PermutationImageBuffer>,
     pub original_image: Option<DynamicImage>,

@@ -2,11 +2,13 @@ use super::super::device::DeviceManager;
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::ValidatedPermutation;
+use std::default::Default;
 use std::error::Error;
 
 mod state;
 use state::ResourceStateManager;
 
+#[derive(Default)]
 pub struct PermuteOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
     pub image: Option<&'a image::DynamicImage>,

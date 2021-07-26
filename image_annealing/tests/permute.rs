@@ -3,6 +3,7 @@ use image_annealing::compute;
 use image_annealing::compute::{CreatePermutationInput, CreatePermutationParameters};
 use image_annealing::compute::{OutputStatus, PermuteInput, PermuteParameters};
 use image_annealing::image_utils::ImageDimensions;
+use std::default::Default;
 use std::error::Error;
 use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
 use test_utils::permutation::DimensionsAndPermutation;
@@ -177,8 +178,8 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: None,
             original_image: Some(dynamic_original_image.clone()),
+            ..Default::default()
         },
         PermuteParameters {},
     );
@@ -229,7 +230,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     algorithm = dispatcher.permute(
         PermuteInput {
             candidate_permutation: Some(other_permutation),
-            original_image: None,
+            ..Default::default()
         },
         PermuteParameters {},
     );
@@ -279,8 +280,8 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: None,
             original_image: Some(dynamic_original_image.clone()),
+            ..Default::default()
         },
         PermuteParameters {},
     );
@@ -303,8 +304,8 @@ fn forget_permutation() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: None,
             original_image: Some(dynamic_original_image),
+            ..Default::default()
         },
         PermuteParameters {},
     );
@@ -327,7 +328,7 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
     let mut algorithm = dispatcher.permute(
         PermuteInput {
             candidate_permutation: Some(permutation),
-            original_image: None,
+            ..Default::default()
         },
         PermuteParameters {},
     );
