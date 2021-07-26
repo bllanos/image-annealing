@@ -2,6 +2,7 @@ use super::{Texture, TextureData, TextureDatatype};
 use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use core::num::NonZeroU32;
+use std::convert::{TryFrom, TryInto};
 
 pub struct PermutationTexture {}
 
@@ -65,7 +66,10 @@ impl PermutationInputTexture {
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
-                    <PermutationTexture as TextureDatatype>::pixel_size() as u32 * dimensions.width,
+                    (<PermutationTexture as TextureDatatype>::pixel_size()
+                        * <usize as TryFrom<u32>>::try_from(dimensions.width).unwrap())
+                    .try_into()
+                    .unwrap(),
                 ),
                 rows_per_image: NonZeroU32::new(dimensions.height),
             },

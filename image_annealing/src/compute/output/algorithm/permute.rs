@@ -153,8 +153,8 @@ impl Permute {
 
                     self.image_output = Some(
                         LosslessImageBuffer::from_vec(
-                            buffer_dimensions.width as u32,
-                            buffer_dimensions.height as u32,
+                            buffer_dimensions.width.try_into().unwrap(),
+                            buffer_dimensions.height.try_into().unwrap(),
                             result,
                         )
                         .unwrap(),

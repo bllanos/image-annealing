@@ -24,7 +24,7 @@ impl TextureCopyBufferDimensions {
     fn new(sz: &ImageDimensions, bytes_per_pixel: usize) -> Self {
         let width = sz.width();
         let unpadded_bytes_per_row = width * bytes_per_pixel;
-        let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as usize;
+        let align: usize = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT.try_into().unwrap();
         let padded_bytes_per_row_padding = (align - unpadded_bytes_per_row % align) % align;
         let padded_bytes_per_row = unpadded_bytes_per_row + padded_bytes_per_row_padding;
         Self {
@@ -101,7 +101,9 @@ impl TextureCopyBufferData {
             TextureCopyBufferDimensions::new(&image_dimensions, bytes_per_pixel);
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label,
-            size: (buffer_dimensions.padded_bytes_per_row * buffer_dimensions.height) as u64,
+            size: (buffer_dimensions.padded_bytes_per_row * buffer_dimensions.height)
+                .try_into()
+                .unwrap(),
             usage,
             mapped_at_creation: false,
         });

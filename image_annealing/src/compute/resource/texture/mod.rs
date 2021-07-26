@@ -51,9 +51,9 @@ impl TextureData {
         view_label: Option<&str>,
     ) -> Self {
         let dimensions = wgpu::Extent3d {
-            width: image_dimensions.width() as u32,
-            height: image_dimensions.height() as u32,
-            depth_or_array_layers: TEXTURE_ARRAY_LAYERS as u32,
+            width: image_dimensions.width().try_into().unwrap(),
+            height: image_dimensions.height().try_into().unwrap(),
+            depth_or_array_layers: TEXTURE_ARRAY_LAYERS.try_into().unwrap(),
         };
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label,

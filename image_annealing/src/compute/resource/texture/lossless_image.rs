@@ -2,6 +2,7 @@ use super::{Texture, TextureData, TextureDatatype};
 use crate::image_utils::ImageDimensions;
 use core::num::NonZeroU32;
 use image::DynamicImage;
+use std::convert::{TryFrom, TryInto};
 
 pub struct LosslessImageTexture {}
 
@@ -61,7 +62,7 @@ impl LosslessImageInputTexture {
         let own_dimensions = self.dimensions();
         assert!(width == own_dimensions.width && height == own_dimensions.height);
 
-        let mut texture_data = Vec::with_capacity((width * height) as usize);
+        let mut texture_data = Vec::with_capacity((width * height).try_into().unwrap());
         image_data.enumerate_pixels().for_each(|(.., px)| {
             texture_data.push(px[0] as <LosslessImageTexture as TextureDatatype>::Component);
             texture_data.push(px[1] as <LosslessImageTexture as TextureDatatype>::Component);
@@ -75,7 +76,10 @@ impl LosslessImageInputTexture {
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
-                    <LosslessImageTexture as TextureDatatype>::pixel_size() as u32 * width,
+                    (<LosslessImageTexture as TextureDatatype>::pixel_size()
+                        * <usize as TryFrom<u32>>::try_from(width).unwrap())
+                    .try_into()
+                    .unwrap(),
                 ),
                 rows_per_image: NonZeroU32::new(height),
             },

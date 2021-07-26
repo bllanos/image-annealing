@@ -8,8 +8,8 @@ use std::ops::IndexMut;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PermutationPixelData {
-    x: u32,
-    y: u32,
+    x: usize,
+    y: usize,
     value: PermutationEntry,
 }
 
@@ -30,8 +30,8 @@ pub enum PermutationFlaw {
         data: PermutationPixelData,
     },
     Duplicate {
-        x: u32,
-        y: u32,
+        x: usize,
+        y: usize,
         first_source: PermutationPixelData,
         second_source: PermutationPixelData,
     },
@@ -92,20 +92,20 @@ pub fn validate_permutation(
     let dimensions = ImageDimensions::from_image(&image)?;
     let mut sources: Vec<Option<PermutationPixelData>> = vec![None; dimensions.count()];
     for (x_in, y_in, px) in image.enumerate_pixels() {
-        let x = x_in as i64;
-        let y = y_in as i64;
+        let x = i64::from(x_in);
+        let y = i64::from(y_in);
         let delta = PermutationEntry(
             PermutationEntryComponent::from_be_bytes([px[0], px[1]]),
             PermutationEntryComponent::from_be_bytes([px[2], px[3]]),
         );
-        let target = (x + (delta.0 as i64), y + (delta.1 as i64));
+        let target = (x + i64::from(delta.0), y + i64::from(delta.1));
         match dimensions.make_linear_index(target.0, target.1) {
             Err(_) => {
                 return Err(Box::new(PermutationFlaw::OutOfBounds {
                     dimensions,
                     data: PermutationPixelData {
-                        x: x_in,
-                        y: y_in,
+                        x: x_in.try_into()?,
+                        y: y_in.try_into()?,
                         value: delta,
                     },
                 }))
@@ -119,16 +119,16 @@ pub fn validate_permutation(
                             y: target.1.try_into()?,
                             first_source: *entry,
                             second_source: PermutationPixelData {
-                                x: x_in,
-                                y: y_in,
+                                x: x_in.try_into()?,
+                                y: y_in.try_into()?,
                                 value: delta,
                             },
                         }));
                     }
                     None => {
                         *element = Some(PermutationPixelData {
-                            x: x_in,
-                            y: y_in,
+                            x: x_in.try_into()?,
+                            y: y_in.try_into()?,
                             value: delta,
                         })
                     }

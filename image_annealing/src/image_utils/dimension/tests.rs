@@ -1,5 +1,6 @@
 use super::ImageDimensions;
 use image::RgbaImage;
+use std::convert::TryInto;
 use std::error::Error;
 
 #[test]
@@ -41,8 +42,8 @@ fn valid_dimensions() -> Result<(), Box<dyn Error>> {
 fn from_image() -> Result<(), Box<dyn Error>> {
     let image = RgbaImage::new(4, 5);
     let dim = ImageDimensions::from_image(&image)?;
-    assert_eq!(dim.width(), image.width() as usize);
-    assert_eq!(dim.height(), image.height() as usize);
+    assert_eq!(dim.width(), image.width().try_into().unwrap());
+    assert_eq!(dim.height(), image.height().try_into().unwrap());
     Ok(())
 }
 
