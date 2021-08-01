@@ -73,7 +73,7 @@ pub struct ValidatedPermutation {
 
 impl ValidatedPermutation {
     pub fn as_raw_slice(&self) -> &[PermutationImageBufferComponent] {
-        &self.data.as_raw().as_slice()
+        self.data.as_raw().as_slice()
     }
     pub fn dimensions(&self) -> ImageDimensions {
         self.dimensions

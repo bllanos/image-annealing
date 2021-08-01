@@ -94,11 +94,10 @@ impl TextureCopyBufferData {
         device: &wgpu::Device,
         image_dimensions: &ImageDimensions,
         bytes_per_pixel: usize,
-        usage: wgpu::BufferUsage,
+        usage: wgpu::BufferUsages,
         label: Option<&str>,
     ) -> Self {
-        let buffer_dimensions =
-            TextureCopyBufferDimensions::new(&image_dimensions, bytes_per_pixel);
+        let buffer_dimensions = TextureCopyBufferDimensions::new(image_dimensions, bytes_per_pixel);
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label,
             size: (buffer_dimensions.padded_bytes_per_row * buffer_dimensions.height)
@@ -123,7 +122,7 @@ impl TextureCopyBufferData {
             device,
             image_dimensions,
             bytes_per_pixel,
-            wgpu::BufferUsage::MAP_READ | wgpu::BufferUsage::COPY_DST,
+            wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
             label,
         )
     }

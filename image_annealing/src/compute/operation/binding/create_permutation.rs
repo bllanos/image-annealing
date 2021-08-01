@@ -14,7 +14,7 @@ impl CreatePermutationBinding {
             label: Some("create_permutation_bind_group_layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: binding_constants::OUTPUT_PERMUTATION_INDEX,
-                visibility: wgpu::ShaderStage::COMPUTE,
+                visibility: wgpu::ShaderStages::COMPUTE,
                 ty: wgpu::BindingType::StorageTexture {
                     access: wgpu::StorageTextureAccess::WriteOnly,
                     format: PermutationTexture::format(),

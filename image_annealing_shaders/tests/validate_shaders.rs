@@ -19,7 +19,7 @@ fn validate_shader(shader: &str) -> Result<(), Box<dyn Error>> {
         naga::valid::Capabilities::empty(),
     );
 
-    let module = match naga::front::wgsl::parse_str(&shader) {
+    let module = match naga::front::wgsl::parse_str(shader) {
         Ok(v) => v,
         Err(e) => {
             eprintln!("Unable to parse WGSL");

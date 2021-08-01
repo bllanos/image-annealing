@@ -6,3 +6,4 @@ members = [
     "image_annealing_shaders",
     "test_utils",
 ]
+resolver = "2"

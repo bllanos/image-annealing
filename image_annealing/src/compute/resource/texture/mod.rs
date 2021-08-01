@@ -46,7 +46,7 @@ impl TextureData {
         device: &wgpu::Device,
         image_dimensions: &ImageDimensions,
         format: wgpu::TextureFormat,
-        usage: wgpu::TextureUsage,
+        usage: wgpu::TextureUsages,
         label: Option<&str>,
         view_label: Option<&str>,
     ) -> Self {
@@ -81,15 +81,15 @@ impl TextureData {
         view_label: Option<&str>,
     ) -> Self {
         let copy_usage = if is_input {
-            wgpu::TextureUsage::COPY_DST
+            wgpu::TextureUsages::COPY_DST
         } else {
-            wgpu::TextureUsage::COPY_SRC
+            wgpu::TextureUsages::COPY_SRC
         };
         Self::create_texture(
             device,
             image_dimensions,
             format,
-            wgpu::TextureUsage::STORAGE | copy_usage,
+            wgpu::TextureUsages::STORAGE_BINDING | copy_usage,
             label,
             view_label,
         )
@@ -116,8 +116,9 @@ fn create_texture_view(texture: &wgpu::Texture, label: Option<&str>) -> wgpu::Te
 
 fn create_texture_copy_view(texture: &wgpu::Texture) -> wgpu::ImageCopyTexture {
     wgpu::ImageCopyTexture {
-        texture: &texture,
+        texture,
         mip_level: 0,
         origin: wgpu::Origin3d::ZERO,
+        aspect: wgpu::TextureAspect::All,
     }
 }

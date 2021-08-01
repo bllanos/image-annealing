@@ -23,7 +23,7 @@ pub struct DeviceManager {
 
 impl DeviceManager {
     pub async fn new() -> Result<Self, Box<dyn Error>> {
-        let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+        let instance = wgpu::Instance::new(wgpu::Backends::PRIMARY);
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions::default())
             .await

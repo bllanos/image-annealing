@@ -19,7 +19,7 @@ impl PermuteBinding {
             entries: &[
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::INPUT_PERMUTATION_INDEX,
-                    visibility: wgpu::ShaderStage::COMPUTE,
+                    visibility: wgpu::ShaderStages::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::ReadOnly,
                         format: PermutationTexture::format(),
@@ -29,7 +29,7 @@ impl PermuteBinding {
                 },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::INPUT_IMAGE_INDEX,
-                    visibility: wgpu::ShaderStage::COMPUTE,
+                    visibility: wgpu::ShaderStages::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::ReadOnly,
                         format: LosslessImageTexture::format(),
@@ -39,7 +39,7 @@ impl PermuteBinding {
                 },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::OUTPUT_IMAGE_INDEX,
-                    visibility: wgpu::ShaderStage::COMPUTE,
+                    visibility: wgpu::ShaderStages::COMPUTE,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::WriteOnly,
                         format: LosslessImageTexture::format(),
