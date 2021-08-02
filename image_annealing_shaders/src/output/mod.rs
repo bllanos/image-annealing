@@ -31,7 +31,7 @@ impl Error for OutputDirectoryError {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct OutputConfig<'a> {
     pub create_permutation: Option<Cow<'a, Path>>,
     pub permute: Option<Cow<'a, Path>>,
@@ -81,3 +81,6 @@ pub fn write_default_files<'a, P: AsRef<Path>>(
     write_files(&config)?;
     Ok(config)
 }
+
+#[cfg(test)]
+mod tests;
