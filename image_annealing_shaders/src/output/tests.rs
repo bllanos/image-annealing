@@ -102,12 +102,12 @@ mod write_files {
 }
 
 mod write_default_files {
-    use super::super::OutputConfig;
-    use std::borrow::Cow;
     use std::error::Error;
+    use std::path::Path;
 
     #[test]
     fn all_shaders() -> Result<(), Box<dyn Error>> {
+        let directory = test_utils::make_test_output_path(&[] as &[&Path]);
         let create_permutation_path =
             test_utils::make_test_output_path(&["create_permutation.wgsl"]);
         if create_permutation_path.is_file() {
@@ -119,11 +119,7 @@ mod write_default_files {
             panic!("permute shader file already exists in the filesystem.")
         }
 
-        let config = OutputConfig {
-            create_permutation: Some(Cow::from(&create_permutation_path)),
-            permute: Some(Cow::from(&permute_path)),
-        };
-        super::super::write_files(&config)?;
+        super::super::write_default_files(Some(directory))?;
 
         let mut expected: Vec<u8> = Vec::new();
         crate::shader::create_permutation(&mut expected)?;
