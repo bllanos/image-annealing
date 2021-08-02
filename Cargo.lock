@@ -494,7 +494,7 @@ dependencies = [
 name = "image_annealing_shaders"
 version = "0.1.0"
 dependencies = [
- "naga 0.5.0 (git+https://github.com/gfx-rs/naga.git)",
+ "naga",
  "test_utils",
 ]
 
@@ -656,7 +656,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.5.0"
-source = "git+https://github.com/gfx-rs/naga?rev=a7ac13a#a7ac13a61d63620b8a0821db9176ed467fc282f7"
+source = "git+https://github.com/gfx-rs/naga.git?rev=a7ac13a#a7ac13a61d63620b8a0821db9176ed467fc282f7"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -666,20 +666,6 @@ dependencies = [
  "num-traits",
  "petgraph",
  "spirv_headers",
- "thiserror",
-]
-
-[[package]]
-name = "naga"
-version = "0.5.0"
-source = "git+https://github.com/gfx-rs/naga.git#8e17c296442514ba38967f94f61dcee8e2ae9de3"
-dependencies = [
- "bit-set",
- "bitflags",
- "codespan-reporting",
- "fxhash",
- "log",
- "num-traits",
  "thiserror",
 ]
 
@@ -1145,7 +1131,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.9.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5c9f1ad3195fe941eb989263dbb2e33d791572ae"
+source = "git+https://github.com/gfx-rs/wgpu.git#11d31d537706f69b982465840a25244e469f471a"
 dependencies = [
  "arrayvec",
  "js-sys",
@@ -1164,7 +1150,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.9.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5c9f1ad3195fe941eb989263dbb2e33d791572ae"
+source = "git+https://github.com/gfx-rs/wgpu.git#11d31d537706f69b982465840a25244e469f471a"
 dependencies = [
  "arrayvec",
  "bitflags",
@@ -1172,7 +1158,7 @@ dependencies = [
  "copyless",
  "fxhash",
  "log",
- "naga 0.5.0 (git+https://github.com/gfx-rs/naga?rev=a7ac13a)",
+ "naga",
  "parking_lot",
  "profiling",
  "raw-window-handle",
@@ -1185,7 +1171,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.9.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5c9f1ad3195fe941eb989263dbb2e33d791572ae"
+source = "git+https://github.com/gfx-rs/wgpu.git#11d31d537706f69b982465840a25244e469f471a"
 dependencies = [
  "arrayvec",
  "ash",
@@ -1204,7 +1190,7 @@ dependencies = [
  "libloading",
  "log",
  "metal",
- "naga 0.5.0 (git+https://github.com/gfx-rs/naga?rev=a7ac13a)",
+ "naga",
  "objc",
  "parking_lot",
  "range-alloc",
@@ -1218,7 +1204,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.9.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5c9f1ad3195fe941eb989263dbb2e33d791572ae"
+source = "git+https://github.com/gfx-rs/wgpu.git#11d31d537706f69b982465840a25244e469f471a"
 dependencies = [
  "bitflags",
 ]

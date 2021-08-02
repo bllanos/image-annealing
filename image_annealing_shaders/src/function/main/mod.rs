@@ -25,7 +25,7 @@ pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
         writer,
         "  let coords : vec2<i32> = vec2<i32>(global_id.xy);
   let permutation_vector : vec2<i32> = load_permutation_vector(coords);
-  let image_texel : vec4<u32> = textureLoad(input_image, coords + permutation_vector);
+  let image_texel : vec4<u32> = textureLoad(input_image, coords + permutation_vector, 0);
   textureStore(output_image, coords, image_texel);
 }}"
     )

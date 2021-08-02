@@ -26,10 +26,29 @@ pub trait TextureDatatype {
     }
 }
 
+fn make_write_texture_binding_description<T: TextureDatatype>() -> wgpu::BindingType {
+    wgpu::BindingType::StorageTexture {
+        access: wgpu::StorageTextureAccess::WriteOnly,
+        format: <T as TextureDatatype>::format(),
+        view_dimension: <T as TextureDatatype>::view_dimension(),
+    }
+}
+
+fn make_read_texture_binding_description<T: TextureDatatype>(
+    sample_type: wgpu::TextureSampleType,
+) -> wgpu::BindingType {
+    wgpu::BindingType::Texture {
+        sample_type,
+        view_dimension: <T as TextureDatatype>::view_dimension(),
+        multisampled: false,
+    }
+}
+
 pub trait Texture {
     fn view(&self) -> &wgpu::TextureView;
     fn dimensions(&self) -> wgpu::Extent3d;
     fn copy_view(&self) -> wgpu::ImageCopyTexture;
+    fn binding_description() -> wgpu::BindingType;
 }
 
 struct TextureData {
@@ -72,24 +91,35 @@ impl TextureData {
         }
     }
 
-    fn create_storage_texture(
+    fn create_write_texture(
         device: &wgpu::Device,
         image_dimensions: &ImageDimensions,
         format: wgpu::TextureFormat,
-        is_input: bool,
         label: Option<&str>,
         view_label: Option<&str>,
     ) -> Self {
-        let copy_usage = if is_input {
-            wgpu::TextureUsages::COPY_DST
-        } else {
-            wgpu::TextureUsages::COPY_SRC
-        };
         Self::create_texture(
             device,
             image_dimensions,
             format,
-            wgpu::TextureUsages::STORAGE_BINDING | copy_usage,
+            wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::COPY_SRC,
+            label,
+            view_label,
+        )
+    }
+
+    fn create_read_texture(
+        device: &wgpu::Device,
+        image_dimensions: &ImageDimensions,
+        format: wgpu::TextureFormat,
+        label: Option<&str>,
+        view_label: Option<&str>,
+    ) -> Self {
+        Self::create_texture(
+            device,
+            image_dimensions,
+            format,
+            wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
             label,
             view_label,
         )

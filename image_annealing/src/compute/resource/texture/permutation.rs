@@ -30,6 +30,11 @@ impl Texture for PermutationInputTexture {
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
+    fn binding_description() -> wgpu::BindingType {
+        super::make_read_texture_binding_description::<PermutationTexture>(
+            wgpu::TextureSampleType::Uint,
+        )
+    }
 }
 
 impl Texture for PermutationOutputTexture {
@@ -42,15 +47,17 @@ impl Texture for PermutationOutputTexture {
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
+    fn binding_description() -> wgpu::BindingType {
+        super::make_write_texture_binding_description::<PermutationTexture>()
+    }
 }
 
 impl PermutationInputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureData::create_storage_texture(
+        Self(TextureData::create_read_texture(
             device,
             image_dimensions,
             PermutationTexture::format(),
-            true,
             Some("permutation_input_texture"),
             Some("permutation_input_texture_view"),
         ))
@@ -87,11 +94,10 @@ impl PermutationInputTexture {
 
 impl PermutationOutputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureData::create_storage_texture(
+        Self(TextureData::create_write_texture(
             device,
             image_dimensions,
             PermutationTexture::format(),
-            false,
             Some("permutation_output_texture"),
             Some("permutation_output_texture_view"),
         ))

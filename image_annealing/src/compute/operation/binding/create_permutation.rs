@@ -1,5 +1,5 @@
 use super::super::super::resource::manager::ResourceManager;
-use super::super::super::resource::texture::{PermutationTexture, Texture, TextureDatatype};
+use super::super::super::resource::texture::{PermutationOutputTexture, Texture};
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use image_annealing_shaders::binding::create_permutation as binding_constants;
@@ -15,11 +15,7 @@ impl CreatePermutationBinding {
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: binding_constants::OUTPUT_PERMUTATION_INDEX,
                 visibility: wgpu::ShaderStages::COMPUTE,
-                ty: wgpu::BindingType::StorageTexture {
-                    access: wgpu::StorageTextureAccess::WriteOnly,
-                    format: PermutationTexture::format(),
-                    view_dimension: PermutationTexture::view_dimension(),
-                },
+                ty: PermutationOutputTexture::binding_description(),
                 count: None,
             }],
         });

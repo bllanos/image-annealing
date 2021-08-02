@@ -1,6 +1,6 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
-    LosslessImageTexture, PermutationTexture, Texture, TextureDatatype,
+    LosslessImageInputTexture, LosslessImageOutputTexture, PermutationInputTexture, Texture,
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
@@ -20,31 +20,19 @@ impl PermuteBinding {
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::INPUT_PERMUTATION_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::StorageTexture {
-                        access: wgpu::StorageTextureAccess::ReadOnly,
-                        format: PermutationTexture::format(),
-                        view_dimension: PermutationTexture::view_dimension(),
-                    },
+                    ty: PermutationInputTexture::binding_description(),
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::INPUT_IMAGE_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::StorageTexture {
-                        access: wgpu::StorageTextureAccess::ReadOnly,
-                        format: LosslessImageTexture::format(),
-                        view_dimension: LosslessImageTexture::view_dimension(),
-                    },
+                    ty: LosslessImageInputTexture::binding_description(),
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::OUTPUT_IMAGE_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::StorageTexture {
-                        access: wgpu::StorageTextureAccess::WriteOnly,
-                        format: LosslessImageTexture::format(),
-                        view_dimension: LosslessImageTexture::view_dimension(),
-                    },
+                    ty: LosslessImageOutputTexture::binding_description(),
                     count: None,
                 },
             ],

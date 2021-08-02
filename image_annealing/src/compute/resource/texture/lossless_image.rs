@@ -30,6 +30,11 @@ impl Texture for LosslessImageInputTexture {
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
+    fn binding_description() -> wgpu::BindingType {
+        super::make_read_texture_binding_description::<LosslessImageTexture>(
+            wgpu::TextureSampleType::Uint,
+        )
+    }
 }
 
 impl Texture for LosslessImageOutputTexture {
@@ -42,15 +47,17 @@ impl Texture for LosslessImageOutputTexture {
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
+    fn binding_description() -> wgpu::BindingType {
+        super::make_write_texture_binding_description::<LosslessImageTexture>()
+    }
 }
 
 impl LosslessImageInputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureData::create_storage_texture(
+        Self(TextureData::create_read_texture(
             device,
             image_dimensions,
             LosslessImageTexture::format(),
-            true,
             Some("lossless_image_input_texture"),
             Some("lossless_image_input_texture_view"),
         ))
@@ -90,11 +97,10 @@ impl LosslessImageInputTexture {
 
 impl LosslessImageOutputTexture {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureData::create_storage_texture(
+        Self(TextureData::create_write_texture(
             device,
             image_dimensions,
             LosslessImageTexture::format(),
-            false,
             Some("lossless_image_output_texture"),
             Some("lossless_image_output_texture_view"),
         ))
