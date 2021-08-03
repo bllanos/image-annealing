@@ -276,7 +276,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     original_image = test_utils::image::coordinates_to_zero_alpha_colors(&dimensions);
     permuted_image =
         test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
-    dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
+    dynamic_original_image = DynamicImage::ImageRgba16(original_image);
 
     algorithm = dispatcher.permute(
         PermuteInput {
