@@ -7,7 +7,7 @@ pub fn permutation_input<W: Write>(mut writer: W) -> std::io::Result<()> {
 pub fn permutation_output<W: Write>(mut writer: W) -> std::io::Result<()> {
     writeln!(
         writer,
-        "var output_permutation : [[access(write)]] texture_storage_2d<rgba8uint>;"
+        "var output_permutation : texture_storage_2d<rgba8uint, write>;"
     )
 }
 
@@ -18,6 +18,6 @@ pub fn lossless_image_input<W: Write>(mut writer: W) -> std::io::Result<()> {
 pub fn lossless_image_output<W: Write>(mut writer: W) -> std::io::Result<()> {
     writeln!(
         writer,
-        "var output_image : [[access(write)]] texture_storage_2d<rgba32uint>;"
+        "var output_image : texture_storage_2d<rgba32uint, write>;"
     )
 }
