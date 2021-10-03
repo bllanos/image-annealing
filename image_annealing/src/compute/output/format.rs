@@ -2,9 +2,9 @@ use image::ImageBuffer;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 
-pub type PermutationImageBufferComponent = u8;
-pub type PermutationImageBuffer =
-    ImageBuffer<image::Rgba<PermutationImageBufferComponent>, Vec<PermutationImageBufferComponent>>;
+pub type VectorFieldImageBufferComponent = u8;
+pub type VectorFieldImageBuffer =
+    ImageBuffer<image::Rgba<VectorFieldImageBufferComponent>, Vec<VectorFieldImageBufferComponent>>;
 
 pub type LosslessImageBufferComponent = u16;
 pub type LosslessImageBuffer =

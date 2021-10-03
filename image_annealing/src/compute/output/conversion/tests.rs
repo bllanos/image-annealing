@@ -1,10 +1,10 @@
-use super::super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
-use super::PermutationEntry;
+use super::super::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
+use super::VectorFieldEntry;
 use crate::image_utils::ImageDimensions;
 use image::Rgba;
 use std::error::Error;
 
-fn make_pixels(x: u32, y: u32) -> Rgba<PermutationImageBufferComponent> {
+fn make_pixels(x: u32, y: u32) -> Rgba<VectorFieldImageBufferComponent> {
     match x {
         0 => match y {
             0 => Rgba([0, 0, 0, 0]),
@@ -34,29 +34,29 @@ fn make_pixels(x: u32, y: u32) -> Rgba<PermutationImageBufferComponent> {
     }
 }
 
-fn make_vector() -> Vec<PermutationEntry> {
+fn make_vector() -> Vec<VectorFieldEntry> {
     vec![
-        PermutationEntry(0, 0),
-        PermutationEntry(257, 257),
-        PermutationEntry(-1, -1),
-        PermutationEntry(0, 1),
-        PermutationEntry(0, 255),
-        PermutationEntry(0, 511),
-        PermutationEntry(0, 256),
-        PermutationEntry(0, -256),
-        PermutationEntry(0, -255),
-        PermutationEntry(1, 0),
-        PermutationEntry(255, 0),
-        PermutationEntry(511, 0),
-        PermutationEntry(256, 0),
-        PermutationEntry(-256, 0),
-        PermutationEntry(-255, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(257, 257),
+        VectorFieldEntry(-1, -1),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 255),
+        VectorFieldEntry(0, 511),
+        VectorFieldEntry(0, 256),
+        VectorFieldEntry(0, -256),
+        VectorFieldEntry(0, -255),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(255, 0),
+        VectorFieldEntry(511, 0),
+        VectorFieldEntry(256, 0),
+        VectorFieldEntry(-256, 0),
+        VectorFieldEntry(-255, 0),
     ]
 }
 
 #[test]
 fn image_to_vec() {
-    let image = PermutationImageBuffer::from_fn(3, 5, make_pixels);
+    let image = VectorFieldImageBuffer::from_fn(3, 5, make_pixels);
     let v = super::to_vec(&image);
     assert_eq!(v, make_vector());
 }
@@ -76,10 +76,10 @@ fn vec_to_image_impossible() {
     super::to_image(
         &ImageDimensions::new(3, 5).unwrap(),
         &[
-            PermutationEntry(0, 0),
-            PermutationEntry(257, 257),
-            PermutationEntry(-1, -1),
-            PermutationEntry(0, 1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(257, 257),
+            VectorFieldEntry(-1, -1),
+            VectorFieldEntry(0, 1),
         ],
     );
 }

@@ -1,15 +1,18 @@
 use super::super::super::system::{DimensionsMismatchError, System};
-use super::super::format::PermutationImageBuffer;
 use super::super::OutputStatus;
 use super::CompletionStatus;
-use crate::image_utils::validation::{self, ValidatedPermutation};
+use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
 
 pub struct ValidatePermutationParameters {}
 
 pub struct ValidatePermutationInput {
-    pub candidate_permutation: PermutationImageBuffer,
+    pub candidate_permutation: CandidatePermutation,
+}
+
+pub struct ValidatePermutationOutput {
+    pub validated_permutation: ValidatedPermutation,
 }
 
 pub struct ValidatePermutation {
@@ -37,10 +40,10 @@ impl ValidatePermutation {
         let ValidatePermutationInput {
             candidate_permutation,
         } = self.input.take().unwrap();
-        match ImageDimensions::from_image(&candidate_permutation) {
+        match ImageDimensions::from_image(&candidate_permutation.0) {
             Ok(dimensions) => {
                 if *system.image_dimensions() == dimensions {
-                    match validation::validate_permutation(candidate_permutation) {
+                    match validation::validate_permutation(candidate_permutation.0) {
                         Ok(validated_permutation) => {
                             self.full_output = Some(validated_permutation);
                             self.completion_status = CompletionStatus::Finished;
@@ -70,7 +73,11 @@ impl ValidatePermutation {
         None
     }
 
-    pub fn full_output(&mut self) -> Option<ValidatedPermutation> {
-        self.full_output.take()
+    pub fn full_output(&mut self) -> Option<ValidatePermutationOutput> {
+        self.full_output
+            .take()
+            .map(|validated_permutation| ValidatePermutationOutput {
+                validated_permutation,
+            })
     }
 }

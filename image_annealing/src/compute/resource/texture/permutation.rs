@@ -1,3 +1,4 @@
+use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::{Texture, TextureData, TextureDatatype};
 use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
@@ -7,7 +8,7 @@ use std::convert::{TryFrom, TryInto};
 pub struct PermutationTexture {}
 
 impl TextureDatatype for PermutationTexture {
-    type Component = i16;
+    type Component = VectorFieldEntryComponent;
     fn n_components() -> usize {
         2
     }

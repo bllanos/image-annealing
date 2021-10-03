@@ -1,14 +1,13 @@
 use super::output::algorithm::create_permutation::{
-    CreatePermutation, CreatePermutationInput, CreatePermutationParameters,
+    CreatePermutation, CreatePermutationInput, CreatePermutationOutput, CreatePermutationParameters,
 };
 use super::output::algorithm::permute::{Permute, PermuteInput, PermuteOutput, PermuteParameters};
 use super::output::algorithm::validate_permutation::{
-    ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
+    ValidatePermutation, ValidatePermutationInput, ValidatePermutationOutput,
+    ValidatePermutationParameters,
 };
-use super::output::format::PermutationImageBuffer;
 use super::output::{Algorithm, OutputStatus};
 use super::system::System;
-use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
 use std::fmt;
@@ -19,9 +18,9 @@ pub fn create_dispatcher(
     Ok(Box::new(DispatcherImplementation::new(image_dimensions)?))
 }
 
-pub type CreatePermutationAlgorithm = dyn Algorithm<(), PermutationImageBuffer>;
+pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput>;
 pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput>;
-pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatedPermutation>;
+pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput>;
 
 pub trait Dispatcher {
     fn create_permutation(
@@ -143,7 +142,7 @@ impl Dispatcher for DispatcherImplementation {
     }
 }
 
-impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
+impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm
             .as_mut_create_permutation()
@@ -152,7 +151,7 @@ impl Algorithm<(), PermutationImageBuffer> for DispatcherImplementation {
     fn partial_output(&mut self) -> Option<()> {
         self.algorithm.as_ref_create_permutation().partial_output()
     }
-    fn full_output(&mut self) -> Option<PermutationImageBuffer> {
+    fn full_output(&mut self) -> Option<CreatePermutationOutput> {
         self.algorithm.as_mut_create_permutation().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
@@ -177,7 +176,7 @@ impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
     }
 }
 
-impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
+impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm
             .as_mut_validate_permutation()
@@ -188,7 +187,7 @@ impl Algorithm<(), ValidatedPermutation> for DispatcherImplementation {
             .as_ref_validate_permutation()
             .partial_output()
     }
-    fn full_output(&mut self) -> Option<ValidatedPermutation> {
+    fn full_output(&mut self) -> Option<ValidatePermutationOutput> {
         self.algorithm.as_mut_validate_permutation().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {

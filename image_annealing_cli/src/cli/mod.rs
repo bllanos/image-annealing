@@ -1,14 +1,14 @@
 use crate::config::Config;
-use image::io::Reader as ImageReader;
-use image::DynamicImage;
-use image_annealing::compute::format::{ImageFileWriter, PermutationImageBuffer};
+use image_annealing::compute::format::ImageFileWriter;
 use image_annealing::compute::{
     self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, OutputStatus,
     PermuteInput, PermuteParameters, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
-use std::path::Path;
+
+mod loader;
+use loader::{load_candidate_permutation, load_image};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let dispatcher = create_dispatcher(&config)?;
@@ -32,14 +32,6 @@ fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Err
     compute::create_dispatcher(&dimensions)
 }
 
-fn load_permutation<P: AsRef<Path>>(path: P) -> Result<PermutationImageBuffer, Box<dyn Error>> {
-    Ok(ImageReader::open(path)?.decode()?.to_rgba8())
-}
-
-fn load_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Box<dyn Error>> {
-    Ok(ImageReader::open(path)?.decode()?)
-}
-
 fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), Box<dyn Error>> {
     match config {
         Config::CreatePermutation {
@@ -49,8 +41,8 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
             let mut algorithm = dispatcher
                 .create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
             algorithm.step_until(OutputStatus::FinalFullOutput)?;
-            let img = algorithm.full_output().unwrap();
-            let output_path = img.save_add_extension(path)?;
+            let permutation = algorithm.full_output().unwrap().validated_permutation;
+            let output_path = permutation.as_ref().save_add_extension(path)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
         Config::Permute {
@@ -60,7 +52,9 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
         } => {
             let mut algorithm = dispatcher.permute(
                 PermuteInput {
-                    candidate_permutation: Some(load_permutation(candidate_permutation_path)?),
+                    candidate_permutation: Some(load_candidate_permutation(
+                        candidate_permutation_path,
+                    )?),
                     original_image: Some(load_image(original_image_path)?),
                 },
                 PermuteParameters {},
@@ -75,7 +69,7 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
         } => {
             let mut algorithm = dispatcher.validate_permutation(
                 ValidatePermutationInput {
-                    candidate_permutation: load_permutation(candidate_permutation_path)?,
+                    candidate_permutation: load_candidate_permutation(candidate_permutation_path)?,
                 },
                 ValidatePermutationParameters {},
             );

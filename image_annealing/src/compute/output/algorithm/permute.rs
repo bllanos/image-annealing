@@ -1,14 +1,13 @@
 use super::super::super::resource::buffer::ReadMappableBuffer;
 use super::super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::super::super::system::{DimensionsMismatchError, PermuteOperationInput, System};
-use super::super::format::PermutationImageBuffer;
 use super::super::format::{LosslessImageBuffer, LosslessImageBufferComponent};
 use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::CompletionStatus;
-use crate::image_utils::validation::ValidatedPermutation;
+use crate::image_utils::validation::{CandidatePermutation, ValidatedPermutation};
 use crate::image_utils::ImageDimensions;
 use image::DynamicImage;
 use std::convert::TryInto;
@@ -19,7 +18,7 @@ pub struct PermuteParameters {}
 
 #[derive(Default)]
 pub struct PermuteInput {
-    pub candidate_permutation: Option<PermutationImageBuffer>,
+    pub candidate_permutation: Option<CandidatePermutation>,
     pub original_image: Option<DynamicImage>,
 }
 
@@ -79,7 +78,8 @@ impl Permute {
                             }
                             OutputStatus::FinalFullOutput
                             | OutputStatus::FinalPartialAndFullOutput => {
-                                self.permutation = v.full_output();
+                                self.permutation =
+                                    v.full_output().map(|output| output.validated_permutation);
                             }
                         }
                         Ok(OutputStatus::NoNewOutput)

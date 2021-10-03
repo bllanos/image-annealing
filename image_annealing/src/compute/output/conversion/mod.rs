@@ -1,36 +1,35 @@
-use super::super::resource::texture::{PermutationTexture, TextureDatatype};
-use super::format::PermutationImageBuffer;
+use super::format::VectorFieldImageBuffer;
 use crate::image_utils::ImageDimensions;
 use std::convert::TryInto;
 
-pub type PermutationEntryComponent = <PermutationTexture as TextureDatatype>::Component;
+pub type VectorFieldEntryComponent = i16;
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub struct PermutationEntry(pub PermutationEntryComponent, pub PermutationEntryComponent);
+pub struct VectorFieldEntry(pub VectorFieldEntryComponent, pub VectorFieldEntryComponent);
 
-pub fn to_vec(image: &PermutationImageBuffer) -> Vec<PermutationEntry> {
+pub fn to_vec(image: &VectorFieldImageBuffer) -> Vec<VectorFieldEntry> {
     image
         .enumerate_pixels()
-        .map(|(.., px)| -> PermutationEntry {
-            PermutationEntry(
-                PermutationEntryComponent::from_be_bytes([px[0], px[1]]),
-                PermutationEntryComponent::from_be_bytes([px[2], px[3]]),
+        .map(|(.., px)| -> VectorFieldEntry {
+            VectorFieldEntry(
+                VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),
+                VectorFieldEntryComponent::from_be_bytes([px[2], px[3]]),
             )
         })
         .collect()
 }
 
-pub fn to_image(dimensions: &ImageDimensions, v: &[PermutationEntry]) -> PermutationImageBuffer {
+pub fn to_image(dimensions: &ImageDimensions, v: &[VectorFieldEntry]) -> VectorFieldImageBuffer {
     if v.len() == dimensions.count() {
         let image_vec = v
             .iter()
-            .flat_map(|PermutationEntry(delta_x, delta_y)| {
+            .flat_map(|VectorFieldEntry(delta_x, delta_y)| {
                 let first = delta_x.to_be_bytes();
                 let second = delta_y.to_be_bytes();
                 [first, second].concat()
             })
             .collect();
-        PermutationImageBuffer::from_vec(
+        VectorFieldImageBuffer::from_vec(
             dimensions.width().try_into().unwrap(),
             dimensions.height().try_into().unwrap(),
             image_vec,

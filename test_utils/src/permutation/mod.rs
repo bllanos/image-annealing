@@ -1,16 +1,17 @@
-use image_annealing::compute::conversion::{self, PermutationEntry};
+use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::LosslessImageBuffer;
-use image_annealing::compute::format::PermutationImageBuffer;
+use image_annealing::compute::format::VectorFieldImageBuffer;
+use image_annealing::image_utils::validation::ValidatedPermutation;
 use image_annealing::image_utils::ImageDimensions;
 
 pub struct DimensionsAndPermutation {
-    pub permutation: PermutationImageBuffer,
+    pub permutation: VectorFieldImageBuffer,
     pub dimensions: ImageDimensions,
 }
 
 pub fn identity() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(2, 3).unwrap();
-    let v = vec![PermutationEntry(0, 0); dimensions.count()];
+    let v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
         dimensions,
@@ -24,12 +25,12 @@ pub fn identity_permute(image: &LosslessImageBuffer) -> LosslessImageBuffer {
 pub fn duplicate() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(2, 3).unwrap();
     let v = vec![
-        PermutationEntry(0, 1),
-        PermutationEntry(0, 0),
-        PermutationEntry(0, 1),
-        PermutationEntry(0, 0),
-        PermutationEntry(0, -1),
-        PermutationEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
     ];
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
@@ -40,12 +41,12 @@ pub fn duplicate() -> DimensionsAndPermutation {
 pub fn non_identity() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(2, 3).unwrap();
     let v = vec![
-        PermutationEntry(0, 1),
-        PermutationEntry(0, 0),
-        PermutationEntry(0, -1),
-        PermutationEntry(-1, 1),
-        PermutationEntry(1, 0),
-        PermutationEntry(0, -1),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(-1, 1),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(0, -1),
     ];
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
@@ -72,28 +73,28 @@ pub fn non_identity_forward_permute(image: &LosslessImageBuffer) -> LosslessImag
 
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(513, 513).unwrap();
-    let mut v = vec![PermutationEntry(0, 0); dimensions.count()];
+    let mut v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     // One cycle
-    v[0] = PermutationEntry(1, 128); // (0, 0) to (1, 128)
-    v[65665] = PermutationEntry(128, 1); // (1, 128) to (129, 129)
-    v[66306] = PermutationEntry(129, 256); // (129, 129) to (258, 385)
-    v[197763] = PermutationEntry(-127, -384); // (258, 385) to (131, 1)
-    v[644] = PermutationEntry(-131, -1); // (131, 1) to (0, 0)
+    v[0] = VectorFieldEntry(1, 128); // (0, 0) to (1, 128)
+    v[65665] = VectorFieldEntry(128, 1); // (1, 128) to (129, 129)
+    v[66306] = VectorFieldEntry(129, 256); // (129, 129) to (258, 385)
+    v[197763] = VectorFieldEntry(-127, -384); // (258, 385) to (131, 1)
+    v[644] = VectorFieldEntry(-131, -1); // (131, 1) to (0, 0)
                                          // Swap
-    v[1] = PermutationEntry(257, 384); // (1, 0) to (258, 384)
-    v[197250] = PermutationEntry(-257, -384); // (258, 384) to (1, 0)
+    v[1] = VectorFieldEntry(257, 384); // (1, 0) to (258, 384)
+    v[197250] = VectorFieldEntry(-257, -384); // (258, 384) to (1, 0)
                                               // Swap
-    v[262661] = PermutationEntry(385, -512); // (5, 512) to (390, 0)
-    v[390] = PermutationEntry(-385, 512); // (390, 0) to (5, 512)
+    v[262661] = VectorFieldEntry(385, -512); // (5, 512) to (390, 0)
+    v[390] = VectorFieldEntry(-385, 512); // (390, 0) to (5, 512)
                                           // Swap
-    v[513] = PermutationEntry(511, 383); // (0, 1) to (511, 384)
-    v[197503] = PermutationEntry(-511, -383); // (511, 384) to (0, 1)
+    v[513] = VectorFieldEntry(511, 383); // (0, 1) to (511, 384)
+    v[197503] = VectorFieldEntry(-511, -383); // (511, 384) to (0, 1)
                                               // Swap
-    v[2] = PermutationEntry(256, 255); // (2, 0) to (258, 255)
-    v[131073] = PermutationEntry(-256, -255); // (258, 255) to (2, 0)
+    v[2] = VectorFieldEntry(256, 255); // (2, 0) to (258, 255)
+    v[131073] = VectorFieldEntry(-256, -255); // (258, 255) to (2, 0)
                                               // Swap
-    v[3] = PermutationEntry(128, 100); // (3, 0) to (131, 100)
-    v[51431] = PermutationEntry(-128, -100); // (131, 100) to (3, 0)
+    v[3] = VectorFieldEntry(128, 100); // (3, 0) to (131, 100)
+    v[51431] = VectorFieldEntry(-128, -100); // (131, 100) to (3, 0)
 
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
@@ -144,4 +145,12 @@ pub fn bit_interpretation_cases_forward_permute(
     permuted_image.put_pixel(131, 100, pixel1);
 
     permuted_image
+}
+
+pub fn assert_is_identity(permutation: &ValidatedPermutation) {
+    let converted_permutation = conversion::to_vec(permutation.as_ref());
+    let dim = permutation.dimensions();
+    let mut expected: Vec<VectorFieldEntry> = Vec::with_capacity(dim.count());
+    expected.resize(dim.count(), VectorFieldEntry(0, 0));
+    assert_eq!(converted_permutation, expected);
 }

@@ -2,6 +2,7 @@ use image::DynamicImage;
 use image_annealing::compute;
 use image_annealing::compute::{CreatePermutationInput, CreatePermutationParameters};
 use image_annealing::compute::{OutputStatus, PermuteInput, PermuteParameters};
+use image_annealing::image_utils::validation::CandidatePermutation;
 use image_annealing::image_utils::ImageDimensions;
 use std::default::Default;
 use std::error::Error;
@@ -22,7 +23,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -56,7 +57,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(invalid_permutation),
+            candidate_permutation: Some(CandidatePermutation(invalid_permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -66,7 +67,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -94,7 +95,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(image),
         },
         PermuteParameters {},
@@ -121,7 +122,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&other_dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(image),
         },
         PermuteParameters {},
@@ -149,7 +150,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -206,7 +207,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -229,7 +230,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(other_permutation),
+            candidate_permutation: Some(CandidatePermutation(other_permutation)),
             ..Default::default()
         },
         PermuteParameters {},
@@ -259,7 +260,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             original_image: Some(dynamic_original_image.clone()),
         },
         PermuteParameters {},
@@ -327,7 +328,7 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(permutation),
+            candidate_permutation: Some(CandidatePermutation(permutation)),
             ..Default::default()
         },
         PermuteParameters {},

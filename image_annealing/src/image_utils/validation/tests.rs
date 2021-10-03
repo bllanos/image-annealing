@@ -1,5 +1,5 @@
 use super::validate_permutation;
-use crate::compute::conversion::{self, PermutationEntry};
+use crate::compute::conversion::{self, VectorFieldEntry};
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
 use test_utils::permutation::{self, DimensionsAndPermutation};
@@ -18,9 +18,9 @@ fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
     let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
-            PermutationEntry(0, 0),
-            PermutationEntry(0, 1),
-            PermutationEntry(1, -1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(1, -1),
         ],
     );
     test_utils::assert_error_contains(
@@ -35,9 +35,9 @@ fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
     let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
-            PermutationEntry(0, -1),
-            PermutationEntry(0, 1),
-            PermutationEntry(0, -1),
+            VectorFieldEntry(0, -1),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, -1),
         ],
     );
     test_utils::assert_error_contains(
@@ -52,9 +52,9 @@ fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
     let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
-            PermutationEntry(0, 0),
-            PermutationEntry(-2, 1),
-            PermutationEntry(0, -1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(-2, 1),
+            VectorFieldEntry(0, -1),
         ],
     );
     test_utils::assert_error_contains(
@@ -69,9 +69,9 @@ fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
     let permutation = conversion::to_image(
         &ImageDimensions::new(1, 3)?,
         &[
-            PermutationEntry(0, 3),
-            PermutationEntry(0, 1),
-            PermutationEntry(0, -1),
+            VectorFieldEntry(0, 3),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, -1),
         ],
     );
     test_utils::assert_error_contains(

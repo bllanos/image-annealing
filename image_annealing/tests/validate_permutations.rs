@@ -2,6 +2,7 @@ use image_annealing::compute;
 use image_annealing::compute::{
     OutputStatus, ValidatePermutationInput, ValidatePermutationParameters,
 };
+use image_annealing::image_utils::validation::CandidatePermutation;
 use image_annealing::image_utils::ImageDimensions;
 use std::error::Error;
 use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
@@ -17,12 +18,12 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: permutation,
+            candidate_permutation: CandidatePermutation(permutation),
         },
         ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output().unwrap().validated_permutation;
     assert_eq!(*output.as_ref(), expected);
     Ok(())
 }
@@ -43,7 +44,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher(&dimensions)?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: invalid_image,
+            candidate_permutation: CandidatePermutation(invalid_image),
         },
         ValidatePermutationParameters {},
     );
@@ -52,12 +53,12 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: permutation,
+            candidate_permutation: CandidatePermutation(permutation),
         },
         ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output().unwrap().validated_permutation;
     assert_eq!(*output.as_ref(), expected);
     Ok(())
 }
@@ -74,7 +75,7 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&invalid_dimensions)?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: permutation,
+            candidate_permutation: CandidatePermutation(permutation),
         },
         ValidatePermutationParameters {},
     );

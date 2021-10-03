@@ -1,4 +1,4 @@
-use image_annealing::compute::format::{ImageFileWriter, PermutationImageBuffer};
+use image_annealing::compute::format::{ImageFileWriter, VectorFieldImageBuffer};
 use image_annealing::image_utils::ImageDimensions;
 use image_annealing_cli::cli;
 use image_annealing_cli::config::Config;
@@ -7,7 +7,7 @@ use std::error::Error;
 #[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
     let path = test_utils::make_test_output_path_string(&["cli_create_permutation"]);
-    let full_output_path = PermutationImageBuffer::make_filename(&path);
+    let full_output_path = VectorFieldImageBuffer::make_filename(&path);
     if full_output_path.is_file() {
         panic!("Output permutation already exists in the filesystem.")
     }

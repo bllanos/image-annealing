@@ -1,8 +1,9 @@
 use super::super::super::resource::buffer::ReadMappableBuffer;
 use super::super::super::system::System;
-use super::super::format::{PermutationImageBuffer, PermutationImageBufferComponent};
+use super::super::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
 use super::super::OutputStatus;
 use super::CompletionStatus;
+use crate::image_utils::validation::{self, ValidatedPermutation};
 use std::convert::TryInto;
 use std::error::Error;
 
@@ -10,10 +11,14 @@ pub struct CreatePermutationParameters {}
 
 pub struct CreatePermutationInput {}
 
+pub struct CreatePermutationOutput {
+    pub validated_permutation: ValidatedPermutation,
+}
+
 pub struct CreatePermutation {
     completion_status: CompletionStatus,
     invoked_operation: bool,
-    full_output: Option<PermutationImageBuffer>,
+    full_output: Option<VectorFieldImageBuffer>,
 }
 
 impl CreatePermutation {
@@ -47,17 +52,17 @@ impl CreatePermutation {
 
             let buffer_dimensions = mapped_buffer.buffer_dimensions();
             let data = mapped_buffer.collect_mapped_buffer();
-            let result: Vec<PermutationImageBufferComponent> = data
+            let result: Vec<VectorFieldImageBufferComponent> = data
                 .chunks(buffer_dimensions.padded_bytes_per_row)
                 .flat_map(|c| {
                     c[..buffer_dimensions.unpadded_bytes_per_row]
-                        .chunks_exact(std::mem::size_of::<PermutationImageBufferComponent>())
+                        .chunks_exact(std::mem::size_of::<VectorFieldImageBufferComponent>())
                 })
-                .map(|b| PermutationImageBufferComponent::from_be_bytes(b.try_into().unwrap()))
-                .collect::<Vec<PermutationImageBufferComponent>>();
+                .map(|b| VectorFieldImageBufferComponent::from_be_bytes(b.try_into().unwrap()))
+                .collect::<Vec<VectorFieldImageBufferComponent>>();
 
             self.full_output = Some(
-                PermutationImageBuffer::from_vec(
+                VectorFieldImageBuffer::from_vec(
                     buffer_dimensions.width.try_into().unwrap(),
                     buffer_dimensions.height.try_into().unwrap(),
                     result,
@@ -73,7 +78,13 @@ impl CreatePermutation {
         None
     }
 
-    pub fn full_output(&mut self) -> Option<PermutationImageBuffer> {
-        self.full_output.take()
+    pub fn full_output(&mut self) -> Option<CreatePermutationOutput> {
+        self.full_output
+            .take()
+            .map(|vector_field| CreatePermutationOutput {
+                validated_permutation: validation::vector_field_into_validated_permutation(
+                    vector_field,
+                ),
+            })
     }
 }

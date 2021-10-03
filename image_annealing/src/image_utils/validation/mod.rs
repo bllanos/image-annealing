@@ -1,6 +1,6 @@
 use super::ImageDimensions;
-use crate::compute::conversion::{PermutationEntry, PermutationEntryComponent};
-use crate::compute::format::{PermutationImageBuffer, PermutationImageBufferComponent};
+use crate::compute::conversion::{VectorFieldEntry, VectorFieldEntryComponent};
+use crate::compute::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
@@ -10,7 +10,7 @@ use std::ops::IndexMut;
 pub struct PermutationPixelData {
     x: usize,
     y: usize,
-    value: PermutationEntry,
+    value: VectorFieldEntry,
 }
 
 impl fmt::Display for PermutationPixelData {
@@ -65,14 +65,16 @@ impl Error for PermutationFlaw {
     }
 }
 
+pub struct CandidatePermutation(pub VectorFieldImageBuffer);
+
 #[derive(Debug)]
 pub struct ValidatedPermutation {
-    data: PermutationImageBuffer,
+    data: VectorFieldImageBuffer,
     dimensions: ImageDimensions,
 }
 
 impl ValidatedPermutation {
-    pub fn as_raw_slice(&self) -> &[PermutationImageBufferComponent] {
+    pub fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
         self.data.as_raw().as_slice()
     }
     pub fn dimensions(&self) -> ImageDimensions {
@@ -80,23 +82,23 @@ impl ValidatedPermutation {
     }
 }
 
-impl AsRef<PermutationImageBuffer> for ValidatedPermutation {
-    fn as_ref(&self) -> &PermutationImageBuffer {
+impl AsRef<VectorFieldImageBuffer> for ValidatedPermutation {
+    fn as_ref(&self) -> &VectorFieldImageBuffer {
         &self.data
     }
 }
 
 pub fn validate_permutation(
-    image: PermutationImageBuffer,
+    image: VectorFieldImageBuffer,
 ) -> Result<ValidatedPermutation, Box<dyn Error>> {
     let dimensions = ImageDimensions::from_image(&image)?;
     let mut sources: Vec<Option<PermutationPixelData>> = vec![None; dimensions.count()];
     for (x_in, y_in, px) in image.enumerate_pixels() {
         let x = i64::from(x_in);
         let y = i64::from(y_in);
-        let delta = PermutationEntry(
-            PermutationEntryComponent::from_be_bytes([px[0], px[1]]),
-            PermutationEntryComponent::from_be_bytes([px[2], px[3]]),
+        let delta = VectorFieldEntry(
+            VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),
+            VectorFieldEntryComponent::from_be_bytes([px[2], px[3]]),
         );
         let target = (x + i64::from(delta.0), y + i64::from(delta.1));
         match dimensions.make_linear_index(target.0, target.1) {
@@ -140,6 +142,16 @@ pub fn validate_permutation(
         data: image,
         dimensions,
     })
+}
+
+pub(crate) fn vector_field_into_validated_permutation(
+    vector_field: VectorFieldImageBuffer,
+) -> ValidatedPermutation {
+    let dimensions = ImageDimensions::from_image(&vector_field).unwrap();
+    ValidatedPermutation {
+        data: vector_field,
+        dimensions,
+    }
 }
 
 #[cfg(test)]
