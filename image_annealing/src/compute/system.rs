@@ -1,6 +1,7 @@
 use super::device::DeviceManager;
 use super::operation::manager::OperationManager;
-use super::resource::manager::ResourceManager;
+use super::output::format::LosslessImageBuffer;
+use crate::image_utils::validation::ValidatedPermutation;
 use crate::image_utils::ImageDimensions;
 use std::error::Error;
 use std::fmt;
@@ -30,7 +31,6 @@ impl Error for DimensionsMismatchError {
 
 pub struct System {
     device: DeviceManager,
-    resources: ResourceManager,
     operations: OperationManager,
     image_dimensions: ImageDimensions,
 }
@@ -38,22 +38,12 @@ pub struct System {
 impl System {
     pub fn new(image_dimensions: &ImageDimensions) -> Result<Self, Box<dyn Error>> {
         let device = futures::executor::block_on(DeviceManager::new())?;
-        let resources = ResourceManager::new(device.device(), image_dimensions);
-        let operations = OperationManager::new(device.device(), &resources);
+        let operations = OperationManager::new(device.device(), image_dimensions);
         Ok(Self {
             device,
-            resources,
             operations,
             image_dimensions: *image_dimensions,
         })
-    }
-
-    pub fn poll_device(&self) {
-        self.device.wait_for_device();
-    }
-
-    pub fn resources(&self) -> &ResourceManager {
-        &self.resources
     }
 
     pub fn image_dimensions(&self) -> &ImageDimensions {
@@ -61,15 +51,21 @@ impl System {
     }
 
     pub fn operation_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
-        self.operations
-            .create_permutation(&self.resources, &self.device)
+        self.operations.create_permutation(&self.device)
+    }
+
+    pub fn output_permutation(&mut self) -> Result<ValidatedPermutation, Box<dyn Error>> {
+        self.operations.output_permutation(&self.device)
     }
 
     pub fn operation_permute(
         &mut self,
         input: &PermuteOperationInput,
     ) -> Result<(), Box<dyn Error>> {
-        self.operations
-            .permute(&self.resources, &self.device, input)
+        self.operations.permute(&self.device, input)
+    }
+
+    pub fn output_permuted_image(&mut self) -> Result<LosslessImageBuffer, Box<dyn Error>> {
+        self.operations.output_permuted_image(&self.device)
     }
 }

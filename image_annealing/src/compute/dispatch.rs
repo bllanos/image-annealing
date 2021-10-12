@@ -152,7 +152,9 @@ impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
         self.algorithm.as_ref_create_permutation().partial_output()
     }
     fn full_output(&mut self) -> Option<CreatePermutationOutput> {
-        self.algorithm.as_mut_create_permutation().full_output()
+        self.algorithm
+            .as_mut_create_permutation()
+            .full_output(&mut self.system)
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.clear_algorithm();
@@ -168,7 +170,9 @@ impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
         self.algorithm.as_ref_permute().partial_output()
     }
     fn full_output(&mut self) -> Option<PermuteOutput> {
-        self.algorithm.as_mut_permute().full_output()
+        self.algorithm
+            .as_mut_permute()
+            .full_output(&mut self.system)
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.clear_algorithm();

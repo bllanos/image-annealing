@@ -28,10 +28,38 @@ impl Error for InsufficientInputError {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum InsufficientOutputError {
+    Permutation,
+    PermutedImage,
+}
+
+impl fmt::Display for InsufficientOutputError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "an output {} does not exist or has been invalidated",
+            match self {
+                InsufficientOutputError::Permutation => "permutation",
+                InsufficientOutputError::PermutedImage => "image",
+            }
+        )
+    }
+}
+
+impl Error for InsufficientOutputError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+
 struct ResourceStateFlags {
     permutation_input_texture: bool,
     permutation_output_texture: bool,
+    permutation_output_buffer: bool,
     lossless_image_input_texture: bool,
+    lossless_image_output_texture: bool,
+    lossless_image_output_buffer: bool,
 }
 
 impl ResourceStateFlags {
@@ -39,7 +67,10 @@ impl ResourceStateFlags {
         Self {
             permutation_input_texture: false,
             permutation_output_texture: false,
+            permutation_output_buffer: false,
             lossless_image_input_texture: false,
+            lossless_image_output_texture: false,
+            lossless_image_output_buffer: false,
         }
     }
 }
@@ -58,19 +89,33 @@ impl ResourceStateManager {
     pub fn prepare_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
         self.flags.permutation_input_texture = false;
         self.flags.permutation_output_texture = false;
+        self.flags.permutation_output_buffer = false;
+        self.flags.lossless_image_output_texture = false;
+        self.flags.lossless_image_output_buffer = false;
         Ok(())
     }
 
-    pub fn finish_create_permutation(
+    pub fn finish_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
+        self.flags.permutation_output_texture = true;
+        Ok(())
+    }
+
+    pub fn output_permutation(
         &mut self,
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
     ) -> Result<(), Box<dyn Error>> {
-        self.flags.permutation_output_texture = true;
-        resources
-            .permutation_output_buffer()
-            .load(encoder, resources.permutation_output_texture());
-        Ok(())
+        if self.flags.permutation_output_texture {
+            if !self.flags.permutation_output_buffer {
+                resources
+                    .permutation_output_buffer()
+                    .load(encoder, resources.permutation_output_texture());
+                self.flags.permutation_output_buffer = true;
+            }
+            Ok(())
+        } else {
+            Err(Box::new(InsufficientOutputError::Permutation))
+        }
     }
 
     pub fn prepare_permute(
@@ -80,6 +125,8 @@ impl ResourceStateManager {
         encoder: &mut wgpu::CommandEncoder,
         input: &PermuteOperationInput,
     ) -> Result<(), Box<dyn Error>> {
+        self.flags.lossless_image_output_texture = false;
+        self.flags.lossless_image_output_buffer = false;
         match input.permutation {
             Some(permutation) => {
                 resources
@@ -87,6 +134,7 @@ impl ResourceStateManager {
                     .load(queue, permutation);
                 self.flags.permutation_input_texture = true;
                 self.flags.permutation_output_texture = false;
+                self.flags.permutation_output_buffer = false;
             }
             None => {
                 if !self.flags.permutation_input_texture {
@@ -115,14 +163,26 @@ impl ResourceStateManager {
         Ok(())
     }
 
-    pub fn finish_permute(
+    pub fn finish_permute(&mut self) -> Result<(), Box<dyn Error>> {
+        self.flags.lossless_image_output_texture = true;
+        Ok(())
+    }
+
+    pub fn output_permuted_image(
         &mut self,
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
     ) -> Result<(), Box<dyn Error>> {
-        resources
-            .lossless_image_output_buffer()
-            .load(encoder, resources.lossless_image_output_texture());
-        Ok(())
+        if self.flags.lossless_image_output_texture {
+            if !self.flags.lossless_image_output_buffer {
+                resources
+                    .lossless_image_output_buffer()
+                    .load(encoder, resources.lossless_image_output_texture());
+                self.flags.lossless_image_output_buffer = true;
+            }
+            Ok(())
+        } else {
+            Err(Box::new(InsufficientOutputError::PermutedImage))
+        }
     }
 }
