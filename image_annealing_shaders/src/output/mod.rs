@@ -35,6 +35,7 @@ impl Error for OutputDirectoryError {
 pub struct OutputConfig<'a> {
     pub create_permutation: Option<Cow<'a, Path>>,
     pub permute: Option<Cow<'a, Path>>,
+    pub swap: Option<Cow<'a, Path>>,
 }
 
 impl<'a> OutputConfig<'a> {
@@ -50,6 +51,7 @@ impl<'a> OutputConfig<'a> {
                 Ok(Self {
                     create_permutation: Some(Cow::from(path.join("create_permutation.wgsl"))),
                     permute: Some(Cow::from(path.join("permute.wgsl"))),
+                    swap: Some(Cow::from(path.join("swap.wgsl"))),
                 })
             } else {
                 Err(Box::new(OutputDirectoryError::NotADirectory(
@@ -70,6 +72,10 @@ pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
     if let Some(path) = config.permute.as_ref() {
         let mut f = File::create(path)?;
         shader::permute(&mut f)?;
+    }
+    if let Some(path) = config.swap.as_ref() {
+        let mut f = File::create(path)?;
+        shader::swap(&mut f)?;
     }
     Ok(())
 }

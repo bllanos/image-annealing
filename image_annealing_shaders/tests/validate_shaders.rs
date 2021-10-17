@@ -50,3 +50,10 @@ fn permute() -> Result<(), Box<dyn Error>> {
     shader::permute(&mut v)?;
     validate_shader(&String::from_utf8(v)?)
 }
+
+#[test]
+fn swap() -> Result<(), Box<dyn Error>> {
+    let mut v: Vec<u8> = Vec::new();
+    shader::swap(&mut v)?;
+    validate_shader(&String::from_utf8(v)?)
+}

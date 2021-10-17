@@ -9,3 +9,13 @@ pub fn load_permutation_vector<W: Write>(mut writer: W) -> std::io::Result<()> {
 }}"
     )
 }
+
+pub fn store_permutation_vector<W: Write>(mut writer: W) -> std::io::Result<()> {
+    writeln!(
+        writer,
+        "fn store_permutation_vector(coords : vec2<i32>, displacement : vec2<i32>) {{
+  let permutation_texel : vec4<u32> = vec4<u32>(i32_to_u16(displacement.x), i32_to_u16(displacement.y));
+  textureStore(output_permutation, coords, permutation_texel);
+}}"
+    )
+}

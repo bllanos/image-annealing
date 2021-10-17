@@ -30,3 +30,20 @@ pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
 }}"
     )
 }
+
+pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
+    global_invocation_id_header(&mut writer)?;
+    writeln!(
+        writer,
+        "  let coords_left : vec2<i32> = vec2<i32>(i32(global_id.x * 2u), i32(global_id.y));
+  let coords_right : vec2<i32> = vec2<i32>(coords_left.x + 1, coords_left.y);
+  let dimensions : vec2<i32> = textureDimensions(input_permutation);
+  if(coords_right.x < dimensions.x && coords_right.y < dimensions.y) {{
+    let permutation_vector_left : vec2<i32> = load_permutation_vector(coords_left);
+    let permutation_vector_right : vec2<i32> = load_permutation_vector(coords_right);
+    store_permutation_vector(coords_left, permutation_vector_right + vec2<i32>(1, 0));
+    store_permutation_vector(coords_right, permutation_vector_left + vec2<i32>(-1, 0));
+  }}
+}}"
+    )
+}

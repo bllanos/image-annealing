@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crate::binding::{create_permutation, permute};
+use crate::binding::{create_permutation, permute, swap};
 use crate::compute;
 use crate::function::{conversion, io, main};
 
@@ -20,4 +20,14 @@ fn permute_common<W: Write>(mut writer: W) -> std::io::Result<()> {
 pub fn permute<W: Write>(mut writer: W) -> std::io::Result<()> {
     permute_common(&mut writer)?;
     main::forward_permute(&mut writer)
+}
+
+pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
+    swap::bind_group(&mut writer)?;
+    conversion::u16_to_i32(&mut writer)?;
+    conversion::i32_to_u16(&mut writer)?;
+    io::load_permutation_vector(&mut writer)?;
+    io::store_permutation_vector(&mut writer)?;
+    compute::compute_shader_annotation(&mut writer, Default::default())?;
+    main::swap(&mut writer)
 }

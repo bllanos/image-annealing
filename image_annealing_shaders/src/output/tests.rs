@@ -16,6 +16,7 @@ mod output_config {
                         [".", "create_permutation.wgsl"].iter().collect::<PathBuf>(),
                     )),
                     permute: Some(Cow::from([".", "permute.wgsl"].iter().collect::<PathBuf>())),
+                    swap: Some(Cow::from([".", "swap.wgsl"].iter().collect::<PathBuf>())),
                 },
             );
             Ok(())
@@ -30,6 +31,7 @@ mod output_config {
                 &OutputConfig {
                     create_permutation: Some(Cow::from(directory.join("create_permutation.wgsl"))),
                     permute: Some(Cow::from(directory.join("permute.wgsl"))),
+                    swap: Some(Cow::from(directory.join("swap.wgsl"))),
                 },
             );
             Ok(())
@@ -99,6 +101,26 @@ mod write_files {
 
         Ok(())
     }
+
+    #[test]
+    fn swap_only() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_output_path(&["swap_only.wgsl"]);
+        if path.is_file() {
+            panic!("Output shader file already exists in the filesystem.")
+        }
+        let config = OutputConfig {
+            swap: Some(Cow::from(&path)),
+            ..Default::default()
+        };
+        super::super::write_files(&config)?;
+        let mut expected: Vec<u8> = Vec::new();
+        crate::shader::swap(&mut expected)?;
+        let actual = std::fs::read(&path)?;
+        assert_eq!(actual, expected);
+        std::fs::remove_file(path)?;
+
+        Ok(())
+    }
 }
 
 mod write_default_files {
@@ -119,6 +141,11 @@ mod write_default_files {
             panic!("permute shader file already exists in the filesystem.")
         }
 
+        let swap_path = test_utils::make_test_output_path(&["swap.wgsl"]);
+        if swap_path.is_file() {
+            panic!("swap shader file already exists in the filesystem.")
+        }
+
         super::super::write_default_files(Some(directory))?;
 
         let mut expected: Vec<u8> = Vec::new();
@@ -132,6 +159,12 @@ mod write_default_files {
         actual = std::fs::read(&permute_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(permute_path)?;
+
+        expected.clear();
+        crate::shader::swap(&mut expected)?;
+        actual = std::fs::read(&swap_path)?;
+        assert_eq!(actual, expected);
+        std::fs::remove_file(swap_path)?;
 
         Ok(())
     }
