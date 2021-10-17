@@ -12,6 +12,10 @@ fn main() {
         "cargo:rustc-env=PERMUTE_SHADER={}",
         config.permute.take().unwrap().display()
     );
+    println!(
+        "cargo:rustc-env=SWAP_SHADER={}",
+        config.swap.take().unwrap().display()
+    );
 
     println!("cargo:rerun-if-changed=build.rs");
 }

@@ -7,6 +7,7 @@ use std::error::Error;
 use std::fmt;
 
 pub use super::operation::manager::PermuteOperationInput;
+pub use super::operation::manager::SwapOperationInput;
 
 #[derive(Debug, Clone)]
 pub struct DimensionsMismatchError(ImageDimensions, ImageDimensions);
@@ -54,15 +55,19 @@ impl System {
         self.operations.create_permutation(&self.device)
     }
 
-    pub fn output_permutation(&mut self) -> Result<ValidatedPermutation, Box<dyn Error>> {
-        self.operations.output_permutation(&self.device)
-    }
-
     pub fn operation_permute(
         &mut self,
         input: &PermuteOperationInput,
     ) -> Result<(), Box<dyn Error>> {
         self.operations.permute(&self.device, input)
+    }
+
+    pub fn operation_swap(&mut self, input: &SwapOperationInput) -> Result<(), Box<dyn Error>> {
+        self.operations.swap(&self.device, input)
+    }
+
+    pub fn output_permutation(&mut self) -> Result<ValidatedPermutation, Box<dyn Error>> {
+        self.operations.output_permutation(&self.device)
     }
 
     pub fn output_permuted_image(&mut self) -> Result<LosslessImageBuffer, Box<dyn Error>> {

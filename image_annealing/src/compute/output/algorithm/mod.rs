@@ -3,6 +3,7 @@ use std::error::Error;
 
 pub mod create_permutation;
 pub mod permute;
+pub mod swap;
 pub mod validate_permutation;
 
 enum CompletionStatus {

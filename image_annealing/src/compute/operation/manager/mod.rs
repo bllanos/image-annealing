@@ -22,6 +22,11 @@ pub struct PermuteOperationInput<'a> {
     pub image: Option<&'a image::DynamicImage>,
 }
 
+#[derive(Default)]
+pub struct SwapOperationInput<'a> {
+    pub permutation: Option<&'a ValidatedPermutation>,
+}
+
 pub struct OperationManager {
     resources: ResourceManager,
     state: ResourceStateManager,
@@ -49,6 +54,44 @@ impl OperationManager {
         self.pipelines.create_permutation(&mut encoder);
         self.state.finish_create_permutation()?;
         device.queue().submit(Some(encoder.finish()));
+        Ok(())
+    }
+
+    pub fn permute(
+        &mut self,
+        device: &DeviceManager,
+        input: &PermuteOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("permute_command_encoder"),
+            });
+        let queue = device.queue();
+        self.state
+            .prepare_permute(&self.resources, queue, &mut encoder, input)?;
+        self.pipelines.permute(&mut encoder);
+        self.state.finish_permute()?;
+        queue.submit(Some(encoder.finish()));
+        Ok(())
+    }
+
+    pub fn swap(
+        &mut self,
+        device: &DeviceManager,
+        input: &SwapOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("swap_command_encoder"),
+            });
+        let queue = device.queue();
+        self.state
+            .prepare_swap(&self.resources, queue, &mut encoder, input)?;
+        self.pipelines.swap(&mut encoder);
+        self.state.finish_swap()?;
+        queue.submit(Some(encoder.finish()));
         Ok(())
     }
 
@@ -91,25 +134,6 @@ impl OperationManager {
             )
             .unwrap(),
         ))
-    }
-
-    pub fn permute(
-        &mut self,
-        device: &DeviceManager,
-        input: &PermuteOperationInput,
-    ) -> Result<(), Box<dyn Error>> {
-        let mut encoder = device
-            .device()
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("permute_command_encoder"),
-            });
-        let queue = device.queue();
-        self.state
-            .prepare_permute(&self.resources, queue, &mut encoder, input)?;
-        self.pipelines.permute(&mut encoder);
-        self.state.finish_permute()?;
-        queue.submit(Some(encoder.finish()));
-        Ok(())
     }
 
     pub fn output_permuted_image(

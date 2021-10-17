@@ -4,6 +4,7 @@ use super::shader::WorkgroupGridDimensions;
 mod create_permutation;
 pub mod manager;
 mod permute;
+mod swap;
 
 trait Binding {
     fn layout(&self) -> &wgpu::BindGroupLayout;

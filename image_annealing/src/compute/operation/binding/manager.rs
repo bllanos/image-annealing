@@ -2,12 +2,14 @@ use super::super::super::resource::manager::ResourceManager;
 use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationBinding;
 use super::permute::PermuteBinding;
+use super::swap::SwapBinding;
 use super::Binding;
 use image_annealing_shaders::binding as binding_constants;
 
 pub struct BindingManager {
     create_permutation_binding: CreatePermutationBinding,
     permute_binding: PermuteBinding,
+    swap_binding: SwapBinding,
 }
 
 impl BindingManager {
@@ -15,6 +17,7 @@ impl BindingManager {
         Self {
             create_permutation_binding: CreatePermutationBinding::new(device, resources),
             permute_binding: PermuteBinding::new(device, resources),
+            swap_binding: SwapBinding::new(device, resources),
         }
     }
 
@@ -42,5 +45,18 @@ impl BindingManager {
 
     pub fn permute_grid_dimensions(&self) -> &WorkgroupGridDimensions {
         self.permute_binding.workgroup_grid_dimensions()
+    }
+
+    pub fn bind_swap<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
+        self.swap_binding
+            .bind(binding_constants::swap::GROUP_INDEX, cpass);
+    }
+
+    pub fn swap_layout(&self) -> &wgpu::BindGroupLayout {
+        self.swap_binding.layout()
+    }
+
+    pub fn swap_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+        self.swap_binding.workgroup_grid_dimensions()
     }
 }

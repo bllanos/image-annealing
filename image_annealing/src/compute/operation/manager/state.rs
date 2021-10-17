@@ -1,5 +1,5 @@
 use super::super::super::resource::manager::ResourceManager;
-use super::PermuteOperationInput;
+use super::{PermuteOperationInput, SwapOperationInput};
 use std::error::Error;
 use std::fmt;
 
@@ -100,24 +100,6 @@ impl ResourceStateManager {
         Ok(())
     }
 
-    pub fn output_permutation(
-        &mut self,
-        resources: &ResourceManager,
-        encoder: &mut wgpu::CommandEncoder,
-    ) -> Result<(), Box<dyn Error>> {
-        if self.flags.permutation_output_texture {
-            if !self.flags.permutation_output_buffer {
-                resources
-                    .permutation_output_buffer()
-                    .load(encoder, resources.permutation_output_texture());
-                self.flags.permutation_output_buffer = true;
-            }
-            Ok(())
-        } else {
-            Err(Box::new(InsufficientOutputError::Permutation))
-        }
-    }
-
     pub fn prepare_permute(
         &mut self,
         resources: &ResourceManager,
@@ -166,6 +148,64 @@ impl ResourceStateManager {
     pub fn finish_permute(&mut self) -> Result<(), Box<dyn Error>> {
         self.flags.lossless_image_output_texture = true;
         Ok(())
+    }
+
+    pub fn prepare_swap(
+        &mut self,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        input: &SwapOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        self.flags.lossless_image_output_texture = false;
+        self.flags.lossless_image_output_buffer = false;
+        let had_output_permutation = self.flags.permutation_output_texture;
+        self.flags.permutation_output_texture = false;
+        self.flags.permutation_output_buffer = false;
+        match input.permutation {
+            Some(permutation) => {
+                resources
+                    .permutation_input_texture()
+                    .load(queue, permutation);
+                self.flags.permutation_input_texture = true;
+            }
+            None => {
+                if !self.flags.permutation_input_texture {
+                    if had_output_permutation {
+                        resources
+                            .permutation_input_texture()
+                            .copy(encoder, resources.permutation_output_texture());
+                        self.flags.permutation_input_texture = true;
+                    } else {
+                        return Err(Box::new(InsufficientInputError::Permutation));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn finish_swap(&mut self) -> Result<(), Box<dyn Error>> {
+        self.flags.permutation_output_texture = true;
+        Ok(())
+    }
+
+    pub fn output_permutation(
+        &mut self,
+        resources: &ResourceManager,
+        encoder: &mut wgpu::CommandEncoder,
+    ) -> Result<(), Box<dyn Error>> {
+        if self.flags.permutation_output_texture {
+            if !self.flags.permutation_output_buffer {
+                resources
+                    .permutation_output_buffer()
+                    .load(encoder, resources.permutation_output_texture());
+                self.flags.permutation_output_buffer = true;
+            }
+            Ok(())
+        } else {
+            Err(Box::new(InsufficientOutputError::Permutation))
+        }
     }
 
     pub fn output_permuted_image(
