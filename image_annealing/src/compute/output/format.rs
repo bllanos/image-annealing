@@ -1,10 +1,11 @@
-use image::ImageBuffer;
+use image::{GenericImageView, ImageBuffer};
 use std::error::Error;
 use std::path::{Path, PathBuf};
 
 pub type VectorFieldImageBufferComponent = u8;
 pub type VectorFieldImageBuffer =
     ImageBuffer<image::Rgba<VectorFieldImageBufferComponent>, Vec<VectorFieldImageBufferComponent>>;
+pub type VectorFieldImageBufferPixel = <VectorFieldImageBuffer as GenericImageView>::Pixel;
 
 pub type LosslessImageBufferComponent = u16;
 pub type LosslessImageBuffer =

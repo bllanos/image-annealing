@@ -1,5 +1,5 @@
 use super::ImageDimensions;
-use crate::compute::conversion::{VectorFieldEntry, VectorFieldEntryComponent};
+use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
 use std::convert::TryInto;
 use std::error::Error;
@@ -96,10 +96,7 @@ pub fn validate_permutation(
     for (x_in, y_in, px) in image.enumerate_pixels() {
         let x = i64::from(x_in);
         let y = i64::from(y_in);
-        let delta = VectorFieldEntry(
-            VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),
-            VectorFieldEntryComponent::from_be_bytes([px[2], px[3]]),
-        );
+        let delta = VectorFieldEntry::from_pixel(px);
         let target = (x + i64::from(delta.0), y + i64::from(delta.1));
         match dimensions.make_linear_index(target.0, target.1) {
             Err(_) => {

@@ -1,5 +1,6 @@
-use super::format::VectorFieldImageBuffer;
+use super::format::{VectorFieldImageBuffer, VectorFieldImageBufferPixel};
 use crate::image_utils::ImageDimensions;
+use image::Rgba;
 use std::convert::TryInto;
 
 pub type VectorFieldEntryComponent = i16;
@@ -7,15 +8,26 @@ pub type VectorFieldEntryComponent = i16;
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct VectorFieldEntry(pub VectorFieldEntryComponent, pub VectorFieldEntryComponent);
 
+impl VectorFieldEntry {
+    pub fn from_pixel(px: &VectorFieldImageBufferPixel) -> Self {
+        VectorFieldEntry(
+            VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),
+            VectorFieldEntryComponent::from_be_bytes([px[2], px[3]]),
+        )
+    }
+
+    pub fn to_pixel(&self) -> VectorFieldImageBufferPixel {
+        let VectorFieldEntry(delta_x, delta_y) = self;
+        let first = delta_x.to_be_bytes();
+        let second = delta_y.to_be_bytes();
+        Rgba([first[0], first[1], second[0], second[1]])
+    }
+}
+
 pub fn to_vec(image: &VectorFieldImageBuffer) -> Vec<VectorFieldEntry> {
     image
         .enumerate_pixels()
-        .map(|(.., px)| -> VectorFieldEntry {
-            VectorFieldEntry(
-                VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),
-                VectorFieldEntryComponent::from_be_bytes([px[2], px[3]]),
-            )
-        })
+        .map(|(.., px)| VectorFieldEntry::from_pixel(px))
         .collect()
 }
 

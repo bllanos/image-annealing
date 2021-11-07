@@ -4,6 +4,41 @@ use crate::image_utils::ImageDimensions;
 use image::Rgba;
 use std::error::Error;
 
+mod vector_field_entry {
+    use super::super::VectorFieldEntry;
+    use crate::image_utils::ImageDimensions;
+    use std::convert::TryInto;
+    use std::error::Error;
+
+    #[test]
+    fn from_pixel() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::new(3, 5)?;
+        let vector = super::make_vector();
+        for (k, entry) in vector.iter().enumerate() {
+            let (x, y) = dimensions.make_coordinates(k)?;
+            assert_eq!(
+                &VectorFieldEntry::from_pixel(&super::make_pixels(x.try_into()?, y.try_into()?)),
+                entry
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn to_pixel() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::new(3, 5)?;
+        let vector = super::make_vector();
+        for (k, entry) in vector.iter().enumerate() {
+            let (x, y) = dimensions.make_coordinates(k)?;
+            assert_eq!(
+                super::make_pixels(x.try_into()?, y.try_into()?),
+                VectorFieldEntry::to_pixel(entry)
+            );
+        }
+        Ok(())
+    }
+}
+
 fn make_pixels(x: u32, y: u32) -> Rgba<VectorFieldImageBufferComponent> {
     match x {
         0 => match y {
