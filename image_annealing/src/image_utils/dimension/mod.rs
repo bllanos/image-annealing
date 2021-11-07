@@ -62,6 +62,7 @@ where
     InvalidNumberType(T),
     OutOfBoundX(ValueOutOfBounds),
     OutOfBoundY(ValueOutOfBounds),
+    OutOfBoundLinear(ValueOutOfBounds),
 }
 
 impl<T> fmt::Display for OutOfBoundsCoordinatesError<T>
@@ -80,6 +81,9 @@ where
             OutOfBoundsCoordinatesError::OutOfBoundX(detail) => write!(f, "x = {}", detail),
             OutOfBoundsCoordinatesError::OutOfBoundY(detail) => {
                 write!(f, "y = {}", detail)
+            }
+            OutOfBoundsCoordinatesError::OutOfBoundLinear(detail) => {
+                write!(f, "linear index {}", detail)
             }
         }
     }
@@ -174,6 +178,28 @@ impl ImageDimensions {
                 .unwrap()
                 .checked_add(x_usize)
                 .unwrap())
+        }
+    }
+
+    pub fn make_coordinates<T>(
+        &self,
+        k: T,
+    ) -> Result<(usize, usize), OutOfBoundsCoordinatesError<T>>
+    where
+        T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
+    {
+        let k_usize = k
+            .try_into()
+            .map_err(|_| OutOfBoundsCoordinatesError::InvalidNumberType(k))?;
+        if k_usize >= self.count() {
+            Err(OutOfBoundsCoordinatesError::OutOfBoundLinear(
+                ValueOutOfBounds {
+                    value: k_usize,
+                    bounds: *self,
+                },
+            ))
+        } else {
+            Ok((k_usize % self.width, k_usize / self.width))
         }
     }
 }

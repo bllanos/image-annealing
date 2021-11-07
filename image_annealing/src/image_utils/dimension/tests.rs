@@ -107,3 +107,55 @@ mod make_linear_index {
         Ok(())
     }
 }
+
+mod make_coordinates {
+    use super::super::ImageDimensions;
+    use std::error::Error;
+
+    #[test]
+    fn negative() -> Result<(), Box<dyn Error>> {
+        let dim = ImageDimensions::new(3, 5)?;
+        test_utils::assert_error_contains(
+            dim.make_coordinates(-1),
+            "failed to convert -1 to the required type for coordinates",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn large() -> Result<(), Box<dyn Error>> {
+        let dim = ImageDimensions::new(3, 5)?;
+        test_utils::assert_error_contains(
+            dim.make_coordinates(15),
+            "linear index 15 is out of bounds (width, height) = (3, 5)",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn valid_indices() -> Result<(), Box<dyn Error>> {
+        let dim = ImageDimensions::new(3, 5)?;
+        let mut coordinates = dim.make_coordinates(0)?;
+        assert_eq!(coordinates.0, 0);
+        assert_eq!(coordinates.1, 0);
+        coordinates = dim.make_coordinates(1)?;
+        assert_eq!(coordinates.0, 1);
+        assert_eq!(coordinates.1, 0);
+        coordinates = dim.make_coordinates(2)?;
+        assert_eq!(coordinates.0, 2);
+        assert_eq!(coordinates.1, 0);
+        coordinates = dim.make_coordinates(3)?;
+        assert_eq!(coordinates.0, 0);
+        assert_eq!(coordinates.1, 1);
+        coordinates = dim.make_coordinates(11)?;
+        assert_eq!(coordinates.0, 2);
+        assert_eq!(coordinates.1, 3);
+        coordinates = dim.make_coordinates(12)?;
+        assert_eq!(coordinates.0, 0);
+        assert_eq!(coordinates.1, 4);
+        coordinates = dim.make_coordinates(14)?;
+        assert_eq!(coordinates.0, 2);
+        assert_eq!(coordinates.1, 4);
+        Ok(())
+    }
+}
