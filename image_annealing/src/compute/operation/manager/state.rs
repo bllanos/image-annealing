@@ -119,15 +119,13 @@ impl ResourceStateManager {
                 self.flags.permutation_output_buffer = false;
             }
             None => {
-                if !self.flags.permutation_input_texture {
-                    if self.flags.permutation_output_texture {
-                        resources
-                            .permutation_input_texture()
-                            .copy(encoder, resources.permutation_output_texture());
-                        self.flags.permutation_input_texture = true;
-                    } else {
-                        return Err(Box::new(InsufficientInputError::Permutation));
-                    }
+                if self.flags.permutation_output_texture {
+                    resources
+                        .permutation_input_texture()
+                        .copy(encoder, resources.permutation_output_texture());
+                    self.flags.permutation_input_texture = true;
+                } else if !self.flags.permutation_input_texture {
+                    return Err(Box::new(InsufficientInputError::Permutation));
                 }
             }
         }
@@ -170,15 +168,13 @@ impl ResourceStateManager {
                 self.flags.permutation_input_texture = true;
             }
             None => {
-                if !self.flags.permutation_input_texture {
-                    if had_output_permutation {
-                        resources
-                            .permutation_input_texture()
-                            .copy(encoder, resources.permutation_output_texture());
-                        self.flags.permutation_input_texture = true;
-                    } else {
-                        return Err(Box::new(InsufficientInputError::Permutation));
-                    }
+                if had_output_permutation {
+                    resources
+                        .permutation_input_texture()
+                        .copy(encoder, resources.permutation_output_texture());
+                    self.flags.permutation_input_texture = true;
+                } else if !self.flags.permutation_input_texture {
+                    return Err(Box::new(InsufficientInputError::Permutation));
                 }
             }
         }

@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 pub mod algorithm;
 pub mod image;
+pub mod operation;
 pub mod permutation;
 
 pub fn make_test_data_path<T, P>(components: T) -> PathBuf

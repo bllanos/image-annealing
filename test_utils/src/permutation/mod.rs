@@ -3,19 +3,27 @@ use image_annealing::compute::format::LosslessImageBuffer;
 use image_annealing::compute::format::VectorFieldImageBuffer;
 use image_annealing::image_utils::validation::ValidatedPermutation;
 use image_annealing::image_utils::ImageDimensions;
+use std::convert::TryInto;
 
 pub struct DimensionsAndPermutation {
     pub permutation: VectorFieldImageBuffer,
     pub dimensions: ImageDimensions,
 }
 
-pub fn identity() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+pub fn identity_with_dimensions<T>(width: T, height: T) -> DimensionsAndPermutation
+where
+    T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
+{
+    let dimensions = ImageDimensions::new(width, height).unwrap();
     let v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
         dimensions,
     }
+}
+
+pub fn identity() -> DimensionsAndPermutation {
+    identity_with_dimensions(2, 3)
 }
 
 pub fn identity_permute(image: &LosslessImageBuffer) -> LosslessImageBuffer {
@@ -145,6 +153,29 @@ pub fn bit_interpretation_cases_forward_permute(
     permuted_image.put_pixel(131, 100, pixel1);
 
     permuted_image
+}
+
+pub fn reflect_around_center() -> DimensionsAndPermutation {
+    // 257 is the smallest odd-numbered size such that permutation vector components will
+    // exceed absolute values of 255 and therefore test correct handling of both bytes
+    // in permutation vector components.
+    let dimensions = ImageDimensions::new(257, 257).unwrap();
+    let count = dimensions.count();
+    let mut v: Vec<VectorFieldEntry> = Vec::with_capacity(count);
+    let center_x: i16 = (dimensions.width() / 2).try_into().unwrap();
+    let center_y: i16 = (dimensions.height() / 2).try_into().unwrap();
+    for k in 0..count {
+        let (x, y) = dimensions.make_coordinates(k).unwrap();
+        v.push(VectorFieldEntry(
+            2i16 * (center_x - <usize as TryInto<i16>>::try_into(x).unwrap()),
+            2i16 * (center_y - <usize as TryInto<i16>>::try_into(y).unwrap()),
+        ))
+    }
+
+    DimensionsAndPermutation {
+        permutation: conversion::to_image(&dimensions, &v),
+        dimensions,
+    }
 }
 
 pub fn assert_is_identity(permutation: &ValidatedPermutation) {
