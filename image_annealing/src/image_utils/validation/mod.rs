@@ -88,7 +88,7 @@ impl AsRef<VectorFieldImageBuffer> for ValidatedPermutation {
     }
 }
 
-pub fn validate_permutation(
+pub(crate) fn validate_permutation(
     image: VectorFieldImageBuffer,
 ) -> Result<ValidatedPermutation, Box<dyn Error>> {
     let dimensions = ImageDimensions::from_image(&image)?;
