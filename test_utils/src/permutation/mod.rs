@@ -79,6 +79,26 @@ pub fn non_identity_forward_permute(image: &LosslessImageBuffer) -> LosslessImag
     permuted_image
 }
 
+pub fn non_identity_horizontal_swap_forward_permute(
+    image: &LosslessImageBuffer,
+) -> LosslessImageBuffer {
+    assert_eq!(image.width(), 2);
+    assert_eq!(image.height(), 3);
+    let mut permuted_image = image.clone();
+    let pixel1 = *permuted_image.get_pixel(0, 0);
+    let pixel2 = *permuted_image.get_pixel(1, 0);
+    let pixel3 = *permuted_image.get_pixel(0, 1);
+    let pixel4 = *permuted_image.get_pixel(1, 1);
+    let pixel5 = *permuted_image.get_pixel(0, 2);
+
+    permuted_image.put_pixel(0, 0, pixel2);
+    permuted_image.put_pixel(1, 0, pixel3);
+    permuted_image.put_pixel(0, 1, pixel5);
+    permuted_image.put_pixel(1, 1, pixel1);
+    permuted_image.put_pixel(0, 2, pixel4);
+    permuted_image
+}
+
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(513, 513).unwrap();
     let mut v = vec![VectorFieldEntry(0, 0); dimensions.count()];

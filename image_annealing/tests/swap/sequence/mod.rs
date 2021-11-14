@@ -72,6 +72,52 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn reuse_nothing() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::non_identity();
+    let mut expected_permutation = test_utils::operation::swap(&permutation);
+
+    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut algorithm = dispatcher.swap(
+        SwapInput {
+            candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+        },
+        SwapParameters {},
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output().unwrap();
+    assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
+    assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+
+    dispatcher = algorithm.return_to_dispatcher();
+
+    let DimensionsAndPermutation {
+        permutation: other_permutation,
+        dimensions: other_dimensions,
+    } = test_utils::permutation::identity();
+    assert_eq!(dimensions, other_dimensions);
+    expected_permutation = test_utils::operation::swap(&other_permutation);
+    algorithm = dispatcher.swap(
+        SwapInput {
+            candidate_permutation: Some(CandidatePermutation(other_permutation.clone())),
+        },
+        SwapParameters {},
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output().unwrap();
+    assert_eq!(
+        *output.input_permutation.unwrap().as_ref(),
+        other_permutation
+    );
+    assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+    Ok(())
+}
+
+#[test]
 fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
@@ -96,7 +142,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
     );
     dispatcher = algorithm.return_to_dispatcher();
 
-    let mut algorithm = dispatcher.swap(Default::default(), SwapParameters {});
+    algorithm = dispatcher.swap(Default::default(), SwapParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
