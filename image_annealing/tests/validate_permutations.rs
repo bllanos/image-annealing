@@ -23,6 +23,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap().validated_permutation;
     assert_eq!(*output.as_ref(), expected);
+    assert!(algorithm.full_output().is_none());
     Ok(())
 }
 

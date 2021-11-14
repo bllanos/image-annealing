@@ -34,6 +34,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), dynamic_original_image);
     assert_eq!(output.permuted_image, permuted_image);
+    assert!(algorithm.full_output().is_none());
     Ok(())
 }
 

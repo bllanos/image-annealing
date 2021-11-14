@@ -73,3 +73,6 @@ impl System {
         self.operations.output_permuted_image(&self.device)
     }
 }
+
+#[cfg(test)]
+mod tests;

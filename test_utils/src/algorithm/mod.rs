@@ -24,6 +24,8 @@ pub fn assert_step_until_success<PartialOutput, FullOutput>(
     algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
     status: OutputStatus,
 ) -> Result<(), Box<dyn Error>> {
+    assert!(algorithm.partial_output().is_none());
+    assert!(algorithm.full_output().is_none());
     algorithm.step_until(status)?;
     assert_output_vacancies(algorithm, status);
     match status {

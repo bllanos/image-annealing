@@ -18,6 +18,7 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
+    assert!(algorithm.full_output().is_none());
     Ok(())
 }
 

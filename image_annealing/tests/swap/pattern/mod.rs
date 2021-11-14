@@ -24,6 +24,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
     assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+    assert!(algorithm.full_output().is_none());
     Ok(())
 }
 
