@@ -1,0 +1,6 @@
+{
+  "Swap": {
+    "candidate_permutation_path": "../test_data/image/permutation/not_found.png",
+    "permutation_output_path_no_extension": "permutation_out"
+  }
+}

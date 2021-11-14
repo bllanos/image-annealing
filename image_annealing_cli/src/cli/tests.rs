@@ -14,33 +14,6 @@ mod create_dispatcher {
     }
 
     #[test]
-    fn valid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
-        create_dispatcher(&Config::ValidatePermutation {
-            candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                "image",
-                "permutation",
-                "identity_permutation.png",
-            ]),
-        })?;
-        Ok(())
-    }
-
-    #[test]
-    fn invalid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
-        test_utils::assert_error_contains(
-            create_dispatcher(&Config::ValidatePermutation {
-                candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                    "image",
-                    "permutation",
-                    "not_found.png",
-                ]),
-            }),
-            "No such file or directory",
-        );
-        Ok(())
-    }
-
-    #[test]
     fn valid_permute_config() -> Result<(), Box<dyn Error>> {
         create_dispatcher(&Config::Permute {
             candidate_permutation_path: test_utils::make_test_data_path_string(&[
@@ -73,6 +46,62 @@ mod create_dispatcher {
                     "not_found.png",
                 ]),
                 permuted_image_output_path_no_extension: String::from("none"),
+            }),
+            "No such file or directory",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn valid_swap_config() -> Result<(), Box<dyn Error>> {
+        create_dispatcher(&Config::Swap {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]),
+            permutation_output_path_no_extension: String::from("none"),
+        })?;
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_swap_config() -> Result<(), Box<dyn Error>> {
+        test_utils::assert_error_contains(
+            create_dispatcher(&Config::Swap {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "not_found.png",
+                ]),
+                permutation_output_path_no_extension: String::from("none"),
+            }),
+            "No such file or directory",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn valid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
+        create_dispatcher(&Config::ValidatePermutation {
+            candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]),
+        })?;
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_validate_permutation_config() -> Result<(), Box<dyn Error>> {
+        test_utils::assert_error_contains(
+            create_dispatcher(&Config::ValidatePermutation {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "not_found.png",
+                ]),
             }),
             "No such file or directory",
         );

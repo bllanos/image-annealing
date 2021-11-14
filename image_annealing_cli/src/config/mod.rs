@@ -36,6 +36,10 @@ enum UnverifiedConfig {
         original_image_path: String,
         permuted_image_output_path_no_extension: String,
     },
+    Swap {
+        candidate_permutation_path: String,
+        permutation_output_path_no_extension: String,
+    },
     ValidatePermutation {
         candidate_permutation_path: String,
     },
@@ -51,6 +55,10 @@ pub enum Config {
         candidate_permutation_path: String,
         original_image_path: String,
         permuted_image_output_path_no_extension: String,
+    },
+    Swap {
+        candidate_permutation_path: String,
+        permutation_output_path_no_extension: String,
     },
     ValidatePermutation {
         candidate_permutation_path: String,
@@ -115,6 +123,15 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
                 )));
             }
         }
+        UnverifiedConfig::Swap {
+            candidate_permutation_path,
+            permutation_output_path_no_extension,
+        } => Config::Swap {
+            candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
+            permutation_output_path_no_extension: convert_path_separators(
+                permutation_output_path_no_extension,
+            ),
+        },
         UnverifiedConfig::ValidatePermutation {
             candidate_permutation_path,
         } => Config::ValidatePermutation {

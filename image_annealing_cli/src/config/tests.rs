@@ -91,37 +91,6 @@ mod parse_config_file {
     }
 
     #[test]
-    fn valid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
-        let path =
-            test_utils::make_test_data_path(&["config", "validate_permutation", "valid.json"]);
-        let r = parse_config_file(path)?;
-        assert_eq!(
-            r,
-            Config::ValidatePermutation {
-                candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                    "image",
-                    "permutation",
-                    "identity_permutation.png"
-                ]),
-            }
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn invalid_validate_permutation_config_file() {
-        let path = test_utils::make_test_data_path(&[
-            "config",
-            "create_permutation",
-            "candidate_permutation_not_found.json",
-        ]);
-        test_utils::assert_error_contains(
-            parse_config_file(path),
-            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
-        );
-    }
-
-    #[test]
     fn valid_permute_config_file() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_data_path(&["config", "permute", "valid.json"]);
         let r = parse_config_file(path)?;
@@ -177,6 +146,68 @@ mod parse_config_file {
         test_utils::assert_error_contains(
             parse_config_file(path),
             "mismatch in image dimensions, (width, height) = (200, 200) and (width, height) = (20, 25)",
+        );
+    }
+
+    #[test]
+    fn valid_swap_config_file() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_data_path(&["config", "swap", "valid.json"]);
+        let r = parse_config_file(path)?;
+        assert_eq!(
+            r,
+            Config::Swap {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "identity_permutation.png"
+                ]),
+                permutation_output_path_no_extension: String::from("permutation_out"),
+            }
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_swap_config_file_permutation() {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "swap",
+            "candidate_permutation_not_found.json",
+        ]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+        );
+    }
+
+    #[test]
+    fn valid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
+        let path =
+            test_utils::make_test_data_path(&["config", "validate_permutation", "valid.json"]);
+        let r = parse_config_file(path)?;
+        assert_eq!(
+            r,
+            Config::ValidatePermutation {
+                candidate_permutation_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "permutation",
+                    "identity_permutation.png"
+                ]),
+            }
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_validate_permutation_config_file() {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "validate_permutation",
+            "candidate_permutation_not_found.json",
+        ]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
         );
     }
 }
