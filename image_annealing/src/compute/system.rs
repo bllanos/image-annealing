@@ -1,8 +1,7 @@
 use super::device::DeviceManager;
 use super::operation::manager::OperationManager;
 use super::output::format::LosslessImageBuffer;
-use crate::image_utils::validation::ValidatedPermutation;
-use crate::image_utils::ImageDimensions;
+use crate::{ImageDimensions, ValidatedPermutation};
 use std::error::Error;
 use std::fmt;
 

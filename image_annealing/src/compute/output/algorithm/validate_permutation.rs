@@ -2,7 +2,7 @@ use super::super::super::system::{DimensionsMismatchError, System};
 use super::super::OutputStatus;
 use super::CompletionStatus;
 use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use std::error::Error;
 
 pub struct ValidatePermutationParameters {}

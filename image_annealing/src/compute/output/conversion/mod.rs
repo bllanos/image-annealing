@@ -1,5 +1,5 @@
 use super::format::{VectorFieldImageBuffer, VectorFieldImageBufferPixel};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use image::Rgba;
 use std::convert::TryInto;
 

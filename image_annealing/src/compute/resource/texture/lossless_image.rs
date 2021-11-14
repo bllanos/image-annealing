@@ -1,5 +1,5 @@
 use super::{Texture, TextureData, TextureDatatype};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use core::num::NonZeroU32;
 use image::DynamicImage;
 use std::convert::{TryFrom, TryInto};

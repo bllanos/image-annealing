@@ -1,7 +1,6 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::{Texture, TextureData, TextureDatatype};
-use crate::image_utils::validation::ValidatedPermutation;
-use crate::image_utils::ImageDimensions;
+use crate::{ImageDimensions, ValidatedPermutation};
 use core::num::NonZeroU32;
 use std::convert::{TryFrom, TryInto};
 

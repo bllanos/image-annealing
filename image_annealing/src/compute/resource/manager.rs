@@ -3,7 +3,7 @@ use super::texture::{
     LosslessImageInputTexture, LosslessImageOutputTexture, PermutationInputTexture,
     PermutationOutputTexture,
 };
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 
 pub struct ResourceManager {
     permutation_input_texture: PermutationInputTexture,

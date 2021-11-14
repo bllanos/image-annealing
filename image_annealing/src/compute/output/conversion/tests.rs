@@ -1,12 +1,12 @@
 use super::super::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
 use super::VectorFieldEntry;
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use image::Rgba;
 use std::error::Error;
 
 mod vector_field_entry {
     use super::super::VectorFieldEntry;
-    use crate::image_utils::ImageDimensions;
+    use crate::ImageDimensions;
     use std::convert::TryInto;
     use std::error::Error;
 

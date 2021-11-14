@@ -1,7 +1,7 @@
 use image::io::Reader as ImageReader;
 use image::DynamicImage;
 use image_annealing::compute::format::VectorFieldImageBuffer;
-use image_annealing::image_utils::validation::CandidatePermutation;
+use image_annealing::CandidatePermutation;
 use std::error::Error;
 use std::path::Path;
 

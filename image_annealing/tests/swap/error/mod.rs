@@ -1,7 +1,5 @@
-use image_annealing::compute;
-use image_annealing::compute::{OutputStatus, SwapInput, SwapParameters};
-use image_annealing::image_utils::validation::CandidatePermutation;
-use image_annealing::image_utils::ImageDimensions;
+use image_annealing::compute::{self, OutputStatus, SwapInput, SwapParameters};
+use image_annealing::{CandidatePermutation, ImageDimensions};
 use std::default::Default;
 use std::error::Error;
 use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};

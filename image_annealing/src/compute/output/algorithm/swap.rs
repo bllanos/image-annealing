@@ -4,7 +4,7 @@ use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::CompletionStatus;
-use crate::image_utils::validation::{CandidatePermutation, ValidatedPermutation};
+use crate::{CandidatePermutation, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
 

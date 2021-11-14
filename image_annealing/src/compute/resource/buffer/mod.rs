@@ -1,5 +1,5 @@
 use super::texture::{Texture, TEXTURE_ARRAY_LAYERS};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use core::future::Future;
 use core::num::NonZeroU32;
 use std::convert::TryInto;

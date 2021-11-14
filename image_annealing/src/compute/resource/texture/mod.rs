@@ -1,4 +1,4 @@
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use std::convert::TryInto;
 
 mod lossless_image;

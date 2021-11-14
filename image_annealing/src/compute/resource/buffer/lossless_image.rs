@@ -2,7 +2,7 @@ use super::super::texture::{
     LosslessImageOutputTexture, LosslessImageTexture, Texture, TextureDatatype,
 };
 use super::{MappedBuffer, ReadMappableBuffer, TextureCopyBufferData};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 
 pub struct LosslessImageOutputBuffer(TextureCopyBufferData);
 

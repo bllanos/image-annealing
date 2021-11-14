@@ -8,7 +8,7 @@ use super::super::resource::manager::ResourceManager;
 use super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self, ValidatedPermutation};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use std::convert::TryInto;
 use std::default::Default;
 use std::error::Error;

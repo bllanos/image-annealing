@@ -2,7 +2,7 @@ use super::super::texture::{
     PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
 };
 use super::{MappedBuffer, ReadMappableBuffer, TextureCopyBufferData};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 
 pub struct PermutationOutputBuffer(TextureCopyBufferData);
 

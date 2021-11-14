@@ -9,7 +9,7 @@ use super::output::algorithm::validate_permutation::{
 };
 use super::output::{Algorithm, OutputStatus};
 use super::system::System;
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use std::error::Error;
 use std::fmt;
 

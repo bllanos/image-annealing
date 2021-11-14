@@ -1,6 +1,6 @@
 use image::Rgba;
 use image_annealing::compute::format::LosslessImageBuffer;
-use image_annealing::image_utils::ImageDimensions;
+use image_annealing::ImageDimensions;
 use std::convert::TryInto;
 
 pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {

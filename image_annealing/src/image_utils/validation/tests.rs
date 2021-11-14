@@ -1,6 +1,6 @@
 use super::validate_permutation;
 use crate::compute::conversion::{self, VectorFieldEntry};
-use crate::image_utils::ImageDimensions;
+use crate::ImageDimensions;
 use std::error::Error;
 use test_utils::permutation::{self, DimensionsAndPermutation};
 

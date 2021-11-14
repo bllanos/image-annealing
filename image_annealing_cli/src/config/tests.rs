@@ -1,6 +1,6 @@
 mod parse_args {
     use super::super::{parse_args, Config};
-    use image_annealing::image_utils::ImageDimensions;
+    use image_annealing::ImageDimensions;
     use std::error::Error;
 
     #[test]
@@ -54,7 +54,7 @@ mod parse_args {
 
 mod parse_config_file {
     use super::super::{parse_config_file, Config};
-    use image_annealing::image_utils::ImageDimensions;
+    use image_annealing::ImageDimensions;
     use std::error::Error;
 
     #[test]

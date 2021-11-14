@@ -1,7 +1,7 @@
 use super::super::super::system::System;
 use super::super::OutputStatus;
 use super::CompletionStatus;
-use crate::image_utils::validation::ValidatedPermutation;
+use crate::ValidatedPermutation;
 use std::error::Error;
 
 pub struct CreatePermutationParameters {}

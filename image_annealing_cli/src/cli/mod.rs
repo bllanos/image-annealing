@@ -4,7 +4,7 @@ use image_annealing::compute::{
     self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, OutputStatus,
     PermuteInput, PermuteParameters, ValidatePermutationInput, ValidatePermutationParameters,
 };
-use image_annealing::image_utils::ImageDimensions;
+use image_annealing::ImageDimensions;
 use std::error::Error;
 
 mod loader;

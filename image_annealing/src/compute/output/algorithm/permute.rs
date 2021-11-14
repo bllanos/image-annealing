@@ -5,8 +5,7 @@ use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::CompletionStatus;
-use crate::image_utils::validation::{CandidatePermutation, ValidatedPermutation};
-use crate::image_utils::ImageDimensions;
+use crate::{CandidatePermutation, ImageDimensions, ValidatedPermutation};
 use image::DynamicImage;
 use std::default::Default;
 use std::error::Error;

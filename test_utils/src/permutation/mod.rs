@@ -1,8 +1,6 @@
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
-use image_annealing::compute::format::LosslessImageBuffer;
-use image_annealing::compute::format::VectorFieldImageBuffer;
-use image_annealing::image_utils::validation::ValidatedPermutation;
-use image_annealing::image_utils::ImageDimensions;
+use image_annealing::compute::format::{LosslessImageBuffer, VectorFieldImageBuffer};
+use image_annealing::{ImageDimensions, ValidatedPermutation};
 use std::convert::TryInto;
 
 pub struct DimensionsAndPermutation {
