@@ -11,7 +11,7 @@ impl PermutationOutputBuffer {
         Self(TextureCopyBufferData::create_output_buffer(
             device,
             image_dimensions,
-            PermutationTexture::pixel_size(),
+            PermutationTexture::PIXEL_SIZE,
             Some("permutation_output_buffer"),
         ))
     }

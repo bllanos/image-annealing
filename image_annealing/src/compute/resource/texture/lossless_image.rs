@@ -8,13 +8,8 @@ pub struct LosslessImageTexture {}
 
 impl TextureDatatype for LosslessImageTexture {
     type Component = u32;
-    fn n_components() -> usize {
-        4
-    }
-
-    fn format() -> wgpu::TextureFormat {
-        wgpu::TextureFormat::Rgba32Uint
-    }
+    const N_COMPONENTS: usize = 4;
+    const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba32Uint;
 }
 
 pub struct LosslessImageInputTexture(TextureData);
@@ -57,7 +52,7 @@ impl LosslessImageInputTexture {
         Self(TextureData::create_read_texture(
             device,
             image_dimensions,
-            LosslessImageTexture::format(),
+            LosslessImageTexture::FORMAT,
             Some("lossless_image_input_texture"),
             Some("lossless_image_input_texture_view"),
         ))
@@ -83,7 +78,7 @@ impl LosslessImageInputTexture {
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
-                    (<LosslessImageTexture as TextureDatatype>::pixel_size()
+                    (<LosslessImageTexture as TextureDatatype>::PIXEL_SIZE
                         * <usize as TryFrom<u32>>::try_from(width).unwrap())
                     .try_into()
                     .unwrap(),
@@ -100,7 +95,7 @@ impl LosslessImageOutputTexture {
         Self(TextureData::create_write_texture(
             device,
             image_dimensions,
-            LosslessImageTexture::format(),
+            LosslessImageTexture::FORMAT,
             Some("lossless_image_output_texture"),
             Some("lossless_image_output_texture_view"),
         ))

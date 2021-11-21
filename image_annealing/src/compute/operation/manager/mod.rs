@@ -161,9 +161,8 @@ impl OperationManager {
         let result: Vec<LosslessImageBufferComponent> = data
             .chunks(buffer_dimensions.padded_bytes_per_row)
             .flat_map(|c| {
-                c[..buffer_dimensions.unpadded_bytes_per_row].chunks_exact(std::mem::size_of::<
-                    <LosslessImageTexture as TextureDatatype>::Component,
-                >())
+                c[..buffer_dimensions.unpadded_bytes_per_row]
+                    .chunks_exact(<LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE)
             })
             .map(|b| {
                 let val = <LosslessImageTexture as TextureDatatype>::Component::from_ne_bytes(

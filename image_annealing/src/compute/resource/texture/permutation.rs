@@ -8,13 +8,9 @@ pub struct PermutationTexture {}
 
 impl TextureDatatype for PermutationTexture {
     type Component = VectorFieldEntryComponent;
-    fn n_components() -> usize {
-        2
-    }
+    const N_COMPONENTS: usize = 2;
 
-    fn format() -> wgpu::TextureFormat {
-        wgpu::TextureFormat::Rgba8Uint
-    }
+    const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba8Uint;
 }
 
 pub struct PermutationInputTexture(TextureData);
@@ -57,7 +53,7 @@ impl PermutationInputTexture {
         Self(TextureData::create_read_texture(
             device,
             image_dimensions,
-            PermutationTexture::format(),
+            PermutationTexture::FORMAT,
             Some("permutation_input_texture"),
             Some("permutation_input_texture_view"),
         ))
@@ -73,7 +69,7 @@ impl PermutationInputTexture {
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
-                    (<PermutationTexture as TextureDatatype>::pixel_size()
+                    (<PermutationTexture as TextureDatatype>::PIXEL_SIZE
                         * <usize as TryFrom<u32>>::try_from(dimensions.width).unwrap())
                     .try_into()
                     .unwrap(),
@@ -97,7 +93,7 @@ impl PermutationOutputTexture {
         Self(TextureData::create_write_texture(
             device,
             image_dimensions,
-            PermutationTexture::format(),
+            PermutationTexture::FORMAT,
             Some("permutation_output_texture"),
             Some("permutation_output_texture_view"),
         ))

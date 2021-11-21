@@ -11,7 +11,7 @@ impl LosslessImageOutputBuffer {
         Self(TextureCopyBufferData::create_output_buffer(
             device,
             image_dimensions,
-            LosslessImageTexture::pixel_size(),
+            LosslessImageTexture::PIXEL_SIZE,
             Some("lossless_image_output_buffer"),
         ))
     }

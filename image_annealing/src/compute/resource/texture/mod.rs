@@ -13,24 +13,18 @@ pub use permutation::PermutationTexture;
 
 pub trait TextureDatatype {
     type Component;
-    fn n_components() -> usize;
-    fn format() -> wgpu::TextureFormat;
-    fn component_size() -> usize {
-        std::mem::size_of::<Self::Component>()
-    }
-    fn pixel_size() -> usize {
-        Self::n_components() * Self::component_size()
-    }
-    fn view_dimension() -> wgpu::TextureViewDimension {
-        wgpu::TextureViewDimension::D2
-    }
+    const N_COMPONENTS: usize;
+    const FORMAT: wgpu::TextureFormat;
+    const COMPONENT_SIZE: usize = std::mem::size_of::<Self::Component>();
+    const PIXEL_SIZE: usize = Self::N_COMPONENTS * Self::COMPONENT_SIZE;
+    const VIEW_DIMENSION: wgpu::TextureViewDimension = wgpu::TextureViewDimension::D2;
 }
 
 fn make_write_texture_binding_description<T: TextureDatatype>() -> wgpu::BindingType {
     wgpu::BindingType::StorageTexture {
         access: wgpu::StorageTextureAccess::WriteOnly,
-        format: <T as TextureDatatype>::format(),
-        view_dimension: <T as TextureDatatype>::view_dimension(),
+        format: <T as TextureDatatype>::FORMAT,
+        view_dimension: <T as TextureDatatype>::VIEW_DIMENSION,
     }
 }
 
@@ -39,7 +33,7 @@ fn make_read_texture_binding_description<T: TextureDatatype>(
 ) -> wgpu::BindingType {
     wgpu::BindingType::Texture {
         sample_type,
-        view_dimension: <T as TextureDatatype>::view_dimension(),
+        view_dimension: <T as TextureDatatype>::VIEW_DIMENSION,
         multisampled: false,
     }
 }
