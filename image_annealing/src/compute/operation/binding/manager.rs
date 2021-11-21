@@ -49,7 +49,7 @@ impl BindingManager {
 
     pub fn bind_swap<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
         self.swap_binding
-            .bind(binding_constants::swap::GROUP_INDEX, cpass);
+            .bind(binding_constants::swap::PERMUTATION_GROUP_INDEX, cpass);
     }
 
     pub fn swap_layout(&self) -> &wgpu::BindGroupLayout {

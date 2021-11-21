@@ -21,3 +21,7 @@ pub fn lossless_image_output<W: Write>(mut writer: W) -> std::io::Result<()> {
         "var output_image : texture_storage_2d<rgba32uint, write>;"
     )
 }
+
+pub fn displacement_goal<W: Write>(mut writer: W) -> std::io::Result<()> {
+    writeln!(writer, "var displacement_goal : texture_2d<u32>;",)
+}
