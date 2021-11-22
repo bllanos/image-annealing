@@ -1,9 +1,12 @@
 use crate::ImageDimensions;
+use image::GenericImageView;
 use std::convert::TryInto;
 
+mod displacement_goals;
 mod lossless_image;
 mod permutation;
 
+pub use displacement_goals::DisplacementGoalInputTexture;
 pub use lossless_image::LosslessImageInputTexture;
 pub use lossless_image::LosslessImageOutputTexture;
 pub use lossless_image::LosslessImageTexture;
@@ -124,6 +127,13 @@ impl TextureData {
             texture.dimensions.width == dimensions.width().try_into().unwrap()
                 && texture.dimensions.height == dimensions.height().try_into().unwrap()
         );
+    }
+
+    fn assert_same_image_dimensions<T>(texture: &Self, image: &T)
+    where
+        T: GenericImageView,
+    {
+        Self::assert_same_dimensions(texture, &ImageDimensions::from_image(image).unwrap());
     }
 
     fn copy_view(&self) -> wgpu::ImageCopyTexture {

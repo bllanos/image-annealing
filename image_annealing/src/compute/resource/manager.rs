@@ -1,11 +1,12 @@
 use super::buffer::{LosslessImageOutputBuffer, PermutationOutputBuffer};
 use super::texture::{
-    LosslessImageInputTexture, LosslessImageOutputTexture, PermutationInputTexture,
-    PermutationOutputTexture,
+    DisplacementGoalInputTexture, LosslessImageInputTexture, LosslessImageOutputTexture,
+    PermutationInputTexture, PermutationOutputTexture,
 };
 use crate::ImageDimensions;
 
 pub struct ResourceManager {
+    displacement_goal_input_texture: DisplacementGoalInputTexture,
     permutation_input_texture: PermutationInputTexture,
     permutation_output_texture: PermutationOutputTexture,
     permutation_output_buffer: PermutationOutputBuffer,
@@ -17,6 +18,10 @@ pub struct ResourceManager {
 impl ResourceManager {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
         Self {
+            displacement_goal_input_texture: DisplacementGoalInputTexture::new(
+                device,
+                image_dimensions,
+            ),
             permutation_input_texture: PermutationInputTexture::new(device, image_dimensions),
             permutation_output_texture: PermutationOutputTexture::new(device, image_dimensions),
             permutation_output_buffer: PermutationOutputBuffer::new(device, image_dimensions),
@@ -27,6 +32,10 @@ impl ResourceManager {
             ),
             lossless_image_output_buffer: LosslessImageOutputBuffer::new(device, image_dimensions),
         }
+    }
+
+    pub fn displacement_goal_input_texture(&self) -> &DisplacementGoalInputTexture {
+        &self.displacement_goal_input_texture
     }
 
     pub fn permutation_input_texture(&self) -> &PermutationInputTexture {
