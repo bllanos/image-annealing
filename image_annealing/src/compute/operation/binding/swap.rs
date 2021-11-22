@@ -1,6 +1,6 @@
 use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
-    PermutationInputTexture, PermutationOutputTexture, Texture,
+    DisplacementGoalInputTexture, PermutationInputTexture, PermutationOutputTexture, Texture,
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
@@ -10,12 +10,19 @@ pub struct SwapBinding(BindingData);
 
 impl SwapBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
+        let displacement_goal_input_texture = resources.displacement_goal_input_texture();
         let permutation_input_texture = resources.permutation_input_texture();
         let permutation_output_texture = resources.permutation_output_texture();
 
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("swap_bind_group_layout"),
             entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
+                    visibility: wgpu::ShaderStages::COMPUTE,
+                    ty: DisplacementGoalInputTexture::binding_description(),
+                    count: None,
+                },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::INPUT_PERMUTATION_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
@@ -35,6 +42,12 @@ impl SwapBinding {
             label: Some("swap_bind_group"),
             layout: &layout,
             entries: &[
+                wgpu::BindGroupEntry {
+                    binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
+                    resource: wgpu::BindingResource::TextureView(
+                        displacement_goal_input_texture.view(),
+                    ),
+                },
                 wgpu::BindGroupEntry {
                     binding: binding_constants::INPUT_PERMUTATION_INDEX,
                     resource: wgpu::BindingResource::TextureView(permutation_input_texture.view()),
