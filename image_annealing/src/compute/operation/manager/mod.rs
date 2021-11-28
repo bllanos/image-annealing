@@ -25,6 +25,7 @@ pub struct PermuteOperationInput<'a> {
 #[derive(Default)]
 pub struct SwapOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
+    pub displacement_goal: Option<&'a VectorFieldImageBuffer>,
 }
 
 pub struct OperationManager {

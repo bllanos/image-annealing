@@ -7,6 +7,7 @@ use std::fmt;
 pub enum InsufficientInputError {
     Permutation,
     OriginalImage,
+    DisplacementGoal,
 }
 
 impl fmt::Display for InsufficientInputError {
@@ -17,6 +18,7 @@ impl fmt::Display for InsufficientInputError {
             match self {
                 InsufficientInputError::Permutation => "permutation",
                 InsufficientInputError::OriginalImage => "image",
+                InsufficientInputError::DisplacementGoal => "displacement goal field",
             }
         )
     }
@@ -53,7 +55,9 @@ impl Error for InsufficientOutputError {
     }
 }
 
+#[derive(Copy, Clone)]
 struct ResourceStateFlags {
+    displacement_goal_input_texture: bool,
     permutation_input_texture: bool,
     permutation_output_texture: bool,
     permutation_output_buffer: bool,
@@ -65,6 +69,7 @@ struct ResourceStateFlags {
 impl ResourceStateFlags {
     pub fn new() -> Self {
         Self {
+            displacement_goal_input_texture: false,
             permutation_input_texture: false,
             permutation_output_texture: false,
             permutation_output_buffer: false,
@@ -109,21 +114,22 @@ impl ResourceStateManager {
     ) -> Result<(), Box<dyn Error>> {
         self.flags.lossless_image_output_texture = false;
         self.flags.lossless_image_output_buffer = false;
+        let mut new_flags = self.flags;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                self.flags.permutation_input_texture = true;
-                self.flags.permutation_output_texture = false;
-                self.flags.permutation_output_buffer = false;
+                new_flags.permutation_input_texture = true;
+                new_flags.permutation_output_texture = false;
+                new_flags.permutation_output_buffer = false;
             }
             None => {
                 if self.flags.permutation_output_texture {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    self.flags.permutation_input_texture = true;
+                    new_flags.permutation_input_texture = true;
                 } else if !self.flags.permutation_input_texture {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
@@ -132,7 +138,7 @@ impl ResourceStateManager {
         match input.image {
             Some(image) => {
                 resources.lossless_image_input_texture().load(queue, image);
-                self.flags.lossless_image_input_texture = true;
+                new_flags.lossless_image_input_texture = true;
             }
             None => {
                 if !self.flags.lossless_image_input_texture {
@@ -140,6 +146,7 @@ impl ResourceStateManager {
                 }
             }
         }
+        self.flags = new_flags;
         Ok(())
     }
 
@@ -160,24 +167,39 @@ impl ResourceStateManager {
         let had_output_permutation = self.flags.permutation_output_texture;
         self.flags.permutation_output_texture = false;
         self.flags.permutation_output_buffer = false;
+        let mut new_flags = self.flags;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                self.flags.permutation_input_texture = true;
+                new_flags.permutation_input_texture = true;
             }
             None => {
                 if had_output_permutation {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    self.flags.permutation_input_texture = true;
+                    new_flags.permutation_input_texture = true;
                 } else if !self.flags.permutation_input_texture {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
             }
         }
+        match input.displacement_goal {
+            Some(displacement_goal) => {
+                resources
+                    .displacement_goal_input_texture()
+                    .load(queue, displacement_goal);
+                new_flags.displacement_goal_input_texture = true;
+            }
+            None => {
+                if !self.flags.displacement_goal_input_texture {
+                    return Err(Box::new(InsufficientInputError::DisplacementGoal));
+                }
+            }
+        }
+        self.flags = new_flags;
         Ok(())
     }
 
