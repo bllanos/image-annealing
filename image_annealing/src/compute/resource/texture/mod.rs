@@ -2,11 +2,11 @@ use crate::ImageDimensions;
 use image::GenericImageView;
 use std::convert::TryInto;
 
-mod displacement_goals;
+mod displacement_goal;
 mod lossless_image;
 mod permutation;
 
-pub use displacement_goals::DisplacementGoalInputTexture;
+pub use displacement_goal::DisplacementGoalInputTexture;
 pub use lossless_image::LosslessImageInputTexture;
 pub use lossless_image::LosslessImageOutputTexture;
 pub use lossless_image::LosslessImageTexture;
