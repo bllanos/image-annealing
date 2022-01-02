@@ -4,7 +4,7 @@ use wgpu::Extent3d;
 #[test]
 #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_width() {
-    WorkgroupGridDimensions::from(Extent3d {
+    let _ = WorkgroupGridDimensions::from(Extent3d {
         width: 0,
         height: 1,
         depth_or_array_layers: 1,
@@ -14,7 +14,7 @@ fn zero_width() {
 #[test]
 #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_height() {
-    WorkgroupGridDimensions::from(Extent3d {
+    let _ = WorkgroupGridDimensions::from(Extent3d {
         width: 1,
         height: 0,
         depth_or_array_layers: 1,
@@ -24,7 +24,7 @@ fn zero_height() {
 #[test]
 #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 fn zero_depth() {
-    WorkgroupGridDimensions::from(Extent3d {
+    let _ = WorkgroupGridDimensions::from(Extent3d {
         width: 1,
         height: 1,
         depth_or_array_layers: 0,
