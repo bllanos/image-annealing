@@ -1,11 +1,10 @@
 use super::super::super::system::{DimensionsMismatchError, SwapOperationInput, System};
-use super::super::format::VectorFieldImageBuffer;
 use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::CompletionStatus;
-use crate::{CandidatePermutation, ImageDimensions, ValidatedPermutation};
+use crate::{CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
 
@@ -14,12 +13,12 @@ pub struct SwapParameters {}
 #[derive(Default)]
 pub struct SwapInput {
     pub candidate_permutation: Option<CandidatePermutation>,
-    pub displacement_goal: Option<VectorFieldImageBuffer>,
+    pub displacement_goal: Option<DisplacementGoal>,
 }
 
 pub struct SwapOutput {
     pub input_permutation: Option<ValidatedPermutation>,
-    pub input_displacement_goal: Option<VectorFieldImageBuffer>,
+    pub input_displacement_goal: Option<DisplacementGoal>,
     pub output_permutation: ValidatedPermutation,
 }
 
@@ -27,7 +26,7 @@ pub struct Swap {
     completion_status: CompletionStatus,
     validator: Option<ValidatePermutation>,
     input_permutation: Option<ValidatedPermutation>,
-    input_displacement_goal: Option<VectorFieldImageBuffer>,
+    input_displacement_goal: Option<DisplacementGoal>,
     has_given_output: bool,
 }
 
@@ -83,7 +82,7 @@ impl Swap {
             None => {
                 let displacement_goal_option = self.input_displacement_goal.take();
                 if let Some(ref displacement_goal) = displacement_goal_option {
-                    match ImageDimensions::from_image(displacement_goal) {
+                    match ImageDimensions::from_image(displacement_goal.as_ref()) {
                         Ok(dimensions) => {
                             if *system.image_dimensions() != dimensions {
                                 self.completion_status = CompletionStatus::Failed;

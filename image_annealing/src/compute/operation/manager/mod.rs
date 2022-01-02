@@ -7,8 +7,8 @@ use super::super::resource::buffer::ReadMappableBuffer;
 use super::super::resource::manager::ResourceManager;
 use super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::pipeline::manager::PipelineManager;
-use crate::image_utils::validation::{self, ValidatedPermutation};
-use crate::ImageDimensions;
+use crate::image_utils::validation::{self};
+use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::convert::TryInto;
 use std::default::Default;
 use std::error::Error;
@@ -25,7 +25,7 @@ pub struct PermuteOperationInput<'a> {
 #[derive(Default)]
 pub struct SwapOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
-    pub displacement_goal: Option<&'a VectorFieldImageBuffer>,
+    pub displacement_goal: Option<&'a DisplacementGoal>,
 }
 
 pub struct OperationManager {

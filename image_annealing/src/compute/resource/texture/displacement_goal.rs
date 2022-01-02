@@ -1,7 +1,6 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::{Texture, TextureData, TextureDatatype};
-use crate::compute::format::VectorFieldImageBuffer;
-use crate::ImageDimensions;
+use crate::{DisplacementGoal, ImageDimensions};
 use core::num::NonZeroU32;
 use std::convert::{TryFrom, TryInto};
 
@@ -44,13 +43,13 @@ impl DisplacementGoalInputTexture {
         ))
     }
 
-    pub fn load(&self, queue: &wgpu::Queue, displacement_goal: &VectorFieldImageBuffer) {
+    pub fn load(&self, queue: &wgpu::Queue, displacement_goal: &DisplacementGoal) {
         let dimensions = self.dimensions();
-        TextureData::assert_same_image_dimensions(&self.0, displacement_goal);
+        TextureData::assert_same_image_dimensions(&self.0, displacement_goal.as_ref());
 
         queue.write_texture(
             self.copy_view(),
-            bytemuck::cast_slice(displacement_goal.as_raw().as_slice()),
+            bytemuck::cast_slice(displacement_goal.as_raw_slice()),
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(

@@ -4,6 +4,22 @@ use crate::ImageDimensions;
 use std::error::Error;
 use test_utils::permutation::{self, DimensionsAndPermutation};
 
+mod validated_permutation {
+    use super::super::manipulation;
+    use std::error::Error;
+    use test_utils::permutation::{self, DimensionsAndPermutation};
+
+    #[test]
+    fn inverse() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let validated_permutation = super::super::validate_permutation(permutation)?;
+        let expected = manipulation::invert_permutation(&validated_permutation);
+        let inverse = validated_permutation.inverse();
+        assert_eq!(*inverse.as_ref(), expected);
+        Ok(())
+    }
+}
+
 #[test]
 fn identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation { permutation, .. } = permutation::identity();

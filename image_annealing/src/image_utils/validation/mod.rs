@@ -1,3 +1,4 @@
+use super::manipulation;
 use super::ImageDimensions;
 use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
@@ -79,6 +80,12 @@ impl ValidatedPermutation {
     }
     pub fn dimensions(&self) -> ImageDimensions {
         self.dimensions
+    }
+    pub fn inverse(&self) -> Self {
+        Self {
+            data: manipulation::invert_permutation(self),
+            dimensions: self.dimensions,
+        }
     }
 }
 
