@@ -5,7 +5,7 @@ use std::error::Error;
 use test_utils::algorithm::assert_step_until_success;
 use test_utils::permutation::DimensionsAndPermutation;
 
-fn dimensions_wxh<T>(width: T, height: T) -> Result<(), Box<dyn Error>>
+fn dimensions_wxh<T>(width: T, height: T, accept_swap: bool) -> Result<(), Box<dyn Error>>
 where
     T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
 {
@@ -13,7 +13,11 @@ where
         permutation,
         dimensions,
     } = test_utils::permutation::identity_with_dimensions(width, height);
-    let expected_permutation = test_utils::operation::swap(&permutation);
+    let expected_permutation = if accept_swap {
+        test_utils::operation::swap(&permutation)
+    } else {
+        permutation.clone()
+    };
     let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
         expected_permutation.clone(),
     ))?;
@@ -40,36 +44,71 @@ where
 }
 
 #[test]
-fn dimensions_1x1() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(1, 1)
+fn dimensions_1x1_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(1, 1, true)
 }
 
 #[test]
-fn dimensions_1x2() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(1, 2)
+fn dimensions_1x1_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(1, 1, false)
 }
 
 #[test]
-fn dimensions_2x1() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(2, 1)
+fn dimensions_1x2_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(1, 2, true)
 }
 
 #[test]
-fn dimensions_2x2() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(2, 2)
+fn dimensions_1x2_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(1, 2, false)
 }
 
 #[test]
-fn dimensions_2x3() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(2, 3)
+fn dimensions_2x1_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 1, true)
 }
 
 #[test]
-fn dimensions_3x2() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(3, 2)
+fn dimensions_2x1_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 1, false)
 }
 
 #[test]
-fn dimensions_3x3() -> Result<(), Box<dyn Error>> {
-    dimensions_wxh(3, 3)
+fn dimensions_2x2_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 2, true)
+}
+
+#[test]
+fn dimensions_2x2_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 2, false)
+}
+
+#[test]
+fn dimensions_2x3_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 3, true)
+}
+
+#[test]
+fn dimensions_2x3_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(2, 3, false)
+}
+
+#[test]
+fn dimensions_3x2_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(3, 2, true)
+}
+
+#[test]
+fn dimensions_3x2_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(3, 2, false)
+}
+
+#[test]
+fn dimensions_3x3_accept_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(3, 3, true)
+}
+
+#[test]
+fn dimensions_3x3_reject_swap() -> Result<(), Box<dyn Error>> {
+    dimensions_wxh(3, 3, false)
 }
