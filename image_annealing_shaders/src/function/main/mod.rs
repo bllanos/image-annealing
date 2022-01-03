@@ -40,20 +40,22 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   let coords2 : vec2<i32> = coords1 + displacement;
   let dimensions : vec2<i32> = textureDimensions(input_permutation);
   if(coords1.x < dimensions.x && coords1.y < dimensions.y) {{
-    var permutation_vector1 : vec2<i32> = load_permutation_vector(coords1);
+    let input_permutation_vector1 : vec2<i32> = load_permutation_vector(coords1);
+    var output_permutation_vector1 : vec2<i32> = input_permutation_vector1;
 
     if(coords2.x < dimensions.x && coords2.y < dimensions.y) {{
-      var permutation_vector2 = load_permutation_vector(coords2);
+      let input_permutation_vector2 : vec2<i32> = load_permutation_vector(coords2);
+      var output_permutation_vector2 : vec2<i32> = input_permutation_vector2;
 
-      if(swap_cost(coords1, displacement, permutation_vector1, permutation_vector2) < 0.0) {{
-        permutation_vector1 = permutation_vector1 - displacement;
-        permutation_vector2 = permutation_vector2 + displacement;
+      if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < 0.0) {{
+        output_permutation_vector1 = input_permutation_vector2 + displacement;
+        output_permutation_vector2 = input_permutation_vector1 - displacement;
       }}
-        
-      store_permutation_vector(coords2, permutation_vector1);
+
+      store_permutation_vector(coords2, output_permutation_vector2);
     }}
 
-    store_permutation_vector(coords1, permutation_vector2);
+    store_permutation_vector(coords1, output_permutation_vector1);
   }}
 }}"
   )

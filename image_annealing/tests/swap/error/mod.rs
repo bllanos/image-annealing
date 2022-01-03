@@ -1,5 +1,5 @@
 use image_annealing::compute::{self, OutputStatus, SwapInput, SwapParameters};
-use image_annealing::{CandidatePermutation, ImageDimensions};
+use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
 use std::default::Default;
 use std::error::Error;
 use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
@@ -11,6 +11,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_utils::permutation::non_identity();
+    let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
     let other_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
 
@@ -18,6 +19,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let mut algorithm = dispatcher.swap(
         SwapInput {
             candidate_permutation: Some(CandidatePermutation(permutation)),
+            displacement_goal: Some(displacement_goal),
         },
         SwapParameters {},
     );
@@ -32,9 +34,16 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
 #[test]
 fn forget_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4).unwrap();
+    let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
     let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
 
-    let mut algorithm = dispatcher.swap(Default::default(), SwapParameters {});
+    let mut algorithm = dispatcher.swap(
+        SwapInput {
+            displacement_goal: Some(displacement_goal),
+            ..Default::default()
+        },
+        SwapParameters {},
+    );
     assert_step_until_error(
         algorithm.as_mut(),
         OutputStatus::FinalFullOutput,
@@ -50,6 +59,10 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let expected_permutation = test_utils::operation::swap(&permutation);
+    let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
+        expected_permutation.clone(),
+    ))?;
+    let expected_displacement_goal = displacement_goal.as_ref().clone();
 
     let DimensionsAndPermutation {
         permutation: invalid_permutation,
@@ -61,6 +74,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     let mut algorithm = dispatcher.swap(
         SwapInput {
             candidate_permutation: Some(CandidatePermutation(invalid_permutation)),
+            displacement_goal: Some(displacement_goal),
         },
         SwapParameters {},
     );
@@ -70,12 +84,19 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     algorithm = dispatcher.swap(
         SwapInput {
             candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+            displacement_goal: Some(DisplacementGoal::from_vector_field(
+                expected_displacement_goal.clone(),
+            )),
         },
         SwapParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
+    assert_eq!(
+        *output.input_displacement_goal.unwrap().as_ref(),
+        expected_displacement_goal
+    );
     assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
     Ok(())
 }

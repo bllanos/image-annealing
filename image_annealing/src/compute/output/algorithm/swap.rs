@@ -80,8 +80,7 @@ impl Swap {
                 }
             }
             None => {
-                let displacement_goal_option = self.input_displacement_goal.take();
-                if let Some(ref displacement_goal) = displacement_goal_option {
+                if let Some(ref displacement_goal) = self.input_displacement_goal {
                     match ImageDimensions::from_image(displacement_goal.as_ref()) {
                         Ok(dimensions) => {
                             if *system.image_dimensions() != dimensions {
@@ -101,7 +100,7 @@ impl Swap {
 
                 match system.operation_swap(&SwapOperationInput {
                     permutation: self.input_permutation.as_ref(),
-                    displacement_goal: displacement_goal_option.as_ref(),
+                    displacement_goal: self.input_displacement_goal.as_ref(),
                 }) {
                     Ok(_) => {
                         self.completion_status = CompletionStatus::Finished;
