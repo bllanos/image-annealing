@@ -5,8 +5,12 @@ use super::super::super::resource::texture::{
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use image_annealing_shaders::binding::swap as binding_constants;
+use std::num::NonZeroU32;
 
-pub struct SwapBinding(BindingData);
+pub struct SwapBinding {
+    binding_data: BindingData,
+    texture_dimensions: wgpu::Extent3d,
+}
 
 impl SwapBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
@@ -59,24 +63,26 @@ impl SwapBinding {
             ],
         });
 
-        Self(BindingData {
-            layout,
-            bind_group,
-            workgroup_grid_dimensions: super::get_workgroup_grid_dimensions(
-                permutation_input_texture,
-            ),
-        })
+        Self {
+            binding_data: BindingData { layout, bind_group },
+            texture_dimensions: permutation_input_texture.dimensions(),
+        }
+    }
+
+    pub fn workgroup_grid_dimensions(
+        &self,
+        x_stride: NonZeroU32,
+        y_stride: NonZeroU32,
+    ) -> WorkgroupGridDimensions {
+        WorkgroupGridDimensions::from_extent_and_stride(self.texture_dimensions, x_stride, y_stride)
     }
 }
 
 impl Binding for SwapBinding {
     fn layout(&self) -> &wgpu::BindGroupLayout {
-        &self.0.layout
-    }
-    fn workgroup_grid_dimensions(&self) -> &WorkgroupGridDimensions {
-        &self.0.workgroup_grid_dimensions
+        &self.binding_data.layout
     }
     fn bind<'a: 'b, 'b>(&'a self, index: u32, cpass: &mut wgpu::ComputePass<'b>) {
-        self.0.bind(index, cpass)
+        self.binding_data.bind(index, cpass)
     }
 }

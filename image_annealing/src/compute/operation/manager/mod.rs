@@ -12,6 +12,7 @@ use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::convert::TryInto;
 use std::default::Default;
 use std::error::Error;
+use std::num::NonZeroU32;
 
 mod state;
 use state::ResourceStateManager;
@@ -90,7 +91,11 @@ impl OperationManager {
         let queue = device.queue();
         self.state
             .prepare_swap(&self.resources, queue, &mut encoder, input)?;
-        self.pipelines.swap(&mut encoder);
+        self.pipelines.swap(
+            &mut encoder,
+            NonZeroU32::new(2).unwrap(),
+            NonZeroU32::new(1).unwrap(),
+        );
         self.state.finish_swap()?;
         queue.submit(Some(encoder.finish()));
         Ok(())

@@ -6,7 +6,10 @@ use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use image_annealing_shaders::binding::permute as binding_constants;
 
-pub struct PermuteBinding(BindingData);
+pub struct PermuteBinding {
+    binding_data: BindingData,
+    workgroup_grid_dimensions: WorkgroupGridDimensions,
+}
 
 impl PermuteBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
@@ -57,22 +60,22 @@ impl PermuteBinding {
             ],
         });
 
-        Self(BindingData {
-            layout,
-            bind_group,
+        Self {
+            binding_data: BindingData { layout, bind_group },
             workgroup_grid_dimensions: super::get_workgroup_grid_dimensions(permutation_texture),
-        })
+        }
+    }
+
+    pub fn workgroup_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+        &self.workgroup_grid_dimensions
     }
 }
 
 impl Binding for PermuteBinding {
     fn layout(&self) -> &wgpu::BindGroupLayout {
-        &self.0.layout
-    }
-    fn workgroup_grid_dimensions(&self) -> &WorkgroupGridDimensions {
-        &self.0.workgroup_grid_dimensions
+        &self.binding_data.layout
     }
     fn bind<'a: 'b, 'b>(&'a self, index: u32, cpass: &mut wgpu::ComputePass<'b>) {
-        self.0.bind(index, cpass)
+        self.binding_data.bind(index, cpass)
     }
 }

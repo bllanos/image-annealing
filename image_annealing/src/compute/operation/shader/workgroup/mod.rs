@@ -5,6 +5,35 @@ use std::num::NonZeroU32;
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct WorkgroupGridDimensions(NonZeroU32, NonZeroU32, NonZeroU32);
 
+impl WorkgroupGridDimensions {
+    pub fn from_extent_and_stride(
+        extent: wgpu::Extent3d,
+        x_stride: NonZeroU32,
+        y_stride: NonZeroU32,
+    ) -> Self {
+        let wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers,
+        } = extent;
+        let remainder = (width % x_stride, height % y_stride);
+        let quotient = (width / x_stride, height / y_stride);
+        Self::from(wgpu::Extent3d {
+            width: if remainder.0 == 0 {
+                quotient.0
+            } else {
+                quotient.0 + 1
+            },
+            height: if remainder.1 == 0 {
+                quotient.1
+            } else {
+                quotient.1 + 1
+            },
+            depth_or_array_layers,
+        })
+    }
+}
+
 impl From<wgpu::Extent3d> for WorkgroupGridDimensions {
     fn from(extent: wgpu::Extent3d) -> Self {
         let wgpu::Extent3d {
