@@ -17,6 +17,11 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
             "permutation",
             "identity_permutation.png",
         ]),
+        displacement_goal_path: test_utils::make_test_data_path_string(&[
+            "image",
+            "displacement_goal",
+            "identity_displacement_goal.png",
+        ]),
         permutation_output_path_no_extension: path,
     };
     cli::run(config)?;
@@ -36,6 +41,11 @@ fn swap_invalid() {
             "image",
             "permutation",
             "invalid_permutation.png",
+        ]),
+        displacement_goal_path: test_utils::make_test_data_path_string(&[
+            "image",
+            "displacement_goal",
+            "identity_displacement_goal.png",
         ]),
         permutation_output_path_no_extension: test_utils::make_test_output_path_string(&[
             "cli_swap_invalid",

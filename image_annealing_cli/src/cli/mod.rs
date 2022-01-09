@@ -70,12 +70,16 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
         }
         Config::Swap {
             candidate_permutation_path,
+            displacement_goal_path,
             permutation_output_path_no_extension: path,
         } => {
             let mut algorithm = dispatcher.swap(
                 SwapInput {
                     candidate_permutation: Some(loader::load_candidate_permutation(
                         candidate_permutation_path,
+                    )?),
+                    displacement_goal: Some(loader::load_displacement_goal(
+                        displacement_goal_path,
                     )?),
                 },
                 SwapParameters {},

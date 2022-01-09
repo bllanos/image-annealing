@@ -60,6 +60,11 @@ mod create_dispatcher {
                 "permutation",
                 "identity_permutation.png",
             ]),
+            displacement_goal_path: test_utils::make_test_data_path_string(&[
+                "image",
+                "displacement_goal",
+                "identity_displacement_goal.png",
+            ]),
             permutation_output_path_no_extension: String::from("none"),
         })?;
         Ok(())
@@ -73,6 +78,11 @@ mod create_dispatcher {
                     "image",
                     "permutation",
                     "not_found.png",
+                ]),
+                displacement_goal_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity_displacement_goal.png",
                 ]),
                 permutation_output_path_no_extension: String::from("none"),
             }),

@@ -38,6 +38,7 @@ enum UnverifiedConfig {
     },
     Swap {
         candidate_permutation_path: String,
+        displacement_goal_path: String,
         permutation_output_path_no_extension: String,
     },
     ValidatePermutation {
@@ -58,6 +59,7 @@ pub enum Config {
     },
     Swap {
         candidate_permutation_path: String,
+        displacement_goal_path: String,
         permutation_output_path_no_extension: String,
     },
     ValidatePermutation {
@@ -125,9 +127,11 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
         }
         UnverifiedConfig::Swap {
             candidate_permutation_path,
+            displacement_goal_path,
             permutation_output_path_no_extension,
         } => Config::Swap {
             candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
+            displacement_goal_path: convert_and_check_input_path(displacement_goal_path)?,
             permutation_output_path_no_extension: convert_path_separators(
                 permutation_output_path_no_extension,
             ),

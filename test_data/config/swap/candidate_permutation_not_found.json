@@ -1,6 +1,7 @@
 {
   "Swap": {
     "candidate_permutation_path": "../test_data/image/permutation/not_found.png",
+    "displacement_goal_path": "../test_data/image/displacement_goal/identity_displacement_goal.png",
     "permutation_output_path_no_extension": "permutation_out"
   }
 }

@@ -161,6 +161,11 @@ mod parse_config_file {
                     "permutation",
                     "identity_permutation.png"
                 ]),
+                displacement_goal_path: test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity_displacement_goal.png"
+                ]),
                 permutation_output_path_no_extension: String::from("permutation_out"),
             }
         );
@@ -173,6 +178,19 @@ mod parse_config_file {
             "config",
             "swap",
             "candidate_permutation_not_found.json",
+        ]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+        );
+    }
+
+    #[test]
+    fn invalid_swap_config_file_displacement_goal() {
+        let path = test_utils::make_test_data_path(&[
+            "config",
+            "swap",
+            "displacement_goal_not_found.json",
         ]);
         test_utils::assert_error_contains(
             parse_config_file(path),
