@@ -1,3 +1,4 @@
+use crate::{CandidatePermutationPath, DisplacementGoalPath, ImagePath};
 use image_annealing::compute::DimensionsMismatchError;
 use image_annealing::ImageDimensions;
 use serde::Deserialize;
@@ -32,17 +33,17 @@ enum UnverifiedConfig {
         permutation_output_path_no_extension: String,
     },
     Permute {
-        candidate_permutation_path: String,
-        original_image_path: String,
+        candidate_permutation: String,
+        original_image: String,
         permuted_image_output_path_no_extension: String,
     },
     Swap {
-        candidate_permutation_path: String,
-        displacement_goal_path: String,
+        candidate_permutation: String,
+        displacement_goal: String,
         permutation_output_path_no_extension: String,
     },
     ValidatePermutation {
-        candidate_permutation_path: String,
+        candidate_permutation: String,
     },
 }
 
@@ -53,17 +54,17 @@ pub enum Config {
         permutation_output_path_no_extension: String,
     },
     Permute {
-        candidate_permutation_path: String,
-        original_image_path: String,
+        candidate_permutation: CandidatePermutationPath,
+        original_image: ImagePath,
         permuted_image_output_path_no_extension: String,
     },
     Swap {
-        candidate_permutation_path: String,
-        displacement_goal_path: String,
+        candidate_permutation: CandidatePermutationPath,
+        displacement_goal: DisplacementGoalPath,
         permutation_output_path_no_extension: String,
     },
     ValidatePermutation {
-        candidate_permutation_path: String,
+        candidate_permutation: CandidatePermutationPath,
     },
 }
 
@@ -100,20 +101,20 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
             ),
         },
         UnverifiedConfig::Permute {
-            candidate_permutation_path,
-            original_image_path,
+            candidate_permutation,
+            original_image,
             permuted_image_output_path_no_extension,
         } => {
-            let candidate_permutation_path_checked =
-                convert_and_check_input_path(candidate_permutation_path)?;
-            let original_image_path_checked = convert_and_check_input_path(original_image_path)?;
-            let image_dimensions = ImageDimensions::from_image_path(&original_image_path_checked)?;
+            let candidate_permutation_checked =
+                convert_and_check_input_path(candidate_permutation)?;
+            let original_image_checked = convert_and_check_input_path(original_image)?;
+            let image_dimensions = ImageDimensions::from_image_path(&original_image_checked)?;
             let permutation_dimensions =
-                ImageDimensions::from_image_path(&candidate_permutation_path_checked)?;
+                ImageDimensions::from_image_path(&candidate_permutation_checked)?;
             if image_dimensions == permutation_dimensions {
                 Config::Permute {
-                    candidate_permutation_path: candidate_permutation_path_checked,
-                    original_image_path: original_image_path_checked,
+                    candidate_permutation: CandidatePermutationPath(candidate_permutation_checked),
+                    original_image: ImagePath(original_image_checked),
                     permuted_image_output_path_no_extension: convert_path_separators(
                         permuted_image_output_path_no_extension,
                     ),
@@ -126,20 +127,38 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config, Box<dyn 
             }
         }
         UnverifiedConfig::Swap {
-            candidate_permutation_path,
-            displacement_goal_path,
+            candidate_permutation,
+            displacement_goal,
             permutation_output_path_no_extension,
-        } => Config::Swap {
-            candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
-            displacement_goal_path: convert_and_check_input_path(displacement_goal_path)?,
-            permutation_output_path_no_extension: convert_path_separators(
-                permutation_output_path_no_extension,
-            ),
-        },
+        } => {
+            let candidate_permutation_checked =
+                convert_and_check_input_path(candidate_permutation)?;
+            let displacement_goal_checked = convert_and_check_input_path(displacement_goal)?;
+            let displacement_goal_dimensions =
+                ImageDimensions::from_image_path(&displacement_goal_checked)?;
+            let permutation_dimensions =
+                ImageDimensions::from_image_path(&candidate_permutation_checked)?;
+            if displacement_goal_dimensions == permutation_dimensions {
+                Config::Swap {
+                    candidate_permutation: CandidatePermutationPath(candidate_permutation_checked),
+                    displacement_goal: DisplacementGoalPath(displacement_goal_checked),
+                    permutation_output_path_no_extension: convert_path_separators(
+                        permutation_output_path_no_extension,
+                    ),
+                }
+            } else {
+                return Err(Box::new(DimensionsMismatchError::new(
+                    displacement_goal_dimensions,
+                    permutation_dimensions,
+                )));
+            }
+        }
         UnverifiedConfig::ValidatePermutation {
-            candidate_permutation_path,
+            candidate_permutation,
         } => Config::ValidatePermutation {
-            candidate_permutation_path: convert_and_check_input_path(candidate_permutation_path)?,
+            candidate_permutation: CandidatePermutationPath(convert_and_check_input_path(
+                candidate_permutation,
+            )?),
         },
     };
     Ok(config)

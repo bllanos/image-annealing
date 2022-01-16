@@ -1,7 +1,7 @@
 {
   "Permute": {
-    "candidate_permutation_path": "../test_data/image/permutation/identity_permutation.png",
-    "original_image_path": "../test_data/image/image/stripes.png",
+    "candidate_permutation": "../test_data/image/permutation/identity_permutation.png",
+    "original_image": "../test_data/image/image/stripes.png",
     "permuted_image_output_path_no_extension": "permuted_image_out"
   }
 }

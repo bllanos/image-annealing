@@ -54,6 +54,7 @@ mod parse_args {
 
 mod parse_config_file {
     use super::super::{parse_config_file, Config};
+    use crate::{CandidatePermutationPath, DisplacementGoalPath, ImagePath};
     use image_annealing::ImageDimensions;
     use std::error::Error;
 
@@ -97,16 +98,18 @@ mod parse_config_file {
         assert_eq!(
             r,
             Config::Permute {
-                candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                    "image",
-                    "permutation",
-                    "identity_permutation.png"
-                ]),
-                original_image_path: test_utils::make_test_data_path_string(&[
+                candidate_permutation: CandidatePermutationPath(
+                    test_utils::make_test_data_path_string(&[
+                        "image",
+                        "permutation",
+                        "identity_permutation.png"
+                    ])
+                ),
+                original_image: ImagePath(test_utils::make_test_data_path_string(&[
                     "image",
                     "image",
                     "stripes.png"
-                ]),
+                ])),
                 permuted_image_output_path_no_extension: String::from("permuted_image_out"),
             }
         );
@@ -156,16 +159,18 @@ mod parse_config_file {
         assert_eq!(
             r,
             Config::Swap {
-                candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                    "image",
-                    "permutation",
-                    "identity_permutation.png"
-                ]),
-                displacement_goal_path: test_utils::make_test_data_path_string(&[
+                candidate_permutation: CandidatePermutationPath(
+                    test_utils::make_test_data_path_string(&[
+                        "image",
+                        "permutation",
+                        "identity_permutation.png"
+                    ])
+                ),
+                displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
                     "image",
                     "displacement_goal",
                     "identity_displacement_goal.png"
-                ]),
+                ])),
                 permutation_output_path_no_extension: String::from("permutation_out"),
             }
         );
@@ -199,6 +204,15 @@ mod parse_config_file {
     }
 
     #[test]
+    fn invalid_swap_config_file_dimensions() {
+        let path = test_utils::make_test_data_path(&["config", "swap", "dimensions_mismatch.json"]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
+        );
+    }
+
+    #[test]
     fn valid_validate_permutation_config_file() -> Result<(), Box<dyn Error>> {
         let path =
             test_utils::make_test_data_path(&["config", "validate_permutation", "valid.json"]);
@@ -206,11 +220,13 @@ mod parse_config_file {
         assert_eq!(
             r,
             Config::ValidatePermutation {
-                candidate_permutation_path: test_utils::make_test_data_path_string(&[
-                    "image",
-                    "permutation",
-                    "identity_permutation.png"
-                ]),
+                candidate_permutation: CandidatePermutationPath(
+                    test_utils::make_test_data_path_string(&[
+                        "image",
+                        "permutation",
+                        "identity_permutation.png"
+                    ])
+                ),
             }
         );
         Ok(())

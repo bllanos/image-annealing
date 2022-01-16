@@ -1,6 +1,7 @@
 use image_annealing::compute::format::{ImageFileWriter, LosslessImageBuffer};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::Config;
+use image_annealing_cli::{CandidatePermutationPath, ImagePath};
 use std::error::Error;
 
 #[test]
@@ -12,16 +13,16 @@ fn permute_valid() -> Result<(), Box<dyn Error>> {
     }
 
     let config = Config::Permute {
-        candidate_permutation_path: test_utils::make_test_data_path_string(&[
+        candidate_permutation: CandidatePermutationPath(test_utils::make_test_data_path_string(&[
             "image",
             "permutation",
             "identity_permutation.png",
-        ]),
-        original_image_path: test_utils::make_test_data_path_string(&[
+        ])),
+        original_image: ImagePath(test_utils::make_test_data_path_string(&[
             "image",
             "image",
             "stripes.png",
-        ]),
+        ])),
         permuted_image_output_path_no_extension: path,
     };
     cli::run(config)?;
@@ -37,16 +38,16 @@ fn permute_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn permute_invalid() {
     let config = Config::Permute {
-        candidate_permutation_path: test_utils::make_test_data_path_string(&[
+        candidate_permutation: CandidatePermutationPath(test_utils::make_test_data_path_string(&[
             "image",
             "permutation",
             "invalid_permutation.png",
-        ]),
-        original_image_path: test_utils::make_test_data_path_string(&[
+        ])),
+        original_image: ImagePath(test_utils::make_test_data_path_string(&[
             "image",
             "image",
             "stripes.png",
-        ]),
+        ])),
         permuted_image_output_path_no_extension: test_utils::make_test_output_path_string(&[
             "cli_permute_invalid",
         ]),

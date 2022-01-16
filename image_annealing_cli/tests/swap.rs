@@ -1,6 +1,7 @@
 use image_annealing::compute::format::{ImageFileWriter, VectorFieldImageBuffer};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::Config;
+use image_annealing_cli::{CandidatePermutationPath, DisplacementGoalPath};
 use std::error::Error;
 
 #[test]
@@ -12,16 +13,16 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     }
 
     let config = Config::Swap {
-        candidate_permutation_path: test_utils::make_test_data_path_string(&[
+        candidate_permutation: CandidatePermutationPath(test_utils::make_test_data_path_string(&[
             "image",
             "permutation",
             "identity_permutation.png",
-        ]),
-        displacement_goal_path: test_utils::make_test_data_path_string(&[
+        ])),
+        displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
             "image",
             "displacement_goal",
             "identity_displacement_goal.png",
-        ]),
+        ])),
         permutation_output_path_no_extension: path,
     };
     cli::run(config)?;
@@ -37,16 +38,16 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn swap_invalid() {
     let config = Config::Swap {
-        candidate_permutation_path: test_utils::make_test_data_path_string(&[
+        candidate_permutation: CandidatePermutationPath(test_utils::make_test_data_path_string(&[
             "image",
             "permutation",
             "invalid_permutation.png",
-        ]),
-        displacement_goal_path: test_utils::make_test_data_path_string(&[
+        ])),
+        displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
             "image",
             "displacement_goal",
             "identity_displacement_goal.png",
-        ]),
+        ])),
         permutation_output_path_no_extension: test_utils::make_test_output_path_string(&[
             "cli_swap_invalid",
         ]),
