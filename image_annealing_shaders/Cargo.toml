@@ -10,5 +10,5 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 
 [dev-dependencies]
-naga = { git = "https://github.com/gfx-rs/naga.git", features = ["wgsl-in"] }
+naga = { git = "https://github.com/gfx-rs/naga.git", features = ["validate", "wgsl-in"] }
 test_utils = { path = "../test_utils" }

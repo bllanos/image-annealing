@@ -21,8 +21,8 @@ impl WorkgroupDimensions {
 impl Default for WorkgroupDimensions {
     fn default() -> Self {
         Self(
-            NonZeroU32::new(32).unwrap(),
-            NonZeroU32::new(32).unwrap(),
+            NonZeroU32::new(16).unwrap(),
+            NonZeroU32::new(16).unwrap(),
             NonZeroU32::new(1).unwrap(),
         )
     }

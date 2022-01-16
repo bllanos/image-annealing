@@ -20,8 +20,8 @@ mod from_extent_and_stride {
     #[test]
     fn stride_ones() {
         let extent = Extent3d {
-            width: 64,
-            height: 64,
+            width: 32,
+            height: 32,
             depth_or_array_layers: 1,
         };
         let expected = WorkgroupGridDimensions::from(extent);
@@ -37,8 +37,8 @@ mod from_extent_and_stride {
     fn stride_divisible_x() {
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
             Extent3d {
-                width: 128,
-                height: 128,
+                width: 64,
+                height: 64,
                 depth_or_array_layers: 1,
             },
             NonZeroU32::new(2).unwrap(),
@@ -53,8 +53,8 @@ mod from_extent_and_stride {
     fn stride_divisible_y() {
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
             Extent3d {
-                width: 128,
-                height: 128,
+                width: 64,
+                height: 64,
                 depth_or_array_layers: 1,
             },
             NonZeroU32::new(5).unwrap(),
@@ -69,8 +69,8 @@ mod from_extent_and_stride {
     fn near_small_extent() {
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
             Extent3d {
-                width: 65,
-                height: 65,
+                width: 33,
+                height: 33,
                 depth_or_array_layers: 1,
             },
             NonZeroU32::new(2).unwrap(),
@@ -85,8 +85,8 @@ mod from_extent_and_stride {
     fn divisible_small_extent() {
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
             Extent3d {
-                width: 64,
-                height: 64,
+                width: 32,
+                height: 32,
                 depth_or_array_layers: 1,
             },
             NonZeroU32::new(2).unwrap(),
@@ -101,8 +101,8 @@ mod from_extent_and_stride {
     fn nondivisible_small_extent() {
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
             Extent3d {
-                width: 63,
-                height: 63,
+                width: 31,
+                height: 31,
                 depth_or_array_layers: 1,
             },
             NonZeroU32::new(2).unwrap(),
@@ -151,8 +151,8 @@ mod from_extent {
     #[test]
     fn no_remainder() {
         let dim = WorkgroupGridDimensions::from(Extent3d {
-            width: 64,
-            height: 64,
+            width: 32,
+            height: 32,
             depth_or_array_layers: 1,
         });
         assert_eq!(dim.x(), 2);
@@ -163,8 +163,8 @@ mod from_extent {
     #[test]
     fn remainder() {
         let dim = WorkgroupGridDimensions::from(Extent3d {
-            width: 63,
-            height: 65,
+            width: 31,
+            height: 33,
             depth_or_array_layers: 1,
         });
         assert_eq!(dim.x(), 2);
