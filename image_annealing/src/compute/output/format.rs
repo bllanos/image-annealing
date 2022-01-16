@@ -35,7 +35,7 @@ impl ImageFileWriter for ImageBuffer<image::Rgba<u8>, Vec<u8>> {
 }
 
 impl ImageFileWriter for ImageBuffer<image::Rgba<u16>, Vec<u16>> {
-    const EXTENSION: &'static str = "tiff";
+    const EXTENSION: &'static str = "png";
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
