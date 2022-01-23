@@ -1,5 +1,6 @@
 pub mod binding;
 mod compute;
+pub mod constant;
 mod function;
 pub mod output;
 mod resource;

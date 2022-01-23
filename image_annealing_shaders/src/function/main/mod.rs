@@ -1,3 +1,4 @@
+use crate::constant;
 use std::io::Write;
 
 pub const SHADER_ENTRY_POINT: &str = "main";
@@ -35,7 +36,7 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   global_invocation_id_header(&mut writer)?;
   writeln!(
     writer,
-    "  let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x * 2u), i32(global_id.y));
+    "  let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x * {}u), i32(global_id.y));
   let displacement : vec2<i32> = vec2<i32>(1, 0);
   let coords2 : vec2<i32> = coords1 + displacement;
   let dimensions : vec2<i32> = textureDimensions(input_permutation);
@@ -57,6 +58,6 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
 
     store_permutation_vector(coords1, output_permutation_vector1);
   }}
-}}"
+}}", constant::swap::STRIDE
   )
 }

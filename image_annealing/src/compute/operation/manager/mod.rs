@@ -9,6 +9,7 @@ use super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
 use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
+use image_annealing_shaders::constant;
 use std::convert::TryInto;
 use std::default::Default;
 use std::error::Error;
@@ -93,7 +94,7 @@ impl OperationManager {
             .prepare_swap(&self.resources, queue, &mut encoder, input)?;
         self.pipelines.swap(
             &mut encoder,
-            NonZeroU32::new(2).unwrap(),
+            NonZeroU32::new(constant::swap::STRIDE).unwrap(),
             NonZeroU32::new(1).unwrap(),
         );
         self.state.finish_swap()?;
