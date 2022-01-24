@@ -1,3 +1,13 @@
+use image_annealing_shaders::WorkgroupDimensions;
+
+fn create_workgroup_dimensions() -> WorkgroupDimensions {
+    let workgroup_dimensions = WorkgroupDimensions::create_permutation();
+    assert!(workgroup_dimensions.x() >= 2);
+    assert!(workgroup_dimensions.y() >= 2);
+    assert!(workgroup_dimensions.z() >= 1);
+    workgroup_dimensions
+}
+
 mod from_extent_and_stride {
     use super::super::WorkgroupGridDimensions;
     use std::num::NonZeroU32;
@@ -6,7 +16,9 @@ mod from_extent_and_stride {
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn zero_depth() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let _ = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
                 width: 1,
                 height: 1,
@@ -19,13 +31,15 @@ mod from_extent_and_stride {
 
     #[test]
     fn stride_ones() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let extent = Extent3d {
-            width: 32,
-            height: 32,
-            depth_or_array_layers: 1,
+            width: workgroup_dimensions.x() * 2,
+            height: workgroup_dimensions.y() * 2,
+            depth_or_array_layers: workgroup_dimensions.z(),
         };
-        let expected = WorkgroupGridDimensions::from(extent);
+        let expected = WorkgroupGridDimensions::from_extent(&workgroup_dimensions, extent);
         let actual = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             extent,
             NonZeroU32::new(1).unwrap(),
             NonZeroU32::new(1).unwrap(),
@@ -35,11 +49,13 @@ mod from_extent_and_stride {
 
     #[test]
     fn stride_divisible_x() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 1,
+                width: workgroup_dimensions.x() * 4,
+                height: workgroup_dimensions.y() * 4,
+                depth_or_array_layers: workgroup_dimensions.z(),
             },
             NonZeroU32::new(2).unwrap(),
             NonZeroU32::new(5).unwrap(),
@@ -51,11 +67,13 @@ mod from_extent_and_stride {
 
     #[test]
     fn stride_divisible_y() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 1,
+                width: workgroup_dimensions.x() * 4,
+                height: workgroup_dimensions.y() * 4,
+                depth_or_array_layers: workgroup_dimensions.z(),
             },
             NonZeroU32::new(5).unwrap(),
             NonZeroU32::new(2).unwrap(),
@@ -67,11 +85,13 @@ mod from_extent_and_stride {
 
     #[test]
     fn near_small_extent() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
-                width: 33,
-                height: 33,
-                depth_or_array_layers: 1,
+                width: workgroup_dimensions.x() * 2 + 1,
+                height: workgroup_dimensions.y() * 2 + 1,
+                depth_or_array_layers: workgroup_dimensions.z(),
             },
             NonZeroU32::new(2).unwrap(),
             NonZeroU32::new(2).unwrap(),
@@ -83,11 +103,13 @@ mod from_extent_and_stride {
 
     #[test]
     fn divisible_small_extent() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
-                width: 32,
-                height: 32,
-                depth_or_array_layers: 1,
+                width: workgroup_dimensions.x() * 2,
+                height: workgroup_dimensions.y() * 2,
+                depth_or_array_layers: workgroup_dimensions.z(),
             },
             NonZeroU32::new(2).unwrap(),
             NonZeroU32::new(2).unwrap(),
@@ -99,11 +121,13 @@ mod from_extent_and_stride {
 
     #[test]
     fn nondivisible_small_extent() {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
         let dim = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
             Extent3d {
-                width: 31,
-                height: 31,
-                depth_or_array_layers: 1,
+                width: workgroup_dimensions.x() * 2 - 1,
+                height: workgroup_dimensions.y() * 2 - 1,
+                depth_or_array_layers: workgroup_dimensions.z(),
             },
             NonZeroU32::new(2).unwrap(),
             NonZeroU32::new(2).unwrap(),
@@ -121,40 +145,56 @@ mod from_extent {
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn zero_width() {
-        let _ = WorkgroupGridDimensions::from(Extent3d {
-            width: 0,
-            height: 1,
-            depth_or_array_layers: 1,
-        });
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let _ = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: 0,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+        );
     }
 
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn zero_height() {
-        let _ = WorkgroupGridDimensions::from(Extent3d {
-            width: 1,
-            height: 0,
-            depth_or_array_layers: 1,
-        });
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let _ = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: 1,
+                height: 0,
+                depth_or_array_layers: 1,
+            },
+        );
     }
 
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn zero_depth() {
-        let _ = WorkgroupGridDimensions::from(Extent3d {
-            width: 1,
-            height: 1,
-            depth_or_array_layers: 0,
-        });
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let _ = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 0,
+            },
+        );
     }
 
     #[test]
     fn no_remainder() {
-        let dim = WorkgroupGridDimensions::from(Extent3d {
-            width: 32,
-            height: 32,
-            depth_or_array_layers: 1,
-        });
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let dim = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: workgroup_dimensions.x() * 2,
+                height: workgroup_dimensions.y() * 2,
+                depth_or_array_layers: workgroup_dimensions.z(),
+            },
+        );
         assert_eq!(dim.x(), 2);
         assert_eq!(dim.y(), 2);
         assert_eq!(dim.z(), 1);
@@ -162,11 +202,15 @@ mod from_extent {
 
     #[test]
     fn remainder() {
-        let dim = WorkgroupGridDimensions::from(Extent3d {
-            width: 31,
-            height: 33,
-            depth_or_array_layers: 1,
-        });
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let dim = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: workgroup_dimensions.x() * 2 - 1,
+                height: workgroup_dimensions.y() * 2 + 1,
+                depth_or_array_layers: workgroup_dimensions.z(),
+            },
+        );
         assert_eq!(dim.x(), 2);
         assert_eq!(dim.y(), 3);
         assert_eq!(dim.z(), 1);

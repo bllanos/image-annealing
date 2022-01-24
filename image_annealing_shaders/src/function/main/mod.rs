@@ -1,18 +1,12 @@
 use crate::constant;
 use std::io::Write;
 
-pub const SHADER_ENTRY_POINT: &str = "main";
+mod header;
 
-fn global_invocation_id_header<W: Write>(mut writer: W) -> std::io::Result<()> {
-  writeln!(
-    writer,
-    "fn {}([[builtin(global_invocation_id)]] global_id: vec3<u32>) {{",
-    SHADER_ENTRY_POINT
-  )
-}
+pub use header::SHADER_ENTRY_POINT;
 
 pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
-  global_invocation_id_header(&mut writer)?;
+  header::global_invocation_id_header(&mut writer)?;
   writeln!(
     writer,
     "  textureStore(output_permutation, vec2<i32>(global_id.xy), vec4<u32>(0u,0u,0u,0u));
@@ -21,7 +15,7 @@ pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
 }
 
 pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
-  global_invocation_id_header(&mut writer)?;
+  header::global_invocation_id_header(&mut writer)?;
   writeln!(
     writer,
     "  let coords : vec2<i32> = vec2<i32>(global_id.xy);
@@ -33,7 +27,7 @@ pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
 }
 
 pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
-  global_invocation_id_header(&mut writer)?;
+  header::global_invocation_id_header(&mut writer)?;
   writeln!(
     writer,
     "  let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x * {}u), i32(global_id.y));
@@ -59,5 +53,47 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
     store_permutation_vector(coords1, output_permutation_vector1);
   }}
 }}", constant::swap::STRIDE
+  )
+}
+
+pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
+  header::count_swap_header(&mut writer)?;
+  writeln!(
+    writer,
+    "  // Parallel reduction code based on:
+  //   Optimizing Parallel Reduction in CUDA, by Mark Harris, NVIDIA Developer Technology
+  //   Downloaded as a PDF. The PDF was created on August 28, 2018 17:17:47.
+  //   Original download URL unknown. A CUDA implementation can be found at
+  //     https://github.com/zhyma/parallel_reduction,
+  //     along with a link to a slightly older version of the PDF.
+  let total_invocations : u32 = num_workgroups.x * num_workgroups.y * num_workgroups.z * workgroup_invocations;
+  let global_id : u32 = local_id + workgroup_id.x + (workgroup_id.y * num_workgroups.x) + (workgroup_id.z * num_workgroups.x * num_workgroups.y);
+
+  var local_sum : vec4<f32> = vec4<f32>(0.0);
+  for(var channel: u32 = 0u; channel < n_channel; channel += 1u) {{
+    if (parameters.do_segment[channel] != 0u) {{
+      var i : u32 = parameters.segment_start[channel] + global_id;
+      let end : u32 = parameters.segment_end[channel];
+      loop {{
+        if (i >= end) {{
+            break;
+        }}
+
+        local_sum[channel] += input.arr[i];
+
+        i += total_invocations;
+      }}
+    }}
+  }}
+
+  partial_sum[local_id] = local_sum;
+  workgroupBarrier();
+
+  reduce_partial_sum(local_id);
+
+  if (local_id == 0u) {{
+    output.arr[workgroup_id.x] = partial_sum[local_id];
+  }}
+}}"
   )
 }

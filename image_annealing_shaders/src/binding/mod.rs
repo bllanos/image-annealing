@@ -1,5 +1,6 @@
 use std::io::Write;
 
+pub mod count_swap;
 pub mod create_permutation;
 pub mod permute;
 pub mod swap;

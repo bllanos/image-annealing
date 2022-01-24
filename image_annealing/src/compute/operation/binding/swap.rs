@@ -5,6 +5,7 @@ use super::super::super::resource::texture::{
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use image_annealing_shaders::binding::swap as binding_constants;
+use image_annealing_shaders::WorkgroupDimensions;
 use std::num::NonZeroU32;
 
 pub struct SwapBinding {
@@ -74,7 +75,12 @@ impl SwapBinding {
         x_stride: NonZeroU32,
         y_stride: NonZeroU32,
     ) -> WorkgroupGridDimensions {
-        WorkgroupGridDimensions::from_extent_and_stride(self.texture_dimensions, x_stride, y_stride)
+        WorkgroupGridDimensions::from_extent_and_stride(
+            &WorkgroupDimensions::swap(),
+            self.texture_dimensions,
+            x_stride,
+            y_stride,
+        )
     }
 }
 

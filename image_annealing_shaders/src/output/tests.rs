@@ -12,6 +12,9 @@ mod output_config {
             assert_eq!(
                 &config,
                 &OutputConfig {
+                    count_swap: Some(Cow::from(
+                        [".", "count_swap.wgsl"].iter().collect::<PathBuf>(),
+                    )),
                     create_permutation: Some(Cow::from(
                         [".", "create_permutation.wgsl"].iter().collect::<PathBuf>(),
                     )),
@@ -29,6 +32,7 @@ mod output_config {
             assert_eq!(
                 &config,
                 &OutputConfig {
+                    count_swap: Some(Cow::from(directory.join("count_swap.wgsl"))),
                     create_permutation: Some(Cow::from(directory.join("create_permutation.wgsl"))),
                     permute: Some(Cow::from(directory.join("permute.wgsl"))),
                     swap: Some(Cow::from(directory.join("swap.wgsl"))),
@@ -61,6 +65,26 @@ mod write_files {
     use super::super::OutputConfig;
     use std::borrow::Cow;
     use std::error::Error;
+
+    #[test]
+    fn count_swap_only() -> Result<(), Box<dyn Error>> {
+        let path = test_utils::make_test_output_path(&["count_swap_only.wgsl"]);
+        if path.is_file() {
+            panic!("Output shader file already exists in the filesystem.")
+        }
+        let config = OutputConfig {
+            count_swap: Some(Cow::from(&path)),
+            ..Default::default()
+        };
+        super::super::write_files(&config)?;
+        let mut expected: Vec<u8> = Vec::new();
+        crate::shader::count_swap(&mut expected)?;
+        let actual = std::fs::read(&path)?;
+        assert_eq!(actual, expected);
+        std::fs::remove_file(path)?;
+
+        Ok(())
+    }
 
     #[test]
     fn create_permutation_only() -> Result<(), Box<dyn Error>> {
@@ -130,6 +154,12 @@ mod write_default_files {
     #[test]
     fn all_shaders() -> Result<(), Box<dyn Error>> {
         let directory = test_utils::make_test_output_path(&[] as &[&Path]);
+
+        let count_swap_path = test_utils::make_test_output_path(&["count_swap.wgsl"]);
+        if count_swap_path.is_file() {
+            panic!("count_swap shader file already exists in the filesystem.")
+        }
+
         let create_permutation_path =
             test_utils::make_test_output_path(&["create_permutation.wgsl"]);
         if create_permutation_path.is_file() {
@@ -149,8 +179,15 @@ mod write_default_files {
         super::super::write_default_files(Some(directory))?;
 
         let mut expected: Vec<u8> = Vec::new();
+
+        crate::shader::count_swap(&mut expected)?;
+        let mut actual = std::fs::read(&count_swap_path)?;
+        assert_eq!(actual, expected);
+        std::fs::remove_file(count_swap_path)?;
+
+        expected.clear();
         crate::shader::create_permutation(&mut expected)?;
-        let mut actual = std::fs::read(&create_permutation_path)?;
+        actual = std::fs::read(&create_permutation_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(create_permutation_path)?;
 

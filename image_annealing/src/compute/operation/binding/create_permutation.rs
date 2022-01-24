@@ -3,6 +3,7 @@ use super::super::super::resource::texture::{PermutationOutputTexture, Texture};
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use image_annealing_shaders::binding::create_permutation as binding_constants;
+use image_annealing_shaders::WorkgroupDimensions;
 
 pub struct CreatePermutationBinding {
     binding_data: BindingData,
@@ -34,7 +35,10 @@ impl CreatePermutationBinding {
 
         Self {
             binding_data: BindingData { layout, bind_group },
-            workgroup_grid_dimensions: super::get_workgroup_grid_dimensions(texture),
+            workgroup_grid_dimensions: WorkgroupGridDimensions::from_extent(
+                &WorkgroupDimensions::create_permutation(),
+                texture.dimensions(),
+            ),
         }
     }
 

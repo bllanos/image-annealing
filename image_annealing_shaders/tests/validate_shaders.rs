@@ -38,6 +38,13 @@ fn validate_shader(shader: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn count_swap() -> Result<(), Box<dyn Error>> {
+    let mut v: Vec<u8> = Vec::new();
+    shader::count_swap(&mut v)?;
+    validate_shader(&String::from_utf8(v)?)
+}
+
+#[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
     let mut v: Vec<u8> = Vec::new();
     shader::create_permutation(&mut v)?;
