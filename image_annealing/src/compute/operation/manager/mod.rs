@@ -1,7 +1,6 @@
 use super::super::device::DeviceManager;
 use super::super::format::{
-    LosslessImageBuffer, LosslessImageBufferComponent, VectorFieldImageBuffer,
-    VectorFieldImageBufferComponent,
+    LosslessImageBuffer, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
 use super::super::resource::buffer::ReadMappableBuffer;
 use super::super::resource::manager::ResourceManager;
@@ -122,24 +121,14 @@ impl OperationManager {
 
         device.wait_for_device();
 
-        let buffer_dimensions = mapped_buffer.buffer_dimensions();
-        let data = mapped_buffer.collect_mapped_buffer();
-        let result: Vec<VectorFieldImageBufferComponent> = data
-            .chunks(buffer_dimensions.padded_bytes_per_row)
-            .flat_map(|c| {
-                c[..buffer_dimensions.unpadded_bytes_per_row]
-                    .chunks_exact(std::mem::size_of::<VectorFieldImageBufferComponent>())
-            })
-            .map(|b| VectorFieldImageBufferComponent::from_be_bytes(b.try_into().unwrap()))
-            .collect::<Vec<VectorFieldImageBufferComponent>>();
+        let result = mapped_buffer.collect_mapped_buffer(
+            std::mem::size_of::<VectorFieldImageBufferComponent>(),
+            |b| VectorFieldImageBufferComponent::from_be_bytes(b.try_into().unwrap()),
+        );
 
         Ok(validation::vector_field_into_validated_permutation(
-            VectorFieldImageBuffer::from_vec(
-                buffer_dimensions.width.try_into().unwrap(),
-                buffer_dimensions.height.try_into().unwrap(),
-                result,
-            )
-            .unwrap(),
+            VectorFieldImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
+                .unwrap(),
         ))
     }
 
@@ -163,27 +152,19 @@ impl OperationManager {
 
         device.wait_for_device();
 
-        let buffer_dimensions = mapped_buffer.buffer_dimensions();
-        let data = mapped_buffer.collect_mapped_buffer();
-        let result: Vec<LosslessImageBufferComponent> = data
-            .chunks(buffer_dimensions.padded_bytes_per_row)
-            .flat_map(|c| {
-                c[..buffer_dimensions.unpadded_bytes_per_row]
-                    .chunks_exact(<LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE)
-            })
-            .map(|b| {
+        let result = mapped_buffer.collect_mapped_buffer(
+            <LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE,
+            |b| {
                 let val = <LosslessImageTexture as TextureDatatype>::Component::from_ne_bytes(
                     b.try_into().unwrap(),
                 );
                 val.try_into().unwrap_or(0)
-            })
-            .collect::<Vec<LosslessImageBufferComponent>>();
+            },
+        );
 
-        Ok(LosslessImageBuffer::from_vec(
-            buffer_dimensions.width.try_into().unwrap(),
-            buffer_dimensions.height.try_into().unwrap(),
-            result,
+        Ok(
+            LosslessImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
+                .unwrap(),
         )
-        .unwrap())
     }
 }

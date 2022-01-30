@@ -11,7 +11,7 @@ mod permutation;
 pub use lossless_image::LosslessImageOutputBuffer;
 pub use permutation::PermutationOutputBuffer;
 
-/// From https://github.com/gfx-rs/wgpu-rs/blob/master/examples/capture/main.rs
+/// From https://github.com/gfx-rs/wgpu/blob/master/wgpu/examples/capture/main.rs
 #[derive(Copy, Clone)]
 pub struct TextureCopyBufferDimensions {
     pub width: usize,
@@ -60,17 +60,31 @@ impl<'a> MappedBuffer<'a> {
         }
     }
 
-    pub fn collect_mapped_buffer(&mut self) -> wgpu::BufferView {
+    pub fn collect_mapped_buffer<T, F: FnMut(&[u8]) -> T>(
+        &mut self,
+        chunk_size: usize,
+        f: F,
+    ) -> Vec<T> {
         let fut = self
             .buffer_future
             .take()
             .expect("buffer data has already been collected");
         futures::executor::block_on(async move { fut.await.unwrap() });
-        self.buffer_slice.get_mapped_range()
+        let data = self.buffer_slice.get_mapped_range();
+        data.chunks(self.buffer_dimensions.padded_bytes_per_row)
+            .flat_map(|c| {
+                c[..self.buffer_dimensions.unpadded_bytes_per_row].chunks_exact(chunk_size)
+            })
+            .map(f)
+            .collect::<Vec<T>>()
     }
 
-    pub fn buffer_dimensions(&self) -> TextureCopyBufferDimensions {
-        *(self.buffer_dimensions)
+    pub fn width(&self) -> u32 {
+        self.buffer_dimensions.width.try_into().unwrap()
+    }
+
+    pub fn height(&self) -> u32 {
+        self.buffer_dimensions.height.try_into().unwrap()
     }
 }
 
