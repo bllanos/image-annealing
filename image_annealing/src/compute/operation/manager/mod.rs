@@ -1,15 +1,11 @@
 use super::super::device::DeviceManager;
-use super::super::format::{
-    LosslessImageBuffer, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
-};
+use super::super::format::{LosslessImageBuffer, VectorFieldImageBuffer};
 use super::super::resource::buffer::ReadMappableBuffer;
 use super::super::resource::manager::ResourceManager;
-use super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
 use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use image_annealing_shaders::constant;
-use std::convert::TryInto;
 use std::default::Default;
 use std::error::Error;
 use std::num::NonZeroU32;
@@ -121,10 +117,7 @@ impl OperationManager {
 
         device.wait_for_device();
 
-        let result = mapped_buffer.collect_mapped_buffer(
-            std::mem::size_of::<VectorFieldImageBufferComponent>(),
-            |b| VectorFieldImageBufferComponent::from_be_bytes(b.try_into().unwrap()),
-        );
+        let result = mapped_buffer.collect_mapped_buffer();
 
         Ok(validation::vector_field_into_validated_permutation(
             VectorFieldImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
@@ -152,15 +145,7 @@ impl OperationManager {
 
         device.wait_for_device();
 
-        let result = mapped_buffer.collect_mapped_buffer(
-            <LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE,
-            |b| {
-                let val = <LosslessImageTexture as TextureDatatype>::Component::from_ne_bytes(
-                    b.try_into().unwrap(),
-                );
-                val.try_into().unwrap_or(0)
-            },
-        );
+        let result = mapped_buffer.collect_mapped_buffer();
 
         Ok(
             LosslessImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)

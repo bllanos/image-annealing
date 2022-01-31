@@ -38,33 +38,35 @@ impl TextureCopyBufferDimensions {
 
 type BufferFuture = Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>;
 
-pub struct MappedBuffer<'a> {
+pub struct MappedBuffer<'a, T> {
     buffer_slice: wgpu::BufferSlice<'a>,
     buffer_future: Option<BufferFuture>,
     buffer_dimensions: &'a TextureCopyBufferDimensions,
     buffer: &'a wgpu::Buffer,
+    output_chunk_size: usize,
+    output_chunk_mapper: fn(&[u8]) -> T,
 }
 
-impl<'a> MappedBuffer<'a> {
+impl<'a, T> MappedBuffer<'a, T> {
     fn new(
         slice: wgpu::BufferSlice<'a>,
         buffer_future: BufferFuture,
         buffer_dimensions: &'a TextureCopyBufferDimensions,
         buffer: &'a wgpu::Buffer,
+        output_chunk_size: usize,
+        output_chunk_mapper: fn(&[u8]) -> T,
     ) -> Self {
         Self {
             buffer_slice: slice,
             buffer_future: Some(buffer_future),
             buffer_dimensions,
             buffer,
+            output_chunk_size,
+            output_chunk_mapper,
         }
     }
 
-    pub fn collect_mapped_buffer<T, F: FnMut(&[u8]) -> T>(
-        &mut self,
-        chunk_size: usize,
-        f: F,
-    ) -> Vec<T> {
+    pub fn collect_mapped_buffer(&mut self) -> Vec<T> {
         let fut = self
             .buffer_future
             .take()
@@ -73,9 +75,10 @@ impl<'a> MappedBuffer<'a> {
         let data = self.buffer_slice.get_mapped_range();
         data.chunks(self.buffer_dimensions.padded_bytes_per_row)
             .flat_map(|c| {
-                c[..self.buffer_dimensions.unpadded_bytes_per_row].chunks_exact(chunk_size)
+                c[..self.buffer_dimensions.unpadded_bytes_per_row]
+                    .chunks_exact(self.output_chunk_size)
             })
-            .map(f)
+            .map(self.output_chunk_mapper)
             .collect::<Vec<T>>()
     }
 
@@ -88,14 +91,16 @@ impl<'a> MappedBuffer<'a> {
     }
 }
 
-impl Drop for MappedBuffer<'_> {
+impl<T> Drop for MappedBuffer<'_, T> {
     fn drop(&mut self) {
         self.buffer.unmap(); // Free host memory
     }
 }
 
-pub trait ReadMappableBuffer {
-    fn request_map_read(&self) -> MappedBuffer;
+pub trait ReadMappableBuffer<'a> {
+    type Element;
+
+    fn request_map_read(&'a self) -> MappedBuffer<'a, Self::Element>;
 }
 
 struct TextureCopyBufferData {
@@ -153,10 +158,12 @@ impl TextureCopyBufferData {
     fn copy_view(&self) -> wgpu::ImageCopyBuffer {
         create_buffer_copy_view(&self.buffer, &self.buffer_dimensions)
     }
-}
 
-impl ReadMappableBuffer for TextureCopyBufferData {
-    fn request_map_read(&self) -> MappedBuffer {
+    fn request_map_read<T>(
+        &self,
+        output_chunk_size: usize,
+        output_chunk_mapper: fn(&[u8]) -> T,
+    ) -> MappedBuffer<T> {
         let buffer_slice = self.buffer.slice(..);
         let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
         MappedBuffer::new(
@@ -164,6 +171,8 @@ impl ReadMappableBuffer for TextureCopyBufferData {
             buffer_future,
             &self.buffer_dimensions,
             &self.buffer,
+            output_chunk_size,
+            output_chunk_mapper,
         )
     }
 }

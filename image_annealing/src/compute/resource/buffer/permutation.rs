@@ -2,7 +2,9 @@ use super::super::texture::{
     PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
 };
 use super::{MappedBuffer, ReadMappableBuffer, TextureCopyBufferData};
+use crate::compute::format::VectorFieldImageBufferComponent;
 use crate::ImageDimensions;
+use std::convert::TryInto;
 
 pub struct PermutationOutputBuffer(TextureCopyBufferData);
 
@@ -25,10 +27,19 @@ impl PermutationOutputBuffer {
             permutation.dimensions(),
         );
     }
+
+    fn output_chunk_mapper(chunk: &[u8]) -> VectorFieldImageBufferComponent {
+        VectorFieldImageBufferComponent::from_be_bytes(chunk.try_into().unwrap())
+    }
 }
 
-impl ReadMappableBuffer for PermutationOutputBuffer {
-    fn request_map_read(&self) -> MappedBuffer {
-        self.0.request_map_read()
+impl<'a> ReadMappableBuffer<'a> for PermutationOutputBuffer {
+    type Element = VectorFieldImageBufferComponent;
+
+    fn request_map_read(&self) -> MappedBuffer<Self::Element> {
+        self.0.request_map_read(
+            std::mem::size_of::<Self::Element>(),
+            Self::output_chunk_mapper,
+        )
     }
 }
