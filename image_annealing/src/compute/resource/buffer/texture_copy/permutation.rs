@@ -1,7 +1,8 @@
-use super::super::texture::{
+use super::super::super::texture::{
     PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
 };
-use super::{MappedBuffer, ReadMappableBuffer, TextureCopyBufferData};
+use super::super::map::{MappedBuffer, ReadMappableBuffer};
+use super::TextureCopyBufferData;
 use crate::compute::format::VectorFieldImageBufferComponent;
 use crate::ImageDimensions;
 use std::convert::TryInto;
@@ -10,7 +11,7 @@ pub struct PermutationOutputBuffer(TextureCopyBufferData);
 
 impl PermutationOutputBuffer {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureCopyBufferData::create_output_buffer(
+        Self(TextureCopyBufferData::new(
             device,
             image_dimensions,
             PermutationTexture::PIXEL_SIZE,

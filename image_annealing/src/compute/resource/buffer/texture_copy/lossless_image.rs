@@ -1,7 +1,8 @@
-use super::super::texture::{
+use super::super::super::texture::{
     LosslessImageOutputTexture, LosslessImageTexture, Texture, TextureDatatype,
 };
-use super::{MappedBuffer, ReadMappableBuffer, TextureCopyBufferData};
+use super::super::map::{MappedBuffer, ReadMappableBuffer};
+use super::TextureCopyBufferData;
 use crate::compute::format::LosslessImageBufferComponent;
 use crate::ImageDimensions;
 use std::convert::TryInto;
@@ -10,7 +11,7 @@ pub struct LosslessImageOutputBuffer(TextureCopyBufferData);
 
 impl LosslessImageOutputBuffer {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        Self(TextureCopyBufferData::create_output_buffer(
+        Self(TextureCopyBufferData::new(
             device,
             image_dimensions,
             LosslessImageTexture::PIXEL_SIZE,
