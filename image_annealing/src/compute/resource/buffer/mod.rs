@@ -5,43 +5,20 @@ use core::num::NonZeroU32;
 use std::convert::TryInto;
 use std::pin::Pin;
 
+mod dimensions;
 mod lossless_image;
 mod permutation;
 
+use dimensions::BufferDimensions;
 pub use lossless_image::LosslessImageOutputBuffer;
 pub use permutation::PermutationOutputBuffer;
-
-/// From https://github.com/gfx-rs/wgpu/blob/master/wgpu/examples/capture/main.rs
-#[derive(Copy, Clone)]
-pub struct TextureCopyBufferDimensions {
-    pub width: usize,
-    pub height: usize,
-    pub unpadded_bytes_per_row: usize,
-    pub padded_bytes_per_row: usize,
-}
-
-impl TextureCopyBufferDimensions {
-    fn new(sz: &ImageDimensions, bytes_per_pixel: usize) -> Self {
-        let width = sz.width();
-        let unpadded_bytes_per_row = width * bytes_per_pixel;
-        let align: usize = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT.try_into().unwrap();
-        let padded_bytes_per_row_padding = (align - unpadded_bytes_per_row % align) % align;
-        let padded_bytes_per_row = unpadded_bytes_per_row + padded_bytes_per_row_padding;
-        Self {
-            width,
-            height: sz.height(),
-            unpadded_bytes_per_row,
-            padded_bytes_per_row,
-        }
-    }
-}
 
 type BufferFuture = Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>;
 
 pub struct MappedBuffer<'a, T> {
     buffer_slice: wgpu::BufferSlice<'a>,
     buffer_future: Option<BufferFuture>,
-    buffer_dimensions: &'a TextureCopyBufferDimensions,
+    buffer_dimensions: &'a BufferDimensions,
     buffer: &'a wgpu::Buffer,
     output_chunk_size: usize,
     output_chunk_mapper: fn(&[u8]) -> T,
@@ -51,7 +28,7 @@ impl<'a, T> MappedBuffer<'a, T> {
     fn new(
         slice: wgpu::BufferSlice<'a>,
         buffer_future: BufferFuture,
-        buffer_dimensions: &'a TextureCopyBufferDimensions,
+        buffer_dimensions: &'a BufferDimensions,
         buffer: &'a wgpu::Buffer,
         output_chunk_size: usize,
         output_chunk_mapper: fn(&[u8]) -> T,
@@ -73,21 +50,27 @@ impl<'a, T> MappedBuffer<'a, T> {
             .expect("buffer data has already been collected");
         futures::executor::block_on(async move { fut.await.unwrap() });
         let data = self.buffer_slice.get_mapped_range();
-        data.chunks(self.buffer_dimensions.padded_bytes_per_row)
-            .flat_map(|c| {
-                c[..self.buffer_dimensions.unpadded_bytes_per_row]
-                    .chunks_exact(self.output_chunk_size)
-            })
-            .map(self.output_chunk_mapper)
-            .collect::<Vec<T>>()
+        match self.buffer_dimensions.padding() {
+            Some(padding) => data
+                .chunks(padding.padded_bytes_per_row())
+                .flat_map(|c| {
+                    c[..padding.unpadded_bytes_per_row()].chunks_exact(self.output_chunk_size)
+                })
+                .map(self.output_chunk_mapper)
+                .collect::<Vec<T>>(),
+            None => data
+                .chunks_exact(self.output_chunk_size)
+                .map(self.output_chunk_mapper)
+                .collect::<Vec<T>>(),
+        }
     }
 
     pub fn width(&self) -> u32 {
-        self.buffer_dimensions.width.try_into().unwrap()
+        self.buffer_dimensions.width().try_into().unwrap()
     }
 
     pub fn height(&self) -> u32 {
-        self.buffer_dimensions.height.try_into().unwrap()
+        self.buffer_dimensions.height().try_into().unwrap()
     }
 }
 
@@ -104,7 +87,7 @@ pub trait ReadMappableBuffer<'a> {
 }
 
 struct TextureCopyBufferData {
-    buffer_dimensions: TextureCopyBufferDimensions,
+    buffer_dimensions: BufferDimensions,
     buffer: wgpu::Buffer,
 }
 
@@ -116,12 +99,11 @@ impl TextureCopyBufferData {
         usage: wgpu::BufferUsages,
         label: Option<&str>,
     ) -> Self {
-        let buffer_dimensions = TextureCopyBufferDimensions::new(image_dimensions, bytes_per_pixel);
+        let buffer_dimensions =
+            BufferDimensions::new_texture_copy(image_dimensions, bytes_per_pixel);
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label,
-            size: (buffer_dimensions.padded_bytes_per_row * buffer_dimensions.height)
-                .try_into()
-                .unwrap(),
+            size: buffer_dimensions.byte_size().try_into().unwrap(),
             usage,
             mapped_at_creation: false,
         });
@@ -149,8 +131,8 @@ impl TextureCopyBufferData {
     fn assert_same_dimensions<U: Texture>(buffer: &Self, texture: &U) {
         let dimensions = texture.dimensions();
         assert!(
-            buffer.buffer_dimensions.width == dimensions.width.try_into().unwrap()
-                && buffer.buffer_dimensions.height == dimensions.height.try_into().unwrap()
+            buffer.buffer_dimensions.width() == dimensions.width.try_into().unwrap()
+                && buffer.buffer_dimensions.height() == dimensions.height.try_into().unwrap()
                 && TEXTURE_ARRAY_LAYERS == dimensions.depth_or_array_layers.try_into().unwrap()
         );
     }
@@ -179,14 +161,22 @@ impl TextureCopyBufferData {
 
 fn create_buffer_copy_view<'a, 'b>(
     buffer: &'a wgpu::Buffer,
-    dimensions: &'b TextureCopyBufferDimensions,
+    dimensions: &'b BufferDimensions,
 ) -> wgpu::ImageCopyBuffer<'a> {
     wgpu::ImageCopyBuffer {
         buffer,
         layout: wgpu::ImageDataLayout {
             offset: 0,
             bytes_per_row: Some(
-                NonZeroU32::new(dimensions.padded_bytes_per_row.try_into().unwrap()).unwrap(),
+                NonZeroU32::new(
+                    dimensions
+                        .padding()
+                        .unwrap()
+                        .padded_bytes_per_row()
+                        .try_into()
+                        .unwrap(),
+                )
+                .unwrap(),
             ),
             rows_per_image: None,
         },
