@@ -1,4 +1,5 @@
 use image::GenericImageView;
+use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
@@ -12,6 +13,7 @@ where
     InvalidNumberType(T),
     ZeroWidth,
     ZeroHeight,
+    DepthNotOne,
 }
 
 impl<T> fmt::Display for InvalidDimensionError<T>
@@ -29,6 +31,9 @@ where
             }
             InvalidDimensionError::ZeroWidth => write!(f, "width is zero"),
             InvalidDimensionError::ZeroHeight => write!(f, "height is zero"),
+            InvalidDimensionError::DepthNotOne => {
+                write!(f, "depth is not {}", ImageDimensions::DEPTH)
+            }
         }
     }
 }
@@ -105,6 +110,8 @@ pub struct ImageDimensions {
 }
 
 impl ImageDimensions {
+    const DEPTH: usize = 1;
+
     pub fn new<T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy>(
         width: T,
         height: T,
@@ -200,6 +207,26 @@ impl ImageDimensions {
             ))
         } else {
             Ok((k_usize % self.width, k_usize / self.width))
+        }
+    }
+
+    pub fn to_extent(&self) -> wgpu::Extent3d {
+        wgpu::Extent3d {
+            width: self.width.try_into().unwrap(),
+            height: self.height.try_into().unwrap(),
+            depth_or_array_layers: Self::DEPTH.try_into().unwrap(),
+        }
+    }
+}
+
+impl TryFrom<wgpu::Extent3d> for ImageDimensions {
+    type Error = InvalidDimensionError<u32>;
+
+    fn try_from(value: wgpu::Extent3d) -> Result<Self, Self::Error> {
+        if <u32 as TryInto<usize>>::try_into(value.depth_or_array_layers).unwrap() != Self::DEPTH {
+            Err(InvalidDimensionError::DepthNotOne)
+        } else {
+            ImageDimensions::new(value.width, value.height)
         }
     }
 }

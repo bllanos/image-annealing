@@ -40,6 +40,40 @@ impl BufferData {
         )
     }
 
+    pub fn create_storage_buffer(
+        device: &wgpu::Device,
+        dimensions: &BufferDimensions,
+        label: Option<&str>,
+    ) -> Self {
+        Self::create_buffer(device, dimensions, wgpu::BufferUsages::STORAGE, label)
+    }
+
+    pub fn create_output_storage_buffer(
+        device: &wgpu::Device,
+        dimensions: &BufferDimensions,
+        label: Option<&str>,
+    ) -> Self {
+        Self::create_buffer(
+            device,
+            dimensions,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            label,
+        )
+    }
+
+    pub fn create_uniform_buffer(
+        device: &wgpu::Device,
+        dimensions: &BufferDimensions,
+        label: Option<&str>,
+    ) -> Self {
+        Self::create_buffer(
+            device,
+            dimensions,
+            wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            label,
+        )
+    }
+
     pub fn request_map_read<T>(
         &self,
         output_chunk_size: usize,

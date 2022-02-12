@@ -1,14 +1,13 @@
 use super::super::device::DeviceManager;
 use super::super::format::{LosslessImageBuffer, VectorFieldImageBuffer};
+use super::super::link::swap::SwapPass;
 use super::super::resource::buffer::ReadMappableBuffer;
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
 use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
-use image_annealing_shaders::constant;
 use std::default::Default;
 use std::error::Error;
-use std::num::NonZeroU32;
 
 mod state;
 use state::ResourceStateManager;
@@ -87,11 +86,7 @@ impl OperationManager {
         let queue = device.queue();
         self.state
             .prepare_swap(&self.resources, queue, &mut encoder, input)?;
-        self.pipelines.swap(
-            &mut encoder,
-            NonZeroU32::new(constant::swap::STRIDE).unwrap(),
-            NonZeroU32::new(1).unwrap(),
-        );
+        self.pipelines.swap(&mut encoder, &SwapPass::Horizontal);
         self.state.finish_swap()?;
         queue.submit(Some(encoder.finish()));
         Ok(())

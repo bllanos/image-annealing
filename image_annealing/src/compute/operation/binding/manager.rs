@@ -1,3 +1,4 @@
+use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::shader::WorkgroupGridDimensions;
 use super::create_permutation::CreatePermutationBinding;
@@ -5,7 +6,6 @@ use super::permute::PermuteBinding;
 use super::swap::SwapBinding;
 use super::Binding;
 use image_annealing_shaders::binding as binding_constants;
-use std::num::NonZeroU32;
 
 pub struct BindingManager {
     create_permutation_binding: CreatePermutationBinding,
@@ -57,12 +57,7 @@ impl BindingManager {
         self.swap_binding.layout()
     }
 
-    pub fn swap_grid_dimensions(
-        &self,
-        x_stride: NonZeroU32,
-        y_stride: NonZeroU32,
-    ) -> WorkgroupGridDimensions {
-        self.swap_binding
-            .workgroup_grid_dimensions(x_stride, y_stride)
+    pub fn swap_grid_dimensions(&self, pass: &SwapPass) -> WorkgroupGridDimensions {
+        self.swap_binding.workgroup_grid_dimensions(pass)
     }
 }

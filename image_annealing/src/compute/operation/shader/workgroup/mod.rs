@@ -1,10 +1,26 @@
+use crate::ImageDimensions;
 use image_annealing_shaders::WorkgroupDimensions;
+use std::convert::TryFrom;
 use std::num::NonZeroU32;
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct WorkgroupGridDimensions(NonZeroU32, NonZeroU32, NonZeroU32);
 
 impl WorkgroupGridDimensions {
+    pub fn from_image_dimensions_and_stride(
+        workgroup_dimensions: &WorkgroupDimensions,
+        image_dimensions: &ImageDimensions,
+        x_stride: NonZeroU32,
+        y_stride: NonZeroU32,
+    ) -> Self {
+        Self::from_extent_and_stride(
+            workgroup_dimensions,
+            image_dimensions.to_extent(),
+            x_stride,
+            y_stride,
+        )
+    }
+
     pub fn from_extent_and_stride(
         workgroup_dimensions: &WorkgroupDimensions,
         extent: wgpu::Extent3d,
@@ -84,6 +100,15 @@ impl WorkgroupGridDimensions {
 
     pub fn z(&self) -> u32 {
         self.2.get()
+    }
+
+    pub fn count(&self) -> usize {
+        <usize as TryFrom<u32>>::try_from(self.x())
+            .unwrap()
+            .checked_mul(<usize as TryFrom<u32>>::try_from(self.y()).unwrap())
+            .unwrap()
+            .checked_mul(<usize as TryFrom<u32>>::try_from(self.z()).unwrap())
+            .unwrap()
     }
 
     pub fn dispatch(&self, cpass: &mut wgpu::ComputePass) {

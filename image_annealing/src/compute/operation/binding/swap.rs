@@ -1,16 +1,17 @@
+use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
     DisplacementGoalInputTexture, PermutationInputTexture, PermutationOutputTexture, Texture,
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
+use crate::ImageDimensions;
 use image_annealing_shaders::binding::swap as binding_constants;
-use image_annealing_shaders::WorkgroupDimensions;
-use std::num::NonZeroU32;
+use std::convert::TryFrom;
 
 pub struct SwapBinding {
     binding_data: BindingData,
-    texture_dimensions: wgpu::Extent3d,
+    image_dimensions: ImageDimensions,
 }
 
 impl SwapBinding {
@@ -66,21 +67,13 @@ impl SwapBinding {
 
         Self {
             binding_data: BindingData { layout, bind_group },
-            texture_dimensions: permutation_input_texture.dimensions(),
+            image_dimensions: ImageDimensions::try_from(permutation_input_texture.dimensions())
+                .unwrap(),
         }
     }
 
-    pub fn workgroup_grid_dimensions(
-        &self,
-        x_stride: NonZeroU32,
-        y_stride: NonZeroU32,
-    ) -> WorkgroupGridDimensions {
-        WorkgroupGridDimensions::from_extent_and_stride(
-            &WorkgroupDimensions::swap(),
-            self.texture_dimensions,
-            x_stride,
-            y_stride,
-        )
+    pub fn workgroup_grid_dimensions(&self, pass: &SwapPass) -> WorkgroupGridDimensions {
+        pass.swap_workgroup_grid_dimensions(&self.image_dimensions)
     }
 }
 

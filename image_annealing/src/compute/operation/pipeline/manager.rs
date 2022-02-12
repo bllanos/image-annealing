@@ -1,9 +1,9 @@
+use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
 use super::create_permutation::CreatePermutationPipeline;
 use super::permute::PermutePipeline;
 use super::swap::SwapPipeline;
-use std::num::NonZeroU32;
 
 pub struct PipelineManager {
     bindings: BindingManager,
@@ -46,19 +46,14 @@ impl PipelineManager {
         self.bindings.permute_grid_dimensions().dispatch(&mut cpass);
     }
 
-    pub fn swap(
-        &self,
-        encoder: &mut wgpu::CommandEncoder,
-        x_stride: NonZeroU32,
-        y_stride: NonZeroU32,
-    ) {
+    pub fn swap(&self, encoder: &mut wgpu::CommandEncoder, pass: &SwapPass) {
         let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("swap_compute_pass"),
         });
         self.swap_pipeline.set_pipeline(&mut cpass);
         self.bindings.bind_swap(&mut cpass);
         self.bindings
-            .swap_grid_dimensions(x_stride, y_stride)
+            .swap_grid_dimensions(pass)
             .dispatch(&mut cpass);
     }
 }
