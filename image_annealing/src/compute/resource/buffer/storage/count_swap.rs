@@ -1,15 +1,18 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
+use super::super::CountSwapOutputBuffer;
 use super::super::{InputBuffer, OutputBuffer};
-use crate::compute::link::swap::SwapPass;
+use crate::compute::link::swap::{CountSwapOutputDataElement, SwapPass};
 use crate::ImageDimensions;
 
 pub struct CountSwapInputBuffer(BufferData);
 
 impl CountSwapInputBuffer {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
-        let buffer_dimensions =
-            BufferDimensions::new_buffer(1, SwapPass::total_workgroups(image_dimensions));
+        let buffer_dimensions = BufferDimensions::new_buffer(
+            SwapPass::total_workgroups(image_dimensions),
+            std::mem::size_of::<CountSwapOutputDataElement>(),
+        );
         Self(BufferData::create_storage_buffer(
             device,
             &buffer_dimensions,
@@ -33,11 +36,10 @@ impl OutputBuffer for CountSwapInputBuffer {
 pub struct CountSwapOutputStorageBuffer(BufferData);
 
 impl CountSwapOutputStorageBuffer {
-    pub fn new(device: &wgpu::Device) -> Self {
-        let buffer_dimensions = super::super::count_swap_output_buffer_size();
+    pub fn new(device: &wgpu::Device, size_reference: &CountSwapOutputBuffer) -> Self {
         Self(BufferData::create_output_storage_buffer(
             device,
-            &buffer_dimensions,
+            size_reference.dimensions(),
             Some("count_swap_output_storage_buffer"),
         ))
     }

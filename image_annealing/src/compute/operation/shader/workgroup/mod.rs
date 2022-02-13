@@ -90,6 +90,11 @@ impl WorkgroupGridDimensions {
         )
     }
 
+    pub fn count_swap() -> Self {
+        let one = NonZeroU32::new(1).unwrap();
+        Self(one, one, one)
+    }
+
     pub fn x(&self) -> u32 {
         self.0.get()
     }

@@ -4,6 +4,7 @@ use bytemuck::{Pod, Zeroable};
 use image_annealing_shaders::constant;
 use image_annealing_shaders::WorkgroupDimensions;
 use std::convert::TryFrom;
+use std::convert::TryInto;
 use std::num::NonZeroU32;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -126,5 +127,32 @@ impl CountSwapInputLayout {
 
     pub fn clear_passes(&mut self) {
         self.do_segment = Default::default();
+    }
+}
+
+pub type CountSwapOutputDataElement = f32;
+type CountSwapOutputData = [CountSwapOutputDataElement; constant::count_swap::N_CHANNEL];
+
+#[repr(transparent)]
+pub struct CountSwapOutput(CountSwapOutputData);
+
+impl CountSwapOutput {
+    pub const SIZE: usize = std::mem::size_of::<Self>();
+
+    pub fn from_ne_bytes(bytes: [u8; Self::SIZE]) -> Self {
+        Self(
+            bytes
+                .as_slice()
+                .chunks_exact(std::mem::size_of::<CountSwapOutputDataElement>())
+                .enumerate()
+                .fold(
+                    <CountSwapOutputData as Default>::default(),
+                    |mut acc, (i, chunk)| {
+                        acc[i] =
+                            CountSwapOutputDataElement::from_ne_bytes(chunk.try_into().unwrap());
+                        acc
+                    },
+                ),
+        )
     }
 }

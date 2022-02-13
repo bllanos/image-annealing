@@ -24,11 +24,14 @@ pub struct ResourceManager {
 
 impl ResourceManager {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
+        let count_swap_output_buffer = CountSwapOutputBuffer::new(device);
+        let count_swap_output_storage_buffer =
+            CountSwapOutputStorageBuffer::new(device, &count_swap_output_buffer);
         Self {
             count_swap_input_buffer: CountSwapInputBuffer::new(device, image_dimensions),
             count_swap_input_layout_buffer: CountSwapInputLayoutBuffer::new(device),
-            count_swap_output_buffer: CountSwapOutputBuffer::new(device),
-            count_swap_output_storage_buffer: CountSwapOutputStorageBuffer::new(device),
+            count_swap_output_buffer,
+            count_swap_output_storage_buffer,
             displacement_goal_input_texture: DisplacementGoalInputTexture::new(
                 device,
                 image_dimensions,
