@@ -1,5 +1,5 @@
 use super::super::InputBuffer;
-use super::UniformBufferData;
+use super::data::UniformBufferData;
 use crate::compute::link::swap::CountSwapInputLayout;
 
 pub struct CountSwapInputLayoutBuffer(UniformBufferData<CountSwapInputLayout>);

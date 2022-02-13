@@ -1,5 +1,6 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
-use super::{Texture, TextureData, TextureDatatype};
+use super::data::TextureData;
+use super::{Texture, TextureDatatype};
 use crate::{ImageDimensions, ValidatedPermutation};
 use core::num::NonZeroU32;
 use std::convert::{TryFrom, TryInto};
@@ -18,16 +19,16 @@ pub struct PermutationOutputTexture(TextureData);
 
 impl Texture for PermutationInputTexture {
     fn view(&self) -> &wgpu::TextureView {
-        &self.0.view
+        self.0.view()
     }
     fn dimensions(&self) -> wgpu::Extent3d {
-        self.0.dimensions
+        self.0.dimensions()
     }
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
     fn binding_description() -> wgpu::BindingType {
-        super::make_read_texture_binding_description::<PermutationTexture>(
+        super::data::make_read_texture_binding_description::<PermutationTexture>(
             wgpu::TextureSampleType::Uint,
         )
     }
@@ -35,16 +36,16 @@ impl Texture for PermutationInputTexture {
 
 impl Texture for PermutationOutputTexture {
     fn view(&self) -> &wgpu::TextureView {
-        &self.0.view
+        self.0.view()
     }
     fn dimensions(&self) -> wgpu::Extent3d {
-        self.0.dimensions
+        self.0.dimensions()
     }
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
     fn binding_description() -> wgpu::BindingType {
-        super::make_write_texture_binding_description::<PermutationTexture>()
+        super::data::make_write_texture_binding_description::<PermutationTexture>()
     }
 }
 

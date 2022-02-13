@@ -1,4 +1,5 @@
-use super::{Texture, TextureData, TextureDatatype};
+use super::data::TextureData;
+use super::{Texture, TextureDatatype};
 use crate::ImageDimensions;
 use core::num::NonZeroU32;
 use image::DynamicImage;
@@ -17,16 +18,16 @@ pub struct LosslessImageOutputTexture(TextureData);
 
 impl Texture for LosslessImageInputTexture {
     fn view(&self) -> &wgpu::TextureView {
-        &self.0.view
+        self.0.view()
     }
     fn dimensions(&self) -> wgpu::Extent3d {
-        self.0.dimensions
+        self.0.dimensions()
     }
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
     fn binding_description() -> wgpu::BindingType {
-        super::make_read_texture_binding_description::<LosslessImageTexture>(
+        super::data::make_read_texture_binding_description::<LosslessImageTexture>(
             wgpu::TextureSampleType::Uint,
         )
     }
@@ -34,16 +35,16 @@ impl Texture for LosslessImageInputTexture {
 
 impl Texture for LosslessImageOutputTexture {
     fn view(&self) -> &wgpu::TextureView {
-        &self.0.view
+        self.0.view()
     }
     fn dimensions(&self) -> wgpu::Extent3d {
-        self.0.dimensions
+        self.0.dimensions()
     }
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
     fn binding_description() -> wgpu::BindingType {
-        super::make_write_texture_binding_description::<LosslessImageTexture>()
+        super::data::make_write_texture_binding_description::<LosslessImageTexture>()
     }
 }
 

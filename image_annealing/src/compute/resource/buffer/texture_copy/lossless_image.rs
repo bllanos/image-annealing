@@ -2,7 +2,7 @@ use super::super::super::texture::{
     LosslessImageOutputTexture, LosslessImageTexture, Texture, TextureDatatype,
 };
 use super::super::map::{MappedBuffer, ReadMappableBuffer};
-use super::TextureCopyBufferData;
+use super::data::TextureCopyBufferData;
 use crate::compute::format::LosslessImageBufferComponent;
 use crate::ImageDimensions;
 use std::convert::TryInto;

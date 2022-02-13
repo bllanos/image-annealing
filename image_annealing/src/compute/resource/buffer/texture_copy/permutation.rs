@@ -2,7 +2,7 @@ use super::super::super::texture::{
     PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
 };
 use super::super::map::{MappedBuffer, ReadMappableBuffer};
-use super::TextureCopyBufferData;
+use super::data::TextureCopyBufferData;
 use crate::compute::format::VectorFieldImageBufferComponent;
 use crate::ImageDimensions;
 use std::convert::TryInto;

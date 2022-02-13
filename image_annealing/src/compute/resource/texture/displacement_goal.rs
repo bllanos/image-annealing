@@ -1,5 +1,6 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
-use super::{Texture, TextureData, TextureDatatype};
+use super::data::TextureData;
+use super::{Texture, TextureDatatype};
 use crate::{DisplacementGoal, ImageDimensions};
 use core::num::NonZeroU32;
 use std::convert::{TryFrom, TryInto};
@@ -17,16 +18,16 @@ pub struct DisplacementGoalInputTexture(TextureData);
 
 impl Texture for DisplacementGoalInputTexture {
     fn view(&self) -> &wgpu::TextureView {
-        &self.0.view
+        self.0.view()
     }
     fn dimensions(&self) -> wgpu::Extent3d {
-        self.0.dimensions
+        self.0.dimensions()
     }
     fn copy_view(&self) -> wgpu::ImageCopyTexture {
         self.0.copy_view()
     }
     fn binding_description() -> wgpu::BindingType {
-        super::make_read_texture_binding_description::<DisplacementGoalTexture>(
+        super::data::make_read_texture_binding_description::<DisplacementGoalTexture>(
             wgpu::TextureSampleType::Uint,
         )
     }
