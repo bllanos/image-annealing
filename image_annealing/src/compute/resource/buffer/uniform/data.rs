@@ -1,5 +1,6 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
+use super::super::BindableBuffer;
 use std::convert::TryInto;
 use std::marker::PhantomData;
 
@@ -26,5 +27,11 @@ impl<T: bytemuck::Pod> UniformBufferData<T> {
             has_dynamic_offset: false,
             min_binding_size: Some(wgpu::BufferSize::new(Self::SIZE.try_into().unwrap()).unwrap()),
         }
+    }
+}
+
+impl<T> BindableBuffer for UniformBufferData<T> {
+    fn binding_resource(&self) -> wgpu::BindingResource {
+        self.0.buffer().as_entire_binding()
     }
 }

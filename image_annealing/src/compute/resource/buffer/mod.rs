@@ -13,10 +13,14 @@ pub use texture_copy::LosslessImageOutputBuffer;
 pub use texture_copy::PermutationOutputBuffer;
 pub use uniform::CountSwapInputLayoutBuffer;
 
-pub trait InputBuffer {
+pub trait BindableBuffer {
+    fn binding_resource(&self) -> wgpu::BindingResource;
+}
+
+pub trait InputBuffer: BindableBuffer {
     fn input_binding_description(&self) -> wgpu::BindingType;
 }
 
-pub trait OutputBuffer {
+pub trait OutputBuffer: BindableBuffer {
     fn output_binding_description(&self) -> wgpu::BindingType;
 }

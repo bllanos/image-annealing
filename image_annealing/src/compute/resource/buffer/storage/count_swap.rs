@@ -1,7 +1,7 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
 use super::super::CountSwapOutputBuffer;
-use super::super::{InputBuffer, OutputBuffer};
+use super::super::{BindableBuffer, InputBuffer, OutputBuffer};
 use crate::compute::link::swap::{CountSwapOutputDataElement, SwapPass};
 use crate::ImageDimensions;
 
@@ -18,6 +18,12 @@ impl CountSwapInputBuffer {
             &buffer_dimensions,
             Some("count_swap_input_buffer"),
         ))
+    }
+}
+
+impl BindableBuffer for CountSwapInputBuffer {
+    fn binding_resource(&self) -> wgpu::BindingResource {
+        self.0.buffer().as_entire_binding()
     }
 }
 
@@ -42,6 +48,12 @@ impl CountSwapOutputStorageBuffer {
             size_reference.dimensions(),
             Some("count_swap_output_storage_buffer"),
         ))
+    }
+}
+
+impl BindableBuffer for CountSwapOutputStorageBuffer {
+    fn binding_resource(&self) -> wgpu::BindingResource {
+        self.0.buffer().as_entire_binding()
     }
 }
 

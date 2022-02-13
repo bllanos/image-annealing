@@ -1,4 +1,4 @@
-use super::super::InputBuffer;
+use super::super::{BindableBuffer, InputBuffer};
 use super::data::UniformBufferData;
 use crate::compute::link::swap::CountSwapInputLayout;
 
@@ -14,6 +14,12 @@ impl CountSwapInputLayoutBuffer {
 
     pub fn load(&self, queue: &wgpu::Queue, data: &CountSwapInputLayout) {
         self.0.load(queue, data);
+    }
+}
+
+impl BindableBuffer for CountSwapInputLayoutBuffer {
+    fn binding_resource(&self) -> wgpu::BindingResource {
+        self.0.binding_resource()
     }
 }
 
