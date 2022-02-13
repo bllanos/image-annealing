@@ -1,5 +1,5 @@
-use super::super::super::resource::manager::ResourceManager;
-use super::{PermuteOperationInput, SwapOperationInput};
+use super::super::super::super::resource::manager::ResourceManager;
+use super::super::{PermuteOperationInput, SwapOperationInput};
 use std::error::Error;
 use std::fmt;
 
