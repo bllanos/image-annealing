@@ -9,7 +9,7 @@ pub struct BufferData {
 }
 
 impl BufferData {
-    pub fn create_buffer(
+    fn create_buffer(
         device: &wgpu::Device,
         dimensions: &BufferDimensions,
         usage: wgpu::BufferUsages,

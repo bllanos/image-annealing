@@ -20,3 +20,11 @@ pub use uniform::CountSwapInputLayoutBuffer;
 fn count_swap_output_buffer_size() -> BufferDimensions {
     BufferDimensions::new_buffer(constant::count_swap::N_CHANNEL, std::mem::size_of::<f32>())
 }
+
+pub trait InputBuffer {
+    fn input_binding_description(&self) -> wgpu::BindingType;
+}
+
+pub trait OutputBuffer {
+    fn output_binding_description(&self) -> wgpu::BindingType;
+}

@@ -5,7 +5,7 @@ use std::convert::TryInto;
 pub struct CountSwapOutputBuffer(BufferData);
 
 impl CountSwapOutputBuffer {
-    fn new(device: &wgpu::Device) -> Self {
+    pub fn new(device: &wgpu::Device) -> Self {
         let buffer_dimensions = super::count_swap_output_buffer_size();
         Self(BufferData::create_output_buffer(
             device,

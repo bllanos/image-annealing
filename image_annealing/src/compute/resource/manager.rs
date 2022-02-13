@@ -1,4 +1,7 @@
-use super::buffer::{LosslessImageOutputBuffer, PermutationOutputBuffer};
+use super::buffer::{
+    CountSwapInputBuffer, CountSwapInputLayoutBuffer, CountSwapOutputBuffer,
+    CountSwapOutputStorageBuffer, LosslessImageOutputBuffer, PermutationOutputBuffer,
+};
 use super::texture::{
     DisplacementGoalInputTexture, LosslessImageInputTexture, LosslessImageOutputTexture,
     PermutationInputTexture, PermutationOutputTexture,
@@ -6,6 +9,10 @@ use super::texture::{
 use crate::ImageDimensions;
 
 pub struct ResourceManager {
+    count_swap_input_buffer: CountSwapInputBuffer,
+    count_swap_input_layout_buffer: CountSwapInputLayoutBuffer,
+    count_swap_output_buffer: CountSwapOutputBuffer,
+    count_swap_output_storage_buffer: CountSwapOutputStorageBuffer,
     displacement_goal_input_texture: DisplacementGoalInputTexture,
     permutation_input_texture: PermutationInputTexture,
     permutation_output_texture: PermutationOutputTexture,
@@ -18,6 +25,10 @@ pub struct ResourceManager {
 impl ResourceManager {
     pub fn new(device: &wgpu::Device, image_dimensions: &ImageDimensions) -> Self {
         Self {
+            count_swap_input_buffer: CountSwapInputBuffer::new(device, image_dimensions),
+            count_swap_input_layout_buffer: CountSwapInputLayoutBuffer::new(device),
+            count_swap_output_buffer: CountSwapOutputBuffer::new(device),
+            count_swap_output_storage_buffer: CountSwapOutputStorageBuffer::new(device),
             displacement_goal_input_texture: DisplacementGoalInputTexture::new(
                 device,
                 image_dimensions,
@@ -32,6 +43,22 @@ impl ResourceManager {
             ),
             lossless_image_output_buffer: LosslessImageOutputBuffer::new(device, image_dimensions),
         }
+    }
+
+    pub fn count_swap_input_buffer(&self) -> &CountSwapInputBuffer {
+        &self.count_swap_input_buffer
+    }
+
+    pub fn count_swap_input_layout_buffer(&self) -> &CountSwapInputLayoutBuffer {
+        &self.count_swap_input_layout_buffer
+    }
+
+    pub fn count_swap_output_buffer(&self) -> &CountSwapOutputBuffer {
+        &self.count_swap_output_buffer
+    }
+
+    pub fn count_swap_output_storage_buffer(&self) -> &CountSwapOutputStorageBuffer {
+        &self.count_swap_output_storage_buffer
     }
 
     pub fn displacement_goal_input_texture(&self) -> &DisplacementGoalInputTexture {
