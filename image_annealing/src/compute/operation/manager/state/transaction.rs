@@ -1,5 +1,6 @@
 use super::super::super::super::resource::manager::ResourceManager;
 use super::super::{PermuteOperationInput, SwapOperationInput};
+use super::data::ResourceStateFlags;
 use std::error::Error;
 use std::fmt;
 
@@ -55,31 +56,6 @@ impl Error for InsufficientOutputError {
     }
 }
 
-#[derive(Copy, Clone)]
-struct ResourceStateFlags {
-    displacement_goal_input_texture: bool,
-    permutation_input_texture: bool,
-    permutation_output_texture: bool,
-    permutation_output_buffer: bool,
-    lossless_image_input_texture: bool,
-    lossless_image_output_texture: bool,
-    lossless_image_output_buffer: bool,
-}
-
-impl ResourceStateFlags {
-    pub fn new() -> Self {
-        Self {
-            displacement_goal_input_texture: false,
-            permutation_input_texture: false,
-            permutation_output_texture: false,
-            permutation_output_buffer: false,
-            lossless_image_input_texture: false,
-            lossless_image_output_texture: false,
-            lossless_image_output_buffer: false,
-        }
-    }
-}
-
 pub struct ResourceStateManager {
     flags: ResourceStateFlags,
 }
@@ -92,16 +68,11 @@ impl ResourceStateManager {
     }
 
     pub fn prepare_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.permutation_input_texture = false;
-        self.flags.permutation_output_texture = false;
-        self.flags.permutation_output_buffer = false;
-        self.flags.lossless_image_output_texture = false;
-        self.flags.lossless_image_output_buffer = false;
+        self.flags.create_permutation();
         Ok(())
     }
 
     pub fn finish_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.permutation_output_texture = true;
         Ok(())
     }
 
@@ -112,25 +83,22 @@ impl ResourceStateManager {
         encoder: &mut wgpu::CommandEncoder,
         input: &PermuteOperationInput,
     ) -> Result<(), Box<dyn Error>> {
-        self.flags.lossless_image_output_texture = false;
-        self.flags.lossless_image_output_buffer = false;
+        self.flags.clear_output_lossless_image();
         let mut new_flags = self.flags;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                new_flags.permutation_input_texture = true;
-                new_flags.permutation_output_texture = false;
-                new_flags.permutation_output_buffer = false;
+                new_flags.input_permutation();
             }
             None => {
-                if self.flags.permutation_output_texture {
+                if self.flags.check_permutation_output_texture() {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    new_flags.permutation_input_texture = true;
-                } else if !self.flags.permutation_input_texture {
+                    new_flags.recycle_output_permutation();
+                } else if !self.flags.check_permutation_input_texture() {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
             }
@@ -138,10 +106,10 @@ impl ResourceStateManager {
         match input.image {
             Some(image) => {
                 resources.lossless_image_input_texture().load(queue, image);
-                new_flags.lossless_image_input_texture = true;
+                new_flags.input_lossless_image();
             }
             None => {
-                if !self.flags.lossless_image_input_texture {
+                if !self.flags.check_lossless_image_input_texture() {
                     return Err(Box::new(InsufficientInputError::OriginalImage));
                 }
             }
@@ -151,7 +119,7 @@ impl ResourceStateManager {
     }
 
     pub fn finish_permute(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.lossless_image_output_texture = true;
+        self.flags.permute_lossless_image();
         Ok(())
     }
 
@@ -162,26 +130,24 @@ impl ResourceStateManager {
         encoder: &mut wgpu::CommandEncoder,
         input: &SwapOperationInput,
     ) -> Result<(), Box<dyn Error>> {
-        self.flags.lossless_image_output_texture = false;
-        self.flags.lossless_image_output_buffer = false;
-        let had_output_permutation = self.flags.permutation_output_texture;
-        self.flags.permutation_output_texture = false;
-        self.flags.permutation_output_buffer = false;
+        self.flags.clear_output_lossless_image();
+        let had_output_permutation = self.flags.check_permutation_output_texture();
+        self.flags.clear_output_permutation();
         let mut new_flags = self.flags;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                new_flags.permutation_input_texture = true;
+                new_flags.input_permutation();
             }
             None => {
                 if had_output_permutation {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    new_flags.permutation_input_texture = true;
-                } else if !self.flags.permutation_input_texture {
+                    new_flags.recycle_output_permutation();
+                } else if !self.flags.check_permutation_input_texture() {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
             }
@@ -191,10 +157,10 @@ impl ResourceStateManager {
                 resources
                     .displacement_goal_input_texture()
                     .load(queue, displacement_goal);
-                new_flags.displacement_goal_input_texture = true;
+                new_flags.input_displacement_goal();
             }
             None => {
-                if !self.flags.displacement_goal_input_texture {
+                if !self.flags.check_displacement_goal_input_texture() {
                     return Err(Box::new(InsufficientInputError::DisplacementGoal));
                 }
             }
@@ -204,7 +170,7 @@ impl ResourceStateManager {
     }
 
     pub fn finish_swap(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.permutation_output_texture = true;
+        self.flags.create_permutation();
         Ok(())
     }
 
@@ -213,12 +179,12 @@ impl ResourceStateManager {
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
     ) -> Result<(), Box<dyn Error>> {
-        if self.flags.permutation_output_texture {
-            if !self.flags.permutation_output_buffer {
+        if self.flags.check_permutation_output_texture() {
+            if !self.flags.check_permutation_output_buffer() {
                 resources
                     .permutation_output_buffer()
                     .load(encoder, resources.permutation_output_texture());
-                self.flags.permutation_output_buffer = true;
+                self.flags.output_permutation();
             }
             Ok(())
         } else {
@@ -231,12 +197,12 @@ impl ResourceStateManager {
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
     ) -> Result<(), Box<dyn Error>> {
-        if self.flags.lossless_image_output_texture {
-            if !self.flags.lossless_image_output_buffer {
+        if self.flags.check_lossless_image_output_texture() {
+            if !self.flags.check_lossless_image_output_buffer() {
                 resources
                     .lossless_image_output_buffer()
                     .load(encoder, resources.lossless_image_output_texture());
-                self.flags.lossless_image_output_buffer = true;
+                self.flags.output_lossless_image();
             }
             Ok(())
         } else {
