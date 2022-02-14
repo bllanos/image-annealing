@@ -47,10 +47,10 @@ impl OperationManager {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("create_permutation_command_encoder"),
             });
-        self.state.prepare_create_permutation()?;
+        let mut transaction = self.state.create_permutation()?;
         self.pipelines.create_permutation(&mut encoder);
-        self.state.finish_create_permutation()?;
         device.queue().submit(Some(encoder.finish()));
+        transaction.set_commit();
         Ok(())
     }
 
@@ -65,11 +65,12 @@ impl OperationManager {
                 label: Some("permute_command_encoder"),
             });
         let queue = device.queue();
-        self.state
-            .prepare_permute(&self.resources, queue, &mut encoder, input)?;
+        let mut transaction = self
+            .state
+            .permute(&self.resources, queue, &mut encoder, input)?;
         self.pipelines.permute(&mut encoder);
-        self.state.finish_permute()?;
         queue.submit(Some(encoder.finish()));
+        transaction.set_commit();
         Ok(())
     }
 
@@ -84,11 +85,12 @@ impl OperationManager {
                 label: Some("swap_command_encoder"),
             });
         let queue = device.queue();
-        self.state
-            .prepare_swap(&self.resources, queue, &mut encoder, input)?;
+        let mut transaction = self
+            .state
+            .swap(&self.resources, queue, &mut encoder, input)?;
         self.pipelines.swap(&mut encoder, &SwapPass::Horizontal);
-        self.state.finish_swap()?;
         queue.submit(Some(encoder.finish()));
+        transaction.set_commit();
         Ok(())
     }
 
@@ -101,7 +103,8 @@ impl OperationManager {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("output_permutation_command_encoder"),
             });
-        self.state
+        let mut transaction = self
+            .state
             .output_permutation(&self.resources, &mut encoder)?;
         device.queue().submit(Some(encoder.finish()));
 
@@ -114,6 +117,7 @@ impl OperationManager {
 
         let result = mapped_buffer.collect_mapped_buffer();
 
+        transaction.set_commit();
         Ok(validation::vector_field_into_validated_permutation(
             VectorFieldImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
                 .unwrap(),
@@ -129,7 +133,8 @@ impl OperationManager {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("output_permuted_image_command_encoder"),
             });
-        self.state
+        let mut transaction = self
+            .state
             .output_permuted_image(&self.resources, &mut encoder)?;
         device.queue().submit(Some(encoder.finish()));
 
@@ -142,6 +147,7 @@ impl OperationManager {
 
         let result = mapped_buffer.collect_mapped_buffer();
 
+        transaction.set_commit();
         Ok(
             LosslessImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
                 .unwrap(),

@@ -56,6 +56,43 @@ impl Error for InsufficientOutputError {
     }
 }
 
+#[must_use]
+pub struct ResourceStateTransaction<'a> {
+    manager: &'a mut ResourceStateManager,
+    rollback_state: ResourceStateFlags,
+    commit_state: ResourceStateFlags,
+    commit: bool,
+}
+
+impl<'a> ResourceStateTransaction<'a> {
+    fn new(
+        manager: &'a mut ResourceStateManager,
+        rollback_state: ResourceStateFlags,
+        commit_state: ResourceStateFlags,
+    ) -> Self {
+        Self {
+            manager,
+            rollback_state,
+            commit_state,
+            commit: false,
+        }
+    }
+
+    pub fn set_commit(&mut self) {
+        self.commit = true;
+    }
+}
+
+impl Drop for ResourceStateTransaction<'_> {
+    fn drop(&mut self) {
+        if self.commit {
+            self.manager.flags = self.commit_state;
+        } else {
+            self.manager.flags = self.rollback_state;
+        }
+    }
+}
+
 pub struct ResourceStateManager {
     flags: ResourceStateFlags,
 }
@@ -67,37 +104,38 @@ impl ResourceStateManager {
         }
     }
 
-    pub fn prepare_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.create_permutation();
-        Ok(())
+    pub fn create_permutation(&mut self) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags.prepare_create_permutation();
+        let commit_state = self.flags.finish_create_permutation();
+        Ok(ResourceStateTransaction::new(
+            self,
+            rollback_state,
+            commit_state,
+        ))
     }
 
-    pub fn finish_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
-
-    pub fn prepare_permute(
+    pub fn permute(
         &mut self,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
         input: &PermuteOperationInput,
-    ) -> Result<(), Box<dyn Error>> {
-        self.flags.clear_output_lossless_image();
-        let mut new_flags = self.flags;
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags.clear_output_lossless_image();
+        let mut commit_state = rollback_state;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                new_flags.input_permutation();
+                commit_state = commit_state.input_permutation();
             }
             None => {
                 if self.flags.check_permutation_output_texture() {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    new_flags.recycle_output_permutation();
+                    commit_state = commit_state.recycle_output_permutation();
                 } else if !self.flags.check_permutation_input_texture() {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
@@ -106,7 +144,7 @@ impl ResourceStateManager {
         match input.image {
             Some(image) => {
                 resources.lossless_image_input_texture().load(queue, image);
-                new_flags.input_lossless_image();
+                commit_state = commit_state.input_lossless_image();
             }
             None => {
                 if !self.flags.check_lossless_image_input_texture() {
@@ -114,39 +152,39 @@ impl ResourceStateManager {
                 }
             }
         }
-        self.flags = new_flags;
-        Ok(())
+        commit_state = commit_state.permute_lossless_image();
+        Ok(ResourceStateTransaction::new(
+            self,
+            rollback_state,
+            commit_state,
+        ))
     }
 
-    pub fn finish_permute(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.permute_lossless_image();
-        Ok(())
-    }
-
-    pub fn prepare_swap(
+    pub fn swap(
         &mut self,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
         input: &SwapOperationInput,
-    ) -> Result<(), Box<dyn Error>> {
-        self.flags.clear_output_lossless_image();
-        let had_output_permutation = self.flags.check_permutation_output_texture();
-        self.flags.clear_output_permutation();
-        let mut new_flags = self.flags;
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self
+            .flags
+            .clear_output_lossless_image()
+            .clear_output_permutation();
+        let mut commit_state = rollback_state;
         match input.permutation {
             Some(permutation) => {
                 resources
                     .permutation_input_texture()
                     .load(queue, permutation);
-                new_flags.input_permutation();
+                commit_state = commit_state.input_permutation();
             }
             None => {
-                if had_output_permutation {
+                if self.flags.check_permutation_output_texture() {
                     resources
                         .permutation_input_texture()
                         .copy(encoder, resources.permutation_output_texture());
-                    new_flags.recycle_output_permutation();
+                    commit_state = commit_state.recycle_output_permutation();
                 } else if !self.flags.check_permutation_input_texture() {
                     return Err(Box::new(InsufficientInputError::Permutation));
                 }
@@ -157,7 +195,7 @@ impl ResourceStateManager {
                 resources
                     .displacement_goal_input_texture()
                     .load(queue, displacement_goal);
-                new_flags.input_displacement_goal();
+                commit_state = commit_state.input_displacement_goal();
             }
             None => {
                 if !self.flags.check_displacement_goal_input_texture() {
@@ -165,28 +203,33 @@ impl ResourceStateManager {
                 }
             }
         }
-        self.flags = new_flags;
-        Ok(())
-    }
-
-    pub fn finish_swap(&mut self) -> Result<(), Box<dyn Error>> {
-        self.flags.create_permutation();
-        Ok(())
+        commit_state = commit_state.finish_create_permutation();
+        Ok(ResourceStateTransaction::new(
+            self,
+            rollback_state,
+            commit_state,
+        ))
     }
 
     pub fn output_permutation(
         &mut self,
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags;
+        let mut commit_state = rollback_state;
         if self.flags.check_permutation_output_texture() {
             if !self.flags.check_permutation_output_buffer() {
                 resources
                     .permutation_output_buffer()
                     .load(encoder, resources.permutation_output_texture());
-                self.flags.output_permutation();
+                commit_state = commit_state.output_permutation();
             }
-            Ok(())
+            Ok(ResourceStateTransaction::new(
+                self,
+                rollback_state,
+                commit_state,
+            ))
         } else {
             Err(Box::new(InsufficientOutputError::Permutation))
         }
@@ -196,15 +239,21 @@ impl ResourceStateManager {
         &mut self,
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags;
+        let mut commit_state = rollback_state;
         if self.flags.check_lossless_image_output_texture() {
             if !self.flags.check_lossless_image_output_buffer() {
                 resources
                     .lossless_image_output_buffer()
                     .load(encoder, resources.lossless_image_output_texture());
-                self.flags.output_lossless_image();
+                commit_state = commit_state.output_lossless_image();
             }
-            Ok(())
+            Ok(ResourceStateTransaction::new(
+                self,
+                rollback_state,
+                commit_state,
+            ))
         } else {
             Err(Box::new(InsufficientOutputError::PermutedImage))
         }
