@@ -1,6 +1,7 @@
 use super::super::super::super::resource::manager::ResourceManager;
 use super::super::{PermuteOperationInput, SwapOperationInput};
 use super::data::ResourceStateFlags;
+use crate::{DisplacementGoal, ValidatedPermutation};
 use std::error::Error;
 use std::fmt;
 
@@ -104,6 +105,82 @@ impl ResourceStateManager {
         }
     }
 
+    fn input_permutation<'a>(
+        &self,
+        commit_state: ResourceStateFlags,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        permutation: &Option<&'a ValidatedPermutation>,
+    ) -> Result<ResourceStateFlags, InsufficientInputError> {
+        match permutation {
+            Some(permutation) => {
+                resources
+                    .permutation_input_texture()
+                    .load(queue, permutation);
+                Ok(commit_state.input_permutation())
+            }
+            None => {
+                if self.flags.check_permutation_output_texture() {
+                    resources
+                        .permutation_input_texture()
+                        .copy(encoder, resources.permutation_output_texture());
+                    Ok(commit_state.recycle_output_permutation())
+                } else if self.flags.check_permutation_input_texture() {
+                    Ok(commit_state)
+                } else {
+                    Err(InsufficientInputError::Permutation)
+                }
+            }
+        }
+    }
+
+    fn input_image<'a>(
+        &self,
+        commit_state: ResourceStateFlags,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+        image: &Option<&'a image::DynamicImage>,
+    ) -> Result<ResourceStateFlags, InsufficientInputError> {
+        match image {
+            Some(image) => {
+                resources.lossless_image_input_texture().load(queue, image);
+                Ok(commit_state.input_lossless_image())
+            }
+            None => {
+                if self.flags.check_lossless_image_input_texture() {
+                    Ok(commit_state)
+                } else {
+                    Err(InsufficientInputError::OriginalImage)
+                }
+            }
+        }
+    }
+
+    fn input_displacement_goal<'a>(
+        &self,
+        commit_state: ResourceStateFlags,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+        image: &Option<&'a DisplacementGoal>,
+    ) -> Result<ResourceStateFlags, InsufficientInputError> {
+        match image {
+            Some(displacement_goal) => {
+                resources
+                    .displacement_goal_input_texture()
+                    .load(queue, displacement_goal);
+                Ok(commit_state.input_displacement_goal())
+            }
+            None => {
+                if self.flags.check_displacement_goal_input_texture() {
+                    Ok(commit_state)
+                } else {
+                    Err(InsufficientInputError::DisplacementGoal)
+                }
+            }
+        }
+    }
+
     pub fn create_permutation(&mut self) -> Result<ResourceStateTransaction, Box<dyn Error>> {
         let rollback_state = self.flags.prepare_create_permutation();
         let commit_state = self.flags.finish_create_permutation();
@@ -123,35 +200,9 @@ impl ResourceStateManager {
     ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
         let rollback_state = self.flags.clear_output_lossless_image();
         let mut commit_state = rollback_state;
-        match input.permutation {
-            Some(permutation) => {
-                resources
-                    .permutation_input_texture()
-                    .load(queue, permutation);
-                commit_state = commit_state.input_permutation();
-            }
-            None => {
-                if self.flags.check_permutation_output_texture() {
-                    resources
-                        .permutation_input_texture()
-                        .copy(encoder, resources.permutation_output_texture());
-                    commit_state = commit_state.recycle_output_permutation();
-                } else if !self.flags.check_permutation_input_texture() {
-                    return Err(Box::new(InsufficientInputError::Permutation));
-                }
-            }
-        }
-        match input.image {
-            Some(image) => {
-                resources.lossless_image_input_texture().load(queue, image);
-                commit_state = commit_state.input_lossless_image();
-            }
-            None => {
-                if !self.flags.check_lossless_image_input_texture() {
-                    return Err(Box::new(InsufficientInputError::OriginalImage));
-                }
-            }
-        }
+        commit_state =
+            self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
+        commit_state = self.input_image(commit_state, resources, queue, &input.image)?;
         commit_state = commit_state.permute_lossless_image();
         Ok(ResourceStateTransaction::new(
             self,
@@ -172,37 +223,10 @@ impl ResourceStateManager {
             .clear_output_lossless_image()
             .clear_output_permutation();
         let mut commit_state = rollback_state;
-        match input.permutation {
-            Some(permutation) => {
-                resources
-                    .permutation_input_texture()
-                    .load(queue, permutation);
-                commit_state = commit_state.input_permutation();
-            }
-            None => {
-                if self.flags.check_permutation_output_texture() {
-                    resources
-                        .permutation_input_texture()
-                        .copy(encoder, resources.permutation_output_texture());
-                    commit_state = commit_state.recycle_output_permutation();
-                } else if !self.flags.check_permutation_input_texture() {
-                    return Err(Box::new(InsufficientInputError::Permutation));
-                }
-            }
-        }
-        match input.displacement_goal {
-            Some(displacement_goal) => {
-                resources
-                    .displacement_goal_input_texture()
-                    .load(queue, displacement_goal);
-                commit_state = commit_state.input_displacement_goal();
-            }
-            None => {
-                if !self.flags.check_displacement_goal_input_texture() {
-                    return Err(Box::new(InsufficientInputError::DisplacementGoal));
-                }
-            }
-        }
+        commit_state =
+            self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
+        commit_state =
+            self.input_displacement_goal(commit_state, resources, queue, &input.displacement_goal)?;
         commit_state = commit_state.finish_create_permutation();
         Ok(ResourceStateTransaction::new(
             self,
