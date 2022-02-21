@@ -71,6 +71,12 @@ bitflags::bitflags! {
     }
 }
 
+impl SwapPassSelection {
+    pub fn includes_pass(&self, pass: SwapPass) -> bool {
+        Self::from(pass).intersects(*self)
+    }
+}
+
 impl From<SwapPass> for SwapPassSelection {
     fn from(pass: SwapPass) -> Self {
         match pass {
@@ -123,6 +129,11 @@ impl CountSwapInputLayout {
 
     pub fn include_pass(&mut self, pass: SwapPass) {
         self.do_segment[pass as usize] = u32::from(true);
+    }
+
+    pub fn set_selection(&mut self, selection: SwapPassSelection) {
+        self.do_segment =
+            SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
     }
 
     pub fn clear_passes(&mut self) {
