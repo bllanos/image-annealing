@@ -5,6 +5,10 @@ fn main() {
     let directory = env::var("OUT_DIR").unwrap();
     let mut config = output::write_default_files(Some(directory)).unwrap();
     println!(
+        "cargo:rustc-env=COUNT_SWAP_SHADER={}",
+        config.count_swap.take().unwrap().display()
+    );
+    println!(
         "cargo:rustc-env=CREATE_PERMUTATION_SHADER={}",
         config.create_permutation.take().unwrap().display()
     );

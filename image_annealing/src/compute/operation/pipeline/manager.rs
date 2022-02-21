@@ -1,12 +1,14 @@
 use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
+use super::count_swap::CountSwapPipeline;
 use super::create_permutation::CreatePermutationPipeline;
 use super::permute::PermutePipeline;
 use super::swap::SwapPipeline;
 
 pub struct PipelineManager {
     bindings: BindingManager,
+    count_swap_pipeline: CountSwapPipeline,
     create_permutation_pipeline: CreatePermutationPipeline,
     permute_pipeline: PermutePipeline,
     swap_pipeline: SwapPipeline,
@@ -15,15 +17,28 @@ pub struct PipelineManager {
 impl PipelineManager {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
         let bindings = BindingManager::new(device, resources);
+        let count_swap_pipeline = CountSwapPipeline::new(device, &bindings);
         let create_permutation_pipeline = CreatePermutationPipeline::new(device, &bindings);
         let permute_pipeline = PermutePipeline::new(device, &bindings);
         let swap_pipeline = SwapPipeline::new(device, &bindings);
         Self {
             bindings,
+            count_swap_pipeline,
             create_permutation_pipeline,
             permute_pipeline,
             swap_pipeline,
         }
+    }
+
+    pub fn count_swap(&self, encoder: &mut wgpu::CommandEncoder) {
+        let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+            label: Some("count_swap_compute_pass"),
+        });
+        self.count_swap_pipeline.set_pipeline(&mut cpass);
+        self.bindings.bind_count_swap(&mut cpass);
+        self.bindings
+            .count_swap_grid_dimensions()
+            .dispatch(&mut cpass);
     }
 
     pub fn create_permutation(&self, encoder: &mut wgpu::CommandEncoder) {
