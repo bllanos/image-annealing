@@ -1,6 +1,6 @@
 use super::super::super::system::{DimensionsMismatchError, System};
 use super::super::OutputStatus;
-use super::CompletionStatus;
+use super::{CompletionStatus, CompletionStatusHolder};
 use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
 use crate::ImageDimensions;
 use std::error::Error;
@@ -33,40 +33,8 @@ impl ValidatePermutation {
         }
     }
 
-    pub fn step(&mut self, system: &System) -> Result<OutputStatus, Box<dyn Error>> {
-        self.completion_status.ok_if_pending()?;
-        debug_assert!(self.full_output.is_none());
-
-        let ValidatePermutationInput {
-            candidate_permutation,
-        } = self.input.take().unwrap();
-        match ImageDimensions::from_image(&candidate_permutation.0) {
-            Ok(dimensions) => {
-                if *system.image_dimensions() == dimensions {
-                    match validation::validate_permutation(candidate_permutation.0) {
-                        Ok(validated_permutation) => {
-                            self.full_output = Some(validated_permutation);
-                            self.completion_status = CompletionStatus::Finished;
-                            Ok(OutputStatus::FinalFullOutput)
-                        }
-                        Err(e) => {
-                            self.completion_status = CompletionStatus::Failed;
-                            Err(e)
-                        }
-                    }
-                } else {
-                    self.completion_status = CompletionStatus::Failed;
-                    Err(Box::new(DimensionsMismatchError::new(
-                        *system.image_dimensions(),
-                        dimensions,
-                    )))
-                }
-            }
-            Err(e) => {
-                self.completion_status = CompletionStatus::Failed;
-                Err(Box::new(e))
-            }
-        }
+    pub fn step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
+        self.checked_step(system)
     }
 
     pub fn partial_output(&self) -> Option<()> {
@@ -79,5 +47,34 @@ impl ValidatePermutation {
             .map(|validated_permutation| ValidatePermutationOutput {
                 validated_permutation,
             })
+    }
+}
+
+impl CompletionStatusHolder for ValidatePermutation {
+    fn get_status(&self) -> &CompletionStatus {
+        &self.completion_status
+    }
+
+    fn set_status(&mut self, status: CompletionStatus) {
+        self.completion_status = status;
+    }
+
+    fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
+        debug_assert!(self.full_output.is_none());
+
+        let ValidatePermutationInput {
+            candidate_permutation,
+        } = self.input.take().unwrap();
+        let dimensions = ImageDimensions::from_image(&candidate_permutation.0)?;
+        if *system.image_dimensions() == dimensions {
+            self.full_output = Some(validation::validate_permutation(candidate_permutation.0)?);
+            self.completion_status = CompletionStatus::Finished;
+            Ok(OutputStatus::FinalFullOutput)
+        } else {
+            Err(Box::new(DimensionsMismatchError::new(
+                *system.image_dimensions(),
+                dimensions,
+            )))
+        }
     }
 }

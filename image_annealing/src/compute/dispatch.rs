@@ -225,7 +225,7 @@ impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm
             .as_mut_validate_permutation()
-            .step(&self.system)
+            .step(&mut self.system)
     }
     fn partial_output(&mut self) -> Option<()> {
         self.algorithm

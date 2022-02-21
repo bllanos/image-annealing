@@ -3,7 +3,7 @@ use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
-use super::CompletionStatus;
+use super::{CompletionStatus, CompletionStatusHolder, FinalFullOutputHolder};
 use crate::{CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
@@ -50,69 +50,7 @@ impl Swap {
     }
 
     pub fn step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
-        self.completion_status.ok_if_pending()?;
-        match self.validator.take() {
-            Some(mut v) => {
-                debug_assert!(self.input_permutation.is_none());
-
-                match v.step(system) {
-                    Ok(status) => {
-                        match status {
-                            OutputStatus::NoNewOutput
-                            | OutputStatus::NewPartialOutput
-                            | OutputStatus::NewFullOutput
-                            | OutputStatus::NewPartialAndFullOutput
-                            | OutputStatus::FinalPartialOutput => {
-                                self.validator = Some(v);
-                            }
-                            OutputStatus::FinalFullOutput
-                            | OutputStatus::FinalPartialAndFullOutput => {
-                                self.input_permutation =
-                                    v.full_output().map(|output| output.validated_permutation);
-                            }
-                        }
-                        Ok(OutputStatus::NoNewOutput)
-                    }
-                    Err(e) => {
-                        self.completion_status = CompletionStatus::Failed;
-                        Err(e)
-                    }
-                }
-            }
-            None => {
-                if let Some(ref displacement_goal) = self.input_displacement_goal {
-                    match ImageDimensions::from_image(displacement_goal.as_ref()) {
-                        Ok(dimensions) => {
-                            if *system.image_dimensions() != dimensions {
-                                self.completion_status = CompletionStatus::Failed;
-                                return Err(Box::new(DimensionsMismatchError::new(
-                                    *system.image_dimensions(),
-                                    dimensions,
-                                )));
-                            }
-                        }
-                        Err(e) => {
-                            self.completion_status = CompletionStatus::Failed;
-                            return Err(Box::new(e));
-                        }
-                    }
-                }
-
-                match system.operation_swap(&SwapOperationInput {
-                    permutation: self.input_permutation.as_ref(),
-                    displacement_goal: self.input_displacement_goal.as_ref(),
-                }) {
-                    Ok(_) => {
-                        self.completion_status = CompletionStatus::Finished;
-                        Ok(OutputStatus::FinalFullOutput)
-                    }
-                    Err(e) => {
-                        self.completion_status = CompletionStatus::Failed;
-                        Err(e)
-                    }
-                }
-            }
-        }
+        self.checked_step(system)
     }
 
     pub fn partial_output(&self) -> Option<()> {
@@ -120,23 +58,78 @@ impl Swap {
     }
 
     pub fn full_output(&mut self, system: &mut System) -> Option<SwapOutput> {
-        if self.has_given_output {
-            None
-        } else {
-            match self.completion_status {
-                CompletionStatus::Finished => {
-                    self.has_given_output = true;
-                    system
-                        .output_permutation()
-                        .ok()
-                        .map(|output_permutation| SwapOutput {
-                            input_permutation: self.input_permutation.take(),
-                            input_displacement_goal: self.input_displacement_goal.take(),
-                            output_permutation,
-                        })
+        self.checked_full_output(system)
+    }
+}
+
+impl CompletionStatusHolder for Swap {
+    fn get_status(&self) -> &CompletionStatus {
+        &self.completion_status
+    }
+
+    fn set_status(&mut self, status: CompletionStatus) {
+        self.completion_status = status;
+    }
+
+    fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
+        match self.validator.take() {
+            Some(mut v) => {
+                debug_assert!(self.input_permutation.is_none());
+
+                let status = v.step(system)?;
+                match status {
+                    OutputStatus::NoNewOutput
+                    | OutputStatus::NewPartialOutput
+                    | OutputStatus::NewFullOutput
+                    | OutputStatus::NewPartialAndFullOutput
+                    | OutputStatus::FinalPartialOutput => {
+                        self.validator = Some(v);
+                    }
+                    OutputStatus::FinalFullOutput | OutputStatus::FinalPartialAndFullOutput => {
+                        self.input_permutation =
+                            v.full_output().map(|output| output.validated_permutation);
+                    }
                 }
-                _ => None,
+                Ok(OutputStatus::NoNewOutput)
+            }
+            None => {
+                if let Some(ref displacement_goal) = self.input_displacement_goal {
+                    let dimensions = ImageDimensions::from_image(displacement_goal.as_ref())?;
+                    if *system.image_dimensions() != dimensions {
+                        return Err(Box::new(DimensionsMismatchError::new(
+                            *system.image_dimensions(),
+                            dimensions,
+                        )));
+                    }
+                }
+
+                system.operation_swap(&SwapOperationInput {
+                    permutation: self.input_permutation.as_ref(),
+                    displacement_goal: self.input_displacement_goal.as_ref(),
+                })?;
+                self.completion_status = CompletionStatus::Finished;
+                Ok(OutputStatus::FinalFullOutput)
             }
         }
+    }
+}
+
+impl FinalFullOutputHolder<SwapOutput> for Swap {
+    fn has_given_output(&self) -> bool {
+        self.has_given_output
+    }
+    fn set_has_given_output(&mut self) {
+        self.has_given_output = true;
+    }
+
+    fn unchecked_full_output(&mut self, system: &mut System) -> Option<SwapOutput> {
+        system
+            .output_permutation()
+            .ok()
+            .map(|output_permutation| SwapOutput {
+                input_permutation: self.input_permutation.take(),
+                input_displacement_goal: self.input_displacement_goal.take(),
+                output_permutation,
+            })
     }
 }

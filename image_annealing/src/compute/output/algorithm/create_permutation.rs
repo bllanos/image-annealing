@@ -1,6 +1,6 @@
 use super::super::super::system::System;
 use super::super::OutputStatus;
-use super::CompletionStatus;
+use super::{CompletionStatus, CompletionStatusHolder, FinalFullOutputHolder};
 use crate::ValidatedPermutation;
 use std::error::Error;
 
@@ -26,17 +26,7 @@ impl CreatePermutation {
     }
 
     pub fn step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
-        self.completion_status.ok_if_pending()?;
-        match system.operation_create_permutation() {
-            Ok(_) => {
-                self.completion_status = CompletionStatus::Finished;
-                Ok(OutputStatus::FinalFullOutput)
-            }
-            Err(e) => {
-                self.completion_status = CompletionStatus::Failed;
-                Err(e)
-            }
-        }
+        self.checked_step(system)
     }
 
     pub fn partial_output(&self) -> Option<()> {
@@ -44,21 +34,40 @@ impl CreatePermutation {
     }
 
     pub fn full_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
-        if self.has_given_output {
-            None
-        } else {
-            match self.completion_status {
-                CompletionStatus::Finished => {
-                    self.has_given_output = true;
-                    system
-                        .output_permutation()
-                        .ok()
-                        .map(|validated_permutation| CreatePermutationOutput {
-                            validated_permutation,
-                        })
-                }
-                _ => None,
-            }
-        }
+        self.checked_full_output(system)
+    }
+}
+
+impl CompletionStatusHolder for CreatePermutation {
+    fn get_status(&self) -> &CompletionStatus {
+        &self.completion_status
+    }
+
+    fn set_status(&mut self, status: CompletionStatus) {
+        self.completion_status = status;
+    }
+
+    fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
+        system.operation_create_permutation()?;
+        self.completion_status = CompletionStatus::Finished;
+        Ok(OutputStatus::FinalFullOutput)
+    }
+}
+
+impl FinalFullOutputHolder<CreatePermutationOutput> for CreatePermutation {
+    fn has_given_output(&self) -> bool {
+        self.has_given_output
+    }
+    fn set_has_given_output(&mut self) {
+        self.has_given_output = true;
+    }
+
+    fn unchecked_full_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
+        system
+            .output_permutation()
+            .ok()
+            .map(|validated_permutation| CreatePermutationOutput {
+                validated_permutation,
+            })
     }
 }
