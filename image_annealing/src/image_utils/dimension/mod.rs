@@ -223,10 +223,10 @@ impl TryFrom<wgpu::Extent3d> for ImageDimensions {
     type Error = InvalidDimensionError<u32>;
 
     fn try_from(value: wgpu::Extent3d) -> Result<Self, Self::Error> {
-        if <u32 as TryInto<usize>>::try_into(value.depth_or_array_layers).unwrap() != Self::DEPTH {
-            Err(InvalidDimensionError::DepthNotOne)
-        } else {
+        if <u32 as TryInto<usize>>::try_into(value.depth_or_array_layers).unwrap() == Self::DEPTH {
             ImageDimensions::new(value.width, value.height)
+        } else {
+            Err(InvalidDimensionError::DepthNotOne)
         }
     }
 }
