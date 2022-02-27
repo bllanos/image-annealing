@@ -1,7 +1,7 @@
 use crate::ImageDimensions;
 use std::convert::TryInto;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct TexturePaddingDimensions {
     unpadded_bytes_per_row: usize,
     padded_bytes_per_row: usize,
@@ -29,7 +29,7 @@ impl TexturePaddingDimensions {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct BufferDimensions {
     width: usize,
     height: usize,

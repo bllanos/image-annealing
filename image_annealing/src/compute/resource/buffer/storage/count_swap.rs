@@ -49,6 +49,14 @@ impl CountSwapOutputStorageBuffer {
             Some("count_swap_output_storage_buffer"),
         ))
     }
+
+    pub fn dimensions(&self) -> &BufferDimensions {
+        self.0.dimensions()
+    }
+
+    pub fn buffer(&self) -> &wgpu::Buffer {
+        self.0.buffer()
+    }
 }
 
 impl BindableBuffer for CountSwapOutputStorageBuffer {

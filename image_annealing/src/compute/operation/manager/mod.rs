@@ -5,29 +5,22 @@ use super::super::resource::buffer::ReadMappableBuffer;
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
-use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
-use std::default::Default;
+use crate::{ImageDimensions, ValidatedPermutation};
 use std::error::Error;
 
+mod input;
+mod output;
 mod state;
+
+pub use input::{PermuteOperationInput, SwapOperationInput};
+pub use output::{CountSwapOperationOutput, CountSwapOperationOutputPass};
 use state::ResourceStateManager;
-
-#[derive(Default)]
-pub struct PermuteOperationInput<'a> {
-    pub permutation: Option<&'a ValidatedPermutation>,
-    pub image: Option<&'a image::DynamicImage>,
-}
-
-#[derive(Default)]
-pub struct SwapOperationInput<'a> {
-    pub permutation: Option<&'a ValidatedPermutation>,
-    pub displacement_goal: Option<&'a DisplacementGoal>,
-}
 
 pub struct OperationManager {
     resources: ResourceManager,
     state: ResourceStateManager,
     pipelines: PipelineManager,
+    image_dimensions: ImageDimensions,
 }
 
 impl OperationManager {
@@ -36,9 +29,24 @@ impl OperationManager {
         let pipelines = PipelineManager::new(device, &resources);
         OperationManager {
             resources,
-            state: ResourceStateManager::new(),
+            state: ResourceStateManager::new(image_dimensions),
             pipelines,
+            image_dimensions: *image_dimensions,
         }
+    }
+
+    pub fn count_swap(&mut self, device: &DeviceManager) -> Result<(), Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("count_swap_command_encoder"),
+            });
+        let queue = device.queue();
+        let mut transaction = self.state.count_swap(&self.resources, queue)?;
+        self.pipelines.count_swap(&mut encoder);
+        queue.submit(Some(encoder.finish()));
+        transaction.set_commit();
+        Ok(())
     }
 
     pub fn create_permutation(&mut self, device: &DeviceManager) -> Result<(), Box<dyn Error>> {
@@ -92,6 +100,35 @@ impl OperationManager {
         queue.submit(Some(encoder.finish()));
         transaction.set_commit();
         Ok(())
+    }
+
+    pub fn output_count_swap(
+        &mut self,
+        device: &DeviceManager,
+    ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("output_count_swap_command_encoder"),
+            });
+        let mut transaction = self
+            .state
+            .output_count_swap(&self.resources, &mut encoder)?;
+        device.queue().submit(Some(encoder.finish()));
+
+        let mut mapped_buffer = self.resources.count_swap_output_buffer().request_map_read();
+
+        device.wait_for_device();
+
+        let result = mapped_buffer.collect_mapped_buffer();
+        transaction.set_commit();
+
+        assert_eq!(result.len(), 1);
+        Ok(CountSwapOperationOutput::new(
+            &result[0],
+            self.state.last_count_swap_pass_selection(),
+            &self.image_dimensions,
+        ))
     }
 
     pub fn output_permutation(

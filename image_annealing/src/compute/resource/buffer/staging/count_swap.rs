@@ -1,6 +1,7 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
 use super::super::map::{MappedBuffer, ReadMappableBuffer};
+use super::super::storage::CountSwapOutputStorageBuffer;
 use crate::compute::link::swap::CountSwapOutput;
 use crate::compute::operation::WorkgroupGridDimensions;
 use std::convert::TryInto;
@@ -18,6 +19,18 @@ impl CountSwapOutputBuffer {
             &buffer_dimensions,
             Some("count_swap_output_buffer"),
         ))
+    }
+
+    pub fn load(&self, encoder: &mut wgpu::CommandEncoder, buffer: &CountSwapOutputStorageBuffer) {
+        super::assert_same_dimensions(&self.0, buffer.dimensions());
+
+        encoder.copy_buffer_to_buffer(
+            buffer.buffer(),
+            0,
+            self.0.buffer(),
+            0,
+            self.dimensions().byte_size().try_into().unwrap(),
+        );
     }
 
     fn output_chunk_mapper(chunk: &[u8]) -> <Self as ReadMappableBuffer>::Element {

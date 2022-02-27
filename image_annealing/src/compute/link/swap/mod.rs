@@ -43,6 +43,26 @@ impl SwapPass {
         }
     }
 
+    pub fn total_swaps(&self, image_dimensions: &ImageDimensions) -> usize {
+        let stride: usize = constant::swap::STRIDE.try_into().unwrap();
+        match self {
+            SwapPass::Horizontal => (image_dimensions.width() / stride)
+                .checked_mul(image_dimensions.height())
+                .unwrap(),
+            SwapPass::Vertical => (image_dimensions.height() / stride)
+                .checked_mul(image_dimensions.width())
+                .unwrap(),
+            SwapPass::OffsetHorizontal => ((image_dimensions.width() - constant::swap::OFFSET)
+                / stride)
+                .checked_mul(image_dimensions.height())
+                .unwrap(),
+            SwapPass::OffsetVertical => ((image_dimensions.height() - constant::swap::OFFSET)
+                / stride)
+                .checked_mul(image_dimensions.width())
+                .unwrap(),
+        }
+    }
+
     pub fn total_workgroups(image_dimensions: &ImageDimensions) -> usize {
         Self::PASSES
             .iter()
@@ -63,6 +83,7 @@ impl SwapPass {
 }
 
 bitflags::bitflags! {
+    #[derive(Default)]
     pub struct SwapPassSelection: u32 {
         const HORIZONTAL = 1 << SwapPass::Horizontal as u32;
         const VERTICAL = 1 << SwapPass::Vertical as u32;
@@ -75,15 +96,25 @@ impl SwapPassSelection {
     pub fn includes_pass(&self, pass: SwapPass) -> bool {
         Self::from(pass).intersects(*self)
     }
+
+    pub fn add_pass(&self, pass: SwapPass) -> Self {
+        *self | Self::from(pass)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &SwapPass> {
+        SwapPass::PASSES
+            .iter()
+            .filter(move |&&pass| self.includes_pass(pass))
+    }
 }
 
 impl From<SwapPass> for SwapPassSelection {
     fn from(pass: SwapPass) -> Self {
         match pass {
-            SwapPass::Horizontal => SwapPassSelection::HORIZONTAL,
-            SwapPass::Vertical => SwapPassSelection::VERTICAL,
-            SwapPass::OffsetHorizontal => SwapPassSelection::OFFSET_HORIZONTAL,
-            SwapPass::OffsetVertical => SwapPassSelection::OFFSET_VERTICAL,
+            SwapPass::Horizontal => Self::HORIZONTAL,
+            SwapPass::Vertical => Self::VERTICAL,
+            SwapPass::OffsetHorizontal => Self::OFFSET_HORIZONTAL,
+            SwapPass::OffsetVertical => Self::OFFSET_VERTICAL,
         }
     }
 }
@@ -131,6 +162,19 @@ impl CountSwapInputLayout {
         self.do_segment[pass as usize] = u32::from(true);
     }
 
+    pub fn get_selection(&mut self) -> SwapPassSelection {
+        self.do_segment.iter().zip(SwapPass::PASSES.iter()).fold(
+            SwapPassSelection::empty(),
+            |acc, (&flag, &pass)| {
+                if flag == 0 {
+                    acc
+                } else {
+                    acc.add_pass(pass)
+                }
+            },
+        )
+    }
+
     pub fn set_selection(&mut self, selection: SwapPassSelection) {
         self.do_segment =
             SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
@@ -165,5 +209,9 @@ impl CountSwapOutput {
                     },
                 ),
         )
+    }
+
+    pub fn at_pass(&self, pass: SwapPass) -> CountSwapOutputDataElement {
+        self.0[pass as usize]
     }
 }

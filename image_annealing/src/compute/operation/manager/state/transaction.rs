@@ -1,7 +1,8 @@
+use super::super::super::super::link::swap::{CountSwapInputLayout, SwapPassSelection};
 use super::super::super::super::resource::manager::ResourceManager;
 use super::super::{PermuteOperationInput, SwapOperationInput};
 use super::data::ResourceStateFlags;
-use crate::{DisplacementGoal, ValidatedPermutation};
+use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::error::Error;
 use std::fmt;
 
@@ -10,19 +11,26 @@ pub enum InsufficientInputError {
     Permutation,
     OriginalImage,
     DisplacementGoal,
+    SwapPass,
 }
 
 impl fmt::Display for InsufficientInputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "an input {} must be provided as there is none to reuse",
-            match self {
-                InsufficientInputError::Permutation => "permutation",
-                InsufficientInputError::OriginalImage => "image",
-                InsufficientInputError::DisplacementGoal => "displacement goal field",
-            }
-        )
+        match self {
+            InsufficientInputError::SwapPass => write!(
+                f,
+                "no swap passes have occurred since the last count swap operation"
+            ),
+            err => write!(
+                f,
+                "an input {} must be provided as there is none to reuse",
+                match err {
+                    InsufficientInputError::Permutation => "permutation",
+                    InsufficientInputError::OriginalImage => "image",
+                    InsufficientInputError::DisplacementGoal => "displacement goal field",
+                }
+            ),
+        }
     }
 }
 
@@ -34,20 +42,24 @@ impl Error for InsufficientInputError {
 
 #[derive(Debug, Clone)]
 pub enum InsufficientOutputError {
+    CountSwap,
     Permutation,
     PermutedImage,
 }
 
 impl fmt::Display for InsufficientOutputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "an output {} does not exist or has been invalidated",
-            match self {
-                InsufficientOutputError::Permutation => "permutation",
-                InsufficientOutputError::PermutedImage => "image",
-            }
-        )
+        match self {
+            InsufficientOutputError::CountSwap => write!(f, "no current output swap counts exist",),
+            err => write!(
+                f,
+                "an output {} does not exist or has been invalidated",
+                match err {
+                    InsufficientOutputError::Permutation => "permutation",
+                    InsufficientOutputError::PermutedImage => "image",
+                }
+            ),
+        }
     }
 }
 
@@ -96,12 +108,14 @@ impl Drop for ResourceStateTransaction<'_> {
 
 pub struct ResourceStateManager {
     flags: ResourceStateFlags,
+    count_swap_parameters: CountSwapInputLayout,
 }
 
 impl ResourceStateManager {
-    pub fn new() -> Self {
+    pub fn new(image_dimensions: &ImageDimensions) -> Self {
         Self {
             flags: ResourceStateFlags::new(),
+            count_swap_parameters: CountSwapInputLayout::new(image_dimensions),
         }
     }
 
@@ -181,6 +195,37 @@ impl ResourceStateManager {
         }
     }
 
+    pub fn last_count_swap_pass_selection(&self) -> SwapPassSelection {
+        self.count_swap_parameters.get_selection()
+    }
+
+    pub fn count_swap(
+        &mut self,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags.clear_count_swap_pass_selection();
+        let mut commit_state = rollback_state;
+        if self.flags.check_count_swap_pass_selection() {
+            if self
+                .flags
+                .update_count_swap_pass_selection(&mut self.count_swap_parameters)
+            {
+                resources
+                    .count_swap_input_layout_buffer()
+                    .load(queue, &self.count_swap_parameters)
+            }
+            commit_state = commit_state.finish_count_swap();
+            Ok(ResourceStateTransaction::new(
+                self,
+                rollback_state,
+                commit_state,
+            ))
+        } else {
+            Err(Box::new(InsufficientInputError::SwapPass))
+        }
+    }
+
     pub fn create_permutation(&mut self) -> Result<ResourceStateTransaction, Box<dyn Error>> {
         let rollback_state = self.flags.prepare_create_permutation();
         let commit_state = self.flags.finish_create_permutation();
@@ -221,18 +266,43 @@ impl ResourceStateManager {
         let rollback_state = self
             .flags
             .clear_output_lossless_image()
-            .clear_output_permutation();
+            .clear_output_permutation()
+            .clear_output_count_swap();
         let mut commit_state = rollback_state;
         commit_state =
             self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
         commit_state =
             self.input_displacement_goal(commit_state, resources, queue, &input.displacement_goal)?;
-        commit_state = commit_state.finish_create_permutation();
+        commit_state = commit_state.finish_swap(input.pass);
         Ok(ResourceStateTransaction::new(
             self,
             rollback_state,
             commit_state,
         ))
+    }
+
+    pub fn output_count_swap(
+        &mut self,
+        resources: &ResourceManager,
+        encoder: &mut wgpu::CommandEncoder,
+    ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
+        let rollback_state = self.flags;
+        let mut commit_state = rollback_state;
+        if self.flags.check_count_swap_output_storage_buffer() {
+            if !self.flags.check_count_swap_output_buffer() {
+                resources
+                    .count_swap_output_buffer()
+                    .load(encoder, resources.count_swap_output_storage_buffer());
+                commit_state = commit_state.output_count_swap();
+            }
+            Ok(ResourceStateTransaction::new(
+                self,
+                rollback_state,
+                commit_state,
+            ))
+        } else {
+            Err(Box::new(InsufficientOutputError::CountSwap))
+        }
     }
 
     pub fn output_permutation(
