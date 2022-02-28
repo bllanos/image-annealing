@@ -44,19 +44,19 @@ trait CompletionStatusHolder {
     }
 }
 
-trait FinalFullOutputHolder<FullOutput>: CompletionStatusHolder {
+trait FinalOutputHolder<Output>: CompletionStatusHolder {
     fn has_given_output(&self) -> bool;
     fn set_has_given_output(&mut self);
-    fn unchecked_full_output(&mut self, system: &mut System) -> Option<FullOutput>;
+    fn unchecked_output(&mut self, system: &mut System) -> Option<Output>;
 
-    fn checked_full_output(&mut self, system: &mut System) -> Option<FullOutput> {
+    fn checked_output(&mut self, system: &mut System) -> Option<Output> {
         if self.has_given_output() {
             None
         } else {
             match self.get_status() {
                 CompletionStatus::Finished => {
                     self.set_has_given_output();
-                    self.unchecked_full_output(system)
+                    self.unchecked_output(system)
                 }
                 _ => None,
             }

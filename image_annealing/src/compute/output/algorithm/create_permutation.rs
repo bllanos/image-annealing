@@ -1,6 +1,6 @@
 use super::super::super::system::System;
 use super::super::OutputStatus;
-use super::{CompletionStatus, CompletionStatusHolder, FinalFullOutputHolder};
+use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::ValidatedPermutation;
 use std::error::Error;
 
@@ -34,7 +34,7 @@ impl CreatePermutation {
     }
 
     pub fn full_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
-        self.checked_full_output(system)
+        self.checked_output(system)
     }
 }
 
@@ -54,7 +54,7 @@ impl CompletionStatusHolder for CreatePermutation {
     }
 }
 
-impl FinalFullOutputHolder<CreatePermutationOutput> for CreatePermutation {
+impl FinalOutputHolder<CreatePermutationOutput> for CreatePermutation {
     fn has_given_output(&self) -> bool {
         self.has_given_output
     }
@@ -62,7 +62,7 @@ impl FinalFullOutputHolder<CreatePermutationOutput> for CreatePermutation {
         self.has_given_output = true;
     }
 
-    fn unchecked_full_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
+    fn unchecked_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
         system
             .output_permutation()
             .ok()

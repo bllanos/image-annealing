@@ -111,6 +111,7 @@ impl OperationManager {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("output_count_swap_command_encoder"),
             });
+        let selection = self.state.last_count_swap_pass_selection();
         let mut transaction = self
             .state
             .output_count_swap(&self.resources, &mut encoder)?;
@@ -126,7 +127,7 @@ impl OperationManager {
         assert_eq!(result.len(), 1);
         Ok(CountSwapOperationOutput::new(
             &result[0],
-            self.state.last_count_swap_pass_selection(),
+            selection,
             &self.image_dimensions,
         ))
     }

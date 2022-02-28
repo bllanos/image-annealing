@@ -21,14 +21,17 @@ impl fmt::Display for InsufficientInputError {
                 f,
                 "no swap passes have occurred since the last count swap operation"
             ),
-            err => write!(
+            InsufficientInputError::Permutation => write!(
                 f,
-                "an input {} must be provided as there is none to reuse",
-                match err {
-                    InsufficientInputError::Permutation => "permutation",
-                    InsufficientInputError::OriginalImage => "image",
-                    InsufficientInputError::DisplacementGoal => "displacement goal field",
-                }
+                "an input permutation must be provided as there is none to reuse"
+            ),
+            InsufficientInputError::OriginalImage => write!(
+                f,
+                "an input image must be provided as there is none to reuse"
+            ),
+            InsufficientInputError::DisplacementGoal => write!(
+                f,
+                "an input displacement goal field must be provided as there is none to reuse"
             ),
         }
     }
@@ -51,14 +54,13 @@ impl fmt::Display for InsufficientOutputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             InsufficientOutputError::CountSwap => write!(f, "no current output swap counts exist",),
-            err => write!(
+            InsufficientOutputError::Permutation => write!(
                 f,
-                "an output {} does not exist or has been invalidated",
-                match err {
-                    InsufficientOutputError::Permutation => "permutation",
-                    InsufficientOutputError::PermutedImage => "image",
-                }
+                "an output permutation does not exist or has been invalidated",
             ),
+            InsufficientOutputError::PermutedImage => {
+                write!(f, "an output image does not exist or has been invalidated",)
+            }
         }
     }
 }

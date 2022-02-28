@@ -2,7 +2,9 @@ use super::output::algorithm::create_permutation::{
     CreatePermutation, CreatePermutationInput, CreatePermutationOutput, CreatePermutationParameters,
 };
 use super::output::algorithm::permute::{Permute, PermuteInput, PermuteOutput, PermuteParameters};
-use super::output::algorithm::swap::{Swap, SwapInput, SwapOutput, SwapParameters};
+use super::output::algorithm::swap::{
+    Swap, SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput,
+};
 use super::output::algorithm::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationOutput,
     ValidatePermutationParameters,
@@ -21,7 +23,7 @@ pub fn create_dispatcher(
 
 pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput>;
 pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput>;
-pub type SwapAlgorithm = dyn Algorithm<(), SwapOutput>;
+pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput>;
 pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput>;
 
 pub trait Dispatcher {
@@ -81,12 +83,6 @@ impl AlgorithmChoice {
         match self {
             AlgorithmChoice::Permute(ref mut inner) => inner,
             _ => panic!("expected AlgorithmChoice::Permute"),
-        }
-    }
-    fn as_ref_swap(&self) -> &Swap {
-        match self {
-            AlgorithmChoice::Swap(inner) => inner,
-            _ => panic!("expected AlgorithmChoice::Swap"),
         }
     }
     fn as_mut_swap(&mut self) -> &mut Swap {
@@ -205,14 +201,16 @@ impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
     }
 }
 
-impl Algorithm<(), SwapOutput> for DispatcherImplementation {
+impl Algorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm.as_mut_swap().step(&mut self.system)
     }
-    fn partial_output(&mut self) -> Option<()> {
-        self.algorithm.as_ref_swap().partial_output()
+    fn partial_output(&mut self) -> Option<SwapPartialOutput> {
+        self.algorithm
+            .as_mut_swap()
+            .partial_output(&mut self.system)
     }
-    fn full_output(&mut self) -> Option<SwapOutput> {
+    fn full_output(&mut self) -> Option<SwapFullOutput> {
         self.algorithm.as_mut_swap().full_output(&mut self.system)
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {

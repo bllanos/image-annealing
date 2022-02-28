@@ -1,4 +1,4 @@
-use image_annealing::compute::{Algorithm, OutputStatus};
+use image_annealing::compute::{Algorithm, OutputStatus, SwapParameters, SwapPassSelection};
 use std::error::Error;
 
 fn assert_output_vacancies<PartialOutput, FullOutput>(
@@ -59,4 +59,8 @@ pub fn assert_step_until_error<PartialOutput, FullOutput>(
     );
     assert!(algorithm.partial_output().is_none());
     assert!(algorithm.full_output().is_none());
+}
+
+pub fn default_swap_parameters() -> SwapParameters {
+    SwapParameters::new(SwapPassSelection::HORIZONTAL, true).unwrap()
 }

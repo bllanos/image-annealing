@@ -3,12 +3,73 @@ use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
-use super::{CompletionStatus, CompletionStatusHolder, FinalFullOutputHolder};
+use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::{CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
+use std::fmt;
 
-pub struct SwapParameters {}
+pub use super::super::super::link::swap::{SwapPass, SwapPassSelection};
+pub use super::super::super::system::{CountSwapOperationOutput, CountSwapOperationOutputPass};
+
+#[derive(Debug, Clone)]
+pub enum InvalidSwapParametersError {
+    NoPassesSelected,
+}
+
+impl fmt::Display for InvalidSwapParametersError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            InvalidSwapParametersError::NoPassesSelected => {
+                write!(f, "selection of swap passes is empty")
+            }
+        }
+    }
+}
+
+impl Error for InvalidSwapParametersError {}
+
+#[derive(Clone)]
+pub struct SwapParameters {
+    selection: SwapPassSelection,
+    count_swap: bool,
+}
+
+impl SwapParameters {
+    pub fn new(
+        selection: SwapPassSelection,
+        count_swap: bool,
+    ) -> Result<Self, InvalidSwapParametersError> {
+        if selection.is_empty() {
+            Err(InvalidSwapParametersError::NoPassesSelected)
+        } else {
+            Ok(Self {
+                selection,
+                count_swap,
+            })
+        }
+    }
+
+    pub fn from_selection(
+        selection: SwapPassSelection,
+    ) -> Result<Self, InvalidSwapParametersError> {
+        Self::new(selection, false)
+    }
+
+    pub fn selection(&self) -> SwapPassSelection {
+        self.selection
+    }
+
+    pub fn count_swap(&self) -> bool {
+        self.count_swap
+    }
+}
+
+impl Default for SwapParameters {
+    fn default() -> Self {
+        Self::from_selection(SwapPassSelection::all()).unwrap()
+    }
+}
 
 #[derive(Default)]
 pub struct SwapInput {
@@ -16,7 +77,11 @@ pub struct SwapInput {
     pub displacement_goal: Option<DisplacementGoal>,
 }
 
-pub struct SwapOutput {
+pub struct SwapPartialOutput {
+    pub counts: CountSwapOperationOutput,
+}
+
+pub struct SwapFullOutput {
     pub input_permutation: Option<ValidatedPermutation>,
     pub input_displacement_goal: Option<DisplacementGoal>,
     pub output_permutation: ValidatedPermutation,
@@ -27,11 +92,15 @@ pub struct Swap {
     validator: Option<ValidatePermutation>,
     input_permutation: Option<ValidatedPermutation>,
     input_displacement_goal: Option<DisplacementGoal>,
-    has_given_output: bool,
+    is_first_pass: bool,
+    remaining_passes: Vec<SwapPass>,
+    do_count_swap: bool,
+    has_given_partial_output: bool,
+    has_given_full_output: bool,
 }
 
 impl Swap {
-    pub fn new(mut input: SwapInput, _parameters: SwapParameters) -> Self {
+    pub fn new(mut input: SwapInput, parameters: SwapParameters) -> Self {
         let validator = input.candidate_permutation.take().map(|permutation| {
             ValidatePermutation::new(
                 ValidatePermutationInput {
@@ -45,7 +114,12 @@ impl Swap {
             validator,
             input_permutation: None,
             input_displacement_goal: input.displacement_goal.take(),
-            has_given_output: false,
+            is_first_pass: true,
+            // TODO use the selected swap passes, in reverse
+            remaining_passes: vec![SwapPass::Horizontal],
+            do_count_swap: parameters.count_swap(),
+            has_given_partial_output: false,
+            has_given_full_output: false,
         }
     }
 
@@ -53,12 +127,12 @@ impl Swap {
         self.checked_step(system)
     }
 
-    pub fn partial_output(&self) -> Option<()> {
-        None
+    pub fn partial_output(&mut self, system: &mut System) -> Option<SwapPartialOutput> {
+        FinalOutputHolder::<SwapPartialOutput>::checked_output(self, system)
     }
 
-    pub fn full_output(&mut self, system: &mut System) -> Option<SwapOutput> {
-        self.checked_full_output(system)
+    pub fn full_output(&mut self, system: &mut System) -> Option<SwapFullOutput> {
+        FinalOutputHolder::<SwapFullOutput>::checked_output(self, system)
     }
 }
 
@@ -92,41 +166,75 @@ impl CompletionStatusHolder for Swap {
                 }
                 Ok(OutputStatus::NoNewOutput)
             }
-            None => {
-                if let Some(ref displacement_goal) = self.input_displacement_goal {
-                    let dimensions = ImageDimensions::from_image(displacement_goal.as_ref())?;
-                    if *system.image_dimensions() != dimensions {
-                        return Err(Box::new(DimensionsMismatchError::new(
-                            *system.image_dimensions(),
-                            dimensions,
-                        )));
-                    }
-                }
+            None => match self.remaining_passes.pop() {
+                Some(pass) => {
+                    if self.is_first_pass {
+                        if let Some(ref displacement_goal) = self.input_displacement_goal {
+                            let dimensions =
+                                ImageDimensions::from_image(displacement_goal.as_ref())?;
+                            if *system.image_dimensions() != dimensions {
+                                return Err(Box::new(DimensionsMismatchError::new(
+                                    *system.image_dimensions(),
+                                    dimensions,
+                                )));
+                            }
+                        }
 
-                system.operation_swap(&SwapOperationInput {
-                    permutation: self.input_permutation.as_ref(),
-                    displacement_goal: self.input_displacement_goal.as_ref(),
-                })?;
-                self.completion_status = CompletionStatus::Finished;
-                Ok(OutputStatus::FinalFullOutput)
-            }
+                        system.operation_swap(&SwapOperationInput {
+                            pass,
+                            permutation: self.input_permutation.as_ref(),
+                            displacement_goal: self.input_displacement_goal.as_ref(),
+                        })?;
+                        self.is_first_pass = false;
+                    } else {
+                        system.operation_swap(&SwapOperationInput::from_pass(pass))?;
+                    }
+                    Ok(OutputStatus::NoNewOutput)
+                }
+                None => {
+                    let output_status = if self.do_count_swap {
+                        system.operation_count_swap()?;
+                        OutputStatus::FinalPartialAndFullOutput
+                    } else {
+                        OutputStatus::FinalFullOutput
+                    };
+                    self.completion_status = CompletionStatus::Finished;
+                    Ok(output_status)
+                }
+            },
         }
     }
 }
 
-impl FinalFullOutputHolder<SwapOutput> for Swap {
+impl FinalOutputHolder<SwapPartialOutput> for Swap {
     fn has_given_output(&self) -> bool {
-        self.has_given_output
+        self.has_given_partial_output
     }
     fn set_has_given_output(&mut self) {
-        self.has_given_output = true;
+        self.has_given_partial_output = true;
     }
 
-    fn unchecked_full_output(&mut self, system: &mut System) -> Option<SwapOutput> {
+    fn unchecked_output(&mut self, system: &mut System) -> Option<SwapPartialOutput> {
+        system
+            .output_count_swap()
+            .ok()
+            .map(|counts| SwapPartialOutput { counts })
+    }
+}
+
+impl FinalOutputHolder<SwapFullOutput> for Swap {
+    fn has_given_output(&self) -> bool {
+        self.has_given_full_output
+    }
+    fn set_has_given_output(&mut self) {
+        self.has_given_full_output = true;
+    }
+
+    fn unchecked_output(&mut self, system: &mut System) -> Option<SwapFullOutput> {
         system
             .output_permutation()
             .ok()
-            .map(|output_permutation| SwapOutput {
+            .map(|output_permutation| SwapFullOutput {
                 input_permutation: self.input_permutation.take(),
                 input_displacement_goal: self.input_displacement_goal.take(),
                 output_permutation,

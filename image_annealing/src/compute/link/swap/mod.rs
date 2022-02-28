@@ -16,7 +16,7 @@ pub enum SwapPass {
 }
 
 impl SwapPass {
-    pub fn swap_workgroup_grid_dimensions(
+    pub(in super::super) fn swap_workgroup_grid_dimensions(
         &self,
         image_dimensions: &ImageDimensions,
     ) -> WorkgroupGridDimensions {
@@ -63,7 +63,7 @@ impl SwapPass {
         }
     }
 
-    pub fn total_workgroups(image_dimensions: &ImageDimensions) -> usize {
+    pub(in super::super) fn total_workgroups(image_dimensions: &ImageDimensions) -> usize {
         Self::PASSES
             .iter()
             .map(|swap_pass| {
@@ -158,11 +158,7 @@ impl CountSwapInputLayout {
         }
     }
 
-    pub fn include_pass(&mut self, pass: SwapPass) {
-        self.do_segment[pass as usize] = u32::from(true);
-    }
-
-    pub fn get_selection(&mut self) -> SwapPassSelection {
+    pub fn get_selection(&self) -> SwapPassSelection {
         self.do_segment.iter().zip(SwapPass::PASSES.iter()).fold(
             SwapPassSelection::empty(),
             |acc, (&flag, &pass)| {
@@ -178,10 +174,6 @@ impl CountSwapInputLayout {
     pub fn set_selection(&mut self, selection: SwapPassSelection) {
         self.do_segment =
             SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
-    }
-
-    pub fn clear_passes(&mut self) {
-        self.do_segment = Default::default();
     }
 }
 

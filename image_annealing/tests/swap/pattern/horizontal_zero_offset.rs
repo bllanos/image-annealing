@@ -1,8 +1,9 @@
 mod accept_all_swap {
-    use image_annealing::compute::{self, OutputStatus, SwapInput, SwapParameters};
+    use image_annealing::compute::{self, OutputStatus, SwapInput};
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
     use test_utils::algorithm::assert_step_until_success;
+    use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_utils::permutation::DimensionsAndPermutation;
 
     #[test]
@@ -18,14 +19,15 @@ mod accept_all_swap {
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let dispatcher = compute::create_dispatcher(&dimensions)?;
+        let swap_parameters = test_utils::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation(permutation.clone())),
                 displacement_goal: Some(displacement_goal),
             },
-            SwapParameters {},
+            swap_parameters.clone(),
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
         let output = algorithm.full_output().unwrap();
         assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
@@ -35,6 +37,13 @@ mod accept_all_swap {
         );
         assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
         assert!(algorithm.full_output().is_none());
+        assert_correct_swap_count_output(
+            algorithm.partial_output(),
+            &swap_parameters,
+            &dimensions,
+            SwapAcceptedCount::All,
+        );
+        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 
@@ -51,14 +60,15 @@ mod accept_all_swap {
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let dispatcher = compute::create_dispatcher(&dimensions)?;
+        let swap_parameters = test_utils::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation(permutation.clone())),
                 displacement_goal: Some(displacement_goal),
             },
-            SwapParameters {},
+            swap_parameters.clone(),
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
         let output = algorithm.full_output().unwrap();
         assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
@@ -67,17 +77,24 @@ mod accept_all_swap {
             expected_displacement_goal
         );
         assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+        assert_correct_swap_count_output(
+            algorithm.partial_output(),
+            &swap_parameters,
+            &dimensions,
+            SwapAcceptedCount::All,
+        );
         Ok(())
     }
 }
 
 mod select_swap {
     use image_annealing::compute::conversion::{self, VectorFieldEntry};
-    use image_annealing::compute::{self, OutputStatus, SwapInput, SwapParameters};
+    use image_annealing::compute::{self, OutputStatus, SwapInput};
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
     use test_utils::algorithm::assert_step_until_success;
     use test_utils::displacement_goal;
+    use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_utils::permutation::DimensionsAndPermutation;
 
     #[test]
@@ -99,14 +116,15 @@ mod select_swap {
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let dispatcher = compute::create_dispatcher(&dimensions)?;
+        let swap_parameters = test_utils::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation(permutation.clone())),
                 displacement_goal: Some(displacement_goal),
             },
-            SwapParameters {},
+            swap_parameters.clone(),
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
         let output = algorithm.full_output().unwrap();
         assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
@@ -116,6 +134,13 @@ mod select_swap {
         );
         assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
         assert!(algorithm.full_output().is_none());
+        assert_correct_swap_count_output(
+            algorithm.partial_output(),
+            &swap_parameters,
+            &dimensions,
+            SwapAcceptedCount::Some(vec![1]),
+        );
+        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 
@@ -142,14 +167,15 @@ mod select_swap {
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let dispatcher = compute::create_dispatcher(&dimensions)?;
+        let swap_parameters = test_utils::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation(permutation.clone())),
                 displacement_goal: Some(displacement_goal),
             },
-            SwapParameters {},
+            swap_parameters.clone(),
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
         let output = algorithm.full_output().unwrap();
         assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
@@ -159,6 +185,13 @@ mod select_swap {
         );
         assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
         assert!(algorithm.full_output().is_none());
+        assert_correct_swap_count_output(
+            algorithm.partial_output(),
+            &swap_parameters,
+            &dimensions,
+            SwapAcceptedCount::None,
+        );
+        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 }

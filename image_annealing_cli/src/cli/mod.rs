@@ -2,8 +2,8 @@ use crate::config::Config;
 use image_annealing::compute::format::ImageFileWriter;
 use image_annealing::compute::{
     self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, OutputStatus,
-    PermuteInput, PermuteParameters, SwapInput, SwapParameters, ValidatePermutationInput,
-    ValidatePermutationParameters,
+    PermuteInput, PermuteParameters, SwapInput, SwapParameters, SwapPassSelection,
+    ValidatePermutationInput, ValidatePermutationParameters,
 };
 use image_annealing::ImageDimensions;
 use std::error::Error;
@@ -79,7 +79,7 @@ fn run_and_save(dispatcher: Box<dyn Dispatcher>, config: &Config) -> Result<(), 
                     )?),
                     displacement_goal: Some(loader::load_displacement_goal(displacement_goal)?),
                 },
-                SwapParameters {},
+                SwapParameters::from_selection(SwapPassSelection::HORIZONTAL)?,
             );
             algorithm.step_until(OutputStatus::FinalFullOutput)?;
             let permutation = algorithm.full_output().unwrap().output_permutation;

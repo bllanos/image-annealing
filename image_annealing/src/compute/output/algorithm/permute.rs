@@ -4,7 +4,7 @@ use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
-use super::{CompletionStatus, CompletionStatusHolder, FinalFullOutputHolder};
+use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::{CandidatePermutation, ImageDimensions, ValidatedPermutation};
 use image::DynamicImage;
 use std::default::Default;
@@ -60,7 +60,7 @@ impl Permute {
     }
 
     pub fn full_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
-        self.checked_full_output(system)
+        self.checked_output(system)
     }
 }
 
@@ -118,7 +118,7 @@ impl CompletionStatusHolder for Permute {
     }
 }
 
-impl FinalFullOutputHolder<PermuteOutput> for Permute {
+impl FinalOutputHolder<PermuteOutput> for Permute {
     fn has_given_output(&self) -> bool {
         self.has_given_output
     }
@@ -126,7 +126,7 @@ impl FinalFullOutputHolder<PermuteOutput> for Permute {
         self.has_given_output = true;
     }
 
-    fn unchecked_full_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
+    fn unchecked_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
         system
             .output_permuted_image()
             .ok()

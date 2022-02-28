@@ -15,7 +15,10 @@ pub use output::algorithm::create_permutation::{
     CreatePermutationInput, CreatePermutationParameters,
 };
 pub use output::algorithm::permute::{PermuteInput, PermuteOutput, PermuteParameters};
-pub use output::algorithm::swap::{SwapInput, SwapOutput, SwapParameters};
+pub use output::algorithm::swap::{
+    CountSwapOperationOutput, CountSwapOperationOutputPass, InvalidSwapParametersError,
+    SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPass, SwapPassSelection,
+};
 pub use output::algorithm::validate_permutation::{
     ValidatePermutationInput, ValidatePermutationParameters,
 };
