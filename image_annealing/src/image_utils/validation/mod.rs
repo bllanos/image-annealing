@@ -60,11 +60,7 @@ impl fmt::Display for PermutationFlaw {
     }
 }
 
-impl Error for PermutationFlaw {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for PermutationFlaw {}
 
 pub struct CandidatePermutation(pub VectorFieldImageBuffer);
 

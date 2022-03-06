@@ -37,11 +37,7 @@ impl fmt::Display for InsufficientInputError {
     }
 }
 
-impl Error for InsufficientInputError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for InsufficientInputError {}
 
 #[derive(Debug, Clone)]
 pub enum InsufficientOutputError {
@@ -65,11 +61,7 @@ impl fmt::Display for InsufficientOutputError {
     }
 }
 
-impl Error for InsufficientOutputError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for InsufficientOutputError {}
 
 #[must_use]
 pub struct ResourceStateTransaction<'a> {

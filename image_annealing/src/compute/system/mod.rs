@@ -25,11 +25,7 @@ impl fmt::Display for DimensionsMismatchError {
     }
 }
 
-impl Error for DimensionsMismatchError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for DimensionsMismatchError {}
 
 pub struct System {
     device: DeviceManager,

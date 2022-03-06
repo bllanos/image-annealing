@@ -29,11 +29,7 @@ impl fmt::Display for AlreadyFailedError {
     }
 }
 
-impl Error for AlreadyFailedError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for AlreadyFailedError {}
 
 #[derive(Debug, Clone)]
 struct AlreadyFinishedError;
@@ -47,11 +43,7 @@ impl fmt::Display for AlreadyFinishedError {
     }
 }
 
-impl Error for AlreadyFinishedError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for AlreadyFinishedError {}
 
 pub trait Algorithm<PartialOutput, FullOutput> {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>>;

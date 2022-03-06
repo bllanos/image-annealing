@@ -25,11 +25,7 @@ impl fmt::Display for OutputDirectoryError {
     }
 }
 
-impl Error for OutputDirectoryError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for OutputDirectoryError {}
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct OutputConfig<'a> {

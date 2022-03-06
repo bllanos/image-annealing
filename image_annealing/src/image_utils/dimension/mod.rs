@@ -38,13 +38,9 @@ where
     }
 }
 
-impl<T> Error for InvalidDimensionError<T>
-where
-    T: TryInto<usize> + std::fmt::Debug + std::fmt::Display,
+impl<T> Error for InvalidDimensionError<T> where
+    T: TryInto<usize> + std::fmt::Debug + std::fmt::Display
 {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -94,13 +90,9 @@ where
     }
 }
 
-impl<T> Error for OutOfBoundsCoordinatesError<T>
-where
-    T: TryInto<usize> + std::fmt::Debug + std::fmt::Display,
+impl<T> Error for OutOfBoundsCoordinatesError<T> where
+    T: TryInto<usize> + std::fmt::Debug + std::fmt::Display
 {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]

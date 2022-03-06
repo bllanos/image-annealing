@@ -10,11 +10,7 @@ impl fmt::Display for DeviceRequestError {
     }
 }
 
-impl Error for DeviceRequestError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for DeviceRequestError {}
 
 pub struct DeviceManager {
     device: wgpu::Device,
