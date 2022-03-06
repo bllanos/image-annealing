@@ -12,8 +12,8 @@ impl SwapRatio {
     fn new(total: usize, accepted: CountSwapOutputDataElement) -> Self {
         assert!(accepted.is_finite());
         assert!(accepted >= 0.0);
-        assert!(total > 0);
         assert!((accepted as usize) as CountSwapOutputDataElement == accepted);
+        assert!(accepted as usize <= total);
         Self { total, accepted }
     }
 
@@ -22,7 +22,11 @@ impl SwapRatio {
     }
 
     pub fn accepted_fraction(&self) -> f64 {
-        <CountSwapOutputDataElement as Into<f64>>::into(self.accepted) / self.total as f64
+        if self.total == 0 {
+            0.0
+        } else {
+            <CountSwapOutputDataElement as Into<f64>>::into(self.accepted) / self.total as f64
+        }
     }
 
     pub fn total(&self) -> usize {

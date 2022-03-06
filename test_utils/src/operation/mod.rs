@@ -72,7 +72,11 @@ pub fn assert_correct_swap_count_output(
                 assert_eq!(pass_data.is_none_accepted(), accepted_i == 0);
                 assert_eq!(
                     pass_data.accepted_fraction(),
-                    accepted_i as f64 / total_i as f64
+                    if total_i == 0 {
+                        0.0
+                    } else {
+                        accepted_i as f64 / total_i as f64
+                    }
                 );
 
                 acc.0 = acc.0.checked_add(total_i).unwrap();
@@ -82,6 +86,13 @@ pub fn assert_correct_swap_count_output(
 
         assert_eq!(counts.total(), total);
         assert_eq!(counts.accepted(), accepted);
-        assert_eq!(counts.accepted_fraction(), accepted as f64 / total as f64);
+        assert_eq!(
+            counts.accepted_fraction(),
+            if total == 0 {
+                0.0
+            } else {
+                accepted as f64 / total as f64
+            }
+        );
     }
 }
