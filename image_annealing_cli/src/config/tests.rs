@@ -1,6 +1,6 @@
 mod parse_args {
-    use super::super::{parse_args, Config};
-    use image_annealing::ImageDimensions;
+    use super::super::{parse_args, AlgorithmConfig, Config, PermutationPath};
+    use image_annealing::{compute, ImageDimensions};
     use std::error::Error;
 
     #[test]
@@ -27,9 +27,15 @@ mod parse_args {
         let r = parse_args(v)?;
         assert_eq!(
             r,
-            Config::CreatePermutation {
-                image_dimensions: ImageDimensions::new(20, 25)?,
-                permutation_output_path_no_extension: String::from("permutation_out"),
+            Config {
+                algorithm: AlgorithmConfig::CreatePermutation {
+                    permutation_output_path_no_extension: PermutationPath(String::from(
+                        "permutation_out"
+                    )),
+                },
+                dispatcher: compute::Config {
+                    image_dimensions: ImageDimensions::new(20, 25)?
+                }
             }
         );
         Ok(())
@@ -43,9 +49,15 @@ mod parse_args {
         let r = parse_args(v)?;
         assert_eq!(
             r,
-            Config::CreatePermutation {
-                image_dimensions: ImageDimensions::new(20, 25)?,
-                permutation_output_path_no_extension: String::from("permutation_out"),
+            Config {
+                algorithm: AlgorithmConfig::CreatePermutation {
+                    permutation_output_path_no_extension: PermutationPath(String::from(
+                        "permutation_out"
+                    )),
+                },
+                dispatcher: compute::Config {
+                    image_dimensions: ImageDimensions::new(20, 25)?
+                }
             }
         );
         Ok(())

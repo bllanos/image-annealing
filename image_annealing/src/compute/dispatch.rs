@@ -15,10 +15,13 @@ use crate::ImageDimensions;
 use std::error::Error;
 use std::fmt;
 
-pub fn create_dispatcher(
-    image_dimensions: &ImageDimensions,
-) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
-    Ok(Box::new(DispatcherImplementation::new(image_dimensions)?))
+#[derive(Debug, PartialEq, Eq)]
+pub struct Config {
+    pub image_dimensions: ImageDimensions,
+}
+
+pub fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
+    Ok(Box::new(DispatcherImplementation::new(config)?))
 }
 
 pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput>;
@@ -111,9 +114,9 @@ struct DispatcherImplementation {
 }
 
 impl DispatcherImplementation {
-    fn new(image_dimensions: &ImageDimensions) -> Result<Self, Box<dyn Error>> {
+    fn new(config: &Config) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            system: System::new(image_dimensions)?,
+            system: System::new(&config.image_dimensions)?,
             algorithm: AlgorithmChoice::None,
         })
     }

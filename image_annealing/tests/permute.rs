@@ -1,6 +1,6 @@
-use image::DynamicImage;
+use image_annealing::compute::format::{ImageFormat, LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
+    self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
     PermuteParameters, SwapInput,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
@@ -18,23 +18,27 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::identity();
     let expected_permutation = permutation.clone();
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
-    let permuted_image = test_utils::permutation::identity_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let permuted_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
+        test_utils::permutation::identity_permute(&original_image),
+    )?);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let dispatcher = compute::create_dispatcher(&dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(output.permuted_image, permuted_lossless_image);
     assert!(algorithm.full_output().is_none());
     Ok(())
 }
@@ -47,8 +51,10 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::non_identity();
     let expected_permutation = permutation.clone();
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
-    let permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let permuted_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
+        test_utils::permutation::non_identity_forward_permute(&original_image),
+    )?);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let DimensionsAndPermutation {
         permutation: invalid_permutation,
@@ -56,29 +62,31 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(invalid_permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(invalid_permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
 
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(output.permuted_image, permuted_lossless_image);
     Ok(())
 }
 
@@ -90,17 +98,19 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::non_identity();
     let invalid_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image = DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(
+    let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
         &invalid_dimensions,
-    ));
+    ))?);
 
-    let dispatcher = compute::create_dispatcher(&dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(image),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -118,16 +128,19 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::non_identity();
     let other_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image =
-        DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(&other_dimensions));
+    let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
+        &other_dimensions,
+    ))?);
 
-    let dispatcher = compute::create_dispatcher(&other_dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: other_dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(image),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -147,29 +160,36 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image =
         test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let dispatcher = compute::create_dispatcher(&dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
     Ok(())
 }
 
 #[test]
 fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4)?;
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
@@ -177,21 +197,24 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
 
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image = test_utils::permutation::identity_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            original_image: Some(dynamic_original_image.clone()),
+            original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert!(output.permutation.is_none());
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
     Ok(())
 }
 
@@ -202,16 +225,17 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let expected_permutation = test_utils::operation::swap(&permutation);
-    let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
-        expected_permutation.clone(),
-    ))?;
+    let displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
         swap_parameters.clone(),
@@ -236,21 +260,24 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image =
         test_utils::permutation::non_identity_horizontal_swap_forward_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            original_image: Some(dynamic_original_image.clone()),
+            original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert!(output.permutation.is_none());
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
     Ok(())
 }
 
@@ -263,22 +290,27 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     let mut expected_permutation = permutation.clone();
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let mut permuted_image = test_utils::permutation::identity_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image.clone())?);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     dispatcher = algorithm.return_to_dispatcher();
     let DimensionsAndPermutation {
@@ -291,17 +323,22 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(other_permutation)),
+            candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
             ..Default::default()
         },
-        PermuteParameters {},
+        PermuteParameters {
+            permuted_image_format: Some(ImageFormat::Rgba16),
+        },
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert!(output.original_image.is_none());
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     Ok(())
 }
@@ -316,43 +353,52 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     let mut original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let mut permuted_image =
         test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
-    let mut dynamic_original_image = DynamicImage::ImageRgba16(original_image.clone());
+    let mut original_lossless_image =
+        LosslessImage::Rgba16(Rgba16Image::new(original_image.clone())?);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     dispatcher = algorithm.return_to_dispatcher();
 
     original_image = test_utils::image::coordinates_to_zero_alpha_colors(&dimensions);
     permuted_image =
         test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
-    dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            original_image: Some(dynamic_original_image.clone()),
+            original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
     assert!(output.permutation.is_none());
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     Ok(())
 }
@@ -366,22 +412,27 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
     let mut expected_permutation = permutation.clone();
     let mut original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let mut permuted_image = test_utils::permutation::identity_permute(&original_image);
-    let mut dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let mut original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let mut output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     dispatcher = algorithm.return_to_dispatcher();
     let DimensionsAndPermutation {
@@ -392,21 +443,24 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
     expected_permutation = other_permutation.clone();
     original_image = test_utils::image::coordinates_to_zero_alpha_colors(&dimensions);
     permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
-    dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(other_permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     Ok(())
 }
@@ -414,16 +468,20 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
 #[test]
 fn forget_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4).unwrap();
-    let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
-    let dynamic_original_image =
-        DynamicImage::ImageRgba16(test_utils::image::coordinates_to_colors(&dimensions));
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })
+    .unwrap();
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
+        test_utils::image::coordinates_to_colors(&dimensions),
+    )?);
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            original_image: Some(dynamic_original_image),
+            original_image: Some(original_lossless_image),
             ..Default::default()
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -440,13 +498,18 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::identity();
 
-    let dispatcher = compute::create_dispatcher(&dimensions).unwrap();
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })
+    .unwrap();
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             ..Default::default()
         },
-        PermuteParameters {},
+        PermuteParameters {
+            permuted_image_format: Some(ImageFormat::Rgba16),
+        },
     );
     assert_step_until_error(
         algorithm.as_mut(),

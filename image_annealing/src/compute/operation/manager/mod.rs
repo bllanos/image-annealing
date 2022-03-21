@@ -1,7 +1,9 @@
 use super::super::device::DeviceManager;
-use super::super::format::{LosslessImageBuffer, VectorFieldImageBuffer};
+use super::super::format::{ImageFormat, LosslessImage, VectorFieldImageBuffer};
 use super::super::link::swap::SwapPass;
-use super::super::resource::buffer::ReadMappableBuffer;
+use super::super::resource::buffer::{
+    ChunkedReadMappableBuffer, MappedBuffer, PlainReadMappableBuffer,
+};
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
@@ -156,16 +158,23 @@ impl OperationManager {
         let result = mapped_buffer.collect_mapped_buffer();
 
         transaction.set_commit();
-        Ok(validation::vector_field_into_validated_permutation(
-            VectorFieldImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
+        Ok(
+            validation::vector_field_into_validated_permutation_unchecked(
+                VectorFieldImageBuffer::from_vec(
+                    mapped_buffer.width(),
+                    mapped_buffer.height(),
+                    result,
+                )
                 .unwrap(),
-        ))
+            ),
+        )
     }
 
     pub fn output_permuted_image(
         &mut self,
         device: &DeviceManager,
-    ) -> Result<LosslessImageBuffer, Box<dyn Error>> {
+        format: ImageFormat,
+    ) -> Result<LosslessImage, Box<dyn Error>> {
         let mut encoder = device
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -186,9 +195,11 @@ impl OperationManager {
         let result = mapped_buffer.collect_mapped_buffer();
 
         transaction.set_commit();
-        Ok(
-            LosslessImageBuffer::from_vec(mapped_buffer.width(), mapped_buffer.height(), result)
-                .unwrap(),
-        )
+        Ok(LosslessImage::from_texture_data(
+            format,
+            mapped_buffer.width(),
+            mapped_buffer.height(),
+            result,
+        ))
     }
 }

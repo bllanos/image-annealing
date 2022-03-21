@@ -1,10 +1,10 @@
 use image::Rgba;
-use image_annealing::compute::format::LosslessImageBuffer;
+use image_annealing::compute::format::Rgba16ImageBuffer;
 use image_annealing::ImageDimensions;
 use std::convert::TryInto;
 
-pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {
-    LosslessImageBuffer::from_fn(
+pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> Rgba16ImageBuffer {
+    Rgba16ImageBuffer::from_fn(
         dimensions.width().try_into().unwrap(),
         dimensions.height().try_into().unwrap(),
         |x, y| {
@@ -18,8 +18,8 @@ pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> LosslessImageBuffe
     )
 }
 
-pub fn coordinates_to_zero_alpha_colors(dimensions: &ImageDimensions) -> LosslessImageBuffer {
-    LosslessImageBuffer::from_fn(
+pub fn coordinates_to_zero_alpha_colors(dimensions: &ImageDimensions) -> Rgba16ImageBuffer {
+    Rgba16ImageBuffer::from_fn(
         dimensions.width().try_into().unwrap(),
         dimensions.height().try_into().unwrap(),
         |x, y| {

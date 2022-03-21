@@ -1,5 +1,5 @@
 use image_annealing::compute::{
-    self, OutputStatus, ValidatePermutationInput, ValidatePermutationParameters,
+    self, Config, OutputStatus, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use image_annealing::{CandidatePermutation, ImageDimensions};
 use std::error::Error;
@@ -13,10 +13,12 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = permutation::identity();
     let expected = permutation.clone();
-    let dispatcher = compute::create_dispatcher(&dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation(permutation),
+            candidate_permutation: CandidatePermutation::new(permutation)?,
         },
         ValidatePermutationParameters {},
     );
@@ -40,10 +42,12 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     } = permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation(invalid_image),
+            candidate_permutation: CandidatePermutation::new(invalid_image)?,
         },
         ValidatePermutationParameters {},
     );
@@ -52,7 +56,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation(permutation),
+            candidate_permutation: CandidatePermutation::new(permutation)?,
         },
         ValidatePermutationParameters {},
     );
@@ -71,10 +75,12 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
     let invalid_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
 
-    let dispatcher = compute::create_dispatcher(&invalid_dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: invalid_dimensions,
+    })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation(permutation),
+            candidate_permutation: CandidatePermutation::new(permutation)?,
         },
         ValidatePermutationParameters {},
     );

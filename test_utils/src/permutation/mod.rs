@@ -1,6 +1,6 @@
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
-use image_annealing::compute::format::{LosslessImageBuffer, VectorFieldImageBuffer};
-use image_annealing::{ImageDimensions, ValidatedPermutation};
+use image_annealing::compute::format::{Rgba16ImageBuffer, VectorFieldImageBuffer};
+use image_annealing::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use std::convert::TryInto;
 
 pub struct DimensionsAndPermutation {
@@ -24,7 +24,7 @@ pub fn identity() -> DimensionsAndPermutation {
     identity_with_dimensions(2, 3)
 }
 
-pub fn identity_permute(image: &LosslessImageBuffer) -> LosslessImageBuffer {
+pub fn identity_permute(image: &Rgba16ImageBuffer) -> Rgba16ImageBuffer {
     image.clone()
 }
 
@@ -60,7 +60,7 @@ pub fn non_identity() -> DimensionsAndPermutation {
     }
 }
 
-pub fn non_identity_forward_permute(image: &LosslessImageBuffer) -> LosslessImageBuffer {
+pub fn non_identity_forward_permute(image: &Rgba16ImageBuffer) -> Rgba16ImageBuffer {
     assert_eq!(image.width(), 2);
     assert_eq!(image.height(), 3);
     let mut permuted_image = image.clone();
@@ -78,8 +78,8 @@ pub fn non_identity_forward_permute(image: &LosslessImageBuffer) -> LosslessImag
 }
 
 pub fn non_identity_horizontal_swap_forward_permute(
-    image: &LosslessImageBuffer,
-) -> LosslessImageBuffer {
+    image: &Rgba16ImageBuffer,
+) -> Rgba16ImageBuffer {
     assert_eq!(image.width(), 2);
     assert_eq!(image.height(), 3);
     let mut permuted_image = image.clone();
@@ -128,9 +128,7 @@ pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     }
 }
 
-pub fn bit_interpretation_cases_forward_permute(
-    image: &LosslessImageBuffer,
-) -> LosslessImageBuffer {
+pub fn bit_interpretation_cases_forward_permute(image: &Rgba16ImageBuffer) -> Rgba16ImageBuffer {
     assert_eq!(image.width(), 513);
     assert_eq!(image.height(), 513);
     let mut permuted_image = image.clone();

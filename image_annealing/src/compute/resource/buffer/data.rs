@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 
 use super::dimensions::BufferDimensions;
-use super::map::MappedBuffer;
+use super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
 
 pub struct BufferData {
     dimensions: BufferDimensions,
@@ -74,14 +74,14 @@ impl BufferData {
         )
     }
 
-    pub fn request_map_read<T>(
+    pub fn request_chunked_map_read<T>(
         &self,
         output_chunk_size: usize,
         output_chunk_mapper: fn(&[u8]) -> T,
-    ) -> MappedBuffer<T> {
+    ) -> ChunkedMappedBuffer<T> {
         let buffer_slice = self.buffer.slice(..);
         let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
-        MappedBuffer::new(
+        ChunkedMappedBuffer::new(
             buffer_slice,
             buffer_future,
             &self.dimensions,
@@ -89,6 +89,12 @@ impl BufferData {
             output_chunk_size,
             output_chunk_mapper,
         )
+    }
+
+    pub fn request_plain_map_read(&self) -> PlainMappedBuffer {
+        let buffer_slice = self.buffer.slice(..);
+        let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
+        PlainMappedBuffer::new(buffer_slice, buffer_future, &self.dimensions, &self.buffer)
     }
 
     pub fn dimensions(&self) -> &BufferDimensions {

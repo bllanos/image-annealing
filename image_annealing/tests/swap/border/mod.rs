@@ -1,4 +1,4 @@
-use image_annealing::compute::{self, OutputStatus, SwapInput};
+use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::convert::TryInto;
 use std::error::Error;
@@ -19,16 +19,17 @@ where
     } else {
         permutation.clone()
     };
-    let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
-        expected_permutation.clone(),
-    ))?;
+    let displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let dispatcher = compute::create_dispatcher(&dimensions)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
         swap_parameters.clone(),

@@ -1,7 +1,7 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::data::TextureData;
 use super::{Texture, TextureDatatype};
-use crate::{ImageDimensions, ValidatedPermutation};
+use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use core::num::NonZeroU32;
 use std::convert::{TryFrom, TryInto};
 
@@ -62,7 +62,7 @@ impl PermutationInputTexture {
 
     pub fn load(&self, queue: &wgpu::Queue, permutation: &ValidatedPermutation) {
         let dimensions = self.dimensions();
-        TextureData::assert_same_dimensions(&self.0, &permutation.dimensions());
+        TextureData::assert_same_dimensions(&self.0, permutation.dimensions());
 
         queue.write_texture(
             self.copy_view(),

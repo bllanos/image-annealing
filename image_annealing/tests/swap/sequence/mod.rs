@@ -1,7 +1,7 @@
-use image::DynamicImage;
+use image_annealing::compute::format::{LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
-    PermuteParameters, SwapInput,
+    self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
+    SwapInput,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::default::Default;
@@ -17,12 +17,13 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::identity();
     let expected_permutation = test_utils::operation::swap(&permutation);
-    let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
-        expected_permutation.clone(),
-    ))?;
+    let displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
@@ -63,29 +64,33 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     let mut expected_permutation = permutation.clone();
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
-    let dynamic_original_image = DynamicImage::ImageRgba16(original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation(permutation)),
-            original_image: Some(dynamic_original_image.clone()),
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
         },
-        PermuteParameters {},
+        Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
-    assert_eq!(output.original_image.unwrap(), dynamic_original_image);
-    assert_eq!(output.permuted_image, permuted_image);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
 
     dispatcher = algorithm.return_to_dispatcher();
 
     expected_permutation = test_utils::operation::swap(&expected_permutation);
-    let displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
-        expected_permutation.clone(),
-    ))?;
+    let displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
@@ -120,16 +125,17 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let mut expected_permutation = test_utils::operation::swap(&permutation);
-    let mut displacement_goal = DisplacementGoal::from_candidate_permutation(
-        CandidatePermutation(expected_permutation.clone()),
-    )?;
+    let mut displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let mut expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
         swap_parameters.clone(),
@@ -158,13 +164,12 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::identity();
     assert_eq!(dimensions, other_dimensions);
     expected_permutation = test_utils::operation::swap(&other_permutation);
-    displacement_goal = DisplacementGoal::from_candidate_permutation(CandidatePermutation(
-        expected_permutation.clone(),
-    ))?;
+    displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     expected_displacement_goal = displacement_goal.as_ref().clone();
     algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation(other_permutation.clone())),
+            candidate_permutation: Some(CandidatePermutation::new(other_permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
         swap_parameters.clone(),
@@ -197,16 +202,17 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::reflect_around_center();
     let intermediate_permutation = test_utils::operation::swap(&permutation);
-    let intermediate_displacement_goal = DisplacementGoal::from_candidate_permutation(
-        CandidatePermutation(intermediate_permutation.clone()),
-    )?;
+    let intermediate_displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(intermediate_permutation.clone())?;
     let expected_intermediate_displacement_goal = intermediate_displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&dimensions)?;
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation(permutation.clone())),
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(intermediate_displacement_goal),
         },
         swap_parameters.clone(),

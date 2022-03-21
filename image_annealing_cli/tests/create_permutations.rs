@@ -1,7 +1,7 @@
 use image_annealing::compute::format::{ImageFileWriter, VectorFieldImageBuffer};
-use image_annealing::ImageDimensions;
+use image_annealing::{compute, ImageDimensions};
 use image_annealing_cli::cli;
-use image_annealing_cli::config::Config;
+use image_annealing_cli::config::{AlgorithmConfig, Config, PermutationPath};
 use std::error::Error;
 
 #[test]
@@ -12,9 +12,13 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
         panic!("Output permutation already exists in the filesystem.")
     }
 
-    let config = Config::CreatePermutation {
-        image_dimensions: ImageDimensions::new(3, 4)?,
-        permutation_output_path_no_extension: path,
+    let config = Config {
+        algorithm: AlgorithmConfig::CreatePermutation {
+            permutation_output_path_no_extension: PermutationPath(path),
+        },
+        dispatcher: compute::Config {
+            image_dimensions: ImageDimensions::new(3, 4)?,
+        },
     };
     cli::run(config)?;
 

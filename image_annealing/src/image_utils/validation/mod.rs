@@ -1,11 +1,14 @@
 use super::manipulation;
-use super::ImageDimensions;
+use super::{ImageDimensions, ImageDimensionsHolder};
 use crate::compute::conversion::VectorFieldEntry;
-use crate::compute::format::{VectorFieldImageBuffer, VectorFieldImageBufferComponent};
+use crate::compute::format::{
+    ImageFileWriter, Rgba8Image, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
+};
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
 use std::ops::IndexMut;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Copy)]
 pub struct PermutationPixelData {
@@ -62,9 +65,9 @@ impl fmt::Display for PermutationFlaw {
 
 impl Error for PermutationFlaw {}
 
-pub struct CandidatePermutation(pub VectorFieldImageBuffer);
+pub type CandidatePermutation = Rgba8Image;
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidatedPermutation {
     data: VectorFieldImageBuffer,
     dimensions: ImageDimensions,
@@ -74,9 +77,11 @@ impl ValidatedPermutation {
     pub fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
         self.data.as_raw().as_slice()
     }
-    pub fn dimensions(&self) -> ImageDimensions {
-        self.dimensions
+
+    pub fn into_inner(self) -> VectorFieldImageBuffer {
+        self.data
     }
+
     pub fn inverse(&self) -> Self {
         Self {
             data: manipulation::invert_permutation(self),
@@ -88,6 +93,23 @@ impl ValidatedPermutation {
 impl AsRef<VectorFieldImageBuffer> for ValidatedPermutation {
     fn as_ref(&self) -> &VectorFieldImageBuffer {
         &self.data
+    }
+}
+
+impl ImageDimensionsHolder for ValidatedPermutation {
+    fn dimensions(&self) -> &ImageDimensions {
+        &self.dimensions
+    }
+}
+
+impl ImageFileWriter for ValidatedPermutation {
+    const EXTENSION: &'static str = <VectorFieldImageBuffer as ImageFileWriter>::EXTENSION;
+
+    fn save_add_extension<P: AsRef<Path>>(
+        &self,
+        path_no_extension: P,
+    ) -> Result<PathBuf, Box<dyn Error>> {
+        self.data.save_add_extension(path_no_extension)
     }
 }
 
@@ -144,7 +166,7 @@ pub(crate) fn validate_permutation(
     })
 }
 
-pub(crate) fn vector_field_into_validated_permutation(
+pub(crate) fn vector_field_into_validated_permutation_unchecked(
     vector_field: VectorFieldImageBuffer,
 ) -> ValidatedPermutation {
     let dimensions = ImageDimensions::from_image(&vector_field).unwrap();

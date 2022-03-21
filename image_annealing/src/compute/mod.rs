@@ -6,8 +6,7 @@ mod output;
 mod resource;
 mod system;
 
-pub use dispatch::create_dispatcher;
-pub use dispatch::Dispatcher;
+pub use dispatch::{create_dispatcher, Config, Dispatcher};
 pub use dispatch::{
     CreatePermutationAlgorithm, PermuteAlgorithm, SwapAlgorithm, ValidatePermutationAlgorithm,
 };
@@ -26,4 +25,3 @@ pub use output::conversion;
 pub use output::format;
 pub use output::Algorithm;
 pub use output::OutputStatus;
-pub use system::DimensionsMismatchError;

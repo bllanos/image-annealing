@@ -3,7 +3,7 @@ use std::error::Error;
 mod data;
 mod io;
 
-use data::Config;
+pub use data::{AlgorithmConfig, Config, DisplacementGoalPath, LosslessImagePath, PermutationPath};
 use io::parse_config_file;
 pub use io::FileNotFoundError;
 

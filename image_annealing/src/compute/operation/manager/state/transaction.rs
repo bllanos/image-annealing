@@ -1,4 +1,5 @@
 use super::super::super::super::link::swap::{CountSwapInputLayout, SwapPassSelection};
+use super::super::super::super::output::format::LosslessImage;
 use super::super::super::super::resource::manager::ResourceManager;
 use super::super::{PermuteOperationInput, SwapOperationInput};
 use super::data::ResourceStateFlags;
@@ -148,7 +149,7 @@ impl ResourceStateManager {
         commit_state: ResourceStateFlags,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
-        image: &Option<&'a image::DynamicImage>,
+        image: &Option<&'a LosslessImage>,
     ) -> Result<ResourceStateFlags, InsufficientInputError> {
         match image {
             Some(image) => {

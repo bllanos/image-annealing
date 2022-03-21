@@ -223,10 +223,82 @@ impl TryFrom<wgpu::Extent3d> for ImageDimensions {
     }
 }
 
+impl PartialEq<wgpu::Extent3d> for ImageDimensions {
+    fn eq(&self, other: &wgpu::Extent3d) -> bool {
+        Self::try_from(*other).map_or(false, |ref dimensions| self == dimensions)
+    }
+}
+
 impl fmt::Display for ImageDimensions {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "(width, height) = ({}, {})", self.width, self.height)
     }
+}
+
+pub trait ImageDimensionsHolder {
+    fn dimensions(&self) -> &ImageDimensions;
+}
+
+#[derive(Debug, Clone)]
+pub struct DimensionsMismatchError(ImageDimensions, ImageDimensions);
+
+impl DimensionsMismatchError {
+    pub fn new(first: ImageDimensions, second: ImageDimensions) -> Self {
+        Self(first, second)
+    }
+}
+
+impl fmt::Display for DimensionsMismatchError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "mismatch in image dimensions, {} and {}", self.0, self.1)
+    }
+}
+
+impl Error for DimensionsMismatchError {}
+
+pub(crate) fn check_dimensions_match2<'a, T: ImageDimensionsHolder, U: ImageDimensionsHolder>(
+    holder1: &'a T,
+    holder2: &'a U,
+) -> Result<&'a ImageDimensions, DimensionsMismatchError> {
+    let dimensions = holder1.dimensions();
+    if dimensions == holder2.dimensions() {
+        Ok(dimensions)
+    } else {
+        Err(DimensionsMismatchError::new(
+            *dimensions,
+            *holder2.dimensions(),
+        ))
+    }
+}
+
+pub(crate) fn check_dimensions_match3<
+    'a,
+    T: ImageDimensionsHolder,
+    U: ImageDimensionsHolder,
+    V: ImageDimensionsHolder,
+>(
+    holder1: &'a T,
+    holder2: &'a U,
+    holder3: &'a V,
+) -> Result<&'a ImageDimensions, DimensionsMismatchError> {
+    check_dimensions_match2(holder1, holder2)?;
+    check_dimensions_match2(holder1, holder3)
+}
+
+pub(crate) fn check_dimensions_match4<
+    'a,
+    T: ImageDimensionsHolder,
+    U: ImageDimensionsHolder,
+    V: ImageDimensionsHolder,
+    W: ImageDimensionsHolder,
+>(
+    holder1: &'a T,
+    holder2: &'a U,
+    holder3: &'a V,
+    holder4: &'a W,
+) -> Result<&'a ImageDimensions, DimensionsMismatchError> {
+    check_dimensions_match3(holder1, holder2, holder3)?;
+    check_dimensions_match2(holder1, holder4)
 }
 
 #[cfg(test)]

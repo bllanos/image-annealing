@@ -1,9 +1,9 @@
+use super::super::super::output::format::LosslessImage;
 use super::data::TextureData;
 use super::{Texture, TextureDatatype};
-use crate::ImageDimensions;
+use crate::{ImageDimensions, ImageDimensionsHolder};
 use core::num::NonZeroU32;
-use image::DynamicImage;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 
 pub struct LosslessImageTexture {}
 
@@ -59,32 +59,23 @@ impl LosslessImageInputTexture {
         ))
     }
 
-    pub fn load(&self, queue: &wgpu::Queue, image: &DynamicImage) {
-        let image_data = image.to_rgba16();
-        let (width, height) = image_data.dimensions();
+    pub fn load(&self, queue: &wgpu::Queue, image: &LosslessImage) {
+        let image_dimensions = image.dimensions();
         let own_dimensions = self.dimensions();
-        assert!(width == own_dimensions.width && height == own_dimensions.height);
-
-        let mut texture_data = Vec::with_capacity((width * height).try_into().unwrap());
-        image_data.enumerate_pixels().for_each(|(.., px)| {
-            texture_data.push(px[0] as <LosslessImageTexture as TextureDatatype>::Component);
-            texture_data.push(px[1] as <LosslessImageTexture as TextureDatatype>::Component);
-            texture_data.push(px[2] as <LosslessImageTexture as TextureDatatype>::Component);
-            texture_data.push(px[3] as <LosslessImageTexture as TextureDatatype>::Component);
-        });
+        assert_eq!(image_dimensions, &own_dimensions);
 
         queue.write_texture(
             self.copy_view(),
-            bytemuck::cast_slice(texture_data.as_slice()),
+            image.to_texture_data().as_slice(),
             wgpu::ImageDataLayout {
                 offset: 0,
                 bytes_per_row: NonZeroU32::new(
                     (<LosslessImageTexture as TextureDatatype>::PIXEL_SIZE
-                        * <usize as TryFrom<u32>>::try_from(width).unwrap())
+                        * image_dimensions.width())
                     .try_into()
                     .unwrap(),
                 ),
-                rows_per_image: NonZeroU32::new(height),
+                rows_per_image: NonZeroU32::new(own_dimensions.height),
             },
             own_dimensions,
         );

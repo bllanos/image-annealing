@@ -1,11 +1,12 @@
 use super::super::super::link::swap::SwapPass;
+use super::super::super::output::format::LosslessImage;
 use crate::{DisplacementGoal, ValidatedPermutation};
 use std::default::Default;
 
 #[derive(Default)]
 pub struct PermuteOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
-    pub image: Option<&'a image::DynamicImage>,
+    pub image: Option<&'a LosslessImage>,
 }
 
 pub struct SwapOperationInput<'a> {

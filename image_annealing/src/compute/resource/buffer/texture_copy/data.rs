@@ -1,7 +1,7 @@
 use super::super::super::texture::{Texture, TEXTURE_ARRAY_LAYERS};
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
-use super::super::map::MappedBuffer;
+use super::super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
 use crate::ImageDimensions;
 use std::convert::TryInto;
 use std::num::NonZeroU32;
@@ -56,12 +56,16 @@ impl TextureCopyBufferData {
         }
     }
 
-    pub fn request_map_read<T>(
+    pub fn request_chunked_map_read<T>(
         &self,
         output_chunk_size: usize,
         output_chunk_mapper: fn(&[u8]) -> T,
-    ) -> MappedBuffer<T> {
+    ) -> ChunkedMappedBuffer<T> {
         self.0
-            .request_map_read(output_chunk_size, output_chunk_mapper)
+            .request_chunked_map_read(output_chunk_size, output_chunk_mapper)
+    }
+
+    pub fn request_plain_map_read(&self) -> PlainMappedBuffer {
+        self.0.request_plain_map_read()
     }
 }

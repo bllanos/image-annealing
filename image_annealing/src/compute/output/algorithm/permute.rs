@@ -1,27 +1,30 @@
-use super::super::super::system::{DimensionsMismatchError, PermuteOperationInput, System};
-use super::super::format::LosslessImageBuffer;
+use super::super::super::system::{PermuteOperationInput, System};
+use super::super::format::{ImageFormat, ImageFormatError, LosslessImage};
 use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
-use crate::{CandidatePermutation, ImageDimensions, ValidatedPermutation};
-use image::DynamicImage;
+use crate::image_utils::check_dimensions_match2;
+use crate::{CandidatePermutation, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
 
-pub struct PermuteParameters {}
+#[derive(Default)]
+pub struct PermuteParameters {
+    pub permuted_image_format: Option<ImageFormat>,
+}
 
 #[derive(Default)]
 pub struct PermuteInput {
     pub candidate_permutation: Option<CandidatePermutation>,
-    pub original_image: Option<DynamicImage>,
+    pub original_image: Option<LosslessImage>,
 }
 
 pub struct PermuteOutput {
     pub permutation: Option<ValidatedPermutation>,
-    pub original_image: Option<DynamicImage>,
-    pub permuted_image: LosslessImageBuffer,
+    pub original_image: Option<LosslessImage>,
+    pub permuted_image: LosslessImage,
 }
 
 pub struct Permute {
@@ -29,11 +32,12 @@ pub struct Permute {
     input: PermuteInput,
     validator: Option<ValidatePermutation>,
     permutation: Option<ValidatedPermutation>,
+    permuted_image_format: Option<ImageFormat>,
     has_given_output: bool,
 }
 
 impl Permute {
-    pub fn new(mut input: PermuteInput, _parameters: PermuteParameters) -> Self {
+    pub fn new(mut input: PermuteInput, parameters: PermuteParameters) -> Self {
         let validator = input.candidate_permutation.take().map(|permutation| {
             ValidatePermutation::new(
                 ValidatePermutationInput {
@@ -47,6 +51,7 @@ impl Permute {
             input,
             validator,
             permutation: None,
+            permuted_image_format: parameters.permuted_image_format,
             has_given_output: false,
         }
     }
@@ -96,13 +101,29 @@ impl CompletionStatusHolder for Permute {
             }
             None => {
                 let image_option = self.input.original_image.take();
-                if let Some(ref image) = image_option {
-                    let dimensions = ImageDimensions::from_image(image)?;
-                    if *system.image_dimensions() != dimensions {
-                        return Err(Box::new(DimensionsMismatchError::new(
-                            *system.image_dimensions(),
-                            dimensions,
-                        )));
+                match image_option {
+                    Some(ref image) => {
+                        check_dimensions_match2(system, image)?;
+                        let input_format = image.format();
+                        match self.permuted_image_format {
+                            Some(format) => {
+                                if format != input_format {
+                                    return Err(Box::new(ImageFormatError::Mismatch {
+                                        image_name: String::from("input permutation"),
+                                        input_format,
+                                        output_format: format,
+                                    }));
+                                }
+                            }
+                            None => self.permuted_image_format = Some(input_format),
+                        }
+                    }
+                    None => {
+                        if self.permuted_image_format.is_none() {
+                            return Err(Box::new(ImageFormatError::Missing {
+                                image_name: String::from("output permutation"),
+                            }));
+                        }
                     }
                 }
 
@@ -128,7 +149,7 @@ impl FinalOutputHolder<PermuteOutput> for Permute {
 
     fn unchecked_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
         system
-            .output_permuted_image()
+            .output_permuted_image(self.permuted_image_format.unwrap())
             .ok()
             .map(|permuted_image| PermuteOutput {
                 permutation: self.permutation.take(),

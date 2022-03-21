@@ -1,10 +1,11 @@
-use super::super::super::system::{DimensionsMismatchError, SwapOperationInput, System};
+use super::super::super::system::{SwapOperationInput, System};
 use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
 };
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
-use crate::{CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation};
+use crate::image_utils::check_dimensions_match2;
+use crate::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
 use std::default::Default;
 use std::error::Error;
 use std::fmt;
@@ -170,14 +171,7 @@ impl CompletionStatusHolder for Swap {
                 Some(pass) => {
                     if self.is_first_pass {
                         if let Some(ref displacement_goal) = self.input_displacement_goal {
-                            let dimensions =
-                                ImageDimensions::from_image(displacement_goal.as_ref())?;
-                            if *system.image_dimensions() != dimensions {
-                                return Err(Box::new(DimensionsMismatchError::new(
-                                    *system.image_dimensions(),
-                                    dimensions,
-                                )));
-                            }
+                            check_dimensions_match2(system, displacement_goal)?;
                         }
 
                         system.operation_swap(&SwapOperationInput {

@@ -6,11 +6,12 @@ mod displacement_goal {
     use test_utils::permutation::{self, DimensionsAndPermutation};
 
     #[test]
-    fn from_vector_field() {
+    fn from_vector_field() -> Result<(), Box<dyn Error>> {
         let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
         let expected = permutation.clone();
-        let displacement_goal = DisplacementGoal::from_vector_field(permutation);
+        let displacement_goal = DisplacementGoal::from_vector_field(permutation)?;
         assert_eq!(*displacement_goal.as_ref(), expected);
+        Ok(())
     }
 
     #[test]
@@ -18,7 +19,7 @@ mod displacement_goal {
         let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
         let expected = validation::validate_permutation(permutation.clone())?.inverse();
         let displacement_goal =
-            DisplacementGoal::from_candidate_permutation(CandidatePermutation(permutation))?;
+            DisplacementGoal::from_candidate_permutation(CandidatePermutation::new(permutation)?)?;
         assert_eq!(displacement_goal.as_ref(), expected.as_ref());
         Ok(())
     }

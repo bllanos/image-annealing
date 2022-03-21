@@ -1,7 +1,9 @@
 mod parse_config_file {
-    use super::super::{parse_config_file, Config};
-    use crate::{CandidatePermutationPath, DisplacementGoalPath, ImagePath};
-    use image_annealing::ImageDimensions;
+    use super::super::super::{
+        AlgorithmConfig, Config, DisplacementGoalPath, LosslessImagePath, PermutationPath,
+    };
+    use super::super::parse_config_file;
+    use image_annealing::{compute, ImageDimensions};
     use std::error::Error;
 
     #[test]
@@ -19,9 +21,15 @@ mod parse_config_file {
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
-            Config::CreatePermutation {
-                image_dimensions: ImageDimensions::new(20, 25)?,
-                permutation_output_path_no_extension: String::from("permutation_out"),
+            Config {
+                algorithm: AlgorithmConfig::CreatePermutation {
+                    permutation_output_path_no_extension: PermutationPath(String::from(
+                        "permutation_out"
+                    )),
+                },
+                dispatcher: compute::Config {
+                    image_dimensions: ImageDimensions::new(20, 25)?
+                }
             }
         );
         Ok(())
@@ -41,22 +49,25 @@ mod parse_config_file {
     fn valid_permute_config_file() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_data_path(&["config", "permute", "valid.json"]);
         let r = parse_config_file(path)?;
+        let (candidate_permutation_path, image_dimensions) =
+            PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]))?;
         assert_eq!(
             r,
-            Config::Permute {
-                candidate_permutation: CandidatePermutationPath(
-                    test_utils::make_test_data_path_string(&[
-                        "image",
-                        "permutation",
-                        "identity_permutation.png"
-                    ])
-                ),
-                original_image: ImagePath(test_utils::make_test_data_path_string(&[
-                    "image",
-                    "image",
-                    "stripes.png"
-                ])),
-                permuted_image_output_path_no_extension: String::from("permuted_image_out"),
+            Config {
+                algorithm: AlgorithmConfig::Permute {
+                    candidate_permutation: candidate_permutation_path,
+                    original_image: LosslessImagePath::Rgba8(
+                        test_utils::make_test_data_path_string(&["image", "image", "stripes.png"])
+                    ),
+                    permuted_image_output_path_no_extension: LosslessImagePath::Rgba8(
+                        String::from("permuted_image_out")
+                    ),
+                },
+                dispatcher: compute::Config { image_dimensions }
             }
         );
         Ok(())
@@ -102,22 +113,29 @@ mod parse_config_file {
     fn valid_swap_config_file() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_data_path(&["config", "swap", "valid.json"]);
         let r = parse_config_file(path)?;
+        let (candidate_permutation_path, image_dimensions) =
+            PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]))?;
         assert_eq!(
             r,
-            Config::Swap {
-                candidate_permutation: CandidatePermutationPath(
-                    test_utils::make_test_data_path_string(&[
-                        "image",
-                        "permutation",
-                        "identity_permutation.png"
-                    ])
-                ),
-                displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                    "image",
-                    "displacement_goal",
-                    "identity_displacement_goal.png"
-                ])),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+            Config {
+                algorithm: AlgorithmConfig::Swap {
+                    candidate_permutation: candidate_permutation_path,
+                    displacement_goal: DisplacementGoalPath(
+                        test_utils::make_test_data_path_string(&[
+                            "image",
+                            "displacement_goal",
+                            "identity_displacement_goal.png"
+                        ])
+                    ),
+                    permutation_output_path_no_extension: PermutationPath(String::from(
+                        "permutation_out"
+                    )),
+                },
+                dispatcher: compute::Config { image_dimensions }
             }
         );
         Ok(())
@@ -163,16 +181,19 @@ mod parse_config_file {
         let path =
             test_utils::make_test_data_path(&["config", "validate_permutation", "valid.json"]);
         let r = parse_config_file(path)?;
+        let (candidate_permutation_path, image_dimensions) =
+            PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                "image",
+                "permutation",
+                "identity_permutation.png",
+            ]))?;
         assert_eq!(
             r,
-            Config::ValidatePermutation {
-                candidate_permutation: CandidatePermutationPath(
-                    test_utils::make_test_data_path_string(&[
-                        "image",
-                        "permutation",
-                        "identity_permutation.png"
-                    ])
-                ),
+            Config {
+                algorithm: AlgorithmConfig::ValidatePermutation {
+                    candidate_permutation: candidate_permutation_path
+                },
+                dispatcher: compute::Config { image_dimensions }
             }
         );
         Ok(())

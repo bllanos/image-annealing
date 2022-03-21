@@ -1,6 +1,6 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
-use super::super::map::{MappedBuffer, ReadMappableBuffer};
+use super::super::map::{ChunkedMappedBuffer, ChunkedReadMappableBuffer};
 use super::super::storage::CountSwapOutputStorageBuffer;
 use crate::compute::link::swap::CountSwapOutput;
 use crate::compute::operation::WorkgroupGridDimensions;
@@ -12,7 +12,7 @@ impl CountSwapOutputBuffer {
     pub fn new(device: &wgpu::Device) -> Self {
         let buffer_dimensions = BufferDimensions::new_buffer(
             WorkgroupGridDimensions::count_swap().count(),
-            <Self as ReadMappableBuffer>::Element::SIZE,
+            <Self as ChunkedReadMappableBuffer>::Element::SIZE,
         );
         Self(BufferData::create_output_buffer(
             device,
@@ -33,8 +33,8 @@ impl CountSwapOutputBuffer {
         );
     }
 
-    fn output_chunk_mapper(chunk: &[u8]) -> <Self as ReadMappableBuffer>::Element {
-        <Self as ReadMappableBuffer>::Element::from_ne_bytes(chunk.try_into().unwrap())
+    fn output_chunk_mapper(chunk: &[u8]) -> <Self as ChunkedReadMappableBuffer>::Element {
+        <Self as ChunkedReadMappableBuffer>::Element::from_ne_bytes(chunk.try_into().unwrap())
     }
 
     pub(in super::super) fn dimensions(&self) -> &BufferDimensions {
@@ -42,11 +42,11 @@ impl CountSwapOutputBuffer {
     }
 }
 
-impl<'a> ReadMappableBuffer<'a> for CountSwapOutputBuffer {
+impl<'a> ChunkedReadMappableBuffer<'a> for CountSwapOutputBuffer {
     type Element = CountSwapOutput;
 
-    fn request_map_read(&'a self) -> MappedBuffer<'a, Self::Element> {
+    fn request_map_read(&'a self) -> ChunkedMappedBuffer<'a, Self::Element> {
         self.0
-            .request_map_read(Self::Element::SIZE, Self::output_chunk_mapper)
+            .request_chunked_map_read(Self::Element::SIZE, Self::output_chunk_mapper)
     }
 }

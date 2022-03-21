@@ -20,13 +20,14 @@ mod output_permutation {
 }
 
 mod output_permuted_image {
+    use super::super::super::output::format::ImageFormat;
     use std::error::Error;
 
     #[test]
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
-            system.output_permuted_image(),
+            system.output_permuted_image(ImageFormat::Rgba8),
             "an output image does not exist or has been invalidated",
         );
         Ok(())

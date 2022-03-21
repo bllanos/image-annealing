@@ -1,8 +1,8 @@
-use super::super::super::system::{DimensionsMismatchError, System};
+use super::super::super::system::System;
 use super::super::OutputStatus;
 use super::{CompletionStatus, CompletionStatusHolder};
+use crate::image_utils::check_dimensions_match2;
 use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
-use crate::ImageDimensions;
 use std::error::Error;
 
 pub struct ValidatePermutationParameters {}
@@ -65,16 +65,11 @@ impl CompletionStatusHolder for ValidatePermutation {
         let ValidatePermutationInput {
             candidate_permutation,
         } = self.input.take().unwrap();
-        let dimensions = ImageDimensions::from_image(&candidate_permutation.0)?;
-        if *system.image_dimensions() == dimensions {
-            self.full_output = Some(validation::validate_permutation(candidate_permutation.0)?);
-            self.completion_status = CompletionStatus::Finished;
-            Ok(OutputStatus::FinalFullOutput)
-        } else {
-            Err(Box::new(DimensionsMismatchError::new(
-                *system.image_dimensions(),
-                dimensions,
-            )))
-        }
+        check_dimensions_match2(system, &candidate_permutation)?;
+        self.full_output = Some(validation::validate_permutation(
+            candidate_permutation.into_inner(),
+        )?);
+        self.completion_status = CompletionStatus::Finished;
+        Ok(OutputStatus::FinalFullOutput)
     }
 }
