@@ -25,7 +25,12 @@ pub fn permute<W: Write>(mut writer: W) -> std::io::Result<()> {
 }
 
 pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
+    let workgroup_dimensions = WorkgroupDimensions::swap();
+    type_definitions::swap(&mut writer)?;
     swap::bind_group(&mut writer)?;
+    constant::workgroup_invocations(&mut writer, workgroup_dimensions)?;
+    global::partial_scalar_sum(&mut writer)?;
+    function::workgroup::reduce_partial_sum(&mut writer, workgroup_dimensions.invocation_count())?;
     conversion::u16_to_i32(&mut writer)?;
     conversion::i32_to_u16(&mut writer)?;
     io::load_permutation_vector(&mut writer)?;
@@ -34,7 +39,7 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
     function::swap::potential_energy(&mut writer)?;
     function::swap::displacement_cost(&mut writer)?;
     function::swap::swap_cost(&mut writer)?;
-    compute::compute_shader_annotation(&mut writer, WorkgroupDimensions::swap())?;
+    compute::compute_shader_annotation(&mut writer, workgroup_dimensions)?;
     main::swap(&mut writer)
 }
 
@@ -43,8 +48,8 @@ pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
     type_definitions::count_swap(&mut writer)?;
     count_swap::bind_group(&mut writer)?;
     constant::count_swap::n_channel(&mut writer)?;
-    constant::count_swap::workgroup_invocations(&mut writer)?;
-    global::partial_sum(&mut writer)?;
+    constant::workgroup_invocations(&mut writer, workgroup_dimensions)?;
+    global::partial_vector_sum(&mut writer)?;
     function::workgroup::reduce_partial_sum(&mut writer, workgroup_dimensions.invocation_count())?;
     compute::compute_shader_annotation(&mut writer, workgroup_dimensions)?;
     main::count_swap(&mut writer)

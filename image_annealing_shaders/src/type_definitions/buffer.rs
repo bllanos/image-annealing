@@ -17,3 +17,12 @@ pub fn count_swap_output<W: Write>(mut writer: W) -> std::io::Result<()> {
 }};"
     )
 }
+
+pub fn swap_count_output<W: Write>(mut writer: W) -> std::io::Result<()> {
+    writeln!(
+        writer,
+        "struct CountOutput {{
+  arr: array<f32>;
+}};"
+    )
+}
