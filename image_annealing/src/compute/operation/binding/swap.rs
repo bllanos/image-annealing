@@ -1,4 +1,5 @@
 use super::super::super::link::swap::SwapPass;
+use super::super::super::resource::buffer::{BindableBuffer, InputBuffer, OutputBuffer};
 use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{
     DisplacementGoalInputTexture, PermutationInputTexture, PermutationOutputTexture, Texture,
@@ -16,13 +17,21 @@ pub struct SwapBinding {
 
 impl SwapBinding {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
+        let swap_parameters_buffer = resources.swap_parameters_buffer();
         let displacement_goal_input_texture = resources.displacement_goal_input_texture();
         let permutation_input_texture = resources.permutation_input_texture();
         let permutation_output_texture = resources.permutation_output_texture();
+        let count_swap_input_buffer = resources.count_swap_input_buffer();
 
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("swap_bind_group_layout"),
             entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: binding_constants::PARAMETERS_INDEX,
+                    visibility: wgpu::ShaderStages::COMPUTE,
+                    ty: swap_parameters_buffer.input_binding_description(),
+                    count: None,
+                },
                 wgpu::BindGroupLayoutEntry {
                     binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
@@ -41,6 +50,12 @@ impl SwapBinding {
                     ty: PermutationOutputTexture::binding_description(),
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: binding_constants::OUTPUT_COUNT_BUFFER_INDEX,
+                    visibility: wgpu::ShaderStages::COMPUTE,
+                    ty: count_swap_input_buffer.output_binding_description(),
+                    count: None,
+                },
             ],
         });
 
@@ -48,6 +63,10 @@ impl SwapBinding {
             label: Some("swap_bind_group"),
             layout: &layout,
             entries: &[
+                wgpu::BindGroupEntry {
+                    binding: binding_constants::PARAMETERS_INDEX,
+                    resource: swap_parameters_buffer.binding_resource(),
+                },
                 wgpu::BindGroupEntry {
                     binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
                     resource: wgpu::BindingResource::TextureView(
@@ -61,6 +80,10 @@ impl SwapBinding {
                 wgpu::BindGroupEntry {
                     binding: binding_constants::OUTPUT_PERMUTATION_INDEX,
                     resource: wgpu::BindingResource::TextureView(permutation_output_texture.view()),
+                },
+                wgpu::BindGroupEntry {
+                    binding: binding_constants::OUTPUT_COUNT_BUFFER_INDEX,
+                    resource: count_swap_input_buffer.binding_resource(),
                 },
             ],
         });

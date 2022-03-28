@@ -1,6 +1,7 @@
 use super::buffer::{
     CountSwapInputBuffer, CountSwapInputLayoutBuffer, CountSwapOutputBuffer,
     CountSwapOutputStorageBuffer, LosslessImageOutputBuffer, PermutationOutputBuffer,
+    SwapParametersBuffer,
 };
 use super::texture::{
     DisplacementGoalInputTexture, LosslessImageInputTexture, LosslessImageOutputTexture,
@@ -20,6 +21,7 @@ pub struct ResourceManager {
     lossless_image_input_texture: LosslessImageInputTexture,
     lossless_image_output_texture: LosslessImageOutputTexture,
     lossless_image_output_buffer: LosslessImageOutputBuffer,
+    swap_parameters_buffer: SwapParametersBuffer,
 }
 
 impl ResourceManager {
@@ -45,6 +47,7 @@ impl ResourceManager {
                 image_dimensions,
             ),
             lossless_image_output_buffer: LosslessImageOutputBuffer::new(device, image_dimensions),
+            swap_parameters_buffer: SwapParametersBuffer::new(device),
         }
     }
 
@@ -90,5 +93,9 @@ impl ResourceManager {
 
     pub fn lossless_image_output_buffer(&self) -> &LosslessImageOutputBuffer {
         &self.lossless_image_output_buffer
+    }
+
+    pub fn swap_parameters_buffer(&self) -> &SwapParametersBuffer {
+        &self.swap_parameters_buffer
     }
 }

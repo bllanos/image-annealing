@@ -171,9 +171,14 @@ impl CountSwapInputLayout {
         )
     }
 
-    pub fn set_selection(&mut self, selection: SwapPassSelection) {
-        self.do_segment =
-            SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
+    pub fn update_selection(&mut self, selection: SwapPassSelection) -> bool {
+        if self.get_selection() == selection {
+            false
+        } else {
+            self.do_segment =
+                SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
+            true
+        }
     }
 }
 
@@ -205,5 +210,25 @@ impl CountSwapOutput {
 
     pub fn at_pass(&self, pass: SwapPass) -> CountSwapOutputDataElement {
         self.0[pass as usize]
+    }
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Zeroable, Pod)]
+pub struct SwapShaderParameters {
+    count_output_offset: u32,
+    _padding: [u32; 3],
+}
+
+impl SwapShaderParameters {
+    pub fn new() -> Self {
+        Self {
+            count_output_offset: 0,
+            _padding: Default::default(),
+        }
+    }
+
+    pub fn set_pass(&mut self, pass: SwapPass, layout: &CountSwapInputLayout) {
+        self.count_output_offset = layout.segment_start[pass as usize];
     }
 }

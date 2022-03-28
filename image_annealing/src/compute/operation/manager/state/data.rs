@@ -72,11 +72,7 @@ impl ResourceStateFlags {
     }
 
     pub fn update_count_swap_pass_selection(&self, parameters: &mut CountSwapInputLayout) -> bool {
-        let changed = parameters.get_selection() == self.count_swap_pass_selection;
-        if changed {
-            parameters.set_selection(self.count_swap_pass_selection);
-        }
-        changed
+        parameters.update_selection(self.count_swap_pass_selection)
     }
 
     pub fn clear_output_count_swap(&self) -> Self {

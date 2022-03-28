@@ -11,7 +11,7 @@ pub use staging::CountSwapOutputBuffer;
 pub use storage::{CountSwapInputBuffer, CountSwapOutputStorageBuffer};
 pub use texture_copy::LosslessImageOutputBuffer;
 pub use texture_copy::PermutationOutputBuffer;
-pub use uniform::CountSwapInputLayoutBuffer;
+pub use uniform::{CountSwapInputLayoutBuffer, SwapParametersBuffer};
 
 pub trait BindableBuffer {
     fn binding_resource(&self) -> wgpu::BindingResource;

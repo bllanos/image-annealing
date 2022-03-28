@@ -1,4 +1,6 @@
-use super::super::super::super::link::swap::{CountSwapInputLayout, SwapPassSelection};
+use super::super::super::super::link::swap::{
+    CountSwapInputLayout, SwapPassSelection, SwapShaderParameters,
+};
 use super::super::super::super::output::format::LosslessImage;
 use super::super::super::super::resource::manager::ResourceManager;
 use super::super::{PermuteOperationInput, SwapOperationInput};
@@ -104,6 +106,7 @@ impl Drop for ResourceStateTransaction<'_> {
 pub struct ResourceStateManager {
     flags: ResourceStateFlags,
     count_swap_parameters: CountSwapInputLayout,
+    swap_parameters: SwapShaderParameters,
 }
 
 impl ResourceStateManager {
@@ -111,6 +114,7 @@ impl ResourceStateManager {
         Self {
             flags: ResourceStateFlags::new(),
             count_swap_parameters: CountSwapInputLayout::new(image_dimensions),
+            swap_parameters: SwapShaderParameters::new(),
         }
     }
 
@@ -269,6 +273,13 @@ impl ResourceStateManager {
         commit_state =
             self.input_displacement_goal(commit_state, resources, queue, &input.displacement_goal)?;
         commit_state = commit_state.finish_swap(input.pass);
+
+        self.swap_parameters
+            .set_pass(input.pass, &self.count_swap_parameters);
+        resources
+            .swap_parameters_buffer()
+            .load(queue, &self.swap_parameters);
+
         Ok(ResourceStateTransaction::new(
             self,
             rollback_state,
