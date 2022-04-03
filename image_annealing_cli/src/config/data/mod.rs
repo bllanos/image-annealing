@@ -1,12 +1,23 @@
 use image_annealing::{compute, DimensionsMismatchError, ImageDimensions};
 use serde::Deserialize;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 
 mod filepath;
+mod number;
+mod parameters;
 
 pub use filepath::{
     DisplacementGoalPath, LosslessImagePath, PermutationPath, UnverifiedLosslessImagePath,
+};
+pub use number::{
+    InvalidNonnegativeProperFractionError, InvalidNonnegativeRationalNumberError,
+    NonnegativeProperFraction, NonnegativeRationalNumber,
+};
+pub use parameters::{
+    InvalidIterationCountError, IterationCount, SwapParametersConfig, SwapStopConfig,
+    SwapStopThreshold, UnverifiedIterationCount, UnverifiedSwapParametersConfig,
+    UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
 };
 
 fn check_dimensions_match2<'a>(
@@ -39,6 +50,7 @@ pub enum UnverifiedConfig {
         candidate_permutation: String,
         displacement_goal: String,
         permutation_output_path_no_extension: String,
+        parameters: UnverifiedSwapParametersConfig,
     },
     ValidatePermutation {
         candidate_permutation: String,
@@ -59,6 +71,7 @@ pub enum AlgorithmConfig {
         candidate_permutation: PermutationPath,
         displacement_goal: DisplacementGoalPath,
         permutation_output_path_no_extension: PermutationPath,
+        parameters: SwapParametersConfig,
     },
     ValidatePermutation {
         candidate_permutation: PermutationPath,
@@ -114,6 +127,7 @@ impl TryFrom<UnverifiedConfig> for Config {
                 candidate_permutation,
                 displacement_goal,
                 permutation_output_path_no_extension,
+                parameters,
             } => {
                 let (candidate_permutation_checked, permutation_dimensions) =
                     PermutationPath::from_input_path(candidate_permutation)?;
@@ -127,6 +141,7 @@ impl TryFrom<UnverifiedConfig> for Config {
                         permutation_output_path_no_extension: PermutationPath::from_output_path(
                             permutation_output_path_no_extension,
                         ),
+                        parameters: parameters.try_into()?,
                     },
                     permutation_dimensions,
                 )
