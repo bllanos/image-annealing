@@ -3,6 +3,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
+use std::num::NonZeroUsize;
 use std::path::Path;
 
 #[derive(Debug, Clone)]
@@ -97,8 +98,8 @@ impl<T> Error for OutOfBoundsCoordinatesError<T> where
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub struct ImageDimensions {
-    width: usize,
-    height: usize,
+    width: NonZeroUsize,
+    height: NonZeroUsize,
 }
 
 impl ImageDimensions {
@@ -114,16 +115,10 @@ impl ImageDimensions {
         let height_usize = height
             .try_into()
             .map_err(|_| InvalidDimensionError::InvalidNumberType(height))?;
-        if width_usize == 0 {
-            Err(InvalidDimensionError::ZeroWidth)
-        } else if height_usize == 0 {
-            Err(InvalidDimensionError::ZeroHeight)
-        } else {
-            Ok(ImageDimensions {
-                width: width_usize,
-                height: height_usize,
-            })
-        }
+        Ok(ImageDimensions {
+            width: NonZeroUsize::new(width_usize).ok_or(InvalidDimensionError::ZeroWidth)?,
+            height: NonZeroUsize::new(height_usize).ok_or(InvalidDimensionError::ZeroHeight)?,
+        })
     }
 
     pub fn from_image<T>(image: &T) -> Result<Self, InvalidDimensionError<u32>>
@@ -140,15 +135,15 @@ impl ImageDimensions {
     }
 
     pub fn width(&self) -> usize {
-        self.width
+        self.width.get()
     }
 
     pub fn height(&self) -> usize {
-        self.height
+        self.height.get()
     }
 
     pub fn count(&self) -> usize {
-        self.width.checked_mul(self.height).unwrap()
+        self.width().checked_mul(self.height.get()).unwrap()
     }
 
     pub fn make_linear_index<T>(&self, x: T, y: T) -> Result<usize, OutOfBoundsCoordinatesError<T>>
@@ -161,19 +156,19 @@ impl ImageDimensions {
         let y_usize = y
             .try_into()
             .map_err(|_| OutOfBoundsCoordinatesError::InvalidNumberType(y))?;
-        if x_usize >= self.width {
+        if x_usize >= self.width() {
             Err(OutOfBoundsCoordinatesError::OutOfBoundX(ValueOutOfBounds {
                 value: x_usize,
                 bounds: *self,
             }))
-        } else if y_usize >= self.height {
+        } else if y_usize >= self.height() {
             Err(OutOfBoundsCoordinatesError::OutOfBoundY(ValueOutOfBounds {
                 value: y_usize,
                 bounds: *self,
             }))
         } else {
             Ok(y_usize
-                .checked_mul(self.width)
+                .checked_mul(self.width())
                 .unwrap()
                 .checked_add(x_usize)
                 .unwrap())
@@ -204,8 +199,8 @@ impl ImageDimensions {
 
     pub fn to_extent(&self) -> wgpu::Extent3d {
         wgpu::Extent3d {
-            width: self.width.try_into().unwrap(),
-            height: self.height.try_into().unwrap(),
+            width: self.width().try_into().unwrap(),
+            height: self.height().try_into().unwrap(),
             depth_or_array_layers: Self::DEPTH.try_into().unwrap(),
         }
     }
