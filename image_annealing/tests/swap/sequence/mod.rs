@@ -25,7 +25,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
         image_dimensions: dimensions,
     })?;
     let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
+        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -35,7 +35,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
             displacement_goal: Some(displacement_goal),
             ..Default::default()
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -74,7 +74,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -98,7 +98,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
             displacement_goal: Some(displacement_goal),
             ..Default::default()
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -138,7 +138,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -172,7 +172,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(other_permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -215,7 +215,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(intermediate_displacement_goal),
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -237,7 +237,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
     );
     dispatcher = algorithm.return_to_dispatcher();
 
-    algorithm = dispatcher.swap(Default::default(), swap_parameters.clone());
+    algorithm = dispatcher.swap(Default::default(), &swap_parameters);
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
     let output = algorithm.full_output().unwrap();

@@ -37,13 +37,13 @@ pub struct Permute {
 }
 
 impl Permute {
-    pub fn new(mut input: PermuteInput, parameters: PermuteParameters) -> Self {
+    pub fn new(mut input: PermuteInput, parameters: &PermuteParameters) -> Self {
         let validator = input.candidate_permutation.take().map(|permutation| {
             ValidatePermutation::new(
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
-                ValidatePermutationParameters {},
+                &ValidatePermutationParameters {},
             )
         });
         Self {

@@ -20,7 +20,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         ValidatePermutationInput {
             candidate_permutation: CandidatePermutation::new(permutation)?,
         },
-        ValidatePermutationParameters {},
+        &ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap().validated_permutation;
@@ -49,7 +49,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         ValidatePermutationInput {
             candidate_permutation: CandidatePermutation::new(invalid_image)?,
         },
-        ValidatePermutationParameters {},
+        &ValidatePermutationParameters {},
     );
     assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
 
@@ -58,7 +58,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         ValidatePermutationInput {
             candidate_permutation: CandidatePermutation::new(permutation)?,
         },
-        ValidatePermutationParameters {},
+        &ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap().validated_permutation;
@@ -82,7 +82,7 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
         ValidatePermutationInput {
             candidate_permutation: CandidatePermutation::new(permutation)?,
         },
-        ValidatePermutationParameters {},
+        &ValidatePermutationParameters {},
     );
     assert_step_until_error(
         algorithm.as_mut(),

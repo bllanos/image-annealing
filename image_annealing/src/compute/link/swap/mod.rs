@@ -5,6 +5,7 @@ use image_annealing_shaders::constant;
 use image_annealing_shaders::WorkgroupDimensions;
 use std::convert::TryFrom;
 use std::convert::TryInto;
+use std::fmt;
 use std::num::NonZeroU32;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -80,6 +81,17 @@ impl SwapPass {
         SwapPass::OffsetHorizontal,
         SwapPass::OffsetVertical,
     ];
+}
+
+impl fmt::Display for SwapPass {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Horizontal => write!(f, "horizontal swaps, no offset"),
+            Self::Vertical => write!(f, "vertical swaps, no offset"),
+            Self::OffsetHorizontal => write!(f, "horizontal swaps, with offset"),
+            Self::OffsetVertical => write!(f, "vertical swaps, with offset"),
+        }
+    }
 }
 
 bitflags::bitflags! {

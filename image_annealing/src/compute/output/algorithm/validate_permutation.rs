@@ -24,7 +24,7 @@ pub struct ValidatePermutation {
 impl ValidatePermutation {
     pub fn new(
         input: ValidatePermutationInput,
-        _parameters: ValidatePermutationParameters,
+        _parameters: &ValidatePermutationParameters,
     ) -> Self {
         Self {
             completion_status: CompletionStatus::new(),

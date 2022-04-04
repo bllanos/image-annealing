@@ -17,6 +17,20 @@ pub enum OutputStatus {
     FinalPartialAndFullOutput,
 }
 
+impl OutputStatus {
+    pub fn is_final(&self) -> bool {
+        match self {
+            OutputStatus::NoNewOutput
+            | Self::NewFullOutput
+            | Self::NewPartialOutput
+            | Self::NewPartialAndFullOutput => false,
+            Self::FinalPartialOutput | Self::FinalFullOutput | Self::FinalPartialAndFullOutput => {
+                true
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 struct AlreadyFailedError;
 
@@ -54,5 +68,13 @@ pub trait Algorithm<PartialOutput, FullOutput> {
     fn step_until(&mut self, status: OutputStatus) -> Result<(), Box<dyn Error>> {
         while self.step()? != status {}
         Ok(())
+    }
+
+    fn step_until_finished(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
+        let mut status = self.step()?;
+        while !status.is_final() {
+            status = self.step()?;
+        }
+        Ok(status)
     }
 }

@@ -3,7 +3,12 @@ use std::error::Error;
 mod data;
 mod io;
 
-pub use data::{AlgorithmConfig, Config, DisplacementGoalPath, LosslessImagePath, PermutationPath};
+pub use data::{
+    AlgorithmConfig, Config, DisplacementGoalPath, InvalidIterationCountError, IterationCount,
+    LosslessImagePath, PermutationPath, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
+    UnverifiedIterationCount, UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig,
+    UnverifiedSwapStopThreshold,
+};
 use io::parse_config_file;
 pub use io::FileNotFoundError;
 

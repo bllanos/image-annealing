@@ -31,7 +31,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -70,7 +70,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(invalid_permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalFullOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
 
@@ -80,7 +80,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output().unwrap();
@@ -110,7 +110,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(image),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -140,7 +140,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(image),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -170,7 +170,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -191,7 +191,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
         image_dimensions: dimensions,
     })?;
     let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, CreatePermutationParameters {});
+        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -204,7 +204,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
             original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -238,7 +238,7 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
             displacement_goal: Some(displacement_goal),
         },
-        swap_parameters.clone(),
+        &swap_parameters,
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -267,7 +267,7 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
             original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -300,7 +300,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -326,7 +326,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
             ..Default::default()
         },
-        PermuteParameters {
+        &PermuteParameters {
             permuted_image_format: Some(ImageFormat::Rgba16),
         },
     );
@@ -364,7 +364,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -388,7 +388,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
             original_image: Some(original_lossless_image.clone()),
             ..Default::default()
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -422,7 +422,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -450,7 +450,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -481,7 +481,7 @@ fn forget_permutation() -> Result<(), Box<dyn Error>> {
             original_image: Some(original_lossless_image),
             ..Default::default()
         },
-        Default::default(),
+        &Default::default(),
     );
     assert_step_until_error(
         algorithm.as_mut(),
@@ -507,7 +507,7 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             ..Default::default()
         },
-        PermuteParameters {
+        &PermuteParameters {
             permuted_image_format: Some(ImageFormat::Rgba16),
         },
     );

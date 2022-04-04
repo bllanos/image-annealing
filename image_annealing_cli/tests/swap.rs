@@ -1,7 +1,10 @@
 use image_annealing::compute;
 use image_annealing::compute::format::{ImageFileWriter, VectorFieldImageBuffer};
 use image_annealing_cli::cli;
-use image_annealing_cli::config::{AlgorithmConfig, Config, DisplacementGoalPath, PermutationPath};
+use image_annealing_cli::config::{
+    AlgorithmConfig, Config, DisplacementGoalPath, PermutationPath, SwapParametersConfig,
+    SwapStopConfig, SwapStopThreshold,
+};
 use std::error::Error;
 
 #[test]
@@ -27,6 +30,9 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
                 "identity_displacement_goal.png",
             ])),
             permutation_output_path_no_extension: PermutationPath(path),
+            parameters: SwapParametersConfig {
+                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+            },
         },
         dispatcher: compute::Config { image_dimensions },
     };
@@ -59,6 +65,9 @@ fn swap_invalid() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath(
                 test_utils::make_test_output_path_string(&["cli_swap_invalid"]),
             ),
+            parameters: SwapParametersConfig {
+                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+            },
         },
         dispatcher: compute::Config { image_dimensions },
     };

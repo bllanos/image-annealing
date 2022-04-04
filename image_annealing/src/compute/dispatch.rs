@@ -33,18 +33,18 @@ pub trait Dispatcher {
     fn create_permutation(
         self: Box<Self>,
         input: CreatePermutationInput,
-        parameters: CreatePermutationParameters,
+        parameters: &CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm>;
     fn permute(
         self: Box<Self>,
         input: PermuteInput,
-        parameters: PermuteParameters,
+        parameters: &PermuteParameters,
     ) -> Box<PermuteAlgorithm>;
-    fn swap(self: Box<Self>, input: SwapInput, parameters: SwapParameters) -> Box<SwapAlgorithm>;
+    fn swap(self: Box<Self>, input: SwapInput, parameters: &SwapParameters) -> Box<SwapAlgorithm>;
     fn validate_permutation(
         self: Box<Self>,
         input: ValidatePermutationInput,
-        parameters: ValidatePermutationParameters,
+        parameters: &ValidatePermutationParameters,
     ) -> Box<ValidatePermutationAlgorithm>;
 }
 
@@ -130,7 +130,7 @@ impl Dispatcher for DispatcherImplementation {
     fn create_permutation(
         mut self: Box<Self>,
         input: CreatePermutationInput,
-        parameters: CreatePermutationParameters,
+        parameters: &CreatePermutationParameters,
     ) -> Box<CreatePermutationAlgorithm> {
         self.algorithm =
             AlgorithmChoice::CreatePermutation(CreatePermutation::new(input, parameters));
@@ -140,7 +140,7 @@ impl Dispatcher for DispatcherImplementation {
     fn permute(
         mut self: Box<Self>,
         input: PermuteInput,
-        parameters: PermuteParameters,
+        parameters: &PermuteParameters,
     ) -> Box<PermuteAlgorithm> {
         self.algorithm = AlgorithmChoice::Permute(Permute::new(input, parameters));
         self
@@ -149,7 +149,7 @@ impl Dispatcher for DispatcherImplementation {
     fn swap(
         mut self: Box<Self>,
         input: SwapInput,
-        parameters: SwapParameters,
+        parameters: &SwapParameters,
     ) -> Box<SwapAlgorithm> {
         self.algorithm = AlgorithmChoice::Swap(Swap::new(input, parameters));
         self
@@ -158,7 +158,7 @@ impl Dispatcher for DispatcherImplementation {
     fn validate_permutation(
         mut self: Box<Self>,
         input: ValidatePermutationInput,
-        parameters: ValidatePermutationParameters,
+        parameters: &ValidatePermutationParameters,
     ) -> Box<ValidatePermutationAlgorithm> {
         self.algorithm =
             AlgorithmChoice::ValidatePermutation(ValidatePermutation::new(input, parameters));

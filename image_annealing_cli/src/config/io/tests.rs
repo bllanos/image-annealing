@@ -1,6 +1,7 @@
 mod parse_config_file {
     use super::super::super::{
         AlgorithmConfig, Config, DisplacementGoalPath, LosslessImagePath, PermutationPath,
+        SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
     };
     use super::super::parse_config_file;
     use image_annealing::{compute, ImageDimensions};
@@ -134,6 +135,9 @@ mod parse_config_file {
                     permutation_output_path_no_extension: PermutationPath(String::from(
                         "permutation_out"
                     )),
+                    parameters: SwapParametersConfig {
+                        stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0))
+                    }
                 },
                 dispatcher: compute::Config { image_dimensions }
             }

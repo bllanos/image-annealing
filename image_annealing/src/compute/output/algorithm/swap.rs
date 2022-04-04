@@ -101,13 +101,13 @@ pub struct Swap {
 }
 
 impl Swap {
-    pub fn new(mut input: SwapInput, parameters: SwapParameters) -> Self {
+    pub fn new(mut input: SwapInput, parameters: &SwapParameters) -> Self {
         let validator = input.candidate_permutation.take().map(|permutation| {
             ValidatePermutation::new(
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
-                ValidatePermutationParameters {},
+                &ValidatePermutationParameters {},
             )
         });
         Self {

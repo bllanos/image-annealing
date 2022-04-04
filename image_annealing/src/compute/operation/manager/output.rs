@@ -2,6 +2,7 @@ use super::super::super::link::swap::{
     CountSwapOutput, CountSwapOutputDataElement, SwapPass, SwapPassSelection,
 };
 use crate::ImageDimensions;
+use std::fmt;
 
 struct SwapRatio {
     total: usize,
@@ -38,6 +39,18 @@ impl SwapRatio {
     }
 }
 
+impl fmt::Display for SwapRatio {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{} / {} ({:.2}%) swaps accepted",
+            self.accepted(),
+            self.total(),
+            self.accepted_fraction() * 100.0
+        )
+    }
+}
+
 pub struct CountSwapOperationOutputPass {
     pass: SwapPass,
     swap_ratio: SwapRatio,
@@ -62,6 +75,12 @@ impl CountSwapOperationOutputPass {
 
     pub fn accepted(&self) -> usize {
         self.swap_ratio.accepted()
+    }
+}
+
+impl fmt::Display for CountSwapOperationOutputPass {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "pass: {}, result: {}", self.pass, self.swap_ratio)
     }
 }
 
@@ -119,5 +138,15 @@ impl CountSwapOperationOutput {
 
     pub fn accepted(&self) -> usize {
         self.combined_swap_ratio.accepted()
+    }
+}
+
+impl fmt::Display for CountSwapOperationOutput {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "all passes: {}", self.combined_swap_ratio)?;
+        for pass in self.passes.iter() {
+            writeln!(f, "\t{}", pass)?;
+        }
+        fmt::Result::Ok(())
     }
 }
