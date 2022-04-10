@@ -1,7 +1,0 @@
-{
-  "Permute": {
-    "candidate_permutation": "../test_data/image/permutation/identity_permutation.png",
-    "original_image": "../test_data/image/image/radial_gradient_rg.png",
-    "permuted_image_output_path_no_extension": "permuted_image_out"
-  }
-}
