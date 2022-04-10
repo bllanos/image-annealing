@@ -6,8 +6,8 @@ mod io;
 pub use data::{
     AlgorithmConfig, Config, DisplacementGoalPath, InvalidIterationCountError, IterationCount,
     LosslessImagePath, PermutationPath, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-    UnverifiedIterationCount, UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig,
-    UnverifiedSwapStopThreshold,
+    UnverifiedConfig, UnverifiedIterationCount, UnverifiedSwapParametersConfig,
+    UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
 };
 use io::parse_config_file;
 pub use io::FileNotFoundError;
@@ -26,6 +26,5 @@ where
     parse_config_file(&filename)
 }
 
-// The module could also be implemented in this file
 #[cfg(test)]
 mod tests;

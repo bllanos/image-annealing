@@ -165,3 +165,6 @@ impl TryFrom<UnverifiedConfig> for Config {
         })
     }
 }
+
+#[cfg(test)]
+mod tests;

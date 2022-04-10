@@ -60,6 +60,5 @@ pub fn convert_and_check_input_path(filepath: String) -> Result<String, FileNotF
     Ok(new_path)
 }
 
-// The module could also be implemented in this file
 #[cfg(test)]
 mod tests;
