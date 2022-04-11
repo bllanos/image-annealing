@@ -9,7 +9,7 @@ pub fn reduce_partial_sum<W: Write>(mut writer: W, n_elements: u32) -> std::io::
   // Note: Synchronization operations must only be executed in uniform control flow"
     )?;
     let mut i = n_elements / 2u32;
-    while i > 1 {
+    while i > 0 {
         writeln!(
             writer,
             "  if (id < {i}u) {{
