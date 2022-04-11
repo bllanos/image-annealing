@@ -47,7 +47,7 @@ where
         algorithm.partial_output(),
         &swap_parameters,
         &dimensions,
-        if accept_swap {
+        if accept_swap && expected_permutation != permutation {
             SwapAcceptedCount::All
         } else {
             SwapAcceptedCount::None

@@ -245,7 +245,7 @@ mod config_try_from_unverified_config {
         let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
         test_utils::assert_error_contains(
             r,
-            "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
+            "mismatch in image dimensions, (width, height) = (20, 25) and (width, height) = (21, 25)",
         );
     }
 

@@ -91,37 +91,46 @@ fn run_and_save(
                 let mut algorithm = algorithm_option.take().unwrap();
                 algorithm.step_until_finished()?;
 
+                let mut stop = false;
+
                 if let Some(count) = iteration_count {
                     if threshold.is_none() {
                         println!("Texel swap round {}", i);
                     }
                     if i == count.get() {
-                        break;
+                        stop = true;
                     }
                 }
 
-                if let Some(threshold_variant) = threshold {
-                    let SwapPartialOutput {
-                        counts: swap_counts,
-                    } = algorithm.partial_output().unwrap();
-                    println!("Texel swap round {}, {}", i, swap_counts);
-                    match threshold_variant {
-                        SwapStopThreshold::SwapsAccepted(number_of_swaps) => {
-                            if swap_counts.accepted() <= *number_of_swaps {
-                                break;
+                if !stop {
+                    if let Some(threshold_variant) = threshold {
+                        let SwapPartialOutput {
+                            counts: swap_counts,
+                        } = algorithm.partial_output().unwrap();
+                        println!("Texel swap round {}, {}", i, swap_counts);
+                        match threshold_variant {
+                            SwapStopThreshold::SwapsAccepted(number_of_swaps) => {
+                                if swap_counts.accepted() <= *number_of_swaps {
+                                    stop = true;
+                                }
                             }
-                        }
-                        SwapStopThreshold::SwapAcceptanceFraction(fraction_of_swaps) => {
-                            if swap_counts.accepted_fraction() <= fraction_of_swaps.get() {
-                                break;
+                            SwapStopThreshold::SwapAcceptanceFraction(fraction_of_swaps) => {
+                                if swap_counts.accepted_fraction() <= fraction_of_swaps.get() {
+                                    stop = true;
+                                }
                             }
                         }
                     }
                 }
 
-                let dispatcher = algorithm.return_to_dispatcher();
-                algorithm_option = Some(dispatcher.swap(Default::default(), &swap_parameters));
-                i += 1;
+                if stop {
+                    algorithm_option = Some(algorithm);
+                    break;
+                } else {
+                    let dispatcher = algorithm.return_to_dispatcher();
+                    algorithm_option = Some(dispatcher.swap(Default::default(), &swap_parameters));
+                    i += 1;
+                }
             }
             let permutation = algorithm_option
                 .unwrap()
