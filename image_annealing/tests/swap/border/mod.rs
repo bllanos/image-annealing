@@ -6,7 +6,7 @@ use test_utils::algorithm::assert_step_until_success;
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
 use test_utils::permutation::DimensionsAndPermutation;
 
-fn dimensions_wxh<T>(width: T, height: T, accept_swap: bool) -> Result<(), Box<dyn Error>>
+pub fn dimensions_wxh<T>(width: T, height: T, accept_swap: bool) -> Result<(), Box<dyn Error>>
 where
     T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
 {
