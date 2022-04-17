@@ -1,7 +1,7 @@
 use super::super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::{
     ImageFileReader, ImageFileWriter, Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent,
-    Rgba8Image,
+    Rgba8Image, VectorFieldImageBuffer,
 };
 use crate::image_utils::{
     check_dimensions_match2, check_dimensions_match3, check_dimensions_match4,
@@ -61,6 +61,14 @@ impl Rgba8x2Image {
             image::RgbaImage::from_vec(width, height, image_data.1).unwrap(),
         )
         .unwrap()
+    }
+
+    pub fn first_inner(&self) -> &VectorFieldImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &VectorFieldImageBuffer {
+        self.1.as_ref()
     }
 }
 
@@ -134,6 +142,18 @@ impl Rgba8x3Image {
             image::RgbaImage::from_vec(width, height, image_data.1 .1).unwrap(),
         )
         .unwrap()
+    }
+
+    pub fn first_inner(&self) -> &VectorFieldImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &VectorFieldImageBuffer {
+        self.1.as_ref()
+    }
+
+    pub fn third_inner(&self) -> &VectorFieldImageBuffer {
+        self.2.as_ref()
     }
 }
 
@@ -232,6 +252,22 @@ impl Rgba8x4Image {
         )
         .unwrap()
     }
+
+    pub fn first_inner(&self) -> &VectorFieldImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &VectorFieldImageBuffer {
+        self.1.as_ref()
+    }
+
+    pub fn third_inner(&self) -> &VectorFieldImageBuffer {
+        self.2.as_ref()
+    }
+
+    pub fn fourth_inner(&self) -> &VectorFieldImageBuffer {
+        self.3.as_ref()
+    }
 }
 
 impl ImageDimensionsHolder for Rgba8x4Image {
@@ -307,6 +343,14 @@ impl Rgba16x2Image {
         )
         .unwrap()
     }
+
+    pub fn first_inner(&self) -> &Rgba16ImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &Rgba16ImageBuffer {
+        self.1.as_ref()
+    }
 }
 
 impl ImageDimensionsHolder for Rgba16x2Image {
@@ -377,6 +421,14 @@ impl Rgba16Rgba8Image {
             image::RgbaImage::from_vec(width, height, image_data.1).unwrap(),
         )
         .unwrap()
+    }
+
+    pub fn first_inner(&self) -> &Rgba16ImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &VectorFieldImageBuffer {
+        self.1.as_ref()
     }
 }
 
@@ -456,6 +508,18 @@ impl Rgba16Rgba8x2Image {
             image::RgbaImage::from_vec(width, height, image_data.1 .1).unwrap(),
         )
         .unwrap()
+    }
+
+    pub fn first_inner(&self) -> &Rgba16ImageBuffer {
+        self.0.as_ref()
+    }
+
+    pub fn second_inner(&self) -> &VectorFieldImageBuffer {
+        self.1.as_ref()
+    }
+
+    pub fn third_inner(&self) -> &VectorFieldImageBuffer {
+        self.2.as_ref()
     }
 }
 

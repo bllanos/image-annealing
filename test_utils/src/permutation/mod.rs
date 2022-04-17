@@ -1,3 +1,4 @@
+use image::ImageBuffer;
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{Rgba16ImageBuffer, VectorFieldImageBuffer};
 use image_annealing::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
@@ -60,7 +61,9 @@ pub fn non_identity() -> DimensionsAndPermutation {
     }
 }
 
-pub fn non_identity_forward_permute(image: &Rgba16ImageBuffer) -> Rgba16ImageBuffer {
+pub fn non_identity_forward_permute<Component: 'static + image::Primitive>(
+    image: &ImageBuffer<image::Rgba<Component>, Vec<Component>>,
+) -> ImageBuffer<image::Rgba<Component>, Vec<Component>> {
     assert_eq!(image.width(), 2);
     assert_eq!(image.height(), 3);
     let mut permuted_image = image.clone();

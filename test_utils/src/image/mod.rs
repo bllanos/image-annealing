@@ -1,7 +1,17 @@
-use image::Rgba;
-use image_annealing::compute::format::Rgba16ImageBuffer;
+use image::{ImageBuffer, Rgba};
+use image_annealing::compute::format::{
+    Rgba16ImageBuffer, Rgba16ImageBufferComponent, VectorFieldImageBufferComponent,
+};
 use image_annealing::ImageDimensions;
 use std::convert::TryInto;
+
+pub struct DimensionsAndRgbaBuffer<Component: 'static + image::Primitive> {
+    pub image: ImageBuffer<image::Rgba<Component>, Vec<Component>>,
+    pub dimensions: ImageDimensions,
+}
+
+pub type DimensionsAndRgba8Buffer = DimensionsAndRgbaBuffer<VectorFieldImageBufferComponent>;
+pub type DimensionsAndRgba16Buffer = DimensionsAndRgbaBuffer<Rgba16ImageBufferComponent>;
 
 pub fn coordinates_to_colors(dimensions: &ImageDimensions) -> Rgba16ImageBuffer {
     Rgba16ImageBuffer::from_fn(
@@ -31,4 +41,44 @@ pub fn coordinates_to_zero_alpha_colors(dimensions: &ImageDimensions) -> Rgba16I
             ])
         },
     )
+}
+
+pub fn linear_indices_with_bias_to_colors<
+    Bias: TryInto<usize> + std::fmt::Debug + Copy,
+    Component: 'static + image::Primitive + std::convert::TryFrom<usize>,
+>(
+    bias: Bias,
+) -> DimensionsAndRgbaBuffer<Component>
+where
+    <Bias as std::convert::TryInto<usize>>::Error: std::fmt::Debug,
+    <Component as std::convert::TryFrom<usize>>::Error: std::fmt::Debug,
+{
+    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let channel_bias = dimensions.count();
+    let image = ImageBuffer::from_fn(
+        dimensions.width().try_into().unwrap(),
+        dimensions.height().try_into().unwrap(),
+        |x, y| {
+            let index = dimensions
+                .make_linear_index(x, y)
+                .unwrap()
+                .checked_add(bias.try_into().unwrap())
+                .unwrap();
+            Rgba([
+                index.try_into().unwrap(),
+                index.checked_add(channel_bias).unwrap().try_into().unwrap(),
+                index
+                    .checked_add(channel_bias.checked_mul(2).unwrap())
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                index
+                    .checked_add(channel_bias.checked_mul(3).unwrap())
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ])
+        },
+    );
+    DimensionsAndRgbaBuffer { image, dimensions }
 }
