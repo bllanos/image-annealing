@@ -110,6 +110,12 @@ impl AsRef<VectorFieldImageBuffer> for Rgba8Image {
     }
 }
 
+impl PartialEq<VectorFieldImageBuffer> for Rgba8Image {
+    fn eq(&self, other: &VectorFieldImageBuffer) -> bool {
+        self.as_ref() == other
+    }
+}
+
 impl ImageDimensionsHolder for Rgba8Image {
     fn dimensions(&self) -> &ImageDimensions {
         &self.dimensions
@@ -179,6 +185,12 @@ impl Rgba16Image {
 impl AsRef<Rgba16ImageBuffer> for Rgba16Image {
     fn as_ref(&self) -> &Rgba16ImageBuffer {
         &self.image
+    }
+}
+
+impl PartialEq<Rgba16ImageBuffer> for Rgba16Image {
+    fn eq(&self, other: &Rgba16ImageBuffer) -> bool {
+        self.as_ref() == other
     }
 }
 

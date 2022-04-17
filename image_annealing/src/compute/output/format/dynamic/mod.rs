@@ -223,3 +223,6 @@ impl ImageDimensionsHolder for LosslessImage {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

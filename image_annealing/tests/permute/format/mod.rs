@@ -89,7 +89,7 @@ fn permute_rgba8x2() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba8Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba8Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba8x2(Rgba8x2Image::new(image1, image2)?))
 }
 
@@ -98,9 +98,9 @@ fn permute_rgba8x3() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba8Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba8Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     let DimensionsAndRgba8Buffer { image: image3, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba8x3(Rgba8x3Image::new(
         image1, image2, image3,
     )?))
@@ -111,11 +111,11 @@ fn permute_rgba8x4() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba8Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba8Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     let DimensionsAndRgba8Buffer { image: image3, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap() + 1);
     let DimensionsAndRgba8Buffer { image: image4, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image3.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image3.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba8x4(Rgba8x4Image::new(
         image1, image2, image3, image4,
     )?))
@@ -133,7 +133,7 @@ fn permute_rgba16x2() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba16Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba16Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba16x2(Rgba16x2Image::new(image1, image2)?))
 }
 
@@ -142,7 +142,7 @@ fn permute_rgba16_rgba8() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba16Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba8Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba16Rgba8(Rgba16Rgba8Image::new(
         image1, image2,
     )?))
@@ -153,9 +153,9 @@ fn permute_rgba16_rgba8x2() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba16Buffer { image: image1, .. } =
         test_utils::image::linear_indices_with_bias_to_colors(0);
     let DimensionsAndRgba8Buffer { image: image2, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image1.last().unwrap() + 1);
     let DimensionsAndRgba8Buffer { image: image3, .. } =
-        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap());
+        test_utils::image::linear_indices_with_bias_to_colors(*image2.last().unwrap() + 1);
     permute_lossless_image(LosslessImage::Rgba16Rgba8x2(Rgba16Rgba8x2Image::new(
         image1, image2, image3,
     )?))
