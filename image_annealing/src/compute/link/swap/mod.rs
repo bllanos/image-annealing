@@ -244,3 +244,6 @@ impl SwapShaderParameters {
         self.count_output_offset = layout.segment_start[pass as usize];
     }
 }
+
+#[cfg(test)]
+mod tests;
