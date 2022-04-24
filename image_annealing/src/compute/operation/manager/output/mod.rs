@@ -11,10 +11,27 @@ struct SwapRatio {
 
 impl SwapRatio {
     fn new(total: usize, accepted: CountSwapOutputDataElement) -> Self {
-        assert!(accepted.is_finite());
-        assert!(accepted >= 0.0);
-        assert!((accepted as usize) as CountSwapOutputDataElement == accepted);
-        assert!(accepted as usize <= total);
+        assert!(
+            accepted.is_finite(),
+            "number of accepted swaps, {}, is not finite",
+            accepted
+        );
+        assert!(
+            accepted >= 0.0,
+            "number of accepted swaps, {}, is negative",
+            accepted
+        );
+        assert!(
+            (accepted as usize) as CountSwapOutputDataElement == accepted,
+            "number of accepted swaps, {}, is not an integer",
+            accepted
+        );
+        assert!(
+            accepted as usize <= total,
+            "number of accepted swaps, {}, is greater than the total number of swaps, {}",
+            accepted,
+            total
+        );
         Self { total, accepted }
     }
 
@@ -150,3 +167,6 @@ impl fmt::Display for CountSwapOperationOutput {
         fmt::Result::Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests;
