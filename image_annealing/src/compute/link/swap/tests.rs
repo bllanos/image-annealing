@@ -173,3 +173,144 @@ mod swap_pass {
         }
     }
 }
+
+mod swap_pass_selection {
+    mod includes_pass {
+        use super::super::super::{SwapPass, SwapPassSelection};
+
+        #[test]
+        fn does_not_include_pass() {
+            assert!(!SwapPassSelection::empty().includes_pass(SwapPass::Horizontal));
+        }
+
+        #[test]
+        fn includes_pass() {
+            assert!(SwapPassSelection::all().includes_pass(SwapPass::Horizontal));
+        }
+    }
+
+    mod add_pass {
+        use super::super::super::{SwapPass, SwapPassSelection};
+
+        #[test]
+        fn new_pass() {
+            let selection = SwapPassSelection::empty().add_pass(SwapPass::Horizontal);
+            assert!(selection.includes_pass(SwapPass::Horizontal));
+        }
+
+        #[test]
+        fn existing_pass() {
+            let mut selection = SwapPassSelection::HORIZONTAL;
+            assert!(selection.includes_pass(SwapPass::Horizontal));
+            selection = selection.add_pass(SwapPass::Horizontal);
+            assert!(selection.includes_pass(SwapPass::Horizontal));
+        }
+    }
+
+    mod iter {
+        use super::super::super::{SwapPass, SwapPassSelection};
+        use image_annealing_shaders::constant;
+
+        #[test]
+        fn all_passes() {
+            let mut counts = [1; constant::count_swap::N_CHANNEL];
+            SwapPassSelection::all().iter().for_each(|pass| match pass {
+                SwapPass::Horizontal => counts[0] -= 1,
+                SwapPass::Vertical => counts[1] -= 1,
+                SwapPass::OffsetHorizontal => counts[2] -= 1,
+                SwapPass::OffsetVertical => counts[3] -= 1,
+            });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+
+        #[test]
+        fn three_passes() {
+            let mut counts = [1, 1, 0, 1];
+            (SwapPassSelection::HORIZONTAL
+                | SwapPassSelection::VERTICAL
+                | SwapPassSelection::OFFSET_VERTICAL)
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+
+        #[test]
+        fn no_passes() {
+            let mut counts = [0; constant::count_swap::N_CHANNEL];
+            SwapPassSelection::empty()
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+    }
+
+    mod from_swap_pass {
+        use super::super::super::{SwapPass, SwapPassSelection};
+
+        #[test]
+        fn horizontal() {
+            let mut counts = [1, 0, 0, 0];
+            SwapPassSelection::from(SwapPass::Horizontal)
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+
+        #[test]
+        fn vertical() {
+            let mut counts = [0, 1, 0, 0];
+            SwapPassSelection::from(SwapPass::Vertical)
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+
+        #[test]
+        fn offset_horizontal() {
+            let mut counts = [0, 0, 1, 0];
+            SwapPassSelection::from(SwapPass::OffsetHorizontal)
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+
+        #[test]
+        fn offset_vertical() {
+            let mut counts = [0, 0, 0, 1];
+            SwapPassSelection::from(SwapPass::OffsetVertical)
+                .iter()
+                .for_each(|pass| match pass {
+                    SwapPass::Horizontal => counts[0] -= 1,
+                    SwapPass::Vertical => counts[1] -= 1,
+                    SwapPass::OffsetHorizontal => counts[2] -= 1,
+                    SwapPass::OffsetVertical => counts[3] -= 1,
+                });
+            assert!(counts.iter().all(|&count| count == 0));
+        }
+    }
+}
