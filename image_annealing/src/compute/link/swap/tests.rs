@@ -383,3 +383,39 @@ mod count_swap_input_layout {
         Ok(())
     }
 }
+
+mod count_swap_output {
+    use super::super::{CountSwapOutput, SwapPass};
+    use std::convert::TryInto;
+    use std::error::Error;
+
+    #[test]
+    fn from_ne_bytes() -> Result<(), Box<dyn Error>> {
+        let counts = [1.0_f32, 2.0_f32, 3.0_f32, 4.0_f32];
+        let bytes: Vec<u8> = counts
+            .iter()
+            .flat_map(|count| count.to_ne_bytes())
+            .collect();
+        let output = CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into()?);
+        assert_eq!(output.0, counts);
+        Ok(())
+    }
+
+    #[test]
+    fn at_pass() -> Result<(), Box<dyn Error>> {
+        let counts = [1.0_f32, 2.0_f32, 3.0_f32, 4.0_f32];
+        let bytes: Vec<u8> = counts
+            .iter()
+            .flat_map(|count| count.to_ne_bytes())
+            .collect();
+        let output = CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into()?);
+
+        SwapPass::PASSES.iter().for_each(|pass| match pass {
+            SwapPass::Horizontal => assert_eq!(output.at_pass(*pass), counts[0]),
+            SwapPass::Vertical => assert_eq!(output.at_pass(*pass), counts[1]),
+            SwapPass::OffsetHorizontal => assert_eq!(output.at_pass(*pass), counts[2]),
+            SwapPass::OffsetVertical => assert_eq!(output.at_pass(*pass), counts[3]),
+        });
+        Ok(())
+    }
+}
