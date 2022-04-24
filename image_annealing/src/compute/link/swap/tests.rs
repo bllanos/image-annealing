@@ -410,12 +410,41 @@ mod count_swap_output {
             .collect();
         let output = CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into()?);
 
-        SwapPass::PASSES.iter().for_each(|pass| match pass {
-            SwapPass::Horizontal => assert_eq!(output.at_pass(*pass), counts[0]),
-            SwapPass::Vertical => assert_eq!(output.at_pass(*pass), counts[1]),
-            SwapPass::OffsetHorizontal => assert_eq!(output.at_pass(*pass), counts[2]),
-            SwapPass::OffsetVertical => assert_eq!(output.at_pass(*pass), counts[3]),
-        });
+        SwapPass::PASSES
+            .iter()
+            .zip(counts.iter())
+            .for_each(|(pass, count)| assert_eq!(output.at_pass(*pass), *count));
+        Ok(())
+    }
+}
+
+mod swap_shader_parameters {
+    use super::super::{CountSwapInputLayout, SwapPass, SwapShaderParameters};
+    use crate::ImageDimensions;
+    use std::error::Error;
+
+    #[test]
+    fn new() -> Result<(), Box<dyn Error>> {
+        let parameters = SwapShaderParameters::new();
+        let dimensions = ImageDimensions::new(17, 33)?;
+        let layout = CountSwapInputLayout::new(&dimensions);
+        assert_eq!(parameters.count_output_offset, layout.segment_start[0]);
+        Ok(())
+    }
+
+    #[test]
+    fn set_pass() -> Result<(), Box<dyn Error>> {
+        let mut parameters = SwapShaderParameters::new();
+        let dimensions = ImageDimensions::new(17, 33)?;
+        let layout = CountSwapInputLayout::new(&dimensions);
+
+        SwapPass::PASSES
+            .iter()
+            .zip(layout.segment_start.iter())
+            .for_each(|(pass, offset)| {
+                parameters.set_pass(*pass, &layout);
+                assert_eq!(parameters.count_output_offset, *offset);
+            });
         Ok(())
     }
 }
