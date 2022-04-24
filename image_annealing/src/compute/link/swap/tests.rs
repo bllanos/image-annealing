@@ -314,3 +314,72 @@ mod swap_pass_selection {
         }
     }
 }
+
+mod count_swap_input_layout {
+    use super::super::{CountSwapInputLayout, SwapPass, SwapPassSelection};
+    use crate::ImageDimensions;
+    use std::convert::TryInto;
+    use std::error::Error;
+
+    #[test]
+    fn new() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::new(17, 33)?;
+        let layout = CountSwapInputLayout::new(&dimensions);
+        assert!(layout.do_segment.iter().all(|&flag| flag == 0));
+        let mut first = 0_u32;
+        let mut second: u32 = first
+            + <usize as TryInto<u32>>::try_into(
+                SwapPass::Horizontal
+                    .swap_workgroup_grid_dimensions(&dimensions)
+                    .count(),
+            )?;
+        let mut third: u32 = second
+            + <usize as TryInto<u32>>::try_into(
+                SwapPass::Vertical
+                    .swap_workgroup_grid_dimensions(&dimensions)
+                    .count(),
+            )?;
+        let mut fourth: u32 = third
+            + <usize as TryInto<u32>>::try_into(
+                SwapPass::OffsetHorizontal
+                    .swap_workgroup_grid_dimensions(&dimensions)
+                    .count(),
+            )?;
+        assert!([first, second, third, fourth]
+            .iter()
+            .eq(layout.segment_start.iter()));
+        first = second;
+        second = third;
+        third = fourth;
+        fourth = third
+            + <usize as TryInto<u32>>::try_into(
+                SwapPass::OffsetVertical
+                    .swap_workgroup_grid_dimensions(&dimensions)
+                    .count(),
+            )?;
+        assert!([first, second, third, fourth]
+            .iter()
+            .eq(layout.segment_end.iter()));
+        Ok(())
+    }
+
+    #[test]
+    fn get_selection() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::new(17, 33)?;
+        let layout = CountSwapInputLayout::new(&dimensions);
+        assert_eq!(layout.get_selection(), SwapPassSelection::empty());
+        Ok(())
+    }
+
+    #[test]
+    fn update_selection() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::new(17, 33)?;
+        let mut layout = CountSwapInputLayout::new(&dimensions);
+        let selection = SwapPassSelection::HORIZONTAL
+            | SwapPassSelection::VERTICAL
+            | SwapPassSelection::OFFSET_VERTICAL;
+        layout.update_selection(selection);
+        assert_eq!(layout.get_selection(), selection);
+        Ok(())
+    }
+}

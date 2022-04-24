@@ -3,8 +3,7 @@ use crate::ImageDimensions;
 use bytemuck::{Pod, Zeroable};
 use image_annealing_shaders::constant;
 use image_annealing_shaders::WorkgroupDimensions;
-use std::convert::TryFrom;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use std::num::NonZeroU32;
 
@@ -149,13 +148,17 @@ impl CountSwapInputLayout {
             )
             .unwrap()
         });
-        let segment_start = counts.iter().skip(1).enumerate().fold(
-            [0u32; constant::count_swap::N_CHANNEL],
-            |mut acc, (i, count)| {
-                acc[i + 1] = acc[i].checked_add(*count).unwrap();
-                acc
-            },
-        );
+        let segment_start = counts
+            .iter()
+            .take(counts.as_slice().len() - 1)
+            .enumerate()
+            .fold(
+                [0u32; constant::count_swap::N_CHANNEL],
+                |mut acc, (i, count)| {
+                    acc[i + 1] = acc[i].checked_add(*count).unwrap();
+                    acc
+                },
+            );
         let segment_end = counts.iter().enumerate().fold(
             [0u32; constant::count_swap::N_CHANNEL],
             |mut acc, (i, count)| {
