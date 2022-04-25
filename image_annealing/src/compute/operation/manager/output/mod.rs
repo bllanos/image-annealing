@@ -4,10 +4,13 @@ use super::super::super::link::swap::{
 use crate::ImageDimensions;
 use std::fmt;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 struct SwapRatio {
     total: usize,
     accepted: CountSwapOutputDataElement,
 }
+
+impl Eq for SwapRatio {}
 
 impl SwapRatio {
     fn new(total: usize, accepted: CountSwapOutputDataElement) -> Self {
@@ -68,6 +71,7 @@ impl fmt::Display for SwapRatio {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CountSwapOperationOutputPass {
     pass: SwapPass,
     swap_ratio: SwapRatio,
