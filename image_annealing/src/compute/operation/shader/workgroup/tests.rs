@@ -8,6 +8,38 @@ fn create_workgroup_dimensions() -> WorkgroupDimensions {
     workgroup_dimensions
 }
 
+mod from_image_dimensions_and_stride {
+    use super::super::WorkgroupGridDimensions;
+    use crate::ImageDimensions;
+    use std::error::Error;
+    use std::num::NonZeroU32;
+
+    #[test]
+    fn nondivisible_small_extent() -> Result<(), Box<dyn Error>> {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let image_dimensions = ImageDimensions::new(
+            workgroup_dimensions.x() * 2 - 1,
+            workgroup_dimensions.y() * 2 - 1,
+        )?;
+        let x_stride = NonZeroU32::new(2).unwrap();
+        let y_stride = NonZeroU32::new(2).unwrap();
+        let expected = WorkgroupGridDimensions::from_extent_and_stride(
+            &workgroup_dimensions,
+            image_dimensions.to_extent(),
+            x_stride,
+            y_stride,
+        );
+        let actual = WorkgroupGridDimensions::from_image_dimensions_and_stride(
+            &workgroup_dimensions,
+            &image_dimensions,
+            x_stride,
+            y_stride,
+        );
+        assert_eq!(actual, expected);
+        Ok(())
+    }
+}
+
 mod from_extent_and_stride {
     use super::super::WorkgroupGridDimensions;
     use std::num::NonZeroU32;
@@ -214,5 +246,45 @@ mod from_extent {
         assert_eq!(dim.x(), 2);
         assert_eq!(dim.y(), 3);
         assert_eq!(dim.z(), 1);
+    }
+}
+
+mod count_swap {
+    use super::super::WorkgroupGridDimensions;
+
+    #[test]
+    fn count_swap() {
+        let dim = WorkgroupGridDimensions::count_swap();
+        assert_eq!(dim.x(), 1);
+        assert_eq!(dim.y(), 1);
+        assert_eq!(dim.z(), 1);
+    }
+}
+
+mod count {
+    use super::super::WorkgroupGridDimensions;
+    use std::convert::TryFrom;
+    use std::error::Error;
+    use wgpu::Extent3d;
+
+    #[test]
+    fn count() -> Result<(), Box<dyn Error>> {
+        let workgroup_dimensions = super::create_workgroup_dimensions();
+        let dim = WorkgroupGridDimensions::from_extent(
+            &workgroup_dimensions,
+            Extent3d {
+                width: workgroup_dimensions.x() * 2 - 1,
+                height: workgroup_dimensions.y() * 2 + 1,
+                depth_or_array_layers: workgroup_dimensions.z(),
+            },
+        );
+        assert_eq!(dim.x(), 2);
+        assert_eq!(dim.y(), 3);
+        assert_eq!(dim.z(), 1);
+        assert_eq!(
+            dim.count(),
+            <usize as TryFrom<u32>>::try_from(dim.x() * dim.y() * dim.z())?
+        );
+        Ok(())
     }
 }
