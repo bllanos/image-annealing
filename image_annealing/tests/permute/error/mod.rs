@@ -166,3 +166,83 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
     );
     Ok(())
 }
+
+#[test]
+fn forgot_format() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::identity();
+    let expected_permutation = permutation.clone();
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let permuted_image = test_utils::permutation::identity_permute(&original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image.clone())?);
+
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
+    let mut algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            original_image: Some(original_lossless_image.clone()),
+        },
+        &Default::default(),
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output().unwrap();
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
+
+    dispatcher = algorithm.return_to_dispatcher();
+
+    algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            ..Default::default()
+        },
+        &Default::default(),
+    );
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "no image format was provided for the permuted output image",
+    );
+
+    Ok(())
+}
+
+#[test]
+fn format_mismatch() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::identity();
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image.clone())?);
+
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
+    let mut algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            original_image: Some(original_lossless_image.clone()),
+        },
+        &PermuteParameters {
+            permuted_image_format: Some(ImageFormat::Rgba8),
+        },
+    );
+
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "permutation input image has format 16-bit RGBA, but the requested output format is 8-bit RGBA",
+    );
+
+    Ok(())
+}

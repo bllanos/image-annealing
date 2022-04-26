@@ -109,7 +109,7 @@ impl CompletionStatusHolder for Permute {
                             Some(format) => {
                                 if format != input_format {
                                     return Err(Box::new(ImageFormatError::Mismatch {
-                                        image_name: String::from("input permutation"),
+                                        image_name: String::from("permutation"),
                                         input_format,
                                         output_format: format,
                                     }));
@@ -121,7 +121,7 @@ impl CompletionStatusHolder for Permute {
                     None => {
                         if self.permuted_image_format.is_none() {
                             return Err(Box::new(ImageFormatError::Missing {
-                                image_name: String::from("output permutation"),
+                                image_name: String::from("permuted output"),
                             }));
                         }
                     }

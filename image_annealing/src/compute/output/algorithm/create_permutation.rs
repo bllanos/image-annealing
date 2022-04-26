@@ -58,6 +58,7 @@ impl FinalOutputHolder<CreatePermutationOutput> for CreatePermutation {
     fn has_given_output(&self) -> bool {
         self.has_given_output
     }
+
     fn set_has_given_output(&mut self) {
         self.has_given_output = true;
     }
