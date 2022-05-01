@@ -1,4 +1,46 @@
 mod io {
+    use super::super::super::{
+        LosslessImage, Rgba16Image, Rgba16Rgba8Image, Rgba16Rgba8x2Image, Rgba16x2Image,
+        Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+    };
+    use std::path::PathBuf;
+
+    fn assert_not_files(paths: &[PathBuf]) {
+        assert!(paths.iter().all(|path| !path.is_file()));
+    }
+
+    fn existing_rgba8_path() -> PathBuf {
+        test_utils::make_test_data_path(&["image", "image", "stripes.png"])
+    }
+
+    fn large_rgba8_path() -> PathBuf {
+        test_utils::make_test_data_path(&["image", "image", "stripes_large.png"])
+    }
+
+    fn missing_image_path() -> PathBuf {
+        test_utils::make_test_data_path(&["image", "image", "not_found.png"])
+    }
+
+    fn missing_directory_path() -> PathBuf {
+        test_utils::make_test_output_path(&["not_found", "cannot_create"])
+    }
+
+    fn mismatch_error_message() -> &'static str {
+        "mismatch in image dimensions, (width, height) = (20, 25) and (width, height) = (21, 25)"
+    }
+
+    fn missing_error_message() -> &'static str {
+        "No such file or directory"
+    }
+
+    fn valid_rgba8() -> image::RgbaImage {
+        image::RgbaImage::from_pixel(2, 1, image::Rgba([0, 0, 0, 0]))
+    }
+
+    fn valid_rgba8x2() -> LosslessImage {
+        LosslessImage::Rgba8x2(Rgba8x2Image::new(valid_rgba8(), valid_rgba8()).unwrap())
+    }
+
     mod success {
         use super::super::super::super::{
             ImageFileReader, ImageFileWriter, Rgba16ImageBuffer, VectorFieldImageBuffer,
@@ -10,10 +52,6 @@ mod io {
         use std::error::Error;
         use std::path::PathBuf;
         use test_utils::image::{DimensionsAndRgba16Buffer, DimensionsAndRgba8Buffer};
-
-        fn assert_not_files(paths: &[PathBuf]) {
-            assert!(paths.iter().all(|path| !path.is_file()));
-        }
 
         fn assert_same_paths(a: &[PathBuf], b: &[&PathBuf]) {
             assert_eq!(a.len(), b.len());
@@ -88,7 +126,7 @@ mod io {
                 VectorFieldImageBuffer::make_filename(&paths[0]),
                 VectorFieldImageBuffer::make_filename(&paths[1]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -153,7 +191,7 @@ mod io {
                 VectorFieldImageBuffer::make_filename(&paths[1]),
                 VectorFieldImageBuffer::make_filename(&paths[2]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -229,7 +267,7 @@ mod io {
                 VectorFieldImageBuffer::make_filename(&paths[2]),
                 VectorFieldImageBuffer::make_filename(&paths[3]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -326,7 +364,7 @@ mod io {
                 Rgba16ImageBuffer::make_filename(&paths[0]),
                 Rgba16ImageBuffer::make_filename(&paths[1]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -381,7 +419,7 @@ mod io {
                 Rgba16ImageBuffer::make_filename(&paths[0]),
                 VectorFieldImageBuffer::make_filename(&paths[1]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -446,7 +484,7 @@ mod io {
                 VectorFieldImageBuffer::make_filename(&paths[1]),
                 VectorFieldImageBuffer::make_filename(&paths[2]),
             ];
-            assert_not_files(&expected_output_paths);
+            super::assert_not_files(&expected_output_paths);
 
             let full_output_paths = output_image.save_add_extension(&paths)?;
             assert_eq!(full_output_paths, expected_output_paths);
@@ -473,6 +511,96 @@ mod io {
             Ok(expected_output_paths
                 .iter()
                 .try_for_each(std::fs::remove_file)?)
+        }
+    }
+
+    mod first_image_missing {
+        use super::super::super::{
+            ImageFormat, LosslessImage, Rgba16Image, Rgba16Rgba8Image, Rgba16Rgba8x2Image,
+            Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
+
+        #[test]
+        fn rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba8x2,
+                    &[super::missing_image_path(), super::existing_rgba8_path()],
+                ),
+                super::missing_error_message(),
+            );
+        }
+    }
+
+    mod second_image_missing {
+        use super::super::super::{
+            ImageFormat, LosslessImage, Rgba16Image, Rgba16Rgba8Image, Rgba16Rgba8x2Image,
+            Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
+
+        #[test]
+        fn rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba8x2,
+                    &[super::existing_rgba8_path(), super::missing_image_path()],
+                ),
+                super::missing_error_message(),
+            );
+        }
+    }
+
+    mod first_pair_mismatch {
+        use super::super::super::{
+            ImageFormat, LosslessImage, Rgba16Image, Rgba16Rgba8Image, Rgba16Rgba8x2Image,
+            Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
+
+        #[test]
+        fn rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba8x2,
+                    &[super::existing_rgba8_path(), super::large_rgba8_path()],
+                ),
+                super::mismatch_error_message(),
+            );
+        }
+    }
+
+    mod first_image_save_error {
+        #[test]
+        fn rgba8x2() {
+            test_utils::assert_error_contains(
+                super::valid_rgba8x2().save_add_extension(&[
+                    super::missing_directory_path(),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2",
+                    ]),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[test_utils::make_test_output_path(&[
+                "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2.png",
+            ])]);
+        }
+    }
+
+    mod second_image_save_error {
+        #[test]
+        fn rgba8x2() {
+            test_utils::assert_error_contains(
+                super::valid_rgba8x2().save_add_extension(&[
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_1",
+                    ]),
+                    super::missing_directory_path(),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[test_utils::make_test_output_path(&[
+                "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_1.png",
+            ])]);
         }
     }
 }
