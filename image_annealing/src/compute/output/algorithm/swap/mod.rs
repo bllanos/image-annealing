@@ -30,7 +30,7 @@ impl fmt::Display for InvalidSwapParametersError {
 
 impl Error for InvalidSwapParametersError {}
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SwapParameters {
     selection: SwapPassSelection,
     count_swap: bool,
@@ -235,3 +235,6 @@ impl FinalOutputHolder<SwapFullOutput> for Swap {
             })
     }
 }
+
+#[cfg(test)]
+mod tests;
