@@ -74,6 +74,12 @@ mod io {
         LosslessImage::Rgba16Rgba8(Rgba16Rgba8Image::new(valid_rgba16(), valid_rgba8()).unwrap())
     }
 
+    fn valid_rgba16_rgba8x2() -> LosslessImage {
+        LosslessImage::Rgba16Rgba8x2(
+            Rgba16Rgba8x2Image::new(valid_rgba16(), valid_rgba8(), valid_rgba8()).unwrap(),
+        )
+    }
+
     mod success {
         use super::super::super::super::{
             ImageFileReader, ImageFileWriter, Rgba16ImageBuffer, VectorFieldImageBuffer,
@@ -613,6 +619,21 @@ mod io {
                 super::missing_error_message(),
             );
         }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8x2,
+                    &[
+                        super::missing_image_path(),
+                        super::existing_rgba8_path(),
+                        super::existing_rgba8_path(),
+                    ],
+                ),
+                super::missing_error_message(),
+            );
+        }
     }
 
     mod second_image_missing {
@@ -681,6 +702,21 @@ mod io {
                 super::missing_error_message(),
             );
         }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8x2,
+                    &[
+                        super::existing_rgba16_path(),
+                        super::missing_image_path(),
+                        super::existing_rgba8_path(),
+                    ],
+                ),
+                super::missing_error_message(),
+            );
+        }
     }
 
     mod third_image_missing {
@@ -711,6 +747,21 @@ mod io {
                         super::existing_rgba8_path(),
                         super::missing_image_path(),
                         super::existing_rgba8_path(),
+                    ],
+                ),
+                super::missing_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8x2,
+                    &[
+                        super::existing_rgba16_path(),
+                        super::existing_rgba8_path(),
+                        super::missing_image_path(),
                     ],
                 ),
                 super::missing_error_message(),
@@ -804,6 +855,21 @@ mod io {
                 super::mismatch_error_message(),
             );
         }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8x2,
+                    &[
+                        super::existing_rgba16_path(),
+                        super::large_rgba8_path(),
+                        super::existing_rgba8_path(),
+                    ],
+                ),
+                super::mismatch_error_message(),
+            );
+        }
     }
 
     mod first_third_mismatch {
@@ -834,6 +900,21 @@ mod io {
                         super::existing_rgba8_path(),
                         super::large_rgba8_path(),
                         super::existing_rgba8_path(),
+                    ],
+                ),
+                super::mismatch_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8x2,
+                    &[
+                        super::existing_rgba16_path(),
+                        super::existing_rgba8_path(),
+                        super::large_rgba8_path(),
                     ],
                 ),
                 super::mismatch_error_message(),
@@ -963,6 +1044,30 @@ mod io {
                 "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2.png",
             ])]);
         }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                super::valid_rgba16_rgba8x2().save_add_extension(&[
+                    super::missing_directory_path(),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2",
+                    ]),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3",
+                    ]),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2.png",
+                ]),
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3.png",
+                ]),
+            ]);
+        }
     }
 
     mod second_image_save_error {
@@ -1067,6 +1172,30 @@ mod io {
                 "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1.png",
             ])]);
         }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                super::valid_rgba16_rgba8x2().save_add_extension(&[
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1",
+                    ]),
+                    super::missing_directory_path(),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3",
+                    ]),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1.png",
+                ]),
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3.png",
+                ]),
+            ]);
+        }
     }
 
     mod third_image_save_error {
@@ -1120,6 +1249,30 @@ mod io {
                 ]),
                 test_utils::make_test_output_path(&[
                     "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_4.png",
+                ]),
+            ]);
+        }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            test_utils::assert_error_contains(
+                super::valid_rgba16_rgba8x2().save_add_extension(&[
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1",
+                    ]),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2",
+                    ]),
+                    super::missing_directory_path(),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1.png",
+                ]),
+                test_utils::make_test_output_path(&[
+                    "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2.png",
                 ]),
             ]);
         }

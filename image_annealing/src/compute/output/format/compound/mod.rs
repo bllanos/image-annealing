@@ -526,11 +526,24 @@ impl Rgba16Rgba8x2Image {
         path2_no_extension: P2,
         path3_no_extension: P3,
     ) -> Result<(PathBuf, PathBuf, PathBuf), Box<dyn Error>> {
-        Ok((
-            self.0.save_add_extension(path1_no_extension)?,
-            self.1.save_add_extension(path2_no_extension)?,
-            self.2.save_add_extension(path3_no_extension)?,
-        ))
+        self.0
+            .save_add_extension(path1_no_extension)
+            .and_then(
+                |path1| match self.1.save_add_extension(path2_no_extension) {
+                    Ok(path2) => match self.2.save_add_extension(path3_no_extension) {
+                        Ok(path3) => Ok((path1, path2, path3)),
+                        Err(err) => {
+                            std::fs::remove_file(path1).unwrap();
+                            std::fs::remove_file(path2).unwrap();
+                            Err(err)
+                        }
+                    },
+                    Err(err) => {
+                        std::fs::remove_file(path1).unwrap();
+                        Err(err)
+                    }
+                },
+            )
     }
 
     pub(crate) fn to_texture_data(&self) -> Vec<u8> {
