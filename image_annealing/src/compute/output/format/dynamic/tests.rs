@@ -1,7 +1,7 @@
 mod io {
     use super::super::super::{
-        Rgba16Image, Rgba16ImageBuffer, Rgba16Rgba8Image, Rgba16Rgba8x2Image, Rgba16x2Image,
-        Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        Rgba16ImageBuffer, Rgba16Rgba8Image, Rgba16Rgba8x2Image, Rgba16x2Image, Rgba8x2Image,
+        Rgba8x3Image, Rgba8x4Image,
     };
     use super::super::LosslessImage;
     use std::path::PathBuf;
@@ -68,6 +68,10 @@ mod io {
 
     fn valid_rgba16x2() -> LosslessImage {
         LosslessImage::Rgba16x2(Rgba16x2Image::new(valid_rgba16(), valid_rgba16()).unwrap())
+    }
+
+    fn valid_rgba16_rgba8() -> LosslessImage {
+        LosslessImage::Rgba16Rgba8(Rgba16Rgba8Image::new(valid_rgba16(), valid_rgba8()).unwrap())
     }
 
     mod success {
@@ -598,6 +602,17 @@ mod io {
                 super::missing_error_message(),
             );
         }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8,
+                    &[super::missing_image_path(), super::existing_rgba8_path()],
+                ),
+                super::missing_error_message(),
+            );
+        }
     }
 
     mod second_image_missing {
@@ -650,6 +665,17 @@ mod io {
             test_utils::assert_error_contains(
                 LosslessImage::load(
                     ImageFormat::Rgba16x2,
+                    &[super::existing_rgba16_path(), super::missing_image_path()],
+                ),
+                super::missing_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8,
                     &[super::existing_rgba16_path(), super::missing_image_path()],
                 ),
                 super::missing_error_message(),
@@ -763,6 +789,17 @@ mod io {
                 LosslessImage::load(
                     ImageFormat::Rgba16x2,
                     &[super::existing_rgba16_path(), super::large_rgba16_path()],
+                ),
+                super::mismatch_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                LosslessImage::load(
+                    ImageFormat::Rgba16Rgba8,
+                    &[super::existing_rgba16_path(), super::large_rgba8_path()],
                 ),
                 super::mismatch_error_message(),
             );
@@ -910,6 +947,22 @@ mod io {
                 "compute_output_format_dynamic_io_first_image_save_error_rgba16x2_2.png",
             ])]);
         }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                super::valid_rgba16_rgba8().save_add_extension(&[
+                    super::missing_directory_path(),
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2",
+                    ]),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[test_utils::make_test_output_path(&[
+                "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2.png",
+            ])]);
+        }
     }
 
     mod second_image_save_error {
@@ -996,6 +1049,22 @@ mod io {
             );
             super::assert_not_files(&[test_utils::make_test_output_path(&[
                 "compute_output_format_dynamic_io_second_image_save_error_rgba16x2_1.png",
+            ])]);
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                super::valid_rgba16_rgba8().save_add_extension(&[
+                    test_utils::make_test_output_path(&[
+                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1",
+                    ]),
+                    super::missing_directory_path(),
+                ]),
+                super::missing_error_message(),
+            );
+            super::assert_not_files(&[test_utils::make_test_output_path(&[
+                "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1.png",
             ])]);
         }
     }

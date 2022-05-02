@@ -31,7 +31,9 @@ mod new {
     }
 
     mod first_image_error {
-        use super::super::super::{Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
+        use super::super::super::{
+            Rgba16Rgba8Image, Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
 
         #[test]
         fn rgba8x2() {
@@ -73,10 +75,20 @@ mod new {
                 "width is zero",
             );
         }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                Rgba16Rgba8Image::new(super::zero_width_rgba16(), super::valid_rgba8()),
+                "width is zero",
+            );
+        }
     }
 
     mod second_image_error {
-        use super::super::super::{Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
+        use super::super::super::{
+            Rgba16Rgba8Image, Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
 
         #[test]
         fn rgba8x2() {
@@ -115,6 +127,14 @@ mod new {
         fn rgba16x2() {
             test_utils::assert_error_contains(
                 Rgba16x2Image::new(super::valid_rgba16(), super::zero_width_rgba16()),
+                "width is zero",
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                Rgba16Rgba8Image::new(super::valid_rgba16(), super::zero_width_rgba8()),
                 "width is zero",
             );
         }
@@ -167,7 +187,9 @@ mod new {
     }
 
     mod first_second_mismatch {
-        use super::super::super::{Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
+        use super::super::super::{
+            Rgba16Rgba8Image, Rgba16x2Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+        };
 
         #[test]
         fn rgba8x2() {
@@ -206,6 +228,14 @@ mod new {
         fn rgba16x2() {
             test_utils::assert_error_contains(
                 Rgba16x2Image::new(super::valid_rgba16(), super::large_rgba16()),
+                super::mismatch_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            test_utils::assert_error_contains(
+                Rgba16Rgba8Image::new(super::valid_rgba16(), super::large_rgba8()),
                 super::mismatch_error_message(),
             );
         }
