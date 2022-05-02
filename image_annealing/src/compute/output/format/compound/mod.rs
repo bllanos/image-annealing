@@ -345,10 +345,17 @@ impl Rgba16x2Image {
         path1_no_extension: P1,
         path2_no_extension: P2,
     ) -> Result<(PathBuf, PathBuf), Box<dyn Error>> {
-        Ok((
-            self.0.save_add_extension(path1_no_extension)?,
-            self.1.save_add_extension(path2_no_extension)?,
-        ))
+        self.0
+            .save_add_extension(path1_no_extension)
+            .and_then(
+                |path1| match self.1.save_add_extension(path2_no_extension) {
+                    Ok(path2) => Ok((path1, path2)),
+                    Err(err) => {
+                        std::fs::remove_file(path1).unwrap();
+                        Err(err)
+                    }
+                },
+            )
     }
 
     pub(crate) fn to_texture_data(&self) -> Vec<u8> {
