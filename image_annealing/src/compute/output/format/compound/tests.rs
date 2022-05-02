@@ -18,7 +18,7 @@ mod new {
     }
 
     mod first_image_error {
-        use super::super::super::{Rgba8x2Image, Rgba8x3Image};
+        use super::super::super::{Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
 
         #[test]
         fn rgba8x2() {
@@ -39,10 +39,23 @@ mod new {
                 "width is zero",
             );
         }
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::zero_width_rgba8(),
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                ),
+                "width is zero",
+            );
+        }
     }
 
     mod second_image_error {
-        use super::super::super::{Rgba8x2Image, Rgba8x3Image};
+        use super::super::super::{Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
 
         #[test]
         fn rgba8x2() {
@@ -63,10 +76,23 @@ mod new {
                 "width is zero",
             );
         }
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
+                    super::zero_width_rgba8(),
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                ),
+                "width is zero",
+            );
+        }
     }
 
     mod third_image_error {
-        use super::super::super::Rgba8x3Image;
+        use super::super::super::{Rgba8x3Image, Rgba8x4Image};
 
         #[test]
         fn rgba8x3() {
@@ -79,10 +105,40 @@ mod new {
                 "width is zero",
             );
         }
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::zero_width_rgba8(),
+                    super::valid_rgba8(),
+                ),
+                "width is zero",
+            );
+        }
+    }
+
+    mod fourth_image_error {
+        use super::super::super::Rgba8x4Image;
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::zero_width_rgba8(),
+                ),
+                "width is zero",
+            );
+        }
     }
 
     mod first_second_mismatch {
-        use super::super::super::{Rgba8x2Image, Rgba8x3Image};
+        use super::super::super::{Rgba8x2Image, Rgba8x3Image, Rgba8x4Image};
 
         #[test]
         fn rgba8x2() {
@@ -103,15 +159,58 @@ mod new {
                 super::mismatch_error_message(),
             );
         }
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
+                    super::large_rgba8(),
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                ),
+                super::mismatch_error_message(),
+            );
+        }
     }
 
     mod first_third_mismatch {
-        use super::super::super::Rgba8x3Image;
+        use super::super::super::{Rgba8x3Image, Rgba8x4Image};
 
         #[test]
         fn rgba8x3() {
             test_utils::assert_error_contains(
                 Rgba8x3Image::new(
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::large_rgba8(),
+                ),
+                super::mismatch_error_message(),
+            );
+        }
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
+                    super::valid_rgba8(),
+                    super::large_rgba8(),
+                    super::valid_rgba8(),
+                ),
+                super::mismatch_error_message(),
+            );
+        }
+    }
+
+    mod first_fourth_mismatch {
+        use super::super::super::Rgba8x4Image;
+
+        #[test]
+        fn rgba8x4() {
+            test_utils::assert_error_contains(
+                Rgba8x4Image::new(
+                    super::valid_rgba8(),
                     super::valid_rgba8(),
                     super::valid_rgba8(),
                     super::large_rgba8(),
