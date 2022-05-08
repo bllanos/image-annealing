@@ -216,3 +216,6 @@ impl ImageFileWriter for Rgba16Image {
         self.image.save_add_extension(path_no_extension)
     }
 }
+
+#[cfg(test)]
+mod tests;
