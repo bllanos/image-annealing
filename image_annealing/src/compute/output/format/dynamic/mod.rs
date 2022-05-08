@@ -120,30 +120,30 @@ impl LosslessImage {
         paths: &[P],
     ) -> Result<Vec<PathBuf>, Box<dyn Error>> {
         Ok(match self {
-            LosslessImage::Rgba8(image) => vec![image.save_add_extension(&paths[0])?],
-            LosslessImage::Rgba8x2(image) => {
+            Self::Rgba8(image) => vec![image.save_add_extension(&paths[0])?],
+            Self::Rgba8x2(image) => {
                 let result = image.save_add_extension(&paths[0], &paths[1])?;
                 vec![result.0, result.1]
             }
-            LosslessImage::Rgba8x3(image) => {
+            Self::Rgba8x3(image) => {
                 let result = image.save_add_extension(&paths[0], &paths[1], &paths[2])?;
                 vec![result.0, result.1, result.2]
             }
-            LosslessImage::Rgba8x4(image) => {
+            Self::Rgba8x4(image) => {
                 let result =
                     image.save_add_extension(&paths[0], &paths[1], &paths[2], &paths[3])?;
                 vec![result.0, result.1, result.2, result.3]
             }
-            LosslessImage::Rgba16(image) => vec![image.save_add_extension(&paths[0])?],
-            LosslessImage::Rgba16x2(image) => {
+            Self::Rgba16(image) => vec![image.save_add_extension(&paths[0])?],
+            Self::Rgba16x2(image) => {
                 let result = image.save_add_extension(&paths[0], &paths[1])?;
                 vec![result.0, result.1]
             }
-            LosslessImage::Rgba16Rgba8(image) => {
+            Self::Rgba16Rgba8(image) => {
                 let result = image.save_add_extension(&paths[0], &paths[1])?;
                 vec![result.0, result.1]
             }
-            LosslessImage::Rgba16Rgba8x2(image) => {
+            Self::Rgba16Rgba8x2(image) => {
                 let result = image.save_add_extension(&paths[0], &paths[1], &paths[2])?;
                 vec![result.0, result.1, result.2]
             }
@@ -152,27 +152,27 @@ impl LosslessImage {
 
     pub fn format(&self) -> ImageFormat {
         match self {
-            LosslessImage::Rgba8(_) => ImageFormat::Rgba8,
-            LosslessImage::Rgba8x2(_) => ImageFormat::Rgba8x2,
-            LosslessImage::Rgba8x3(_) => ImageFormat::Rgba8x3,
-            LosslessImage::Rgba8x4(_) => ImageFormat::Rgba8x4,
-            LosslessImage::Rgba16(_) => ImageFormat::Rgba16,
-            LosslessImage::Rgba16x2(_) => ImageFormat::Rgba16x2,
-            LosslessImage::Rgba16Rgba8(_) => ImageFormat::Rgba16Rgba8,
-            LosslessImage::Rgba16Rgba8x2(_) => ImageFormat::Rgba16Rgba8x2,
+            Self::Rgba8(_) => ImageFormat::Rgba8,
+            Self::Rgba8x2(_) => ImageFormat::Rgba8x2,
+            Self::Rgba8x3(_) => ImageFormat::Rgba8x3,
+            Self::Rgba8x4(_) => ImageFormat::Rgba8x4,
+            Self::Rgba16(_) => ImageFormat::Rgba16,
+            Self::Rgba16x2(_) => ImageFormat::Rgba16x2,
+            Self::Rgba16Rgba8(_) => ImageFormat::Rgba16Rgba8,
+            Self::Rgba16Rgba8x2(_) => ImageFormat::Rgba16Rgba8x2,
         }
     }
 
     pub(crate) fn to_texture_data(&self) -> Vec<u8> {
         match self {
-            LosslessImage::Rgba8(image) => image.to_texture_data(),
-            LosslessImage::Rgba8x2(image) => image.to_texture_data(),
-            LosslessImage::Rgba8x3(image) => image.to_texture_data(),
-            LosslessImage::Rgba8x4(image) => image.to_texture_data(),
-            LosslessImage::Rgba16(image) => image.to_texture_data(),
-            LosslessImage::Rgba16x2(image) => image.to_texture_data(),
-            LosslessImage::Rgba16Rgba8(image) => image.to_texture_data(),
-            LosslessImage::Rgba16Rgba8x2(image) => image.to_texture_data(),
+            Self::Rgba8(image) => image.to_texture_data(),
+            Self::Rgba8x2(image) => image.to_texture_data(),
+            Self::Rgba8x3(image) => image.to_texture_data(),
+            Self::Rgba8x4(image) => image.to_texture_data(),
+            Self::Rgba16(image) => image.to_texture_data(),
+            Self::Rgba16x2(image) => image.to_texture_data(),
+            Self::Rgba16Rgba8(image) => image.to_texture_data(),
+            Self::Rgba16Rgba8x2(image) => image.to_texture_data(),
         }
     }
 
@@ -212,14 +212,14 @@ impl LosslessImage {
 impl ImageDimensionsHolder for LosslessImage {
     fn dimensions(&self) -> &ImageDimensions {
         match self {
-            LosslessImage::Rgba8(image) => image.dimensions(),
-            LosslessImage::Rgba8x2(image) => image.dimensions(),
-            LosslessImage::Rgba8x3(image) => image.dimensions(),
-            LosslessImage::Rgba8x4(image) => image.dimensions(),
-            LosslessImage::Rgba16(image) => image.dimensions(),
-            LosslessImage::Rgba16x2(image) => image.dimensions(),
-            LosslessImage::Rgba16Rgba8(image) => image.dimensions(),
-            LosslessImage::Rgba16Rgba8x2(image) => image.dimensions(),
+            Self::Rgba8(image) => image.dimensions(),
+            Self::Rgba8x2(image) => image.dimensions(),
+            Self::Rgba8x3(image) => image.dimensions(),
+            Self::Rgba8x4(image) => image.dimensions(),
+            Self::Rgba16(image) => image.dimensions(),
+            Self::Rgba16x2(image) => image.dimensions(),
+            Self::Rgba16Rgba8(image) => image.dimensions(),
+            Self::Rgba16Rgba8x2(image) => image.dimensions(),
         }
     }
 }
