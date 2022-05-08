@@ -78,3 +78,6 @@ pub trait Algorithm<PartialOutput, FullOutput> {
         Ok(status)
     }
 }
+
+#[cfg(test)]
+mod tests;
