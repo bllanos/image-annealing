@@ -1,3 +1,57 @@
+mod image_format {
+    mod display {
+        use super::super::super::ImageFormat;
+
+        #[test]
+        fn rgba8() {
+            let str = ImageFormat::Rgba8.to_string();
+            assert_eq!(str, "8-bit RGBA");
+        }
+
+        #[test]
+        fn rgba8x2() {
+            let str = ImageFormat::Rgba8x2.to_string();
+            assert_eq!(str, "2 x 8-bit RGBA");
+        }
+
+        #[test]
+        fn rgba8x3() {
+            let str = ImageFormat::Rgba8x3.to_string();
+            assert_eq!(str, "3 x 8-bit RGBA");
+        }
+
+        #[test]
+        fn rgba8x4() {
+            let str = ImageFormat::Rgba8x4.to_string();
+            assert_eq!(str, "4 x 8-bit RGBA");
+        }
+
+        #[test]
+        fn rgba16() {
+            let str = ImageFormat::Rgba16.to_string();
+            assert_eq!(str, "16-bit RGBA");
+        }
+
+        #[test]
+        fn rgba16x2() {
+            let str = ImageFormat::Rgba16x2.to_string();
+            assert_eq!(str, "2 x 16-bit RGBA");
+        }
+
+        #[test]
+        fn rgba16_rgba8() {
+            let str = ImageFormat::Rgba16Rgba8.to_string();
+            assert_eq!(str, "16-bit RGBA + 8-bit RGBA");
+        }
+
+        #[test]
+        fn rgba16_rgba8x2() {
+            let str = ImageFormat::Rgba16Rgba8x2.to_string();
+            assert_eq!(str, "16-bit RGBA + 2 x 8-bit RGBA");
+        }
+    }
+}
+
 mod io {
     use super::super::super::{
         Rgba16ImageBuffer, Rgba16Rgba8Image, Rgba16Rgba8x2Image, Rgba16x2Image, Rgba8x2Image,

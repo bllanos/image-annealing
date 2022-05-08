@@ -22,14 +22,14 @@ pub enum ImageFormat {
 impl fmt::Display for ImageFormat {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ImageFormat::Rgba8 => write!(f, "8-bit RGBA"),
-            ImageFormat::Rgba8x2 => write!(f, "2 x 8-bit RGBA"),
-            ImageFormat::Rgba8x3 => write!(f, "3 x 8-bit RGBA"),
-            ImageFormat::Rgba8x4 => write!(f, "4 x 8-bit RGBA"),
-            ImageFormat::Rgba16 => write!(f, "16-bit RGBA"),
-            ImageFormat::Rgba16x2 => write!(f, "2 x 16-bit RGBA"),
-            ImageFormat::Rgba16Rgba8 => write!(f, "16-bit RGBA + 8-bit RGBA"),
-            ImageFormat::Rgba16Rgba8x2 => write!(f, "16-bit RGBA + 2 x 8-bit RGBA"),
+            Self::Rgba8 => write!(f, "8-bit RGBA"),
+            Self::Rgba8x2 => write!(f, "2 x 8-bit RGBA"),
+            Self::Rgba8x3 => write!(f, "3 x 8-bit RGBA"),
+            Self::Rgba8x4 => write!(f, "4 x 8-bit RGBA"),
+            Self::Rgba16 => write!(f, "16-bit RGBA"),
+            Self::Rgba16x2 => write!(f, "2 x 16-bit RGBA"),
+            Self::Rgba16Rgba8 => write!(f, "16-bit RGBA + 8-bit RGBA"),
+            Self::Rgba16Rgba8x2 => write!(f, "16-bit RGBA + 2 x 8-bit RGBA"),
         }
     }
 }
