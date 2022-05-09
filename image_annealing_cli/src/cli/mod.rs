@@ -110,6 +110,7 @@ fn run_swap(
     displacement_goal: Option<DisplacementGoal>,
     parameters: &SwapParametersConfig,
 ) -> Result<ValidatedPermutation, Box<dyn Error>> {
+    // TODO Input the SwapPassSelection from the SwapParametersConfig
     let swap_pass_selection = SwapPassSelection::HORIZONTAL;
     let (swap_parameters, threshold) = match parameters.stop {
         SwapStopConfig::Bounded {

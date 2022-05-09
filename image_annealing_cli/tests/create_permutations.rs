@@ -29,3 +29,19 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[test]
+fn save_missing_directory() -> Result<(), Box<dyn Error>> {
+    let path = test_utils::make_test_output_path_string(&["not_found", "cannot_create"]);
+
+    let config = Config {
+        algorithm: AlgorithmConfig::CreatePermutation {
+            permutation_output_path_no_extension: PermutationPath(path),
+        },
+        dispatcher: compute::Config {
+            image_dimensions: ImageDimensions::new(3, 4)?,
+        },
+    };
+    test_utils::assert_error_contains(cli::run(config), "No such file or directory");
+    Ok(())
+}
