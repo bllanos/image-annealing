@@ -67,43 +67,43 @@ impl AlgorithmChoice {
     fn as_ref_create_permutation(&self) -> &CreatePermutation {
         match self {
             AlgorithmChoice::CreatePermutation(inner) => inner,
-            _ => panic!("expected AlgorithmChoice::CreatePermutation"),
+            _ => unreachable!("expected AlgorithmChoice::CreatePermutation"),
         }
     }
     fn as_mut_create_permutation(&mut self) -> &mut CreatePermutation {
         match self {
             AlgorithmChoice::CreatePermutation(ref mut inner) => inner,
-            _ => panic!("expected AlgorithmChoice::CreatePermutation"),
+            _ => unreachable!("expected AlgorithmChoice::CreatePermutation"),
         }
     }
     fn as_ref_permute(&self) -> &Permute {
         match self {
             AlgorithmChoice::Permute(inner) => inner,
-            _ => panic!("expected AlgorithmChoice::Permute"),
+            _ => unreachable!("expected AlgorithmChoice::Permute"),
         }
     }
     fn as_mut_permute(&mut self) -> &mut Permute {
         match self {
             AlgorithmChoice::Permute(ref mut inner) => inner,
-            _ => panic!("expected AlgorithmChoice::Permute"),
+            _ => unreachable!("expected AlgorithmChoice::Permute"),
         }
     }
     fn as_mut_swap(&mut self) -> &mut Swap {
         match self {
             AlgorithmChoice::Swap(ref mut inner) => inner,
-            _ => panic!("expected AlgorithmChoice::Swap"),
+            _ => unreachable!("expected AlgorithmChoice::Swap"),
         }
     }
     fn as_ref_validate_permutation(&self) -> &ValidatePermutation {
         match self {
             AlgorithmChoice::ValidatePermutation(inner) => inner,
-            _ => panic!("expected AlgorithmChoice::ValidatePermutation"),
+            _ => unreachable!("expected AlgorithmChoice::ValidatePermutation"),
         }
     }
     fn as_mut_validate_permutation(&mut self) -> &mut ValidatePermutation {
         match self {
             AlgorithmChoice::ValidatePermutation(ref mut inner) => inner,
-            _ => panic!("expected AlgorithmChoice::ValidatePermutation"),
+            _ => unreachable!("expected AlgorithmChoice::ValidatePermutation"),
         }
     }
 }
