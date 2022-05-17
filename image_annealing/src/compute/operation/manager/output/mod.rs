@@ -105,6 +105,18 @@ impl fmt::Display for CountSwapOperationOutputPass {
     }
 }
 
+pub struct CountSwapOperationOutputPassIter<'a> {
+    iter: std::slice::Iter<'a, CountSwapOperationOutputPass>,
+}
+
+impl<'a> Iterator for CountSwapOperationOutputPassIter<'a> {
+    type Item = &'a CountSwapOperationOutputPass;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
 pub struct CountSwapOperationOutput {
     passes: Vec<CountSwapOperationOutputPass>,
     combined_swap_ratio: SwapRatio,
@@ -141,8 +153,10 @@ impl CountSwapOperationOutput {
         }
     }
 
-    pub fn passes(&self) -> &[CountSwapOperationOutputPass] {
-        self.passes.as_slice()
+    pub fn passes(&self) -> CountSwapOperationOutputPassIter<'_> {
+        CountSwapOperationOutputPassIter {
+            iter: self.passes.iter(),
+        }
     }
 
     pub fn is_none_accepted(&self) -> bool {

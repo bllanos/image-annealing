@@ -131,10 +131,9 @@ mod count_swap_operation_output {
             selection,
             &ImageDimensions::new(1, 1)?,
         );
-        let passes = output.passes();
-        assert_eq!(passes.len(), constant::count_swap::N_CHANNEL);
-        passes
-            .iter()
+        assert_eq!(output.passes().count(), constant::count_swap::N_CHANNEL);
+        output
+            .passes()
             .zip(selection.iter())
             .for_each(|(output_pass, pass)| {
                 assert_eq!(output_pass.pass(), *pass);
@@ -175,9 +174,8 @@ mod count_swap_operation_output {
             selection,
             &ImageDimensions::new(2, 9)?,
         );
-        let passes = output.passes();
-        assert_eq!(passes.len(), 2);
-        passes.iter().eq([
+        assert_eq!(output.passes().count(), 2);
+        output.passes().eq([
             CountSwapOperationOutputPass {
                 pass: pass1,
                 swap_ratio: SwapRatio::new(9, 1.0_f32),

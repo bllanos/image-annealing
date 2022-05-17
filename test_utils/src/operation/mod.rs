@@ -48,16 +48,18 @@ pub fn assert_correct_swap_count_output(
         };
         assert_eq!(counts.is_none_accepted(), is_none_accepted);
 
-        let passes = counts.passes();
-        assert_eq!(passes.len(), parameters.selection().iter().count());
+        assert_eq!(
+            counts.passes().count(),
+            parameters.selection().iter().count()
+        );
         if let SwapAcceptedCount::Some(v) = &swaps_accepted {
-            assert_eq!(passes.len(), v.len());
+            assert_eq!(counts.passes().count(), v.len());
         }
 
         let (total, accepted) = parameters
             .selection()
             .iter()
-            .zip(passes.iter())
+            .zip(counts.passes())
             .enumerate()
             .fold((0_usize, 0_usize), |mut acc, (i, (&pass, pass_data))| {
                 assert_eq!(pass, pass_data.pass());
