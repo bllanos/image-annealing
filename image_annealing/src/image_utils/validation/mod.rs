@@ -166,7 +166,7 @@ pub(crate) fn validate_permutation(
     })
 }
 
-pub(crate) fn vector_field_into_validated_permutation_unchecked(
+pub unsafe fn vector_field_into_validated_permutation_unchecked(
     vector_field: VectorFieldImageBuffer,
 ) -> ValidatedPermutation {
     let dimensions = ImageDimensions::from_image(&vector_field).unwrap();

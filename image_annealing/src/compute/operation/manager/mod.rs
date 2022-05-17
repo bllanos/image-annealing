@@ -158,7 +158,7 @@ impl OperationManager {
         let result = mapped_buffer.collect_mapped_buffer();
 
         transaction.set_commit();
-        Ok(
+        Ok(unsafe {
             validation::vector_field_into_validated_permutation_unchecked(
                 VectorFieldImageBuffer::from_vec(
                     mapped_buffer.width(),
@@ -166,8 +166,8 @@ impl OperationManager {
                     result,
                 )
                 .unwrap(),
-            ),
-        )
+            )
+        })
     }
 
     pub fn output_permuted_image(
