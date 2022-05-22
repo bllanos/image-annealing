@@ -9,21 +9,14 @@ use crate::{DisplacementGoal, ValidatedPermutation};
 use std::error::Error;
 
 mod input;
+mod output;
 
-pub use super::super::super::system::{CountSwapOperationOutput, CountSwapOperationOutputPass}; // TODO Remove
 pub use input::{
     InvalidSwapParametersError, SwapInput, SwapParameters, SwapPass, SwapPassSelection,
 };
-
-pub struct SwapPartialOutput {
-    pub counts: CountSwapOperationOutput,
-}
-
-pub struct SwapFullOutput {
-    pub input_permutation: Option<ValidatedPermutation>,
-    pub input_displacement_goal: Option<DisplacementGoal>,
-    pub output_permutation: ValidatedPermutation,
-}
+pub use output::{
+    SwapFullOutput, SwapPartialOutput, SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio,
+};
 
 pub struct Swap {
     completion_status: CompletionStatus,
@@ -149,7 +142,9 @@ impl FinalOutputHolder<SwapPartialOutput> for Swap {
         system
             .output_count_swap()
             .ok()
-            .map(|counts| SwapPartialOutput { counts })
+            .map(|counts| SwapPartialOutput {
+                counts: Box::new(counts),
+            })
     }
 }
 

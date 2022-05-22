@@ -1,13 +1,11 @@
 use super::device::DeviceManager;
+use super::operation::manager::CountSwapOperationOutput;
 use super::operation::manager::OperationManager;
 use super::output::format::{ImageFormat, LosslessImage};
 use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use std::error::Error;
 
-pub use super::operation::manager::PermuteOperationInput;
-pub use super::operation::manager::{
-    CountSwapOperationOutput, CountSwapOperationOutputPass, SwapOperationInput,
-};
+pub use super::operation::manager::{PermuteOperationInput, SwapOperationInput};
 
 pub struct System {
     device: DeviceManager,

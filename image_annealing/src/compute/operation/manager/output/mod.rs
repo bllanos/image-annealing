@@ -1,18 +1,21 @@
 use super::super::super::link::swap::{
     CountSwapOutput, CountSwapOutputDataElement, SwapPass, SwapPassSelection,
 };
+use super::super::super::output::algorithm::swap::{
+    SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio,
+};
 use crate::ImageDimensions;
 use std::fmt;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-struct SwapRatio {
+struct SwapRatioImplementation {
     total: usize,
     accepted: CountSwapOutputDataElement,
 }
 
-impl Eq for SwapRatio {}
+impl Eq for SwapRatioImplementation {}
 
-impl SwapRatio {
+impl SwapRatioImplementation {
     fn new(total: usize, accepted: CountSwapOutputDataElement) -> Self {
         assert!(
             accepted.is_finite(),
@@ -37,12 +40,10 @@ impl SwapRatio {
         );
         Self { total, accepted }
     }
+}
 
-    pub fn is_none_accepted(&self) -> bool {
-        self.accepted == 0.0
-    }
-
-    pub fn accepted_fraction(&self) -> f64 {
+impl SwapRatio for SwapRatioImplementation {
+    fn accepted_fraction(&self) -> f64 {
         if self.total == 0 {
             0.0
         } else {
@@ -50,16 +51,16 @@ impl SwapRatio {
         }
     }
 
-    pub fn total(&self) -> usize {
+    fn total(&self) -> usize {
         self.total
     }
 
-    pub fn accepted(&self) -> usize {
+    fn accepted(&self) -> usize {
         self.accepted as usize
     }
 }
 
-impl fmt::Display for SwapRatio {
+impl fmt::Display for SwapRatioImplementation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -72,30 +73,28 @@ impl fmt::Display for SwapRatio {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct CountSwapOperationOutputPass {
+struct CountSwapOperationOutputPass {
     pass: SwapPass,
-    swap_ratio: SwapRatio,
+    swap_ratio: SwapRatioImplementation,
 }
 
-impl CountSwapOperationOutputPass {
-    pub fn pass(&self) -> SwapPass {
-        self.pass
-    }
-
-    pub fn is_none_accepted(&self) -> bool {
-        self.swap_ratio.is_none_accepted()
-    }
-
-    pub fn accepted_fraction(&self) -> f64 {
+impl SwapRatio for CountSwapOperationOutputPass {
+    fn accepted_fraction(&self) -> f64 {
         self.swap_ratio.accepted_fraction()
     }
 
-    pub fn total(&self) -> usize {
+    fn total(&self) -> usize {
         self.swap_ratio.total()
     }
 
-    pub fn accepted(&self) -> usize {
+    fn accepted(&self) -> usize {
         self.swap_ratio.accepted()
+    }
+}
+
+impl SwapPassSwapRatio for CountSwapOperationOutputPass {
+    fn pass(&self) -> SwapPass {
+        self.pass
     }
 }
 
@@ -105,21 +104,21 @@ impl fmt::Display for CountSwapOperationOutputPass {
     }
 }
 
-pub struct CountSwapOperationOutputPassIter<'a> {
+struct CountSwapOperationOutputPassIter<'a> {
     iter: std::slice::Iter<'a, CountSwapOperationOutputPass>,
 }
 
 impl<'a> Iterator for CountSwapOperationOutputPassIter<'a> {
-    type Item = &'a CountSwapOperationOutputPass;
+    type Item = &'a dyn SwapPassSwapRatio;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
+        self.iter.next().map(|item| item as &dyn SwapPassSwapRatio)
     }
 }
 
 pub struct CountSwapOperationOutput {
     passes: Vec<CountSwapOperationOutputPass>,
-    combined_swap_ratio: SwapRatio,
+    combined_swap_ratio: SwapRatioImplementation,
 }
 
 impl CountSwapOperationOutput {
@@ -139,7 +138,7 @@ impl CountSwapOperationOutput {
                 let total_i = pass.total_swaps(image_dimensions);
                 acc.0.push(CountSwapOperationOutputPass {
                     pass,
-                    swap_ratio: SwapRatio::new(total_i, accepted_i),
+                    swap_ratio: SwapRatioImplementation::new(total_i, accepted_i),
                 });
                 acc.1 = acc.1.checked_add(total_i).unwrap();
                 acc.2 += accepted_i;
@@ -149,30 +148,33 @@ impl CountSwapOperationOutput {
 
         Self {
             passes,
-            combined_swap_ratio: SwapRatio::new(total, accepted),
+            combined_swap_ratio: SwapRatioImplementation::new(total, accepted),
         }
     }
+}
 
-    pub fn passes(&self) -> CountSwapOperationOutputPassIter<'_> {
-        CountSwapOperationOutputPassIter {
-            iter: self.passes.iter(),
-        }
-    }
-
-    pub fn is_none_accepted(&self) -> bool {
-        self.combined_swap_ratio.is_none_accepted()
-    }
-
-    pub fn accepted_fraction(&self) -> f64 {
+impl SwapRatio for CountSwapOperationOutput {
+    fn accepted_fraction(&self) -> f64 {
         self.combined_swap_ratio.accepted_fraction()
     }
 
-    pub fn total(&self) -> usize {
+    fn total(&self) -> usize {
         self.combined_swap_ratio.total()
     }
 
-    pub fn accepted(&self) -> usize {
+    fn accepted(&self) -> usize {
         self.combined_swap_ratio.accepted()
+    }
+}
+
+impl SwapPassSelectionSwapRatio for CountSwapOperationOutput {
+    fn passes<'a, 'b>(&'a self) -> Box<dyn Iterator<Item = &'a dyn SwapPassSwapRatio> + 'b>
+    where
+        'a: 'b,
+    {
+        Box::new(CountSwapOperationOutputPassIter {
+            iter: self.passes.iter(),
+        })
     }
 }
 

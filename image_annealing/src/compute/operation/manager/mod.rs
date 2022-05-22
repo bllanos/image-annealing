@@ -15,7 +15,7 @@ mod output;
 mod state;
 
 pub use input::{PermuteOperationInput, SwapOperationInput};
-pub use output::{CountSwapOperationOutput, CountSwapOperationOutputPass};
+pub use output::CountSwapOperationOutput;
 use state::ResourceStateManager;
 
 pub struct OperationManager {
