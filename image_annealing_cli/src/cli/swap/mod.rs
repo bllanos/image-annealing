@@ -72,7 +72,7 @@ fn run_swap(
             if threshold.is_none() {
                 println!("Texel swap round {}", i);
             }
-            if i == count.get() {
+            if i == count.get().checked_sub(1).unwrap() {
                 stop = true;
             }
         }
@@ -113,3 +113,6 @@ fn run_swap(
         .unwrap()
         .output_permutation)
 }
+
+#[cfg(test)]
+mod tests;

@@ -5,16 +5,16 @@ use std::error::Error;
 use std::fmt;
 use std::num::NonZeroUsize;
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 pub enum UnverifiedSwapStopThreshold {
     SwapsAccepted(usize),
     SwapAcceptanceFraction(f64),
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 pub struct UnverifiedIterationCount(pub usize);
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub enum UnverifiedSwapStopConfig {
     Bounded {
         iteration_count: UnverifiedIterationCount,
@@ -54,7 +54,7 @@ impl fmt::Display for InvalidIterationCountError {
 impl Error for InvalidIterationCountError {}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct IterationCount(NonZeroUsize);
+pub struct IterationCount(pub NonZeroUsize);
 
 impl IterationCount {
     pub fn get(self) -> usize {
@@ -72,7 +72,7 @@ impl TryFrom<UnverifiedIterationCount> for IterationCount {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SwapStopConfig {
     Bounded {
         iteration_count: IterationCount,
@@ -103,12 +103,12 @@ impl TryFrom<UnverifiedSwapStopConfig> for SwapStopConfig {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct UnverifiedSwapParametersConfig {
     pub stop: UnverifiedSwapStopConfig,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SwapParametersConfig {
     pub stop: SwapStopConfig,
 }

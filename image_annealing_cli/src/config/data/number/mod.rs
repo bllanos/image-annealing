@@ -56,15 +56,15 @@ impl TryFrom<f64> for NonnegativeRationalNumber {
 
 #[derive(Debug, Clone)]
 pub enum InvalidNonnegativeProperFractionError {
-    GreaterThanOne(f64),
+    NotLessThanOne(f64),
     Irrational(InvalidNonnegativeRationalNumberError),
 }
 
 impl fmt::Display for InvalidNonnegativeProperFractionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::GreaterThanOne(value) => {
-                write!(f, "{} is greater than one", value)
+            Self::NotLessThanOne(value) => {
+                write!(f, "{} is not less than one", value)
             }
             Self::Irrational(err) => err.fmt(f),
         }
@@ -83,7 +83,7 @@ impl NonnegativeProperFraction {
                 InvalidNonnegativeProperFractionError::Irrational,
             )?))
         } else {
-            Err(InvalidNonnegativeProperFractionError::GreaterThanOne(value))
+            Err(InvalidNonnegativeProperFractionError::NotLessThanOne(value))
         }
     }
 
