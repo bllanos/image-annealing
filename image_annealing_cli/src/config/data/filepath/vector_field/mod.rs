@@ -80,3 +80,6 @@ impl ImagePath for DisplacementGoalPath {
         Self(path.into())
     }
 }
+
+#[cfg(test)]
+mod tests;
