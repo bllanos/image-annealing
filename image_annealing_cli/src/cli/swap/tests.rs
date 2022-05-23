@@ -59,6 +59,7 @@ mod run_swap {
         output_swap_counts: Vec<TestSwapRatio>,
         swap_round_index: usize,
         step_index: usize,
+        partial_output_call_count: usize,
     }
 
     impl SwapDispatcher {
@@ -70,6 +71,7 @@ mod run_swap {
                 output_swap_counts,
                 swap_round_index: 0,
                 step_index: 0,
+                partial_output_call_count: 0,
             };
             if instance.expected_count_swap_flag() {
                 assert_eq!(
@@ -230,6 +232,7 @@ mod run_swap {
 
         fn partial_output(&mut self) -> Option<SwapPartialOutput> {
             if self.expected_count_swap_flag() && self.step_index == Self::FINAL_STEP_INDEX {
+                self.partial_output_call_count += 1;
                 Some(SwapPartialOutput {
                     counts: Box::new(self.output_swap_counts[self.swap_round_index - 1].clone()),
                 })
@@ -239,9 +242,14 @@ mod run_swap {
         }
 
         fn full_output(&mut self) -> Option<SwapFullOutput> {
-            if self.swap_round_index == self.expected_number_of_rounds()
-                && self.step_index == Self::FINAL_STEP_INDEX
+            let expected_rounds = self.expected_number_of_rounds();
+            if self.swap_round_index == expected_rounds && self.step_index == Self::FINAL_STEP_INDEX
             {
+                if self.expected_count_swap_flag() {
+                    // Assert that client code accessed swap count values every round,
+                    // even if only to print them to the user.
+                    assert_eq!(self.partial_output_call_count, expected_rounds);
+                }
                 let output_permutation_buffer = self
                     .run_swap_input
                     .candidate_permutation

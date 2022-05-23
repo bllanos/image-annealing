@@ -77,12 +77,12 @@ fn run_swap(
             }
         }
 
-        if !stop {
-            if let Some(threshold_variant) = threshold {
-                let SwapPartialOutput {
-                    counts: swap_counts,
-                } = algorithm.partial_output().unwrap();
-                println!("Texel swap round {}, {}", i, swap_counts);
+        if let Some(threshold_variant) = threshold {
+            let SwapPartialOutput {
+                counts: swap_counts,
+            } = algorithm.partial_output().unwrap();
+            println!("Texel swap round {}, {}", i, swap_counts);
+            if !stop {
                 match threshold_variant {
                     SwapStopThreshold::SwapsAccepted(number_of_swaps) => {
                         if swap_counts.accepted() <= number_of_swaps {
