@@ -1,5 +1,5 @@
 mod parse_args {
-    use super::super::{parse_args, AlgorithmConfig, Config, PermutationPath};
+    use super::super::{parse_args, AlgorithmConfig, Config, ImagePath, PermutationPath};
     use image_annealing::{compute, ImageDimensions};
     use std::error::Error;
 
@@ -29,9 +29,9 @@ mod parse_args {
             r,
             Config {
                 algorithm: AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath(String::from(
+                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
                         "permutation_out"
-                    )),
+                    ),
                 },
                 dispatcher: compute::Config {
                     image_dimensions: ImageDimensions::new(20, 25)?
@@ -51,9 +51,9 @@ mod parse_args {
             r,
             Config {
                 algorithm: AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath(String::from(
+                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
                         "permutation_out"
-                    )),
+                    ),
                 },
                 dispatcher: compute::Config {
                     image_dimensions: ImageDimensions::new(20, 25)?

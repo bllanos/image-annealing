@@ -8,7 +8,8 @@ mod number;
 mod parameters;
 
 pub use filepath::{
-    DisplacementGoalPath, LosslessImagePath, PermutationPath, UnverifiedLosslessImagePath,
+    DisplacementGoalPath, ImagePath, LosslessImagePath, PermutationPath,
+    UnverifiedLosslessImagePath,
 };
 pub use number::{
     InvalidNonnegativeProperFractionError, InvalidNonnegativeRationalNumberError,

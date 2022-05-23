@@ -45,7 +45,8 @@ fn check_input_path<P: AsRef<Path>>(filepath: P) -> Result<(), FileNotFoundError
     }
 }
 
-pub fn convert_path_separators(filepath: String) -> String {
+pub fn convert_path_separators<T: AsRef<str>>(filepath: T) -> String {
+    let filepath = String::from(filepath.as_ref());
     if <String as AsRef<Path>>::as_ref(&filepath).is_absolute() {
         filepath
     } else {
@@ -54,7 +55,9 @@ pub fn convert_path_separators(filepath: String) -> String {
     }
 }
 
-pub fn convert_and_check_input_path(filepath: String) -> Result<String, FileNotFoundError> {
+pub fn convert_and_check_input_path<T: AsRef<str>>(
+    filepath: T,
+) -> Result<String, FileNotFoundError> {
     let new_path = convert_path_separators(filepath);
     check_input_path(&new_path)?;
     Ok(new_path)

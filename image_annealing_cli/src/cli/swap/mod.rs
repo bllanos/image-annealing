@@ -22,7 +22,7 @@ pub fn run_and_save_swap(
         Some(loader::load_displacement_goal(displacement_goal)?),
         parameters,
     )?;
-    let output_path = permutation.save_add_extension(&permutation_output_path_no_extension.0)?;
+    let output_path = permutation.save_add_extension(permutation_output_path_no_extension)?;
     println!("Wrote swapped permutation to: {}", output_path.display());
     Ok(())
 }

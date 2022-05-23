@@ -1,7 +1,7 @@
 mod config_try_from_unverified_config {
     use super::super::{
-        AlgorithmConfig, Config, DisplacementGoalPath, LosslessImagePath, PermutationPath,
-        SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
+        AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, LosslessImagePath,
+        PermutationPath, SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
         UnverifiedLosslessImagePath, UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig,
         UnverifiedSwapStopThreshold,
     };
@@ -21,9 +21,9 @@ mod config_try_from_unverified_config {
             r,
             Config {
                 algorithm: AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath(String::from(
+                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
                         "permutation_out"
-                    )),
+                    ),
                 },
                 dispatcher: compute::Config {
                     image_dimensions: ImageDimensions::new(20, 25)?
@@ -178,16 +178,16 @@ mod config_try_from_unverified_config {
             Config {
                 algorithm: AlgorithmConfig::Swap {
                     candidate_permutation: candidate_permutation_path,
-                    displacement_goal: DisplacementGoalPath(
+                    displacement_goal: DisplacementGoalPath::from_raw(
                         test_utils::make_test_data_path_string(&[
                             "image",
                             "displacement_goal",
                             "identity_displacement_goal.png"
                         ])
                     ),
-                    permutation_output_path_no_extension: PermutationPath(String::from(
+                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
                         "permutation_out"
-                    )),
+                    ),
                     parameters: make_swap_parameters()
                 },
                 dispatcher: compute::Config { image_dimensions }

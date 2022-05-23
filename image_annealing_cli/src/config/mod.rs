@@ -4,7 +4,7 @@ mod data;
 mod io;
 
 pub use data::{
-    AlgorithmConfig, Config, DisplacementGoalPath, InvalidIterationCountError,
+    AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, InvalidIterationCountError,
     InvalidNonnegativeProperFractionError, InvalidNonnegativeRationalNumberError, IterationCount,
     LosslessImagePath, NonnegativeProperFraction, NonnegativeRationalNumber, PermutationPath,
     SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,

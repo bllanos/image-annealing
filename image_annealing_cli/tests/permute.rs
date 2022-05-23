@@ -1,7 +1,9 @@
 use image_annealing::compute;
 use image_annealing::compute::format::{ImageFileWriter, ImageFormat, Rgba8Image};
 use image_annealing_cli::cli;
-use image_annealing_cli::config::{AlgorithmConfig, Config, LosslessImagePath, PermutationPath};
+use image_annealing_cli::config::{
+    AlgorithmConfig, Config, ImagePath, LosslessImagePath, PermutationPath,
+};
 use std::error::Error;
 
 #[test]

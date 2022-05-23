@@ -3,39 +3,83 @@ use image_annealing::compute::format::ImageFormat;
 use image_annealing::{DimensionsMismatchError, ImageDimensions};
 use serde::Deserialize;
 use std::error::Error;
+use std::fmt;
 use std::path::Path;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct PermutationPath(pub String);
+pub trait ImagePath: AsRef<Path> + AsRef<str> + Clone + Eq + fmt::Display + PartialEq
+where
+    Self: Sized,
+{
+    fn from_raw<T: Into<String>>(path: T) -> Self;
 
-impl PermutationPath {
-    pub fn from_input_path(
-        unverified_path: String,
+    fn from_raw_clone<T: AsRef<str>>(path: T) -> Self {
+        Self::from_raw(String::from(path.as_ref()))
+    }
+
+    fn from_input_path<T: AsRef<str>>(
+        unverified_path: T,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
         let path = convert_and_check_input_path(unverified_path)?;
         let dimensions = ImageDimensions::from_image_path(&path)?;
-        Ok((Self(path), dimensions))
+        Ok((Self::from_raw(path), dimensions))
     }
 
-    pub fn from_output_path(path_no_extension: String) -> Self {
-        Self(convert_path_separators(path_no_extension))
+    fn from_output_path<T: AsRef<str>>(path_no_extension: T) -> Self {
+        Self::from_raw(convert_path_separators(path_no_extension))
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct DisplacementGoalPath(pub String);
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PermutationPath(String);
 
-impl DisplacementGoalPath {
-    pub fn from_input_path(
-        unverified_path: String,
-    ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
-        let path = convert_and_check_input_path(unverified_path)?;
-        let dimensions = ImageDimensions::from_image_path(&path)?;
-        Ok((Self(path), dimensions))
+impl fmt::Display for PermutationPath {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
     }
+}
 
-    pub fn from_output_path(path_no_extension: String) -> Self {
-        Self(convert_path_separators(path_no_extension))
+impl AsRef<Path> for PermutationPath {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
+impl AsRef<str> for PermutationPath {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
+}
+
+impl ImagePath for PermutationPath {
+    fn from_raw<T: Into<String>>(path: T) -> Self {
+        Self(path.into())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DisplacementGoalPath(String);
+
+impl fmt::Display for DisplacementGoalPath {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl AsRef<Path> for DisplacementGoalPath {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
+impl AsRef<str> for DisplacementGoalPath {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
+}
+
+impl ImagePath for DisplacementGoalPath {
+    fn from_raw<T: Into<String>>(path: T) -> Self {
+        Self(path.into())
     }
 }
 
@@ -49,6 +93,65 @@ pub enum UnverifiedLosslessImagePath {
     Rgba16x2(String, String),
     Rgba16Rgba8(String, String),
     Rgba16Rgba8x2(String, String, String),
+}
+
+impl UnverifiedLosslessImagePath {
+    pub fn from_raw<T>(format: ImageFormat, paths: T) -> Self
+    where
+        T: IntoIterator,
+        <T as IntoIterator>::Item: Into<String>,
+    {
+        let mut paths_iter = paths.into_iter();
+        match format {
+            ImageFormat::Rgba8 => Self::Rgba8(paths_iter.next().unwrap().into()),
+            ImageFormat::Rgba8x2 => Self::Rgba8x2(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+            ImageFormat::Rgba8x3 => Self::Rgba8x3(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+            ImageFormat::Rgba8x4 => Self::Rgba8x4(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+            ImageFormat::Rgba16 => Self::Rgba16(paths_iter.next().unwrap().into()),
+            ImageFormat::Rgba16x2 => Self::Rgba16x2(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+            ImageFormat::Rgba16Rgba8 => Self::Rgba16Rgba8(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+            ImageFormat::Rgba16Rgba8x2 => Self::Rgba16Rgba8x2(
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+                paths_iter.next().unwrap().into(),
+            ),
+        }
+    }
+
+    pub fn from_raw_clone<T: AsRef<str>>(format: ImageFormat, paths: &[T]) -> Self {
+        Self::from_raw(format, paths.iter().map(|path| String::from(path.as_ref())))
+    }
+
+    pub fn format(&self) -> ImageFormat {
+        match self {
+            Self::Rgba8(..) => ImageFormat::Rgba8,
+            Self::Rgba8x2(..) => ImageFormat::Rgba8x2,
+            Self::Rgba8x3(..) => ImageFormat::Rgba8x3,
+            Self::Rgba8x4(..) => ImageFormat::Rgba8x4,
+            Self::Rgba16(..) => ImageFormat::Rgba16,
+            Self::Rgba16x2(..) => ImageFormat::Rgba16x2,
+            Self::Rgba16Rgba8(..) => ImageFormat::Rgba16Rgba8,
+            Self::Rgba16Rgba8x2(..) => ImageFormat::Rgba16Rgba8x2,
+        }
+    }
 }
 
 fn check_dimensions_match2<T: AsRef<Path>, U: AsRef<Path>>(
@@ -101,29 +204,29 @@ pub enum LosslessImagePath {
 impl LosslessImagePath {
     pub fn format(&self) -> ImageFormat {
         match self {
-            LosslessImagePath::Rgba8(..) => ImageFormat::Rgba8,
-            LosslessImagePath::Rgba8x2(..) => ImageFormat::Rgba8x2,
-            LosslessImagePath::Rgba8x3(..) => ImageFormat::Rgba8x3,
-            LosslessImagePath::Rgba8x4(..) => ImageFormat::Rgba8x4,
-            LosslessImagePath::Rgba16(..) => ImageFormat::Rgba16,
-            LosslessImagePath::Rgba16x2(..) => ImageFormat::Rgba16x2,
-            LosslessImagePath::Rgba16Rgba8(..) => ImageFormat::Rgba16Rgba8,
-            LosslessImagePath::Rgba16Rgba8x2(..) => ImageFormat::Rgba16Rgba8x2,
+            Self::Rgba8(..) => ImageFormat::Rgba8,
+            Self::Rgba8x2(..) => ImageFormat::Rgba8x2,
+            Self::Rgba8x3(..) => ImageFormat::Rgba8x3,
+            Self::Rgba8x4(..) => ImageFormat::Rgba8x4,
+            Self::Rgba16(..) => ImageFormat::Rgba16,
+            Self::Rgba16x2(..) => ImageFormat::Rgba16x2,
+            Self::Rgba16Rgba8(..) => ImageFormat::Rgba16Rgba8,
+            Self::Rgba16Rgba8x2(..) => ImageFormat::Rgba16Rgba8x2,
         }
     }
 
     pub fn to_vec(&self) -> Vec<&String> {
         match self {
-            LosslessImagePath::Rgba8(path) => vec![path],
-            LosslessImagePath::Rgba8x2(path1, path2) => vec![path1, path2],
-            LosslessImagePath::Rgba8x3(path1, path2, path3) => vec![path1, path2, path3],
-            LosslessImagePath::Rgba8x4(path1, path2, path3, path4) => {
+            Self::Rgba8(path) => vec![path],
+            Self::Rgba8x2(path1, path2) => vec![path1, path2],
+            Self::Rgba8x3(path1, path2, path3) => vec![path1, path2, path3],
+            Self::Rgba8x4(path1, path2, path3, path4) => {
                 vec![path1, path2, path3, path4]
             }
-            LosslessImagePath::Rgba16(path) => vec![path],
-            LosslessImagePath::Rgba16x2(path1, path2) => vec![path1, path2],
-            LosslessImagePath::Rgba16Rgba8(path1, path2) => vec![path1, path2],
-            LosslessImagePath::Rgba16Rgba8x2(path1, path2, path3) => vec![path1, path2, path3],
+            Self::Rgba16(path) => vec![path],
+            Self::Rgba16x2(path1, path2) => vec![path1, path2],
+            Self::Rgba16Rgba8(path1, path2) => vec![path1, path2],
+            Self::Rgba16Rgba8x2(path1, path2, path3) => vec![path1, path2, path3],
         }
     }
 

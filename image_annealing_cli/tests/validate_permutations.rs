@@ -1,7 +1,7 @@
 use image_annealing::compute;
 use image_annealing::compute::format::ImageFormat;
 use image_annealing_cli::cli;
-use image_annealing_cli::config::{AlgorithmConfig, Config, PermutationPath};
+use image_annealing_cli::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
 use std::error::Error;
 
 #[test]

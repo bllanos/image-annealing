@@ -2,8 +2,8 @@ use image_annealing::compute;
 use image_annealing::compute::format::{ImageFileWriter, ImageFormat, VectorFieldImageBuffer};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{
-    AlgorithmConfig, Config, DisplacementGoalPath, PermutationPath, SwapParametersConfig,
-    SwapStopConfig, SwapStopThreshold,
+    AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, PermutationPath,
+    SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
 };
 use std::error::Error;
 
@@ -24,12 +24,14 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                "image",
-                "displacement_goal",
-                "identity_displacement_goal.png",
-            ])),
-            permutation_output_path_no_extension: PermutationPath(path),
+            displacement_goal: DisplacementGoalPath::from_raw(
+                test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity_displacement_goal.png",
+                ]),
+            ),
+            permutation_output_path_no_extension: PermutationPath::from_raw(path),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
             },
@@ -57,12 +59,14 @@ fn swap_invalid() -> Result<(), Box<dyn Error>> {
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                "image",
-                "displacement_goal",
-                "identity_displacement_goal.png",
-            ])),
-            permutation_output_path_no_extension: PermutationPath(
+            displacement_goal: DisplacementGoalPath::from_raw(
+                test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity_displacement_goal.png",
+                ]),
+            ),
+            permutation_output_path_no_extension: PermutationPath::from_raw(
                 test_utils::make_test_output_path_string(&["cli_swap_invalid"]),
             ),
             parameters: SwapParametersConfig {
@@ -84,12 +88,14 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                "image",
-                "displacement_goal",
-                "identity_displacement_goal.png",
-            ])),
-            permutation_output_path_no_extension: PermutationPath(
+            displacement_goal: DisplacementGoalPath::from_raw(
+                test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity_displacement_goal.png",
+                ]),
+            ),
+            permutation_output_path_no_extension: PermutationPath::from_raw(
                 test_utils::make_test_output_path_string(&["cli_swap_invalid_permutation_format"]),
             ),
             parameters: SwapParametersConfig {
@@ -116,10 +122,10 @@ fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                "image", "image", "red.png",
-            ])),
-            permutation_output_path_no_extension: PermutationPath(
+            displacement_goal: DisplacementGoalPath::from_raw(
+                test_utils::make_test_data_path_string(&["image", "image", "red.png"]),
+            ),
+            permutation_output_path_no_extension: PermutationPath::from_raw(
                 test_utils::make_test_output_path_string(&[
                     "cli_swap_invalid_displacement_goal_format",
                 ]),
@@ -149,12 +155,14 @@ fn save_missing_directory() -> Result<(), Box<dyn Error>> {
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath(test_utils::make_test_data_path_string(&[
-                "image",
-                "displacement_goal",
-                "identity.png",
-            ])),
-            permutation_output_path_no_extension: PermutationPath(path),
+            displacement_goal: DisplacementGoalPath::from_raw(
+                test_utils::make_test_data_path_string(&[
+                    "image",
+                    "displacement_goal",
+                    "identity.png",
+                ]),
+            ),
+            permutation_output_path_no_extension: PermutationPath::from_raw(path),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
             },

@@ -27,7 +27,7 @@ fn run_and_save(
                 .create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
             algorithm.step_until_finished()?;
             let permutation = algorithm.full_output().unwrap().validated_permutation;
-            let output_path = permutation.save_add_extension(&path.0)?;
+            let output_path = permutation.save_add_extension(path)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
         AlgorithmConfig::Permute {
@@ -73,10 +73,7 @@ fn run_and_save(
                 &ValidatePermutationParameters {},
             );
             algorithm.step_until_finished()?;
-            println!(
-                "Candidate permutation '{}' is valid",
-                candidate_permutation.0
-            );
+            println!("Candidate permutation '{}' is valid", candidate_permutation);
         }
     }
     Ok(())

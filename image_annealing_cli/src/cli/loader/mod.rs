@@ -6,13 +6,13 @@ use std::error::Error;
 pub fn load_candidate_permutation(
     path: &PermutationPath,
 ) -> Result<CandidatePermutation, Box<dyn Error>> {
-    Rgba8Image::load(&path.0)
+    Rgba8Image::load(path)
 }
 
 pub fn load_displacement_goal(
     path: &DisplacementGoalPath,
 ) -> Result<DisplacementGoal, Box<dyn Error>> {
-    DisplacementGoal::load(&path.0)
+    DisplacementGoal::load(path)
 }
 
 pub fn load_image(path: &LosslessImagePath) -> Result<LosslessImage, Box<dyn Error>> {
