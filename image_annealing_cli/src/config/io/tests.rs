@@ -5,6 +5,24 @@ mod parse_config_file {
     use std::error::Error;
 
     #[test]
+    fn missing_config_file() {
+        let path = test_utils::make_test_data_path(&["config", "not_found.json"]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem",
+        );
+    }
+
+    #[test]
+    fn directory_not_file() {
+        let path = test_utils::make_test_data_path(&["config"]);
+        test_utils::assert_error_contains(
+            parse_config_file(path),
+            "does not exist in the filesystem",
+        );
+    }
+
+    #[test]
     fn malformed_config_file() {
         let path = test_utils::make_test_data_path(&["config", "empty.json"]);
         test_utils::assert_error_contains(
@@ -31,6 +49,13 @@ mod parse_config_file {
             }
         );
         Ok(())
+    }
+
+    #[test]
+    fn invalid_create_permutation_config_file() {
+        let path =
+            test_utils::make_test_data_path(&["config", "create_permutation", "invalid.json"]);
+        test_utils::assert_error_contains(parse_config_file(path), "width is zero");
     }
 }
 
