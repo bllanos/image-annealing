@@ -122,3 +122,6 @@ impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
         })
     }
 }
+
+#[cfg(test)]
+mod tests;
