@@ -280,3 +280,6 @@ impl LosslessImagePath {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
