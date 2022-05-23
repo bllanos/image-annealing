@@ -440,6 +440,14 @@ mod lossless_image_path {
             "does not exist in the filesystem"
         }
 
+        fn non_image_path() -> String {
+            test_utils::make_test_data_path_string(&["empty.txt"])
+        }
+
+        fn non_image_error_message() -> &'static str {
+            "The file extension `.\"txt\"` was not recognized as an image format"
+        }
+
         fn mismatch_error_message() -> &'static str {
             "mismatch in image dimensions, (width, height) = (20, 25) and (width, height) = (21, 25)"
         }
@@ -764,6 +772,232 @@ mod lossless_image_path {
                         super::missing_image_path(),
                     )),
                     super::missing_error_message(),
+                );
+            }
+        }
+
+        mod first_path_non_image {
+            use super::super::super::super::{LosslessImagePath, UnverifiedLosslessImagePath};
+
+            #[test]
+            fn rgba8() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8(
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x3() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x4() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16(
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba16_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16_rgba8() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16_rgba8x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+        }
+
+        mod second_path_non_image {
+            use super::super::super::super::{LosslessImagePath, UnverifiedLosslessImagePath};
+
+            #[test]
+            fn rgba8x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x3() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x4() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
+                        super::super::super::existing_rgba16_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16_rgba8() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16_rgba8x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+        }
+
+        mod third_path_non_image {
+            use super::super::super::super::{LosslessImagePath, UnverifiedLosslessImagePath};
+
+            #[test]
+            fn rgba8x3() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba8x4() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                        super::super::super::existing_rgba8_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+
+            #[test]
+            fn rgba16_rgba8x2() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
+                );
+            }
+        }
+
+        mod fourth_path_non_image {
+            use super::super::super::super::{LosslessImagePath, UnverifiedLosslessImagePath};
+
+            #[test]
+            fn rgba8x4() {
+                test_utils::assert_error_contains(
+                    LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::super::super::existing_rgba8_path(),
+                        super::non_image_path(),
+                    )),
+                    super::non_image_error_message(),
                 );
             }
         }
