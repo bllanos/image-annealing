@@ -26,7 +26,7 @@ mod accept_all_swap {
                 candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
                 displacement_goal: Some(displacement_goal),
             },
-            &swap_parameters.clone(),
+            &swap_parameters,
         );
         assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 

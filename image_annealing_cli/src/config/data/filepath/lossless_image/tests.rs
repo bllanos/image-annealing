@@ -332,7 +332,7 @@ mod lossless_image_path {
             let paths = vec![String::from("1")];
             assert_eq!(
                 LosslessImagePath::Rgba8(paths[0].clone()).to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -341,7 +341,7 @@ mod lossless_image_path {
             let paths = vec![String::from("1"), String::from("2")];
             assert_eq!(
                 LosslessImagePath::Rgba8x2(paths[0].clone(), paths[1].clone()).to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -351,7 +351,7 @@ mod lossless_image_path {
             assert_eq!(
                 LosslessImagePath::Rgba8x3(paths[0].clone(), paths[1].clone(), paths[2].clone())
                     .to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -371,7 +371,7 @@ mod lossless_image_path {
                     paths[3].clone()
                 )
                 .to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -380,7 +380,7 @@ mod lossless_image_path {
             let paths = vec![String::from("1")];
             assert_eq!(
                 LosslessImagePath::Rgba16(paths[0].clone()).to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -389,7 +389,7 @@ mod lossless_image_path {
             let paths = vec![String::from("1"), String::from("2")];
             assert_eq!(
                 LosslessImagePath::Rgba16x2(paths[0].clone(), paths[1].clone()).to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -398,7 +398,7 @@ mod lossless_image_path {
             let paths = vec![String::from("1"), String::from("2")];
             assert_eq!(
                 LosslessImagePath::Rgba16Rgba8(paths[0].clone(), paths[1].clone()).to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
 
@@ -412,7 +412,7 @@ mod lossless_image_path {
                     paths[2].clone()
                 )
                 .to_vec(),
-                paths.iter().map(|path| path).collect::<Vec<&String>>()
+                paths.iter().collect::<Vec<&String>>()
             );
         }
     }

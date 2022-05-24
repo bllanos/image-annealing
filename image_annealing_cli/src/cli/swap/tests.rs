@@ -318,7 +318,7 @@ mod run_swap {
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -344,7 +344,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -382,7 +382,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(0, 0)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -409,7 +409,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -438,7 +438,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -465,7 +465,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -497,7 +497,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(0, 0)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -518,7 +518,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -541,7 +541,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -562,7 +562,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -602,7 +602,7 @@ mod run_swap {
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -628,7 +628,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 2];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -666,7 +666,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -693,7 +693,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -722,7 +722,7 @@ mod run_swap {
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -754,7 +754,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -775,7 +775,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -798,7 +798,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -838,7 +838,7 @@ mod run_swap {
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -864,7 +864,7 @@ mod run_swap {
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 3];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -906,7 +906,7 @@ mod run_swap {
                         TestSwapRatio(2, 0),
                     ];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -937,7 +937,7 @@ mod run_swap {
                         TestSwapRatio(2, 1),
                     ];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -970,7 +970,7 @@ mod run_swap {
                         TestSwapRatio(2, 1),
                     ];
                     let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters.clone());
+                        super::super::super::make_test_data(parameters);
                     let dispatcher =
                         Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                     assert_eq!(
@@ -1006,7 +1006,7 @@ mod run_swap {
                     TestSwapRatio(2, 0),
                 ];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -1031,7 +1031,7 @@ mod run_swap {
                     TestSwapRatio(2, 1),
                 ];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(
@@ -1058,7 +1058,7 @@ mod run_swap {
                     TestSwapRatio(2, 1),
                 ];
                 let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters.clone());
+                    super::super::make_test_data(parameters);
                 let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
                 assert_eq!(
                     run_swap(

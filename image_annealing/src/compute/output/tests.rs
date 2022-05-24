@@ -140,10 +140,7 @@ mod algorithm {
         #[test]
         fn one_step() -> Result<(), Box<dyn Error>> {
             let mut algorithm = super::OneStepAlgorithm::new();
-            assert_eq!(
-                algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?,
-                ()
-            );
+            algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?;
             test_utils::assert_error_contains(
                 super::OneStepAlgorithm::new().step_until(OutputStatus::FinalFullOutput),
                 "OneStepAlgorithm error",
@@ -154,10 +151,7 @@ mod algorithm {
         #[test]
         fn two_step() -> Result<(), Box<dyn Error>> {
             let mut algorithm = super::TwoStepAlgorithm::new();
-            assert_eq!(
-                algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?,
-                ()
-            );
+            algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?;
             test_utils::assert_error_contains(
                 super::TwoStepAlgorithm::new().step_until(OutputStatus::FinalFullOutput),
                 "TwoStepAlgorithm error",
