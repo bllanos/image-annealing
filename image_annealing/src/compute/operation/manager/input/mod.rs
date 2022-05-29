@@ -9,6 +9,7 @@ pub struct PermuteOperationInput<'a> {
     pub image: Option<&'a LosslessImage>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct SwapOperationInput<'a> {
     pub pass: SwapPass,
     pub permutation: Option<&'a ValidatedPermutation>,
@@ -24,3 +25,6 @@ impl<'a> SwapOperationInput<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

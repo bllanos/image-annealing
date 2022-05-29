@@ -11,9 +11,7 @@ use std::error::Error;
 fn swap_valid() -> Result<(), Box<dyn Error>> {
     let path = test_utils::make_test_output_path_string(&["cli_swap"]);
     let full_output_path = VectorFieldImageBuffer::make_filename(&path);
-    if full_output_path.is_file() {
-        panic!("Output permutation already exists in the filesystem.")
-    }
+    assert!(!full_output_path.is_file());
 
     let (candidate_permutation_path, image_dimensions) =
         PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
@@ -40,9 +38,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     };
     cli::run(config)?;
 
-    if !full_output_path.is_file() {
-        panic!("Output permutation does not exist in the filesystem.",)
-    }
+    assert!(full_output_path.is_file());
     std::fs::remove_file(full_output_path)?;
 
     Ok(())

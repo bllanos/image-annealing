@@ -69,9 +69,7 @@ mod write_files {
     #[test]
     fn count_swap_only() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_output_path(&["count_swap_only.wgsl"]);
-        if path.is_file() {
-            panic!("Output shader file already exists in the filesystem.")
-        }
+        assert!(!path.is_file());
         let config = OutputConfig {
             count_swap: Some(Cow::from(&path)),
             ..Default::default()
@@ -89,9 +87,7 @@ mod write_files {
     #[test]
     fn create_permutation_only() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_output_path(&["create_permutation_only.wgsl"]);
-        if path.is_file() {
-            panic!("Output shader file already exists in the filesystem.")
-        }
+        assert!(!path.is_file());
         let config = OutputConfig {
             create_permutation: Some(Cow::from(&path)),
             ..Default::default()
@@ -109,9 +105,7 @@ mod write_files {
     #[test]
     fn permute_only() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_output_path(&["permute_only.wgsl"]);
-        if path.is_file() {
-            panic!("Output shader file already exists in the filesystem.")
-        }
+        assert!(!path.is_file());
         let config = OutputConfig {
             permute: Some(Cow::from(&path)),
             ..Default::default()
@@ -129,9 +123,7 @@ mod write_files {
     #[test]
     fn swap_only() -> Result<(), Box<dyn Error>> {
         let path = test_utils::make_test_output_path(&["swap_only.wgsl"]);
-        if path.is_file() {
-            panic!("Output shader file already exists in the filesystem.")
-        }
+        assert!(!path.is_file());
         let config = OutputConfig {
             swap: Some(Cow::from(&path)),
             ..Default::default()
@@ -156,25 +148,17 @@ mod write_default_files {
         let directory = test_utils::make_test_output_path(&[] as &[&Path]);
 
         let count_swap_path = test_utils::make_test_output_path(&["count_swap.wgsl"]);
-        if count_swap_path.is_file() {
-            panic!("count_swap shader file already exists in the filesystem.")
-        }
+        assert!(!count_swap_path.is_file());
 
         let create_permutation_path =
             test_utils::make_test_output_path(&["create_permutation.wgsl"]);
-        if create_permutation_path.is_file() {
-            panic!("create_permutation shader file already exists in the filesystem.")
-        }
+        assert!(!create_permutation_path.is_file());
 
         let permute_path = test_utils::make_test_output_path(&["permute.wgsl"]);
-        if permute_path.is_file() {
-            panic!("permute shader file already exists in the filesystem.")
-        }
+        assert!(!permute_path.is_file());
 
         let swap_path = test_utils::make_test_output_path(&["swap.wgsl"]);
-        if swap_path.is_file() {
-            panic!("swap shader file already exists in the filesystem.")
-        }
+        assert!(!swap_path.is_file());
 
         super::super::write_default_files(Some(directory))?;
 

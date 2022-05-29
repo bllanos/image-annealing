@@ -47,7 +47,7 @@ fn make_pixels(x: u32, y: u32) -> Rgba<VectorFieldImageBufferComponent> {
             2 => Rgba([0, 0, 1, 0]),
             3 => Rgba([0, 1, 0, 0]),
             4 => Rgba([1, 0, 0, 0]),
-            _ => panic!(),
+            _ => unreachable!(),
         },
         1 => match y {
             0 => Rgba([1, 1, 1, 1]),
@@ -55,7 +55,7 @@ fn make_pixels(x: u32, y: u32) -> Rgba<VectorFieldImageBufferComponent> {
             2 => Rgba([0, 0, 255, 0]),
             3 => Rgba([0, 255, 0, 0]),
             4 => Rgba([255, 0, 0, 0]),
-            _ => panic!(),
+            _ => unreachable!(),
         },
         2 => match y {
             0 => Rgba([255, 255, 255, 255]),
@@ -63,9 +63,9 @@ fn make_pixels(x: u32, y: u32) -> Rgba<VectorFieldImageBufferComponent> {
             2 => Rgba([0, 0, 255, 1]),
             3 => Rgba([1, 255, 0, 0]),
             4 => Rgba([255, 1, 0, 0]),
-            _ => panic!(),
+            _ => unreachable!(),
         },
-        _ => panic!(),
+        _ => unreachable!(),
     }
 }
 

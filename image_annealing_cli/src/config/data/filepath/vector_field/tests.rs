@@ -8,19 +8,19 @@ mod image_path {
 
     impl fmt::Display for TestImagePath {
         fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-            unimplemented!()
+            unreachable!()
         }
     }
 
     impl AsRef<Path> for TestImagePath {
         fn as_ref(&self) -> &Path {
-            unimplemented!()
+            unreachable!()
         }
     }
 
     impl AsRef<str> for TestImagePath {
         fn as_ref(&self) -> &str {
-            unimplemented!()
+            unreachable!()
         }
     }
 

@@ -16,7 +16,7 @@ mod swap_ratio {
 
     impl fmt::Display for TestSwapRatio {
         fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-            unimplemented!()
+            unreachable!()
         }
     }
 

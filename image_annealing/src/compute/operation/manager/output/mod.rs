@@ -116,6 +116,7 @@ impl<'a> Iterator for CountSwapOperationOutputPassIter<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct CountSwapOperationOutput {
     passes: Vec<CountSwapOperationOutputPass>,
     combined_swap_ratio: SwapRatioImplementation,

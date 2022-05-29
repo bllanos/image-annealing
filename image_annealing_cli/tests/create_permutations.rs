@@ -8,9 +8,7 @@ use std::error::Error;
 fn create_permutation() -> Result<(), Box<dyn Error>> {
     let path = test_utils::make_test_output_path_string(&["cli_create_permutation"]);
     let full_output_path = VectorFieldImageBuffer::make_filename(&path);
-    if full_output_path.is_file() {
-        panic!("Output permutation already exists in the filesystem.")
-    }
+    assert!(!full_output_path.is_file());
 
     let config = Config {
         algorithm: AlgorithmConfig::CreatePermutation {
@@ -22,9 +20,7 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
     };
     cli::run(config)?;
 
-    if !full_output_path.is_file() {
-        panic!("Output permutation does not exist in the filesystem.",)
-    }
+    assert!(full_output_path.is_file());
     std::fs::remove_file(full_output_path)?;
 
     Ok(())

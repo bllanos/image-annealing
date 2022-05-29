@@ -43,7 +43,7 @@ mod run_swap {
         where
             'a: 'b,
         {
-            unimplemented!()
+            unreachable!()
         }
     }
 
@@ -141,7 +141,7 @@ mod run_swap {
             _input: CreatePermutationInput,
             _parameters: &CreatePermutationParameters,
         ) -> Box<CreatePermutationAlgorithm> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn permute(
@@ -149,7 +149,7 @@ mod run_swap {
             _input: PermuteInput,
             _parameters: &PermuteParameters,
         ) -> Box<PermuteAlgorithm> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn swap(
@@ -194,7 +194,7 @@ mod run_swap {
             _input: ValidatePermutationInput,
             _parameters: &ValidatePermutationParameters,
         ) -> Box<ValidatePermutationAlgorithm> {
-            unimplemented!()
+            unreachable!()
         }
     }
 

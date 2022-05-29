@@ -37,15 +37,15 @@ mod algorithm {
         }
 
         fn partial_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn full_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-            unimplemented!()
+            unreachable!()
         }
     }
 
@@ -73,15 +73,15 @@ mod algorithm {
         }
 
         fn partial_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn full_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-            unimplemented!()
+            unreachable!()
         }
     }
 
@@ -113,15 +113,15 @@ mod algorithm {
         }
 
         fn partial_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn full_output(&mut self) -> Option<()> {
-            unimplemented!()
+            unreachable!()
         }
 
         fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-            unimplemented!()
+            unreachable!()
         }
     }
 
@@ -189,15 +189,15 @@ mod algorithm {
             }
 
             fn partial_output(&mut self) -> Option<()> {
-                unimplemented!()
+                unreachable!()
             }
 
             fn full_output(&mut self) -> Option<()> {
-                unimplemented!()
+                unreachable!()
             }
 
             fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-                unimplemented!()
+                unreachable!()
             }
         }
 

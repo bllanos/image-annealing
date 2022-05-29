@@ -1,4 +1,6 @@
 mod swap_parameters {
+    use super::super::{SwapParameters, SwapPassSelection};
+
     mod new {
         use super::super::super::{SwapParameters, SwapPassSelection};
         use std::error::Error;
@@ -44,5 +46,16 @@ mod swap_parameters {
                 "selection of swap passes is empty",
             );
         }
+    }
+
+    #[test]
+    fn default() {
+        assert_eq!(
+            <SwapParameters as Default>::default(),
+            SwapParameters {
+                selection: SwapPassSelection::all(),
+                count_swap: false,
+            }
+        );
     }
 }

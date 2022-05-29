@@ -1,3 +1,20 @@
+use image::{ImageBuffer, Primitive, Rgba};
+use std::convert::{TryFrom, TryInto};
+
+fn make_image_buffer<T: TryFrom<u32> + Primitive + 'static>() -> ImageBuffer<image::Rgba<T>, Vec<T>>
+where
+    <T as TryFrom<u32>>::Error: std::fmt::Debug,
+{
+    ImageBuffer::from_fn(2, 3, |x, y| {
+        Rgba([
+            x.try_into().unwrap(),
+            (x + 1).try_into().unwrap(),
+            y.try_into().unwrap(),
+            (y + 1).try_into().unwrap(),
+        ])
+    })
+}
+
 mod vector_field_image_buffer {
     use super::super::super::{ImageFileReader, ImageFormat};
     use super::super::VectorFieldImageBuffer;
@@ -25,5 +42,33 @@ mod rgba16_image_buffer {
             Rgba16ImageBuffer::load(path),
             &format!("not the expected format of {}", ImageFormat::Rgba16),
         );
+    }
+}
+
+mod rgba8_image {
+    use super::super::Rgba8Image;
+    use std::error::Error;
+
+    #[test]
+    fn into_inner() -> Result<(), Box<dyn Error>> {
+        let image = super::make_image_buffer();
+        let expected = image.clone();
+        let wrapped_image = Rgba8Image::new(image)?;
+        assert_eq!(wrapped_image.into_inner(), expected);
+        Ok(())
+    }
+}
+
+mod rgba16_image {
+    use super::super::Rgba16Image;
+    use std::error::Error;
+
+    #[test]
+    fn into_inner() -> Result<(), Box<dyn Error>> {
+        let image = super::make_image_buffer();
+        let expected = image.clone();
+        let wrapped_image = Rgba16Image::new(image)?;
+        assert_eq!(wrapped_image.into_inner(), expected);
+        Ok(())
     }
 }

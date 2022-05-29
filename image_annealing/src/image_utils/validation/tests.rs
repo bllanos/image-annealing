@@ -60,9 +60,7 @@ mod validated_permutation {
                 "image_utils_validation_validated_permutation_io_image",
             ]);
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
-            if expected_output_path.is_file() {
-                panic!("Image already exists in the filesystem")
-            }
+            assert!(!expected_output_path.is_file());
 
             let full_output_path = validated_permutation.save_add_extension(path)?;
             assert_eq!(full_output_path, expected_output_path);

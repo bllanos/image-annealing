@@ -194,16 +194,14 @@ mod lossless_image {
 
                 match output_image {
                     LosslessImage::Rgba8(ref wrapped_image) => assert_eq!(wrapped_image, &image),
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let path = test_utils::make_test_output_path_string(&[
                     "compute_output_format_dynamic_io_rgba8",
                 ]);
                 let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
-                if expected_output_path.is_file() {
-                    panic!("Rgba8 image already exists in the filesystem")
-                }
+                assert!(!expected_output_path.is_file());
 
                 let full_output_paths = output_image.save_add_extension(&[path])?;
                 assert_same_paths(&full_output_paths, &[&expected_output_path]);
@@ -215,7 +213,7 @@ mod lossless_image {
 
                 match input_image {
                     LosslessImage::Rgba8(ref wrapped_image) => assert_eq!(wrapped_image, &image),
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -238,7 +236,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -270,7 +268,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -303,7 +301,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.second_inner(), &image2);
                         assert_eq!(wrapped_image.third_inner(), &image3)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -342,7 +340,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.second_inner(), &image2);
                         assert_eq!(wrapped_image.third_inner(), &image3)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -381,7 +379,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.third_inner(), &image3);
                         assert_eq!(wrapped_image.fourth_inner(), &image4)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -427,7 +425,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.third_inner(), &image3);
                         assert_eq!(wrapped_image.fourth_inner(), &image4)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -444,16 +442,14 @@ mod lossless_image {
 
                 match output_image {
                     LosslessImage::Rgba16(ref wrapped_image) => assert_eq!(wrapped_image, &image),
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let path = test_utils::make_test_output_path_string(&[
                     "compute_output_format_dynamic_io_rgba16",
                 ]);
                 let expected_output_path = Rgba16ImageBuffer::make_filename(&path);
-                if expected_output_path.is_file() {
-                    panic!("Rgba16 image already exists in the filesystem")
-                }
+                assert!(!expected_output_path.is_file());
 
                 let full_output_paths = output_image.save_add_extension(&[path])?;
                 assert_same_paths(&full_output_paths, &[&expected_output_path]);
@@ -465,7 +461,7 @@ mod lossless_image {
 
                 match input_image {
                     LosslessImage::Rgba16(ref wrapped_image) => assert_eq!(wrapped_image, &image),
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -488,7 +484,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -520,7 +516,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -547,7 +543,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -580,7 +576,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.first_inner(), &image1);
                         assert_eq!(wrapped_image.second_inner(), &image2)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
@@ -613,7 +609,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.second_inner(), &image2);
                         assert_eq!(wrapped_image.third_inner(), &image3)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
 
                 let paths = [
@@ -653,7 +649,7 @@ mod lossless_image {
                         assert_eq!(wrapped_image.second_inner(), &image2);
                         assert_eq!(wrapped_image.third_inner(), &image3)
                     }
-                    _ => panic!("Unexpected image format"),
+                    _ => unreachable!("Unexpected image format"),
                 }
                 assert_eq!(input_image, output_image);
 
