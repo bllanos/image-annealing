@@ -150,8 +150,7 @@ mod count_swap_operation_output {
 \tpass: horizontal swaps, no offset, result: 0 / 0 (0.00%) swaps accepted
 \tpass: vertical swaps, no offset, result: 0 / 0 (0.00%) swaps accepted
 \tpass: horizontal swaps, with offset, result: 0 / 0 (0.00%) swaps accepted
-\tpass: vertical swaps, with offset, result: 0 / 0 (0.00%) swaps accepted
-"
+\tpass: vertical swaps, with offset, result: 0 / 0 (0.00%) swaps accepted"
         );
         Ok(())
     }
@@ -201,8 +200,7 @@ mod count_swap_operation_output {
             output.to_string(),
             "all passes: 9 / 17 (52.94%) swaps accepted
 \tpass: horizontal swaps, no offset, result: 1 / 9 (11.11%) swaps accepted
-\tpass: vertical swaps, with offset, result: 8 / 8 (100.00%) swaps accepted
-"
+\tpass: vertical swaps, with offset, result: 8 / 8 (100.00%) swaps accepted"
         );
         Ok(())
     }

@@ -181,8 +181,12 @@ impl SwapPassSelectionSwapRatio for CountSwapOperationOutput {
 impl fmt::Display for CountSwapOperationOutput {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "all passes: {}", self.combined_swap_ratio)?;
-        for pass in self.passes.iter() {
-            writeln!(f, "\t{}", pass)?;
+        let mut passes_iterator = self.passes.iter().peekable();
+        while let Some(pass) = passes_iterator.next() {
+            match passes_iterator.peek() {
+                Some(_) => writeln!(f, "\t{}", pass),
+                None => write!(f, "\t{}", pass),
+            }?
         }
         fmt::Result::Ok(())
     }
