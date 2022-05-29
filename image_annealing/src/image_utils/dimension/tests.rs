@@ -73,6 +73,15 @@ mod from_image_path {
             "No such file or directory",
         );
     }
+
+    #[test]
+    fn non_image() {
+        let path = test_utils::make_test_data_path(&["empty.txt"]);
+        test_utils::assert_error_contains(
+            ImageDimensions::from_image_path(path),
+            "The file extension `.\"txt\"` was not recognized as an image format",
+        );
+    }
 }
 
 mod make_linear_index {

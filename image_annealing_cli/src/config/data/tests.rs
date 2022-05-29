@@ -139,7 +139,7 @@ mod config_try_from_unverified_config {
                     "../test_data/image/permutation/identity_permutation.png",
                 ),
                 original_image: UnverifiedLosslessImagePath::Rgba8(String::from(
-                    "../test_data/image/image/radial_gradient_rg.png",
+                    "../test_data/image/image/stripes_large.png",
                 )),
                 permuted_image_output_path_no_extension: UnverifiedLosslessImagePath::Rgba8(
                     String::from("permuted_image_out"),
@@ -148,7 +148,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_utils::assert_error_contains(
             r,
-            "mismatch in image dimensions, (width, height) = (200, 200) and (width, height) = (20, 25)",
+            "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
         );
         }
     }

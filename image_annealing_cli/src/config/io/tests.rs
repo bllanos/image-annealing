@@ -81,7 +81,7 @@ mod check_input_path {
 
     #[test]
     fn valid_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(&["image", "image", "radial_gradient_rg.png"]);
+        let path = test_utils::make_test_data_path(&["image", "image", "stripes.png"]);
         Ok(check_input_path(path)?)
     }
 }
