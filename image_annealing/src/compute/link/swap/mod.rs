@@ -3,7 +3,6 @@ use crate::ImageDimensions;
 use bytemuck::{Pod, Zeroable};
 use image_annealing_shaders::constant;
 use image_annealing_shaders::WorkgroupDimensions;
-use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use std::num::NonZeroU32;
 

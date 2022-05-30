@@ -263,7 +263,6 @@ mod count_swap {
 
 mod count {
     use super::super::WorkgroupGridDimensions;
-    use std::convert::TryFrom;
     use std::error::Error;
     use wgpu::Extent3d;
 

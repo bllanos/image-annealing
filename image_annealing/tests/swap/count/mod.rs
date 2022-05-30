@@ -11,7 +11,6 @@ mod sum_at_least_two_elements_per_invocation {
     use super::super::border;
     use image_annealing_shaders::constant::swap::STRIDE;
     use image_annealing_shaders::WorkgroupDimensions;
-    use std::convert::TryInto;
     use std::error::Error;
 
     fn at_least_two_elements_per_invocation() -> usize {

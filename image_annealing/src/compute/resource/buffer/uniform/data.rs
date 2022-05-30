@@ -1,7 +1,6 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
 use super::super::BindableBuffer;
-use std::convert::TryInto;
 use std::marker::PhantomData;
 
 pub struct UniformBufferData<T>(BufferData, PhantomData<T>);

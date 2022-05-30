@@ -1,5 +1,4 @@
 use image::{ImageBuffer, Rgba};
-use std::convert::{TryFrom, TryInto};
 
 fn make_image_buffer<T: TryFrom<u32> + 'static>(
 ) -> ImageBuffer<image::Rgba<T>, Vec<<image::Rgba<T> as image::Pixel>::Subpixel>>

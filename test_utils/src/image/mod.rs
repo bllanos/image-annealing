@@ -3,7 +3,6 @@ use image_annealing::compute::format::{
     Rgba16ImageBuffer, Rgba16ImageBufferComponent, VectorFieldImageBufferComponent,
 };
 use image_annealing::ImageDimensions;
-use std::convert::TryInto;
 
 pub struct DimensionsAndRgbaBuffer<Component: 'static>
 where
@@ -51,13 +50,13 @@ pub fn coordinates_to_zero_alpha_colors(dimensions: &ImageDimensions) -> Rgba16I
 
 pub fn linear_indices_with_bias_to_colors<
     Bias: TryInto<usize> + std::fmt::Debug + Copy,
-    Component: 'static + std::convert::TryFrom<usize>,
+    Component: 'static + TryFrom<usize>,
 >(
     bias: Bias,
 ) -> DimensionsAndRgbaBuffer<Component>
 where
-    <Bias as std::convert::TryInto<usize>>::Error: std::fmt::Debug,
-    <Component as std::convert::TryFrom<usize>>::Error: std::fmt::Debug,
+    <Bias as TryInto<usize>>::Error: std::fmt::Debug,
+    <Component as TryFrom<usize>>::Error: std::fmt::Debug,
     image::Rgba<Component>: image::Pixel,
 {
     let dimensions = ImageDimensions::new(2, 3).unwrap();

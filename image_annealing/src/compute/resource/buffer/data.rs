@@ -1,5 +1,3 @@
-use std::convert::TryInto;
-
 use super::dimensions::BufferDimensions;
 use super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
 

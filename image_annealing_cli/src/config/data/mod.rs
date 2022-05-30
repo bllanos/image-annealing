@@ -1,6 +1,5 @@
 use image_annealing::{compute, DimensionsMismatchError, ImageDimensions};
 use serde::Deserialize;
-use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 
 mod filepath;

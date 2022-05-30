@@ -4,7 +4,6 @@ use super::super::map::{ChunkedMappedBuffer, ChunkedReadMappableBuffer};
 use super::super::storage::CountSwapOutputStorageBuffer;
 use crate::compute::link::swap::CountSwapOutput;
 use crate::compute::operation::WorkgroupGridDimensions;
-use std::convert::TryInto;
 
 pub struct CountSwapOutputBuffer(BufferData);
 

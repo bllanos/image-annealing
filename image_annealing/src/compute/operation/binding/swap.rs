@@ -8,7 +8,6 @@ use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use crate::ImageDimensions;
 use image_annealing_shaders::binding::swap as binding_constants;
-use std::convert::TryFrom;
 
 pub struct SwapBinding {
     binding_data: BindingData,

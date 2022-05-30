@@ -5,7 +5,6 @@ use super::super::map::{ChunkedMappedBuffer, ChunkedReadMappableBuffer};
 use super::data::TextureCopyBufferData;
 use crate::compute::format::VectorFieldImageBufferComponent;
 use crate::ImageDimensions;
-use std::convert::TryInto;
 
 pub struct PermutationOutputBuffer(TextureCopyBufferData);
 

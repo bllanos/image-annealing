@@ -1,6 +1,5 @@
 use super::ImageDimensions;
 use image::RgbaImage;
-use std::convert::TryInto;
 use std::error::Error;
 
 mod new {
@@ -213,7 +212,6 @@ fn to_extent() -> Result<(), Box<dyn Error>> {
 
 mod try_from_extent {
     use super::super::ImageDimensions;
-    use std::convert::TryFrom;
     use std::error::Error;
 
     #[test]

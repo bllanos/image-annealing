@@ -3,7 +3,6 @@ use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
 use super::super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
 use crate::ImageDimensions;
-use std::convert::TryInto;
 use std::num::NonZeroU32;
 
 pub struct TextureCopyBufferData(BufferData);

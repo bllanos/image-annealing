@@ -1,7 +1,6 @@
 mod swap_stop_threshold_try_from_unverified_swap_stop_threshold {
     use super::super::super::super::number::NonnegativeProperFraction;
     use super::super::{SwapStopThreshold, UnverifiedSwapStopThreshold};
-    use std::convert::TryFrom;
     use std::error::Error;
 
     #[test]
@@ -33,7 +32,6 @@ mod swap_stop_threshold_try_from_unverified_swap_stop_threshold {
 
 mod iteration_count {
     use super::super::{IterationCount, UnverifiedIterationCount};
-    use std::convert::TryFrom;
     use std::error::Error;
     use std::num::NonZeroUsize;
 
@@ -66,7 +64,6 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
             IterationCount, SwapStopConfig, SwapStopThreshold, UnverifiedIterationCount,
             UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
         };
-        use std::convert::TryFrom;
         use std::error::Error;
         use std::num::NonZeroUsize;
 
@@ -128,7 +125,6 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
             SwapStopConfig, SwapStopThreshold, UnverifiedSwapStopConfig,
             UnverifiedSwapStopThreshold,
         };
-        use std::convert::TryFrom;
         use std::error::Error;
 
         #[test]
@@ -159,7 +155,6 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
         SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedSwapParametersConfig,
         UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
     };
-    use std::convert::TryFrom;
     use std::error::Error;
 
     #[test]

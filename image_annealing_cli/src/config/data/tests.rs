@@ -4,7 +4,6 @@ mod config_try_from_unverified_config {
             AlgorithmConfig, Config, ImagePath, PermutationPath, UnverifiedConfig,
         };
         use image_annealing::{compute, ImageDimensions};
-        use std::convert::{TryFrom, TryInto};
         use std::error::Error;
 
         #[test]
@@ -49,7 +48,6 @@ mod config_try_from_unverified_config {
             UnverifiedConfig, UnverifiedLosslessImagePath,
         };
         use image_annealing::compute;
-        use std::convert::{TryFrom, TryInto};
         use std::error::Error;
 
         #[test]
@@ -160,7 +158,6 @@ mod config_try_from_unverified_config {
             UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
         };
         use image_annealing::compute;
-        use std::convert::{TryFrom, TryInto};
         use std::error::Error;
 
         fn make_unverified_swap_parameters() -> UnverifiedSwapParametersConfig {
@@ -300,7 +297,6 @@ mod config_try_from_unverified_config {
             AlgorithmConfig, Config, ImagePath, PermutationPath, UnverifiedConfig,
         };
         use image_annealing::compute;
-        use std::convert::{TryFrom, TryInto};
         use std::error::Error;
 
         #[test]

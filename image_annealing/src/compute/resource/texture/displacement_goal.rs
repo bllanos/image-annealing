@@ -3,7 +3,6 @@ use super::data::TextureData;
 use super::{Texture, TextureDatatype};
 use crate::{DisplacementGoal, ImageDimensions};
 use core::num::NonZeroU32;
-use std::convert::{TryFrom, TryInto};
 
 pub struct DisplacementGoalTexture {}
 

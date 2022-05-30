@@ -1,6 +1,5 @@
 use super::super::number::{InvalidNonnegativeProperFractionError, NonnegativeProperFraction};
 use serde::Deserialize;
-use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::fmt;
 use std::num::NonZeroUsize;

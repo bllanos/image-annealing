@@ -1,7 +1,6 @@
 use super::validation::ValidatedPermutation;
 use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::VectorFieldImageBuffer;
-use std::convert::{TryFrom, TryInto};
 
 pub(crate) fn invert_permutation(permutation: &ValidatedPermutation) -> VectorFieldImageBuffer {
     let vector_field: &VectorFieldImageBuffer = permutation.as_ref();

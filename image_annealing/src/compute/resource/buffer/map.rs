@@ -1,6 +1,5 @@
 use super::dimensions::BufferDimensions;
 use core::future::Future;
-use std::convert::TryInto;
 use std::pin::Pin;
 
 pub trait MappedBuffer<'a, T> {

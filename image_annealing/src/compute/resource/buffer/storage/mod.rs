@@ -1,5 +1,4 @@
 use super::dimensions::BufferDimensions;
-use std::convert::TryInto;
 
 mod count_swap;
 

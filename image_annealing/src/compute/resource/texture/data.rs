@@ -1,7 +1,6 @@
 use super::TextureDatatype;
 use crate::ImageDimensions;
 use image::GenericImageView;
-use std::convert::TryInto;
 
 pub fn make_write_texture_binding_description<T: TextureDatatype>() -> wgpu::BindingType {
     wgpu::BindingType::StorageTexture {

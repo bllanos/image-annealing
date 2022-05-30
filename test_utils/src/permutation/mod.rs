@@ -2,7 +2,6 @@ use image::ImageBuffer;
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{Rgba16ImageBuffer, VectorFieldImageBuffer};
 use image_annealing::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
-use std::convert::TryInto;
 
 pub struct DimensionsAndPermutation {
     pub permutation: VectorFieldImageBuffer,

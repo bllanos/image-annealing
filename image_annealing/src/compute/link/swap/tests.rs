@@ -309,7 +309,6 @@ mod swap_pass_selection {
 mod count_swap_input_layout {
     use super::super::{CountSwapInputLayout, SwapPass, SwapPassSelection};
     use crate::ImageDimensions;
-    use std::convert::TryInto;
     use std::error::Error;
 
     #[test]
@@ -377,7 +376,6 @@ mod count_swap_input_layout {
 
 mod count_swap_output {
     use super::super::{CountSwapOutput, SwapPass};
-    use std::convert::TryInto;
     use std::error::Error;
 
     #[test]

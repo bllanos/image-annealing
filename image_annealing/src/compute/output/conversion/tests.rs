@@ -7,7 +7,6 @@ use std::error::Error;
 mod vector_field_entry {
     use super::super::VectorFieldEntry;
     use crate::ImageDimensions;
-    use std::convert::TryInto;
     use std::error::Error;
 
     #[test]

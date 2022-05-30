@@ -114,7 +114,6 @@ mod count_swap_operation_output {
     use crate::compute::{SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio};
     use crate::ImageDimensions;
     use image_annealing_shaders::constant;
-    use std::convert::TryInto;
     use std::error::Error;
 
     #[test]

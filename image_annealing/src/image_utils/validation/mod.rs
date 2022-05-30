@@ -4,7 +4,6 @@ use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::{
     ImageFileWriter, Rgba8Image, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
-use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
 use std::ops::IndexMut;

@@ -1,5 +1,4 @@
 use crate::ImageDimensions;
-use std::convert::TryInto;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct TexturePaddingDimensions {

@@ -1,6 +1,5 @@
 use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
-use std::convert::TryInto;
 use std::error::Error;
 use test_utils::algorithm::assert_step_until_success;
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};

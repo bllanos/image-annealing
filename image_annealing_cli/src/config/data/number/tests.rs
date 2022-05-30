@@ -1,6 +1,5 @@
 mod nonnegative_rational_number {
     use super::super::NonnegativeRationalNumber;
-    use std::convert::TryFrom;
     use std::error::Error;
 
     #[test]
@@ -45,7 +44,6 @@ mod nonnegative_rational_number {
 
 mod nonnegative_proper_fraction {
     use super::super::NonnegativeProperFraction;
-    use std::convert::TryFrom;
     use std::error::Error;
 
     #[test]

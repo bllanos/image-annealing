@@ -1,5 +1,4 @@
 use super::data::{Config, UnverifiedConfig};
-use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 use std::fs::File;

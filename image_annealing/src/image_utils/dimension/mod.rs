@@ -1,6 +1,4 @@
 use image::GenericImageView;
-use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
 use std::num::NonZeroUsize;
