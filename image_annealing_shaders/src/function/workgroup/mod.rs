@@ -13,7 +13,7 @@ pub fn reduce_partial_sum<W: Write>(mut writer: W, n_elements: u32) -> std::io::
         writeln!(
             writer,
             "  if (id < {i}u) {{
-    partial_sum[id] += partial_sum[id + {i}u];
+    partial_sum[id] = partial_sum[id] + partial_sum[id + {i}u];
   }}
   workgroupBarrier();",
             i = i

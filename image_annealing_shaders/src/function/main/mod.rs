@@ -6,29 +6,29 @@ mod header;
 pub use header::SHADER_ENTRY_POINT;
 
 pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
-  header::global_invocation_id_header(&mut writer)?;
-  writeln!(
-    writer,
-    "  textureStore(output_permutation, vec2<i32>(global_id.xy), vec4<u32>(0u,0u,0u,0u));
+    header::global_invocation_id_header(&mut writer)?;
+    writeln!(
+        writer,
+        "  textureStore(output_permutation, vec2<i32>(global_id.xy), vec4<u32>(0u,0u,0u,0u));
 }}"
-  )
+    )
 }
 
 pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {
-  header::global_invocation_id_header(&mut writer)?;
-  writeln!(
-    writer,
-    "  let coords : vec2<i32> = vec2<i32>(global_id.xy);
+    header::global_invocation_id_header(&mut writer)?;
+    writeln!(
+        writer,
+        "  let coords : vec2<i32> = vec2<i32>(global_id.xy);
   let permutation_vector : vec2<i32> = load_permutation_vector(coords);
   let image_texel : vec4<u32> = textureLoad(input_image, coords + permutation_vector, 0);
   textureStore(output_image, coords, image_texel);
 }}"
-  )
+    )
 }
 
 pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
-  header::swap_header(&mut writer)?;
-  writeln!(
+    header::swap_header(&mut writer)?;
+    writeln!(
     writer,
     "  var count : f32 = 0.0;
   let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x * {}u), i32(global_id.y));
@@ -69,8 +69,8 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
 }
 
 pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
-  header::count_swap_header(&mut writer)?;
-  writeln!(
+    header::count_swap_header(&mut writer)?;
+    writeln!(
     writer,
     "  // Parallel reduction code based on:
   //   Optimizing Parallel Reduction in CUDA, by Mark Harris, NVIDIA Developer Technology
@@ -82,7 +82,7 @@ pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   let global_id : u32 = local_id + (workgroup_id.x + (workgroup_id.y * num_workgroups.x) + (workgroup_id.z * num_workgroups.x * num_workgroups.y)) * workgroup_invocations;
 
   var local_sum : vec4<f32> = vec4<f32>(0.0);
-  for(var channel: u32 = 0u; channel < n_channel; channel += 1u) {{
+  for(var channel: u32 = 0u; channel < n_channel; channel = channel + 1u) {{
     if (parameters.do_segment[channel] != 0u) {{
       var i : u32 = parameters.segment_start[channel] + global_id;
       let end : u32 = parameters.segment_end[channel];
@@ -91,9 +91,9 @@ pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
             break;
         }}
 
-        local_sum[channel] += input.arr[i];
+        local_sum[channel] = local_sum[channel] + input.arr[i];
 
-        i += total_invocations;
+        i = i + total_invocations;
       }}
     }}
   }}
