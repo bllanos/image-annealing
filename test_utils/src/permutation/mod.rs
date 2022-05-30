@@ -61,9 +61,15 @@ pub fn non_identity() -> DimensionsAndPermutation {
     }
 }
 
-pub fn non_identity_forward_permute<Component: 'static + image::Primitive>(
-    image: &ImageBuffer<image::Rgba<Component>, Vec<Component>>,
-) -> ImageBuffer<image::Rgba<Component>, Vec<Component>> {
+pub fn non_identity_forward_permute<Component: 'static>(
+    image: &ImageBuffer<
+        image::Rgba<Component>,
+        Vec<<image::Rgba<Component> as image::Pixel>::Subpixel>,
+    >,
+) -> ImageBuffer<image::Rgba<Component>, Vec<<image::Rgba<Component> as image::Pixel>::Subpixel>>
+where
+    image::Rgba<Component>: image::Pixel,
+{
     assert_eq!(image.width(), 2);
     assert_eq!(image.height(), 3);
     let mut permuted_image = image.clone();

@@ -1,9 +1,11 @@
-use image::{ImageBuffer, Primitive, Rgba};
+use image::{ImageBuffer, Rgba};
 use std::convert::{TryFrom, TryInto};
 
-fn make_image_buffer<T: TryFrom<u32> + Primitive + 'static>() -> ImageBuffer<image::Rgba<T>, Vec<T>>
+fn make_image_buffer<T: TryFrom<u32> + 'static>(
+) -> ImageBuffer<image::Rgba<T>, Vec<<image::Rgba<T> as image::Pixel>::Subpixel>>
 where
     <T as TryFrom<u32>>::Error: std::fmt::Debug,
+    image::Rgba<T>: image::Pixel,
 {
     ImageBuffer::from_fn(2, 3, |x, y| {
         Rgba([
