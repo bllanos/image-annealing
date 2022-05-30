@@ -2,7 +2,7 @@
 name = "image_annealing"
 version = "0.1.0"
 authors = ["Bernard Llanos"]
-edition = "2018"
+edition = "2021"
 description = "Approximate optimization algorithms applied to images"
 keywords = ["image","graphics"]
 license = "MIT OR Apache-2.0"
