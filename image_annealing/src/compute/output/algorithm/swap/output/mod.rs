@@ -8,10 +8,11 @@ pub trait SwapRatio: fmt::Display {
     }
 
     fn accepted_fraction(&self) -> f64 {
-        if self.total() == 0 {
+        let total = self.total();
+        if total == 0 {
             0.0
         } else {
-            self.accepted() as f64 / self.total() as f64
+            self.accepted() as f64 / total as f64
         }
     }
 

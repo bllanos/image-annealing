@@ -45,18 +45,26 @@ impl SwapPass {
     pub fn total_swaps(&self, image_dimensions: &ImageDimensions) -> usize {
         let stride: usize = constant::swap::STRIDE.try_into().unwrap();
         match self {
-            SwapPass::Horizontal => (image_dimensions.width() / stride)
+            SwapPass::Horizontal => image_dimensions
+                .width()
+                .checked_div_euclid(stride)
+                .unwrap()
                 .checked_mul(image_dimensions.height())
                 .unwrap(),
-            SwapPass::Vertical => (image_dimensions.height() / stride)
+            SwapPass::Vertical => image_dimensions
+                .height()
+                .checked_div_euclid(stride)
+                .unwrap()
                 .checked_mul(image_dimensions.width())
                 .unwrap(),
-            SwapPass::OffsetHorizontal => ((image_dimensions.width() - constant::swap::OFFSET)
-                / stride)
+            SwapPass::OffsetHorizontal => (image_dimensions.width() - constant::swap::OFFSET)
+                .checked_div_euclid(stride)
+                .unwrap()
                 .checked_mul(image_dimensions.height())
                 .unwrap(),
-            SwapPass::OffsetVertical => ((image_dimensions.height() - constant::swap::OFFSET)
-                / stride)
+            SwapPass::OffsetVertical => (image_dimensions.height() - constant::swap::OFFSET)
+                .checked_div_euclid(stride)
+                .unwrap()
                 .checked_mul(image_dimensions.width())
                 .unwrap(),
         }

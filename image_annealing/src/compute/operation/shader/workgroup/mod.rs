@@ -58,14 +58,14 @@ impl WorkgroupGridDimensions {
             depth_or_array_layers: depth,
         } = extent;
         let remainder = (
-            width % workgroup_dimensions.x(),
-            height % workgroup_dimensions.y(),
-            depth % workgroup_dimensions.z(),
+            width.checked_rem_euclid(workgroup_dimensions.x()).unwrap(),
+            height.checked_rem_euclid(workgroup_dimensions.y()).unwrap(),
+            depth.checked_rem_euclid(workgroup_dimensions.z()).unwrap(),
         );
         let quotient = (
-            width / workgroup_dimensions.x(),
-            height / workgroup_dimensions.y(),
-            depth / workgroup_dimensions.z(),
+            width.checked_div_euclid(workgroup_dimensions.x()).unwrap(),
+            height.checked_div_euclid(workgroup_dimensions.y()).unwrap(),
+            depth.checked_div_euclid(workgroup_dimensions.z()).unwrap(),
         );
         Self(
             NonZeroU32::new(if remainder.0 == 0 {

@@ -9,10 +9,16 @@ pub struct TexturePaddingDimensions {
 impl TexturePaddingDimensions {
     /// From https://github.com/gfx-rs/wgpu/blob/master/wgpu/examples/capture/main.rs
     fn new(sz: &ImageDimensions, bytes_per_pixel: usize) -> Self {
-        let unpadded_bytes_per_row = sz.width() * bytes_per_pixel;
+        let unpadded_bytes_per_row = sz.width().checked_mul(bytes_per_pixel).unwrap();
         let align: usize = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT.try_into().unwrap();
-        let padded_bytes_per_row_padding = (align - unpadded_bytes_per_row % align) % align;
-        let padded_bytes_per_row = unpadded_bytes_per_row + padded_bytes_per_row_padding;
+        let padded_bytes_per_row_padding = align
+            .checked_sub(unpadded_bytes_per_row.checked_rem_euclid(align).unwrap())
+            .unwrap()
+            .checked_rem_euclid(align)
+            .unwrap();
+        let padded_bytes_per_row = unpadded_bytes_per_row
+            .checked_add(padded_bytes_per_row_padding)
+            .unwrap();
         Self {
             unpadded_bytes_per_row,
             padded_bytes_per_row,
