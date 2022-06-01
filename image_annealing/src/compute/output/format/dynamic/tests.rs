@@ -135,27 +135,27 @@ mod lossless_image {
         }
 
         fn existing_rgba8_path() -> PathBuf {
-            test_utils::make_test_data_path(&["image", "image", "stripes.png"])
+            test_utils::make_test_data_path(["image", "image", "stripes.png"])
         }
 
         fn existing_rgba16_path() -> PathBuf {
-            test_utils::make_test_data_path(&["image", "image", "red.png"])
+            test_utils::make_test_data_path(["image", "image", "red.png"])
         }
 
         fn large_rgba8_path() -> PathBuf {
-            test_utils::make_test_data_path(&["image", "image", "stripes_large.png"])
+            test_utils::make_test_data_path(["image", "image", "stripes_large.png"])
         }
 
         fn large_rgba16_path() -> PathBuf {
-            test_utils::make_test_data_path(&["image", "image", "red_large.png"])
+            test_utils::make_test_data_path(["image", "image", "red_large.png"])
         }
 
         fn missing_image_path() -> PathBuf {
-            test_utils::make_test_data_path(&["image", "image", "not_found.png"])
+            test_utils::make_test_data_path(["image", "image", "not_found.png"])
         }
 
         fn missing_directory_path() -> PathBuf {
-            test_utils::make_test_output_path(&["not_found", "cannot_create"])
+            test_utils::make_test_output_path(["not_found", "cannot_create"])
         }
 
         fn mismatch_error_message() -> &'static str {
@@ -197,7 +197,7 @@ mod lossless_image {
                     _ => unreachable!("Unexpected image format"),
                 }
 
-                let path = test_utils::make_test_output_path_string(&[
+                let path = test_utils::make_test_output_path_string([
                     "compute_output_format_dynamic_io_rgba8",
                 ]);
                 let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
@@ -240,10 +240,10 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x2_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x2_2",
                     ]),
                 ];
@@ -305,13 +305,13 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x3_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x3_2",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x3_3",
                     ]),
                 ];
@@ -383,16 +383,16 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x4_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x4_2",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x4_3",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba8x4_4",
                     ]),
                 ];
@@ -445,7 +445,7 @@ mod lossless_image {
                     _ => unreachable!("Unexpected image format"),
                 }
 
-                let path = test_utils::make_test_output_path_string(&[
+                let path = test_utils::make_test_output_path_string([
                     "compute_output_format_dynamic_io_rgba16",
                 ]);
                 let expected_output_path = Rgba16ImageBuffer::make_filename(&path);
@@ -488,10 +488,10 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16x2_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16x2_2",
                     ]),
                 ];
@@ -547,10 +547,10 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16_rgba8_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16_rgba8_2",
                     ]),
                 ];
@@ -613,13 +613,13 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16_rgba8x2_1",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16_rgba8x2_2",
                     ]),
-                    test_utils::make_test_output_path_string(&[
+                    test_utils::make_test_output_path_string([
                         "compute_output_format_dynamic_io_rgba16_rgba8x2_3",
                     ]),
                 ];
@@ -1079,13 +1079,13 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x2().save_add_extension(&[
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2.png",
                 ])]);
             }
@@ -1095,20 +1095,20 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_2",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_3",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_2.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_3.png",
                     ]),
                 ]);
@@ -1119,26 +1119,26 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_2",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_3",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_4",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_2.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_3.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_4.png",
                     ]),
                 ]);
@@ -1158,13 +1158,13 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba16x2().save_add_extension(&[
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_first_image_save_error_rgba16x2_2",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_first_image_save_error_rgba16x2_2.png",
                 ])]);
             }
@@ -1174,13 +1174,13 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                 super::super::valid_rgba16_rgba8().save_add_extension(&[
                     super::missing_directory_path(),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2",
                     ]),
                 ]),
                 super::missing_error_message(),
             );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2.png",
                 ])]);
             }
@@ -1190,20 +1190,20 @@ mod lossless_image {
                 test_utils::assert_error_contains(
                 super::super::valid_rgba16_rgba8x2().save_add_extension(&[
                     super::missing_directory_path(),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3",
                     ]),
                 ]),
                 super::missing_error_message(),
             );
                 super::assert_not_files(&[
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2.png",
                 ]),
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3.png",
                 ]),
             ]);
@@ -1215,14 +1215,14 @@ mod lossless_image {
             fn rgba8x2() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x2().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x2_1",
                         ]),
                         super::missing_directory_path(),
                     ]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_second_image_save_error_rgba8x2_1.png",
                 ])]);
             }
@@ -1231,21 +1231,21 @@ mod lossless_image {
             fn rgba8x3() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_1",
                         ]),
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_3",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_1.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_3.png",
                     ]),
                 ]);
@@ -1255,27 +1255,27 @@ mod lossless_image {
             fn rgba8x4() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_1",
                         ]),
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_3",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_4",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_1.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_3.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_4.png",
                     ]),
                 ]);
@@ -1285,14 +1285,14 @@ mod lossless_image {
             fn rgba16x2() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba16x2().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_second_image_save_error_rgba16x2_1",
                         ]),
                         super::missing_directory_path(),
                     ]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_second_image_save_error_rgba16x2_1.png",
                 ])]);
             }
@@ -1301,14 +1301,14 @@ mod lossless_image {
             fn rgba16_rgba8() {
                 test_utils::assert_error_contains(
                 super::super::valid_rgba16_rgba8().save_add_extension(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1",
                     ]),
                     super::missing_directory_path(),
                 ]),
                 super::missing_error_message(),
             );
-                super::assert_not_files(&[test_utils::make_test_output_path(&[
+                super::assert_not_files(&[test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1.png",
                 ])]);
             }
@@ -1317,21 +1317,21 @@ mod lossless_image {
             fn rgba16_rgba8x2() {
                 test_utils::assert_error_contains(
                 super::super::valid_rgba16_rgba8x2().save_add_extension(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1",
                     ]),
                     super::missing_directory_path(),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3",
                     ]),
                 ]),
                 super::missing_error_message(),
             );
                 super::assert_not_files(&[
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1.png",
                 ]),
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3.png",
                 ]),
             ]);
@@ -1343,10 +1343,10 @@ mod lossless_image {
             fn rgba8x3() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_1",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_2",
                         ]),
                         super::missing_directory_path(),
@@ -1354,10 +1354,10 @@ mod lossless_image {
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_1.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_2.png",
                     ]),
                 ]);
@@ -1367,27 +1367,27 @@ mod lossless_image {
             fn rgba8x4() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_1",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_2",
                         ]),
                         super::missing_directory_path(),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_4",
                         ]),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_1.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_2.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_4.png",
                     ]),
                 ]);
@@ -1397,10 +1397,10 @@ mod lossless_image {
             fn rgba16_rgba8x2() {
                 test_utils::assert_error_contains(
                 super::super::valid_rgba16_rgba8x2().save_add_extension(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2",
                     ]),
                     super::missing_directory_path(),
@@ -1408,10 +1408,10 @@ mod lossless_image {
                 super::missing_error_message(),
             );
                 super::assert_not_files(&[
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1.png",
                 ]),
-                test_utils::make_test_output_path(&[
+                test_utils::make_test_output_path([
                     "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2.png",
                 ]),
             ]);
@@ -1423,13 +1423,13 @@ mod lossless_image {
             fn rgba8x4() {
                 test_utils::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_1",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_2",
                         ]),
-                        test_utils::make_test_output_path(&[
+                        test_utils::make_test_output_path([
                             "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_3",
                         ]),
                         super::missing_directory_path(),
@@ -1437,13 +1437,13 @@ mod lossless_image {
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_1.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_2.png",
                     ]),
-                    test_utils::make_test_output_path(&[
+                    test_utils::make_test_output_path([
                         "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_3.png",
                     ]),
                 ]);

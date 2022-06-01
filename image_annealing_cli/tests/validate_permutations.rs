@@ -7,7 +7,7 @@ use std::error::Error;
 #[test]
 fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
             "image",
             "permutation",
             "identity_permutation.png",
@@ -25,7 +25,7 @@ fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
             "image",
             "permutation",
             "invalid_permutation.png",
@@ -43,7 +43,7 @@ fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
             "image", "image", "red.png",
         ]))?;
     let config = Config {

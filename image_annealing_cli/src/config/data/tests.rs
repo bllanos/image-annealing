@@ -65,7 +65,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
@@ -76,7 +76,7 @@ mod config_try_from_unverified_config {
                     algorithm: AlgorithmConfig::Permute {
                         candidate_permutation: candidate_permutation_path,
                         original_image: LosslessImagePath::Rgba8(
-                            test_utils::make_test_data_path_string(&[
+                            test_utils::make_test_data_path_string([
                                 "image",
                                 "image",
                                 "stripes.png"
@@ -188,7 +188,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
@@ -199,7 +199,7 @@ mod config_try_from_unverified_config {
                     algorithm: AlgorithmConfig::Swap {
                         candidate_permutation: candidate_permutation_path,
                         displacement_goal: DisplacementGoalPath::from_raw(
-                            test_utils::make_test_data_path_string(&[
+                            test_utils::make_test_data_path_string([
                                 "image",
                                 "displacement_goal",
                                 "identity_displacement_goal.png"
@@ -308,7 +308,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string(&[
+                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",

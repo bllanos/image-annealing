@@ -22,7 +22,7 @@ mod parse_args {
     #[test]
     fn valid_config_file() -> Result<(), Box<dyn Error>> {
         let path =
-            test_utils::make_test_data_path_string(&["config", "create_permutation", "valid.json"]);
+            test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
         let v = vec![String::from("one"), path];
         let r = parse_args(v)?;
         assert_eq!(
@@ -44,7 +44,7 @@ mod parse_args {
     #[test]
     fn additional_args() -> Result<(), Box<dyn Error>> {
         let path =
-            test_utils::make_test_data_path_string(&["config", "create_permutation", "valid.json"]);
+            test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
         let v = vec![String::from("one"), path, String::from("other_arg")];
         let r = parse_args(v)?;
         assert_eq!(

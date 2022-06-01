@@ -6,7 +6,7 @@ use std::error::Error;
 
 #[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
-    let path = test_utils::make_test_output_path_string(&["cli_create_permutation"]);
+    let path = test_utils::make_test_output_path_string(["cli_create_permutation"]);
     let full_output_path = VectorFieldImageBuffer::make_filename(&path);
     assert!(!full_output_path.is_file());
 
@@ -28,7 +28,7 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn save_missing_directory() -> Result<(), Box<dyn Error>> {
-    let path = test_utils::make_test_output_path_string(&["not_found", "cannot_create"]);
+    let path = test_utils::make_test_output_path_string(["not_found", "cannot_create"]);
 
     let config = Config {
         algorithm: AlgorithmConfig::CreatePermutation {

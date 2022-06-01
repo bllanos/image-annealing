@@ -57,7 +57,7 @@ mod from_image_path {
 
     #[test]
     fn from_image_path() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(&["image", "image", "stripes.png"]);
+        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
         let dim = ImageDimensions::from_image_path(path)?;
         assert_eq!(dim.width(), 20);
         assert_eq!(dim.height(), 25);
@@ -66,7 +66,7 @@ mod from_image_path {
 
     #[test]
     fn missing_image() {
-        let path = test_utils::make_test_data_path(&["image", "image", "not_found.png"]);
+        let path = test_utils::make_test_data_path(["image", "image", "not_found.png"]);
         test_utils::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "No such file or directory",
@@ -75,7 +75,7 @@ mod from_image_path {
 
     #[test]
     fn non_image() {
-        let path = test_utils::make_test_data_path(&["empty.txt"]);
+        let path = test_utils::make_test_data_path(["empty.txt"]);
         test_utils::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "The file extension `.\"txt\"` was not recognized as an image format",

@@ -56,7 +56,7 @@ mod validated_permutation {
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             assert_eq!(*validated_permutation.as_ref(), expected);
 
-            let path = test_utils::make_test_output_path_string(&[
+            let path = test_utils::make_test_output_path_string([
                 "image_utils_validation_validated_permutation_io_image",
             ]);
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
@@ -76,7 +76,7 @@ mod validated_permutation {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             test_utils::assert_error_contains(
-                validated_permutation.save_add_extension(&test_utils::make_test_output_path(&[
+                validated_permutation.save_add_extension(&test_utils::make_test_output_path([
                     "not_found",
                     "cannot_create",
                 ])),

@@ -1,27 +1,27 @@
 use super::UnverifiedLosslessImagePath;
 
 fn existing_rgba8_path1() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "stripes.png"])
+    test_utils::make_test_data_path_string(["image", "image", "stripes.png"])
 }
 
 fn existing_rgba8_path2() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "green.png"])
+    test_utils::make_test_data_path_string(["image", "image", "green.png"])
 }
 
 fn existing_rgba8_path3() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "pastel.png"])
+    test_utils::make_test_data_path_string(["image", "image", "pastel.png"])
 }
 
 fn existing_rgba8_path4() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "parque.png"])
+    test_utils::make_test_data_path_string(["image", "image", "parque.png"])
 }
 
 fn existing_rgba16_path1() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "red.png"])
+    test_utils::make_test_data_path_string(["image", "image", "red.png"])
 }
 
 fn existing_rgba16_path2() -> String {
-    test_utils::make_test_data_path_string(&["image", "image", "leopard.png"])
+    test_utils::make_test_data_path_string(["image", "image", "leopard.png"])
 }
 
 fn valid_rgba8() -> UnverifiedLosslessImagePath {
@@ -447,15 +447,15 @@ mod lossless_image_path {
         }
 
         fn large_rgba8_path() -> String {
-            test_utils::make_test_data_path_string(&["image", "image", "stripes_large.png"])
+            test_utils::make_test_data_path_string(["image", "image", "stripes_large.png"])
         }
 
         fn large_rgba16_path() -> String {
-            test_utils::make_test_data_path_string(&["image", "image", "red_large.png"])
+            test_utils::make_test_data_path_string(["image", "image", "red_large.png"])
         }
 
         fn missing_image_path() -> String {
-            test_utils::make_test_data_path_string(&["image", "image", "not_found.png"])
+            test_utils::make_test_data_path_string(["image", "image", "not_found.png"])
         }
 
         fn missing_error_message() -> &'static str {
@@ -463,7 +463,7 @@ mod lossless_image_path {
         }
 
         fn non_image_path() -> String {
-            test_utils::make_test_data_path_string(&["empty.txt"])
+            test_utils::make_test_data_path_string(["empty.txt"])
         }
 
         fn non_image_error_message() -> &'static str {
