@@ -59,6 +59,26 @@ impl SwapParameters {
         Self::new(selection, swap_acceptance_threshold, false)
     }
 
+    pub fn set_selection(
+        &mut self,
+        selection: SwapPassSelection,
+    ) -> Result<(), InvalidSwapParametersError> {
+        if selection.is_empty() {
+            Err(InvalidSwapParametersError::NoPassesSelected)
+        } else {
+            self.selection = selection;
+            Ok(())
+        }
+    }
+
+    pub fn set_swap_acceptance_threshold(&mut self, swap_acceptance_threshold: f32) {
+        self.swap_acceptance_threshold = swap_acceptance_threshold;
+    }
+
+    pub fn set_count_swap(&mut self, count_swap: bool) {
+        self.count_swap = count_swap;
+    }
+
     pub fn selection(&self) -> SwapPassSelection {
         self.selection
     }
