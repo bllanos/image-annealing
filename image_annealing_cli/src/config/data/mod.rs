@@ -57,7 +57,7 @@ pub enum UnverifiedConfig {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum AlgorithmConfig {
     CreatePermutation {
         permutation_output_path_no_extension: PermutationPath,
@@ -78,7 +78,7 @@ pub enum AlgorithmConfig {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct Config {
     pub algorithm: AlgorithmConfig,
     pub dispatcher: compute::Config,

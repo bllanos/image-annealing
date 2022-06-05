@@ -25,6 +25,7 @@ pub struct Swap {
     input_displacement_goal: Option<DisplacementGoal>,
     is_first_pass: bool,
     remaining_passes: Vec<SwapPass>,
+    swap_acceptance_threshold: f32,
     do_count_swap: bool,
     has_given_partial_output: bool,
     has_given_full_output: bool,
@@ -48,6 +49,7 @@ impl Swap {
             is_first_pass: true,
             // TODO use the selected swap passes, in reverse
             remaining_passes: vec![SwapPass::Horizontal],
+            swap_acceptance_threshold: parameters.swap_acceptance_threshold(),
             do_count_swap: parameters.count_swap(),
             has_given_partial_output: false,
             has_given_full_output: false,
@@ -106,12 +108,16 @@ impl CompletionStatusHolder for Swap {
 
                         system.operation_swap(&SwapOperationInput {
                             pass,
+                            acceptance_threshold: self.swap_acceptance_threshold,
                             permutation: self.input_permutation.as_ref(),
                             displacement_goal: self.input_displacement_goal.as_ref(),
                         })?;
                         self.is_first_pass = false;
                     } else {
-                        system.operation_swap(&SwapOperationInput::from_pass(pass))?;
+                        system.operation_swap(&SwapOperationInput::from_pass_and_threshold(
+                            pass,
+                            self.swap_acceptance_threshold,
+                        ))?;
                     }
                     Ok(OutputStatus::NoNewOutput)
                 }

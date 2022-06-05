@@ -239,15 +239,21 @@ impl CountSwapOutput {
 #[derive(Clone, Copy, Zeroable, Pod)]
 pub struct SwapShaderParameters {
     count_output_offset: u32,
-    _padding: [u32; 3],
+    acceptance_threshold: f32,
+    _padding: [u32; 2],
 }
 
 impl SwapShaderParameters {
     pub fn new() -> Self {
         Self {
             count_output_offset: 0,
+            acceptance_threshold: Default::default(),
             _padding: Default::default(),
         }
+    }
+
+    pub fn set_acceptance_threshold(&mut self, threshold: f32) {
+        self.acceptance_threshold = threshold;
     }
 
     pub fn set_pass(&mut self, pass: SwapPass, layout: &CountSwapInputLayout) {

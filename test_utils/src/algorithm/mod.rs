@@ -62,5 +62,5 @@ pub fn assert_step_until_error<PartialOutput, FullOutput>(
 }
 
 pub fn default_swap_parameters() -> SwapParameters {
-    SwapParameters::new(SwapPassSelection::HORIZONTAL, true).unwrap()
+    SwapParameters::new(SwapPassSelection::HORIZONTAL, Default::default(), true).unwrap()
 }

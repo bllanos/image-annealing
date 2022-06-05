@@ -22,15 +22,17 @@ impl fmt::Display for InvalidSwapParametersError {
 
 impl Error for InvalidSwapParametersError {}
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SwapParameters {
     selection: SwapPassSelection,
+    swap_acceptance_threshold: f32,
     count_swap: bool,
 }
 
 impl SwapParameters {
     pub fn new(
         selection: SwapPassSelection,
+        swap_acceptance_threshold: f32,
         count_swap: bool,
     ) -> Result<Self, InvalidSwapParametersError> {
         if selection.is_empty() {
@@ -38,6 +40,7 @@ impl SwapParameters {
         } else {
             Ok(Self {
                 selection,
+                swap_acceptance_threshold,
                 count_swap,
             })
         }
@@ -46,11 +49,22 @@ impl SwapParameters {
     pub fn from_selection(
         selection: SwapPassSelection,
     ) -> Result<Self, InvalidSwapParametersError> {
-        Self::new(selection, false)
+        Self::from_selection_and_threshold(selection, Default::default())
+    }
+
+    pub fn from_selection_and_threshold(
+        selection: SwapPassSelection,
+        swap_acceptance_threshold: f32,
+    ) -> Result<Self, InvalidSwapParametersError> {
+        Self::new(selection, swap_acceptance_threshold, false)
     }
 
     pub fn selection(&self) -> SwapPassSelection {
         self.selection
+    }
+
+    pub fn swap_acceptance_threshold(&self) -> f32 {
+        self.swap_acceptance_threshold
     }
 
     pub fn count_swap(&self) -> bool {

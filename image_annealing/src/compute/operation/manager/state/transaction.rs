@@ -276,6 +276,8 @@ impl ResourceStateManager {
 
         self.swap_parameters
             .set_pass(input.pass, &self.count_swap_parameters);
+        self.swap_parameters
+            .set_acceptance_threshold(input.acceptance_threshold);
         resources
             .swap_parameters_buffer()
             .load(queue, &self.swap_parameters);

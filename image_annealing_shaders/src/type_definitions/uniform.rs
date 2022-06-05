@@ -16,6 +16,7 @@ pub fn swap_parameters<W: Write>(mut writer: W) -> std::io::Result<()> {
         writer,
         "struct Parameters {{
   count_output_offset : u32;
+  acceptance_threshold: f32;
 }};"
     )
 }

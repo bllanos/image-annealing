@@ -159,26 +159,30 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
 
     #[test]
     fn valid() -> Result<(), Box<dyn Error>> {
+        let swap_acceptance_threshold = 1.0;
         assert_eq!(
             SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapsAccepted(0)
-                )
+                ),
+                swap_acceptance_threshold
             })?,
             SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0))
+                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold
             }
         );
         Ok(())
     }
 
     #[test]
-    fn threshold_one() {
+    fn stop_threshold_one() {
         test_utils::assert_error_contains(
             SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapAcceptanceFraction(1.0),
                 ),
+                swap_acceptance_threshold: Default::default(),
             }),
             "1 is not less than one",
         );

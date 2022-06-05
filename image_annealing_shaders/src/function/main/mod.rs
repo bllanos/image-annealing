@@ -43,7 +43,7 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
       let input_permutation_vector2 : vec2<i32> = load_permutation_vector(coords2);
       var output_permutation_vector2 : vec2<i32> = input_permutation_vector2;
 
-      if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < 0.0) {{
+      if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < parameters.acceptance_threshold) {{
         output_permutation_vector1 = input_permutation_vector2 + displacement;
         output_permutation_vector2 = input_permutation_vector1 - displacement;
         count = 1.0;

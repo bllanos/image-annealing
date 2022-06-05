@@ -32,6 +32,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold: Default::default(),
             },
         },
         dispatcher: compute::Config { image_dimensions },
@@ -67,6 +68,7 @@ fn swap_invalid() -> Result<(), Box<dyn Error>> {
             ),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold: Default::default(),
             },
         },
         dispatcher: compute::Config { image_dimensions },
@@ -96,6 +98,7 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
             ),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold: Default::default(),
             },
         },
         dispatcher: compute::Config { image_dimensions },
@@ -128,6 +131,7 @@ fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
             ),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold: Default::default(),
             },
         },
         dispatcher: compute::Config { image_dimensions },
@@ -161,6 +165,7 @@ fn save_missing_directory() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
             parameters: SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                swap_acceptance_threshold: Default::default(),
             },
         },
         dispatcher: compute::Config { image_dimensions },

@@ -41,10 +41,20 @@ fn run_swap(
             ..
         }
         | SwapStopConfig::Unbounded(threshold_variant) => (
-            SwapParameters::new(swap_pass_selection, true)?,
+            SwapParameters::new(
+                swap_pass_selection,
+                parameters.swap_acceptance_threshold,
+                true,
+            )?,
             Some(threshold_variant),
         ),
-        _ => (SwapParameters::from_selection(swap_pass_selection)?, None),
+        _ => (
+            SwapParameters::from_selection_and_threshold(
+                swap_pass_selection,
+                parameters.swap_acceptance_threshold,
+            )?,
+            None,
+        ),
     };
     let iteration_count = match parameters.stop {
         SwapStopConfig::Bounded {

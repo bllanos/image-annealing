@@ -105,11 +105,13 @@ impl TryFrom<UnverifiedSwapStopConfig> for SwapStopConfig {
 #[derive(Clone, Deserialize)]
 pub struct UnverifiedSwapParametersConfig {
     pub stop: UnverifiedSwapStopConfig,
+    pub swap_acceptance_threshold: f32,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SwapParametersConfig {
     pub stop: SwapStopConfig,
+    pub swap_acceptance_threshold: f32,
 }
 
 impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
@@ -118,6 +120,7 @@ impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
     fn try_from(value: UnverifiedSwapParametersConfig) -> Result<Self, Self::Error> {
         Ok(Self {
             stop: value.stop.try_into()?,
+            swap_acceptance_threshold: value.swap_acceptance_threshold,
         })
     }
 }

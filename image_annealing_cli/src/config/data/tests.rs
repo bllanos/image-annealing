@@ -160,17 +160,21 @@ mod config_try_from_unverified_config {
         use image_annealing::compute;
         use std::error::Error;
 
+        const SWAP_ACCEPTANCE_THRESHOLD: f32 = 2.0;
+
         fn make_unverified_swap_parameters() -> UnverifiedSwapParametersConfig {
             UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapsAccepted(1),
                 ),
+                swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
             }
         }
 
         fn make_swap_parameters() -> SwapParametersConfig {
             SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
+                swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
             }
         }
 
@@ -285,6 +289,7 @@ mod config_try_from_unverified_config {
                     stop: UnverifiedSwapStopConfig::Unbounded(
                         UnverifiedSwapStopThreshold::SwapAcceptanceFraction(2.0),
                     ),
+                    swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
                 },
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);

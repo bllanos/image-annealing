@@ -418,7 +418,17 @@ mod swap_shader_parameters {
         let dimensions = ImageDimensions::new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
         assert_eq!(parameters.count_output_offset, layout.segment_start[0]);
+        assert_eq!(parameters.acceptance_threshold, Default::default());
         Ok(())
+    }
+
+    #[test]
+    fn set_acceptance_threshold() {
+        let mut parameters = SwapShaderParameters::new();
+        assert_eq!(parameters.acceptance_threshold, 0.0);
+        let new_threshold = 1.0;
+        parameters.set_acceptance_threshold(new_threshold);
+        assert_eq!(parameters.acceptance_threshold, new_threshold);
     }
 
     #[test]
