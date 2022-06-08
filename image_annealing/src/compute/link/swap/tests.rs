@@ -417,6 +417,8 @@ mod swap_shader_parameters {
         let parameters = SwapShaderParameters::new();
         let dimensions = ImageDimensions::new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
+        assert_eq!(parameters.displacement, [0, 0]);
+        assert_eq!(parameters.offset, [0, 0]);
         assert_eq!(parameters.count_output_offset, layout.segment_start[0]);
         assert_eq!(parameters.acceptance_threshold, Default::default());
         Ok(())
@@ -443,6 +445,8 @@ mod swap_shader_parameters {
             .for_each(|(pass, offset)| {
                 parameters.set_pass(*pass, &layout);
                 assert_eq!(parameters.count_output_offset, *offset);
+                assert_eq!(parameters.displacement, pass.displacement_vector());
+                assert_eq!(parameters.offset, pass.offset_vector());
             });
         Ok(())
     }

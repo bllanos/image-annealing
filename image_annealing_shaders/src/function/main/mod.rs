@@ -1,4 +1,3 @@
-use crate::constant;
 use std::io::Write;
 
 mod header;
@@ -31,8 +30,8 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
     writeln!(
     writer,
     "  var count : f32 = 0.0;
-  let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x * {}u), i32(global_id.y));
-  let displacement : vec2<i32> = vec2<i32>(1, 0);
+  let displacement : vec2<i32> = parameters.displacement;
+  let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x) * (displacement.x + 1), i32(global_id.y) * (displacement.y + 1)) + parameters.offset;
   let coords2 : vec2<i32> = coords1 + displacement;
   let dimensions : vec2<i32> = textureDimensions(input_permutation);
   if(coords1.x < dimensions.x && coords1.y < dimensions.y) {{
@@ -64,7 +63,7 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
     let workgroup_index : u32 = workgroup_id.x + (workgroup_id.y * num_workgroups.x) + (workgroup_id.z * num_workgroups.x * num_workgroups.y);
     count_output.arr[parameters.count_output_offset + workgroup_index] = partial_sum[local_id];
   }}
-}}", constant::swap::STRIDE
+}}"
   )
 }
 

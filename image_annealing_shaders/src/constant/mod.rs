@@ -2,7 +2,6 @@ use crate::compute::WorkgroupDimensions;
 use std::io::Write;
 
 pub mod count_swap;
-pub mod swap;
 
 pub fn workgroup_invocations<W: Write>(
     mut writer: W,

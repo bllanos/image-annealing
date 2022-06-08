@@ -15,15 +15,19 @@ pub enum SwapPass {
 }
 
 impl SwapPass {
+    pub const STRIDE: usize = 2;
+
+    const OFFSET: usize = 1;
+
     pub(in super::super) fn swap_workgroup_grid_dimensions(
         &self,
         image_dimensions: &ImageDimensions,
     ) -> WorkgroupGridDimensions {
         let workgroup_dimensions = WorkgroupDimensions::swap();
-        let swap_stride = NonZeroU32::new(constant::swap::STRIDE).unwrap();
+        let swap_stride = NonZeroU32::new(Self::STRIDE.try_into().unwrap()).unwrap();
         let unit_stride = NonZeroU32::new(1).unwrap();
         match self {
-            SwapPass::Horizontal | SwapPass::OffsetHorizontal => {
+            Self::Horizontal | Self::OffsetHorizontal => {
                 WorkgroupGridDimensions::from_image_dimensions_and_stride(
                     &workgroup_dimensions,
                     image_dimensions,
@@ -31,7 +35,7 @@ impl SwapPass {
                     unit_stride,
                 )
             }
-            SwapPass::Vertical | SwapPass::OffsetVertical => {
+            Self::Vertical | Self::OffsetVertical => {
                 WorkgroupGridDimensions::from_image_dimensions_and_stride(
                     &workgroup_dimensions,
                     image_dimensions,
@@ -43,27 +47,26 @@ impl SwapPass {
     }
 
     pub fn total_swaps(&self, image_dimensions: &ImageDimensions) -> usize {
-        let stride: usize = constant::swap::STRIDE.try_into().unwrap();
         match self {
-            SwapPass::Horizontal => image_dimensions
+            Self::Horizontal => image_dimensions
                 .width()
-                .checked_div_euclid(stride)
+                .checked_div_euclid(Self::STRIDE)
                 .unwrap()
                 .checked_mul(image_dimensions.height())
                 .unwrap(),
-            SwapPass::Vertical => image_dimensions
+            Self::Vertical => image_dimensions
                 .height()
-                .checked_div_euclid(stride)
+                .checked_div_euclid(Self::STRIDE)
                 .unwrap()
                 .checked_mul(image_dimensions.width())
                 .unwrap(),
-            SwapPass::OffsetHorizontal => (image_dimensions.width() - constant::swap::OFFSET)
-                .checked_div_euclid(stride)
+            Self::OffsetHorizontal => (image_dimensions.width() - Self::OFFSET)
+                .checked_div_euclid(Self::STRIDE)
                 .unwrap()
                 .checked_mul(image_dimensions.height())
                 .unwrap(),
-            SwapPass::OffsetVertical => (image_dimensions.height() - constant::swap::OFFSET)
-                .checked_div_euclid(stride)
+            Self::OffsetVertical => (image_dimensions.height() - Self::OFFSET)
+                .checked_div_euclid(Self::STRIDE)
                 .unwrap()
                 .checked_mul(image_dimensions.width())
                 .unwrap(),
@@ -81,11 +84,26 @@ impl SwapPass {
             .sum()
     }
 
-    const PASSES: [SwapPass; constant::count_swap::N_CHANNEL] = [
-        SwapPass::Horizontal,
-        SwapPass::Vertical,
-        SwapPass::OffsetHorizontal,
-        SwapPass::OffsetVertical,
+    fn displacement_vector(&self) -> [i32; 2] {
+        match self {
+            Self::Horizontal | Self::OffsetHorizontal => [1, 0],
+            Self::Vertical | Self::OffsetVertical => [0, 1],
+        }
+    }
+
+    fn offset_vector(&self) -> [i32; 2] {
+        match self {
+            Self::Horizontal | Self::Vertical => [0, 0],
+            Self::OffsetHorizontal => [1, 0],
+            Self::OffsetVertical => [0, 1],
+        }
+    }
+
+    const PASSES: [Self; constant::count_swap::N_CHANNEL] = [
+        Self::Horizontal,
+        Self::Vertical,
+        Self::OffsetHorizontal,
+        Self::OffsetVertical,
     ];
 }
 
@@ -236,8 +254,10 @@ impl CountSwapOutput {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Zeroable, Pod)]
+#[derive(Clone, Copy, Default, Zeroable, Pod)]
 pub struct SwapShaderParameters {
+    displacement: [i32; 2],
+    offset: [i32; 2],
     count_output_offset: u32,
     acceptance_threshold: f32,
     _padding: [u32; 2],
@@ -245,11 +265,7 @@ pub struct SwapShaderParameters {
 
 impl SwapShaderParameters {
     pub fn new() -> Self {
-        Self {
-            count_output_offset: 0,
-            acceptance_threshold: Default::default(),
-            _padding: Default::default(),
-        }
+        Default::default()
     }
 
     pub fn set_acceptance_threshold(&mut self, threshold: f32) {
@@ -257,6 +273,8 @@ impl SwapShaderParameters {
     }
 
     pub fn set_pass(&mut self, pass: SwapPass, layout: &CountSwapInputLayout) {
+        self.displacement = pass.displacement_vector();
+        self.offset = pass.offset_vector();
         self.count_output_offset = layout.segment_start[pass as usize];
     }
 }
