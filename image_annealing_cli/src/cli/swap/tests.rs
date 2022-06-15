@@ -8,7 +8,7 @@ mod run_swap {
         ValidatePermutationInput, ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
-    use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
+    use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
     use std::fmt;
     use std::num::NonZeroUsize;
@@ -279,22 +279,35 @@ mod run_swap {
         }
     }
 
-    fn make_test_data(parameters: SwapParametersConfig) -> (RunSwapInput, ValidatedPermutation) {
+    fn test_run_swap_with_parameters(
+        parameters: SwapParametersConfig,
+        swap_ratios: Vec<TestSwapRatio>,
+    ) -> Result<(), Box<dyn Error>> {
         let DimensionsAndPermutation { permutation, .. } = test_utils::permutation::non_identity();
         let candidate_permutation = CandidatePermutation::new(permutation.clone()).unwrap();
         let validated_permutation = unsafe {
             validation::vector_field_into_validated_permutation_unchecked(permutation.clone())
         };
-        (
-            RunSwapInput {
-                candidate_permutation: Some(candidate_permutation),
-                displacement_goal: Some(
-                    DisplacementGoal::from_raw_candidate_permutation(permutation).unwrap(),
-                ),
-                parameters,
-            },
-            validated_permutation,
-        )
+        let run_swap_input = RunSwapInput {
+            candidate_permutation: Some(candidate_permutation),
+            displacement_goal: Some(
+                DisplacementGoal::from_raw_candidate_permutation(permutation).unwrap(),
+            ),
+            parameters,
+        };
+
+        let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
+        assert_eq!(
+            super::super::run_swap(
+                dispatcher,
+                run_swap_input.candidate_permutation,
+                run_swap_input.displacement_goal,
+                &run_swap_input.parameters
+            )
+            .collect::<Result<Vec<_>, _>>()?,
+            vec![validated_permutation]
+        );
+        Ok(())
     }
 
     fn make_base_swap_parameters_config() -> SwapParametersConfig {
@@ -314,8 +327,7 @@ mod run_swap {
 
     mod one_swap_rounds {
         mod bounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -336,19 +348,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -363,24 +363,11 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             mod threshold_first {
-                use super::super::super::super::super::run_swap;
-                use super::super::super::{SwapDispatcher, TestSwapRatio};
+                use super::super::super::TestSwapRatio;
                 use crate::config::{
                     IterationCount, NonnegativeProperFraction, SwapParametersConfig,
                     SwapStopConfig, SwapStopThreshold,
@@ -402,20 +389,7 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(0, 0)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -430,20 +404,7 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -460,20 +421,7 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -488,27 +436,13 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
             }
         }
 
         mod unbounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -521,19 +455,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(0, 0)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -543,19 +465,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -567,19 +477,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -589,27 +487,14 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
         }
     }
 
     mod two_swap_rounds {
         mod bounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -630,19 +515,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -657,24 +530,11 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 2];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             mod threshold_first {
-                use super::super::super::super::super::run_swap;
-                use super::super::super::{SwapDispatcher, TestSwapRatio};
+                use super::super::super::TestSwapRatio;
                 use crate::config::{
                     IterationCount, NonnegativeProperFraction, SwapParametersConfig,
                     SwapStopConfig, SwapStopThreshold,
@@ -696,20 +556,7 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -724,20 +571,7 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -754,27 +588,13 @@ mod run_swap {
                         ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
             }
         }
 
         mod unbounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -787,19 +607,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -809,19 +617,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -833,27 +629,14 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
         }
     }
 
     mod three_swap_rounds {
         mod bounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -874,19 +657,7 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -901,24 +672,11 @@ mod run_swap {
                     ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 3];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             mod threshold_first {
-                use super::super::super::super::super::run_swap;
-                use super::super::super::{SwapDispatcher, TestSwapRatio};
+                use super::super::super::TestSwapRatio;
                 use crate::config::{
                     IterationCount, NonnegativeProperFraction, SwapParametersConfig,
                     SwapStopConfig, SwapStopThreshold,
@@ -944,20 +702,7 @@ mod run_swap {
                         TestSwapRatio(2, 1),
                         TestSwapRatio(2, 0),
                     ];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -976,20 +721,7 @@ mod run_swap {
                         TestSwapRatio(2, 2),
                         TestSwapRatio(2, 1),
                     ];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
 
                 #[test]
@@ -1010,27 +742,13 @@ mod run_swap {
                         TestSwapRatio(2, 2),
                         TestSwapRatio(2, 1),
                     ];
-                    let (run_swap_input, validated_permutation) =
-                        super::super::super::make_test_data(parameters);
-                    let dispatcher =
-                        Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                    assert_eq!(
-                        run_swap(
-                            dispatcher,
-                            run_swap_input.candidate_permutation,
-                            run_swap_input.displacement_goal,
-                            &run_swap_input.parameters
-                        )?,
-                        validated_permutation
-                    );
-                    Ok(())
+                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
                 }
             }
         }
 
         mod unbounded {
-            use super::super::super::super::run_swap;
-            use super::super::{SwapDispatcher, TestSwapRatio};
+            use super::super::TestSwapRatio;
             use crate::config::{
                 NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
             };
@@ -1047,19 +765,7 @@ mod run_swap {
                     TestSwapRatio(2, 1),
                     TestSwapRatio(2, 0),
                 ];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -1073,19 +779,7 @@ mod run_swap {
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 1),
                 ];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
 
             #[test]
@@ -1101,19 +795,7 @@ mod run_swap {
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 1),
                 ];
-                let (run_swap_input, validated_permutation) =
-                    super::super::make_test_data(parameters);
-                let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
-                assert_eq!(
-                    run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )?,
-                    validated_permutation
-                );
-                Ok(())
+                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
             }
         }
     }
