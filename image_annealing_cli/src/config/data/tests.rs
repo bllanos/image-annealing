@@ -154,10 +154,10 @@ mod config_try_from_unverified_config {
     mod swap {
         use super::super::super::{
             AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, PermutationPath,
-            SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
+            SwapParametersConfig, SwapPass, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
             UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
         };
-        use image_annealing::compute;
+        use image_annealing::compute::{self, SwapPassSequence};
         use std::error::Error;
 
         const SWAP_ACCEPTANCE_THRESHOLD: f32 = 2.0;
@@ -168,6 +168,7 @@ mod config_try_from_unverified_config {
                     UnverifiedSwapStopThreshold::SwapsAccepted(1),
                 ),
                 swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
+                swap_pass_sequence: vec![SwapPass::Vertical, SwapPass::OffsetVertical],
             }
         }
 
@@ -175,6 +176,11 @@ mod config_try_from_unverified_config {
             SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
                 swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
+                swap_pass_sequence: SwapPassSequence::from_passes([
+                    compute::SwapPass::Vertical,
+                    compute::SwapPass::OffsetVertical,
+                ])
+                .unwrap(),
             }
         }
 
@@ -289,7 +295,7 @@ mod config_try_from_unverified_config {
                     stop: UnverifiedSwapStopConfig::Unbounded(
                         UnverifiedSwapStopThreshold::SwapAcceptanceFraction(2.0),
                     ),
-                    swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
+                    ..make_unverified_swap_parameters()
                 },
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);

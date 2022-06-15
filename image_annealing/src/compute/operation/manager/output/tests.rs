@@ -106,12 +106,12 @@ mod count_swap_operation_output_pass {
 
 mod count_swap_operation_output {
     use super::super::super::super::super::link::swap::{
-        CountSwapOutput, SwapPass, SwapPassSelection,
+        CountSwapOutput, SwapPass, SwapPassSequence,
     };
     use super::super::{
         CountSwapOperationOutput, CountSwapOperationOutputPass, SwapRatioImplementation,
     };
-    use crate::compute::{SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio};
+    use crate::compute::{SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio};
     use crate::ImageDimensions;
     use image_annealing_shaders::constant;
     use std::error::Error;
@@ -124,16 +124,16 @@ mod count_swap_operation_output {
             .flat_map(|&count| count.to_ne_bytes())
             .collect();
         let count_swap_output = CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into()?);
-        let selection = SwapPassSelection::all();
+        let sequence = SwapPassSequence::all();
         let output = CountSwapOperationOutput::new(
             &count_swap_output,
-            selection,
+            &sequence,
             &ImageDimensions::new(1, 1)?,
         );
         assert_eq!(output.passes().count(), constant::count_swap::N_CHANNEL);
         output
             .passes()
-            .zip(selection.iter())
+            .zip(sequence.iter())
             .for_each(|(output_pass, pass)| {
                 assert_eq!(output_pass.pass(), *pass);
                 assert_eq!(output_pass.accepted_fraction(), 0.0);
@@ -164,10 +164,10 @@ mod count_swap_operation_output {
         let count_swap_output = CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into()?);
         let pass1 = SwapPass::Horizontal;
         let pass2 = SwapPass::OffsetVertical;
-        let selection = SwapPassSelection::from(pass1) | SwapPassSelection::from(pass2);
+        let sequence = SwapPassSequence::from_passes([pass1, pass2])?;
         let output = CountSwapOperationOutput::new(
             &count_swap_output,
-            selection,
+            &sequence,
             &ImageDimensions::new(2, 9)?,
         );
         assert_eq!(output.passes().count(), 2);
@@ -216,10 +216,10 @@ mod count_swap_operation_output {
             .collect();
         let count_swap_output =
             CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into().unwrap());
-        let selection = SwapPassSelection::all();
+        let sequence = SwapPassSequence::all();
         CountSwapOperationOutput::new(
             &count_swap_output,
-            selection,
+            &sequence,
             &ImageDimensions::new(1, 1).unwrap(),
         );
     }
@@ -236,10 +236,10 @@ mod count_swap_operation_output {
             .collect();
         let count_swap_output =
             CountSwapOutput::from_ne_bytes(bytes.as_slice().try_into().unwrap());
-        let selection = SwapPassSelection::all();
+        let sequence = SwapPassSequence::all();
         CountSwapOperationOutput::new(
             &count_swap_output,
-            selection,
+            &sequence,
             &ImageDimensions::new(2, 2).unwrap(),
         );
     }

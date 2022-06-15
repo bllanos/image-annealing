@@ -1,8 +1,8 @@
 use super::super::super::link::swap::{
-    CountSwapOutput, CountSwapOutputDataElement, SwapPass, SwapPassSelection,
+    CountSwapOutput, CountSwapOutputDataElement, SwapPass, SwapPassSequence,
 };
 use super::super::super::output::algorithm::swap::{
-    SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio,
+    SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio,
 };
 use crate::ImageDimensions;
 use std::fmt;
@@ -125,10 +125,10 @@ pub struct CountSwapOperationOutput {
 impl CountSwapOperationOutput {
     pub(super) fn new(
         count_swap_output: &CountSwapOutput,
-        selection: SwapPassSelection,
+        sequence: &SwapPassSequence,
         image_dimensions: &ImageDimensions,
     ) -> Self {
-        let (passes, total, accepted) = selection.iter().fold(
+        let (passes, total, accepted) = sequence.iter().fold(
             (
                 Vec::<CountSwapOperationOutputPass>::new(),
                 0_usize,
@@ -168,7 +168,7 @@ impl SwapRatio for CountSwapOperationOutput {
     }
 }
 
-impl SwapPassSelectionSwapRatio for CountSwapOperationOutput {
+impl SwapPassSequenceSwapRatio for CountSwapOperationOutput {
     fn passes<'a, 'b>(&'a self) -> Box<dyn Iterator<Item = &'a dyn SwapPassSwapRatio> + 'b>
     where
         'a: 'b,

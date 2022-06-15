@@ -1,16 +1,17 @@
 mod run_swap {
-    use crate::config::{SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
+    use crate::config::{IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
     use image_annealing::compute::{
         Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
         Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters,
-        SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPassSelection,
-        SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm,
+        SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPass, SwapPassSequence,
+        SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm,
         ValidatePermutationInput, ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
     use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
     use std::error::Error;
     use std::fmt;
+    use std::num::NonZeroUsize;
     use test_utils::permutation::DimensionsAndPermutation;
 
     #[derive(Clone)]
@@ -38,7 +39,7 @@ mod run_swap {
         }
     }
 
-    impl SwapPassSelectionSwapRatio for TestSwapRatio {
+    impl SwapPassSequenceSwapRatio for TestSwapRatio {
         fn passes<'a, 'b>(&'a self) -> Box<dyn Iterator<Item = &'a dyn SwapPassSwapRatio> + 'b>
         where
             'a: 'b,
@@ -160,13 +161,14 @@ mod run_swap {
             assert!(self.swap_round_index < self.expected_number_of_rounds());
             assert_eq!(
                 parameters,
-                // TODO: Use SwapPassSelection from self.run_swap_input.parameters
-                &SwapParameters::new(
-                    SwapPassSelection::HORIZONTAL,
-                    self.run_swap_input.parameters.swap_acceptance_threshold,
-                    self.expected_count_swap_flag()
-                )
-                .unwrap()
+                &SwapParameters {
+                    sequence: self.run_swap_input.parameters.swap_pass_sequence,
+                    swap_acceptance_threshold: self
+                        .run_swap_input
+                        .parameters
+                        .swap_acceptance_threshold,
+                    count_swap: self.expected_count_swap_flag()
+                }
             );
             if self.swap_round_index == 0 {
                 assert_eq!(
@@ -295,7 +297,20 @@ mod run_swap {
         )
     }
 
-    const SWAP_ACCEPTANCE_THRESHOLD: f32 = 2.0;
+    fn make_base_swap_parameters_config() -> SwapParametersConfig {
+        SwapParametersConfig {
+            stop: SwapStopConfig::Bounded {
+                iteration_count: IterationCount(NonZeroUsize::new(1).unwrap()),
+                threshold: None,
+            },
+            swap_acceptance_threshold: 2.0,
+            swap_pass_sequence: SwapPassSequence::from_passes([
+                SwapPass::OffsetVertical,
+                SwapPass::Horizontal,
+            ])
+            .unwrap(),
+        }
+    }
 
     mod one_swap_rounds {
         mod bounded {
@@ -318,7 +333,7 @@ mod run_swap {
                         ),
                         threshold: None,
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
@@ -345,7 +360,7 @@ mod run_swap {
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1)];
                 let (run_swap_input, validated_permutation) =
@@ -384,7 +399,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(0, 0)];
                     let (run_swap_input, validated_permutation) =
@@ -412,7 +427,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
@@ -442,7 +457,7 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
@@ -470,7 +485,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(2)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2)];
                     let (run_swap_input, validated_permutation) =
@@ -503,7 +518,7 @@ mod run_swap {
             fn none_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(0, 0)];
                 let (run_swap_input, validated_permutation) =
@@ -525,7 +540,7 @@ mod run_swap {
             fn some_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
@@ -549,7 +564,7 @@ mod run_swap {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
                         NonnegativeProperFraction::new(0.5)?,
                     )),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
@@ -571,7 +586,7 @@ mod run_swap {
             fn all_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(2)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2)];
                 let (run_swap_input, validated_permutation) =
@@ -612,7 +627,7 @@ mod run_swap {
                         ),
                         threshold: None,
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
@@ -639,7 +654,7 @@ mod run_swap {
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 2];
                 let (run_swap_input, validated_permutation) =
@@ -678,7 +693,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
                     let (run_swap_input, validated_permutation) =
@@ -706,7 +721,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
@@ -736,7 +751,7 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                     let (run_swap_input, validated_permutation) =
@@ -769,7 +784,7 @@ mod run_swap {
             fn none_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
                 let (run_swap_input, validated_permutation) =
@@ -791,7 +806,7 @@ mod run_swap {
             fn some_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
@@ -815,7 +830,7 @@ mod run_swap {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
                         NonnegativeProperFraction::new(0.5)?,
                     )),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
                 let (run_swap_input, validated_permutation) =
@@ -856,7 +871,7 @@ mod run_swap {
                         ),
                         threshold: None,
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = Vec::new();
                 let (run_swap_input, validated_permutation) =
@@ -883,7 +898,7 @@ mod run_swap {
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![TestSwapRatio(1, 1); 3];
                 let (run_swap_input, validated_permutation) =
@@ -922,7 +937,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![
                         TestSwapRatio(2, 1),
@@ -954,7 +969,7 @@ mod run_swap {
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![
                         TestSwapRatio(2, 2),
@@ -988,7 +1003,7 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        swap_acceptance_threshold: super::super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                        ..super::super::super::make_base_swap_parameters_config()
                     };
                     let swap_ratios = vec![
                         TestSwapRatio(2, 2),
@@ -1025,7 +1040,7 @@ mod run_swap {
             fn none_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 1),
@@ -1051,7 +1066,7 @@ mod run_swap {
             fn some_accepted() -> Result<(), Box<dyn Error>> {
                 let parameters = SwapParametersConfig {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 2),
@@ -1079,7 +1094,7 @@ mod run_swap {
                     stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
                         NonnegativeProperFraction::new(0.5)?,
                     )),
-                    swap_acceptance_threshold: super::super::SWAP_ACCEPTANCE_THRESHOLD,
+                    ..super::super::make_base_swap_parameters_config()
                 };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 2),

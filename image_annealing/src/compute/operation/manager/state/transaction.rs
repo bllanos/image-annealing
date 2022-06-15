@@ -1,5 +1,5 @@
 use super::super::super::super::link::swap::{
-    CountSwapInputLayout, SwapPassSelection, SwapShaderParameters,
+    CountSwapInputLayout, SwapPassSequence, SwapShaderParameters,
 };
 use super::super::super::super::output::format::LosslessImage;
 use super::super::super::super::resource::manager::ResourceManager;
@@ -14,25 +14,20 @@ pub enum InsufficientInputError {
     Permutation,
     OriginalImage,
     DisplacementGoal,
-    SwapPass,
 }
 
 impl fmt::Display for InsufficientInputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            InsufficientInputError::SwapPass => write!(
-                f,
-                "no swap passes have occurred since the last count swap operation"
-            ),
-            InsufficientInputError::Permutation => write!(
+            Self::Permutation => write!(
                 f,
                 "an input permutation must be provided as there is none to reuse"
             ),
-            InsufficientInputError::OriginalImage => write!(
+            Self::OriginalImage => write!(
                 f,
                 "an input image must be provided as there is none to reuse"
             ),
-            InsufficientInputError::DisplacementGoal => write!(
+            Self::DisplacementGoal => write!(
                 f,
                 "an input displacement goal field must be provided as there is none to reuse"
             ),
@@ -45,6 +40,8 @@ impl Error for InsufficientInputError {}
 #[derive(Debug, Clone)]
 pub enum InsufficientOutputError {
     CountSwap,
+    CountSwapPass,
+    SwapPass,
     Permutation,
     PermutedImage,
 }
@@ -52,12 +49,20 @@ pub enum InsufficientOutputError {
 impl fmt::Display for InsufficientOutputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            InsufficientOutputError::CountSwap => write!(f, "no current output swap counts exist",),
-            InsufficientOutputError::Permutation => write!(
+            Self::CountSwap => write!(f, "no current output swap counts exist",),
+            Self::CountSwapPass => write!(
+                f,
+                "not all selected swap passes were counted during the last count swap operation"
+            ),
+            Self::SwapPass => write!(
+                f,
+                "not all selected swap passes have occurred since the last count swap operation"
+            ),
+            Self::Permutation => write!(
                 f,
                 "an output permutation does not exist or has been invalidated",
             ),
-            InsufficientOutputError::PermutedImage => {
+            Self::PermutedImage => {
                 write!(f, "an output image does not exist or has been invalidated",)
             }
         }
@@ -194,22 +199,20 @@ impl ResourceStateManager {
         }
     }
 
-    pub fn last_count_swap_pass_selection(&self) -> SwapPassSelection {
-        self.count_swap_parameters.get_selection()
-    }
-
     pub fn count_swap(
         &mut self,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
+        sequence: SwapPassSequence,
     ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
-        let rollback_state = self.flags.clear_count_swap_pass_selection();
-        let mut commit_state = rollback_state;
-        if self.flags.check_count_swap_pass_selection() {
-            if self
-                .flags
-                .update_count_swap_pass_selection(&mut self.count_swap_parameters)
-            {
+        if self
+            .flags
+            .check_count_swap_pass_set()
+            .contains_set(&sequence)
+        {
+            let rollback_state = self.flags.clear_count_swap_pass_set();
+            let mut commit_state = rollback_state;
+            if self.count_swap_parameters.update_set(sequence.into()) {
                 resources
                     .count_swap_input_layout_buffer()
                     .load(queue, &self.count_swap_parameters)
@@ -221,7 +224,7 @@ impl ResourceStateManager {
                 commit_state,
             ))
         } else {
-            Err(Box::new(InsufficientInputError::SwapPass))
+            Err(Box::new(InsufficientOutputError::SwapPass))
         }
     }
 
@@ -293,23 +296,28 @@ impl ResourceStateManager {
         &mut self,
         resources: &ResourceManager,
         encoder: &mut wgpu::CommandEncoder,
+        sequence: &SwapPassSequence,
     ) -> Result<ResourceStateTransaction, Box<dyn Error>> {
-        let rollback_state = self.flags;
-        let mut commit_state = rollback_state;
-        if self.flags.check_count_swap_output_storage_buffer() {
-            if !self.flags.check_count_swap_output_buffer() {
-                resources
-                    .count_swap_output_buffer()
-                    .load(encoder, resources.count_swap_output_storage_buffer());
-                commit_state = commit_state.output_count_swap();
+        if self.count_swap_parameters.get_set().contains_set(sequence) {
+            let rollback_state = self.flags;
+            let mut commit_state = rollback_state;
+            if self.flags.check_count_swap_output_storage_buffer() {
+                if !self.flags.check_count_swap_output_buffer() {
+                    resources
+                        .count_swap_output_buffer()
+                        .load(encoder, resources.count_swap_output_storage_buffer());
+                    commit_state = commit_state.output_count_swap();
+                }
+                Ok(ResourceStateTransaction::new(
+                    self,
+                    rollback_state,
+                    commit_state,
+                ))
+            } else {
+                Err(Box::new(InsufficientOutputError::CountSwap))
             }
-            Ok(ResourceStateTransaction::new(
-                self,
-                rollback_state,
-                commit_state,
-            ))
         } else {
-            Err(Box::new(InsufficientOutputError::CountSwap))
+            Err(Box::new(InsufficientOutputError::CountSwapPass))
         }
     }
 

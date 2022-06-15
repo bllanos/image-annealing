@@ -1,9 +1,9 @@
-use super::super::super::super::link::swap::{CountSwapInputLayout, SwapPass, SwapPassSelection};
+use super::super::super::super::link::swap::{SwapPass, SwapPassSet};
 
 #[must_use]
 #[derive(Copy, Clone)]
 pub struct ResourceStateFlags {
-    count_swap_pass_selection: SwapPassSelection,
+    count_swap_pass_set: SwapPassSet,
     count_swap_output_storage_buffer: bool,
     count_swap_output_buffer: bool,
     displacement_goal_input_texture: bool,
@@ -18,7 +18,7 @@ pub struct ResourceStateFlags {
 impl ResourceStateFlags {
     pub fn new() -> Self {
         Self {
-            count_swap_pass_selection: Default::default(),
+            count_swap_pass_set: Default::default(),
             count_swap_output_storage_buffer: false,
             count_swap_output_buffer: false,
             displacement_goal_input_texture: false,
@@ -31,8 +31,8 @@ impl ResourceStateFlags {
         }
     }
 
-    pub fn check_count_swap_pass_selection(&self) -> bool {
-        !self.count_swap_pass_selection.is_empty()
+    pub fn check_count_swap_pass_set(&self) -> SwapPassSet {
+        self.count_swap_pass_set
     }
 
     pub fn check_count_swap_output_storage_buffer(&self) -> bool {
@@ -71,10 +71,6 @@ impl ResourceStateFlags {
         self.lossless_image_output_buffer
     }
 
-    pub fn update_count_swap_pass_selection(&self, parameters: &mut CountSwapInputLayout) -> bool {
-        parameters.update_selection(self.count_swap_pass_selection)
-    }
-
     pub fn clear_output_count_swap(&self) -> Self {
         Self {
             count_swap_output_storage_buffer: false,
@@ -83,9 +79,9 @@ impl ResourceStateFlags {
         }
     }
 
-    pub fn clear_count_swap_pass_selection(&self) -> Self {
+    pub fn clear_count_swap_pass_set(&self) -> Self {
         let mut next = self.clear_output_count_swap();
-        next.count_swap_pass_selection = Default::default();
+        next.count_swap_pass_set = Default::default();
         next
     }
 
@@ -113,9 +109,7 @@ impl ResourceStateFlags {
     }
 
     pub fn input_permutation(&self) -> Self {
-        let mut next = self
-            .clear_output_permutation()
-            .clear_count_swap_pass_selection();
+        let mut next = self.clear_output_permutation().clear_count_swap_pass_set();
         next.permutation_input_texture = true;
         next
     }
@@ -127,7 +121,7 @@ impl ResourceStateFlags {
     }
 
     pub fn finish_count_swap(&self) -> Self {
-        let mut next = self.clear_count_swap_pass_selection();
+        let mut next = self.clear_count_swap_pass_set();
         next.count_swap_output_storage_buffer = true;
         next
     }
@@ -136,7 +130,7 @@ impl ResourceStateFlags {
         let mut next = self
             .clear_output_permutation()
             .clear_output_lossless_image()
-            .clear_count_swap_pass_selection();
+            .clear_count_swap_pass_set();
         next.permutation_input_texture = false;
         next
     }
@@ -160,7 +154,7 @@ impl ResourceStateFlags {
             .clear_output_count_swap();
         next.permutation_input_texture = false;
         next.permutation_output_texture = true;
-        next.count_swap_pass_selection = self.count_swap_pass_selection.add_pass(pass);
+        next.count_swap_pass_set = self.count_swap_pass_set.add_pass(pass);
         next
     }
 

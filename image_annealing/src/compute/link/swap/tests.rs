@@ -174,47 +174,49 @@ mod swap_pass {
     }
 }
 
-mod swap_pass_selection {
+mod swap_pass_set {
     mod includes_pass {
-        use super::super::super::{SwapPass, SwapPassSelection};
+        use super::super::super::{SwapPass, SwapPassSet};
 
         #[test]
         fn does_not_include_pass() {
-            assert!(!SwapPassSelection::empty().includes_pass(SwapPass::Horizontal));
+            assert!(!SwapPassSet::empty().includes_pass(SwapPass::Horizontal));
         }
 
         #[test]
         fn includes_pass() {
-            assert!(SwapPassSelection::all().includes_pass(SwapPass::Horizontal));
+            assert!(SwapPassSet::all().includes_pass(SwapPass::Horizontal));
         }
     }
 
     mod add_pass {
-        use super::super::super::{SwapPass, SwapPassSelection};
+        use super::super::super::{SwapPass, SwapPassSet};
 
         #[test]
         fn new_pass() {
-            let selection = SwapPassSelection::empty().add_pass(SwapPass::Horizontal);
-            assert!(selection.includes_pass(SwapPass::Horizontal));
+            let mut set = SwapPassSet::empty();
+            assert!(!set.includes_pass(SwapPass::Horizontal));
+            set = set.add_pass(SwapPass::Horizontal);
+            assert!(set.includes_pass(SwapPass::Horizontal));
         }
 
         #[test]
         fn existing_pass() {
-            let mut selection = SwapPassSelection::HORIZONTAL;
-            assert!(selection.includes_pass(SwapPass::Horizontal));
-            selection = selection.add_pass(SwapPass::Horizontal);
-            assert!(selection.includes_pass(SwapPass::Horizontal));
+            let mut set = SwapPassSet::HORIZONTAL;
+            assert!(set.includes_pass(SwapPass::Horizontal));
+            set = set.add_pass(SwapPass::Horizontal);
+            assert!(set.includes_pass(SwapPass::Horizontal));
         }
     }
 
     mod iter {
-        use super::super::super::{SwapPass, SwapPassSelection};
+        use super::super::super::{SwapPass, SwapPassSet};
         use image_annealing_shaders::constant;
 
         #[test]
         fn all_passes() {
             let mut counts = [1; constant::count_swap::N_CHANNEL];
-            SwapPassSelection::all().iter().for_each(|pass| match pass {
+            SwapPassSet::all().iter().for_each(|pass| match pass {
                 SwapPass::Horizontal => counts[0] -= 1,
                 SwapPass::Vertical => counts[1] -= 1,
                 SwapPass::OffsetHorizontal => counts[2] -= 1,
@@ -226,9 +228,7 @@ mod swap_pass_selection {
         #[test]
         fn three_passes() {
             let mut counts = [1, 1, 0, 1];
-            (SwapPassSelection::HORIZONTAL
-                | SwapPassSelection::VERTICAL
-                | SwapPassSelection::OFFSET_VERTICAL)
+            (SwapPassSet::HORIZONTAL | SwapPassSet::VERTICAL | SwapPassSet::OFFSET_VERTICAL)
                 .iter()
                 .for_each(|pass| match pass {
                     SwapPass::Horizontal => counts[0] -= 1,
@@ -241,17 +241,17 @@ mod swap_pass_selection {
 
         #[test]
         fn no_passes() {
-            assert!(SwapPassSelection::empty().iter().next().is_none());
+            assert!(SwapPassSet::empty().iter().next().is_none());
         }
     }
 
     mod from_swap_pass {
-        use super::super::super::{SwapPass, SwapPassSelection};
+        use super::super::super::{SwapPass, SwapPassSet};
 
         #[test]
         fn horizontal() {
             let mut count = 1;
-            SwapPassSelection::from(SwapPass::Horizontal)
+            SwapPassSet::from(SwapPass::Horizontal)
                 .iter()
                 .for_each(|pass| match pass {
                     SwapPass::Horizontal => count -= 1,
@@ -265,7 +265,7 @@ mod swap_pass_selection {
         #[test]
         fn vertical() {
             let mut count = 1;
-            SwapPassSelection::from(SwapPass::Vertical)
+            SwapPassSet::from(SwapPass::Vertical)
                 .iter()
                 .for_each(|pass| match pass {
                     SwapPass::Horizontal => unreachable!(),
@@ -279,7 +279,7 @@ mod swap_pass_selection {
         #[test]
         fn offset_horizontal() {
             let mut count = 1;
-            SwapPassSelection::from(SwapPass::OffsetHorizontal)
+            SwapPassSet::from(SwapPass::OffsetHorizontal)
                 .iter()
                 .for_each(|pass| match pass {
                     SwapPass::Horizontal => unreachable!(),
@@ -293,7 +293,7 @@ mod swap_pass_selection {
         #[test]
         fn offset_vertical() {
             let mut count = 1;
-            SwapPassSelection::from(SwapPass::OffsetVertical)
+            SwapPassSet::from(SwapPass::OffsetVertical)
                 .iter()
                 .for_each(|pass| match pass {
                     SwapPass::Horizontal => unreachable!(),
@@ -307,7 +307,7 @@ mod swap_pass_selection {
 }
 
 mod count_swap_input_layout {
-    use super::super::{CountSwapInputLayout, SwapPass, SwapPassSelection};
+    use super::super::{CountSwapInputLayout, SwapPass, SwapPassSet};
     use crate::ImageDimensions;
     use std::error::Error;
 
@@ -354,22 +354,20 @@ mod count_swap_input_layout {
     }
 
     #[test]
-    fn get_selection() -> Result<(), Box<dyn Error>> {
+    fn get_set() -> Result<(), Box<dyn Error>> {
         let dimensions = ImageDimensions::new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
-        assert_eq!(layout.get_selection(), SwapPassSelection::empty());
+        assert_eq!(layout.get_set(), SwapPassSet::empty());
         Ok(())
     }
 
     #[test]
-    fn update_selection() -> Result<(), Box<dyn Error>> {
+    fn update_set() -> Result<(), Box<dyn Error>> {
         let dimensions = ImageDimensions::new(17, 33)?;
         let mut layout = CountSwapInputLayout::new(&dimensions);
-        let selection = SwapPassSelection::HORIZONTAL
-            | SwapPassSelection::VERTICAL
-            | SwapPassSelection::OFFSET_VERTICAL;
-        layout.update_selection(selection);
-        assert_eq!(layout.get_selection(), selection);
+        let set = SwapPassSet::HORIZONTAL | SwapPassSet::VERTICAL | SwapPassSet::OFFSET_VERTICAL;
+        layout.update_set(set);
+        assert_eq!(layout.get_set(), set);
         Ok(())
     }
 }

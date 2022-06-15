@@ -1,6 +1,6 @@
 use super::super::device::DeviceManager;
 use super::super::format::{ImageFormat, LosslessImage, VectorFieldImageBuffer};
-use super::super::link::swap::SwapPass;
+use super::super::link::swap::SwapPassSequence;
 use super::super::resource::buffer::{
     ChunkedReadMappableBuffer, MappedBuffer, PlainReadMappableBuffer,
 };
@@ -37,14 +37,18 @@ impl OperationManager {
         }
     }
 
-    pub fn count_swap(&mut self, device: &DeviceManager) -> Result<(), Box<dyn Error>> {
+    pub fn count_swap(
+        &mut self,
+        device: &DeviceManager,
+        sequence: SwapPassSequence,
+    ) -> Result<(), Box<dyn Error>> {
         let mut encoder = device
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("count_swap_command_encoder"),
             });
         let queue = device.queue();
-        let mut transaction = self.state.count_swap(&self.resources, queue)?;
+        let mut transaction = self.state.count_swap(&self.resources, queue, sequence)?;
         self.pipelines.count_swap(&mut encoder);
         queue.submit(Some(encoder.finish()));
         transaction.set_commit();
@@ -98,7 +102,7 @@ impl OperationManager {
         let mut transaction = self
             .state
             .swap(&self.resources, queue, &mut encoder, input)?;
-        self.pipelines.swap(&mut encoder, &SwapPass::Horizontal);
+        self.pipelines.swap(&mut encoder, &input.pass);
         queue.submit(Some(encoder.finish()));
         transaction.set_commit();
         Ok(())
@@ -107,16 +111,16 @@ impl OperationManager {
     pub fn output_count_swap(
         &mut self,
         device: &DeviceManager,
+        sequence: &SwapPassSequence,
     ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
         let mut encoder = device
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("output_count_swap_command_encoder"),
             });
-        let selection = self.state.last_count_swap_pass_selection();
-        let mut transaction = self
-            .state
-            .output_count_swap(&self.resources, &mut encoder)?;
+        let mut transaction =
+            self.state
+                .output_count_swap(&self.resources, &mut encoder, sequence)?;
         device.queue().submit(Some(encoder.finish()));
 
         let mut mapped_buffer = self.resources.count_swap_output_buffer().request_map_read();
@@ -129,7 +133,7 @@ impl OperationManager {
         assert_eq!(result.len(), 1);
         Ok(CountSwapOperationOutput::new(
             &result[0],
-            selection,
+            sequence,
             &self.image_dimensions,
         ))
     }

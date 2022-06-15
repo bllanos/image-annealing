@@ -39,7 +39,7 @@ pub fn assert_correct_swap_count_output(
     image_dimensions: &ImageDimensions,
     swaps_accepted: SwapAcceptedCount,
 ) {
-    assert_eq!(output.is_some(), parameters.count_swap());
+    assert_eq!(output.is_some(), parameters.count_swap);
     if let Some(SwapPartialOutput { counts }) = output {
         let is_none_accepted = match swaps_accepted {
             SwapAcceptedCount::None => true,
@@ -48,16 +48,13 @@ pub fn assert_correct_swap_count_output(
         };
         assert_eq!(counts.is_none_accepted(), is_none_accepted);
 
-        assert_eq!(
-            counts.passes().count(),
-            parameters.selection().iter().count()
-        );
+        assert_eq!(counts.passes().count(), parameters.sequence.iter().count());
         if let SwapAcceptedCount::Some(v) = &swaps_accepted {
             assert_eq!(counts.passes().count(), v.len());
         }
 
         let (total, accepted) = parameters
-            .selection()
+            .sequence
             .iter()
             .zip(counts.passes())
             .enumerate()

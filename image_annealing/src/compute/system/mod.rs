@@ -1,4 +1,5 @@
 use super::device::DeviceManager;
+use super::link::swap::SwapPassSequence;
 use super::operation::manager::CountSwapOperationOutput;
 use super::operation::manager::OperationManager;
 use super::output::format::{ImageFormat, LosslessImage};
@@ -24,8 +25,11 @@ impl System {
         })
     }
 
-    pub fn operation_count_swap(&mut self) -> Result<(), Box<dyn Error>> {
-        self.operations.count_swap(&self.device)
+    pub fn operation_count_swap(
+        &mut self,
+        sequence: SwapPassSequence,
+    ) -> Result<(), Box<dyn Error>> {
+        self.operations.count_swap(&self.device, sequence)
     }
 
     pub fn operation_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
@@ -43,8 +47,11 @@ impl System {
         self.operations.swap(&self.device, input)
     }
 
-    pub fn output_count_swap(&mut self) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
-        self.operations.output_count_swap(&self.device)
+    pub fn output_count_swap(
+        &mut self,
+        sequence: &SwapPassSequence,
+    ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
+        self.operations.output_count_swap(&self.device, sequence)
     }
 
     pub fn output_permutation(&mut self) -> Result<ValidatedPermutation, Box<dyn Error>> {

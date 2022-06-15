@@ -205,7 +205,7 @@ mod select_swap {
 mod swap_acceptance_threshold {
     use image_annealing::compute::conversion::{self, VectorFieldEntry};
     use image_annealing::compute::{
-        self, Config, OutputStatus, SwapInput, SwapParameters, SwapPassSelection,
+        self, Config, OutputStatus, SwapInput, SwapParameters, SwapPass,
     };
     use image_annealing::CandidatePermutation;
     use std::error::Error;
@@ -230,11 +230,11 @@ mod swap_acceptance_threshold {
             image_dimensions: dimensions,
         })?;
         let mut swap_acceptance_threshold = -2.0;
-        let mut swap_parameters = SwapParameters::new(
-            SwapPassSelection::HORIZONTAL,
+        let mut swap_parameters = SwapParameters {
+            sequence: SwapPass::Horizontal.into(),
             swap_acceptance_threshold,
-            true,
-        )?;
+            count_swap: true,
+        };
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
@@ -263,7 +263,7 @@ mod swap_acceptance_threshold {
         dispatcher = algorithm.return_to_dispatcher();
 
         swap_acceptance_threshold = 1.0 - 2.0_f32.sqrt();
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold - epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold - epsilon;
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
         assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -282,7 +282,7 @@ mod swap_acceptance_threshold {
 
         dispatcher = algorithm.return_to_dispatcher();
 
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold + epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold + epsilon;
         let mut v = vec![
             VectorFieldEntry(0, 1),
             VectorFieldEntry(0, 0),
@@ -314,7 +314,7 @@ mod swap_acceptance_threshold {
         dispatcher = algorithm.return_to_dispatcher();
 
         swap_acceptance_threshold = 0.0;
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold - epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold - epsilon;
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
         assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
 
@@ -336,7 +336,7 @@ mod swap_acceptance_threshold {
 
         dispatcher = algorithm.return_to_dispatcher();
 
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold + epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold + epsilon;
         v = vec![
             VectorFieldEntry(0, 1),
             VectorFieldEntry(0, 0),
@@ -389,7 +389,7 @@ mod swap_acceptance_threshold {
         dispatcher = algorithm.return_to_dispatcher();
 
         swap_acceptance_threshold = 2.0 - 2.0_f32.sqrt();
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold - epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold - epsilon;
         v = vec![
             VectorFieldEntry(0, 1),
             VectorFieldEntry(0, 0),
@@ -441,7 +441,7 @@ mod swap_acceptance_threshold {
 
         dispatcher = algorithm.return_to_dispatcher();
 
-        swap_parameters.set_swap_acceptance_threshold(swap_acceptance_threshold + epsilon);
+        swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold + epsilon;
         v = vec![
             VectorFieldEntry(1, 0),
             VectorFieldEntry(-1, 1),

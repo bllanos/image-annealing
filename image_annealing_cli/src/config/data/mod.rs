@@ -15,7 +15,7 @@ pub use number::{
     NonnegativeProperFraction, NonnegativeRationalNumber,
 };
 pub use parameters::{
-    InvalidIterationCountError, IterationCount, SwapParametersConfig, SwapStopConfig,
+    InvalidIterationCountError, IterationCount, SwapParametersConfig, SwapPass, SwapStopConfig,
     SwapStopThreshold, UnverifiedIterationCount, UnverifiedSwapParametersConfig,
     UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
 };

@@ -3,6 +3,7 @@ use crate::ImageDimensions;
 use bytemuck::{Pod, Zeroable};
 use image_annealing_shaders::constant;
 use image_annealing_shaders::WorkgroupDimensions;
+use std::error::Error;
 use std::fmt;
 use std::num::NonZeroU32;
 
@@ -118,9 +119,27 @@ impl fmt::Display for SwapPass {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum InvalidSwapPassSelectionError {
+    Duplicate(SwapPass),
+    Empty,
+}
+
+impl fmt::Display for InvalidSwapPassSelectionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Duplicate(pass) => write!(f, "attempt to select {} pass multiple times", pass),
+            Self::Empty => write!(f, "selection of swap passes is empty"),
+        }
+    }
+}
+
+impl Error for InvalidSwapPassSelectionError {}
+
 bitflags::bitflags! {
+    #[must_use]
     #[derive(Default)]
-    pub struct SwapPassSelection: u32 {
+    pub struct SwapPassSet: u32 {
         const HORIZONTAL = 1 << SwapPass::Horizontal as u32;
         const VERTICAL = 1 << SwapPass::Vertical as u32;
         const OFFSET_HORIZONTAL = 1 << SwapPass::OffsetHorizontal as u32;
@@ -128,9 +147,26 @@ bitflags::bitflags! {
     }
 }
 
-impl SwapPassSelection {
+impl SwapPassSet {
+    pub fn from_passes<T>(passes: T) -> Self
+    where
+        T: IntoIterator<Item = SwapPass>,
+    {
+        passes
+            .into_iter()
+            .fold(Self::empty(), |acc, pass| acc.add_pass(pass))
+    }
+
     pub fn includes_pass(&self, pass: SwapPass) -> bool {
         Self::from(pass).intersects(*self)
+    }
+
+    pub fn equal_set(&self, sequence: &SwapPassSequence) -> bool {
+        &Self::from(*sequence) == self
+    }
+
+    pub fn contains_set(&self, sequence: &SwapPassSequence) -> bool {
+        self.contains(Self::from(*sequence))
     }
 
     pub fn add_pass(&self, pass: SwapPass) -> Self {
@@ -144,7 +180,7 @@ impl SwapPassSelection {
     }
 }
 
-impl From<SwapPass> for SwapPassSelection {
+impl From<SwapPass> for SwapPassSet {
     fn from(pass: SwapPass) -> Self {
         match pass {
             SwapPass::Horizontal => Self::HORIZONTAL,
@@ -152,6 +188,107 @@ impl From<SwapPass> for SwapPassSelection {
             SwapPass::OffsetHorizontal => Self::OFFSET_HORIZONTAL,
             SwapPass::OffsetVertical => Self::OFFSET_VERTICAL,
         }
+    }
+}
+
+impl From<SwapPassSequence> for SwapPassSet {
+    fn from(sequence: SwapPassSequence) -> Self {
+        Self::from_passes(sequence)
+    }
+}
+
+#[must_use]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SwapPassSequence([Option<SwapPass>; constant::count_swap::N_CHANNEL]);
+
+impl SwapPassSequence {
+    const EMPTY: Self = Self([None; constant::count_swap::N_CHANNEL]);
+
+    pub fn from_passes<T>(passes: T) -> Result<Self, InvalidSwapPassSelectionError>
+    where
+        T: IntoIterator<Item = SwapPass>,
+    {
+        let instance = passes
+            .into_iter()
+            .try_fold(Self::EMPTY, |acc, pass| acc.add_pass(pass))?;
+        if instance == Self::EMPTY {
+            Err(InvalidSwapPassSelectionError::Empty)
+        } else {
+            Ok(instance)
+        }
+    }
+
+    pub fn all() -> Self {
+        Self::from_passes(SwapPass::PASSES).unwrap()
+    }
+
+    pub fn includes_pass(&self, pass: SwapPass) -> bool {
+        self.0.contains(&Some(pass))
+    }
+
+    pub fn equal_set(&self, set: &SwapPassSet) -> bool {
+        set.equal_set(self)
+    }
+
+    pub fn contains_set(&self, set: &SwapPassSet) -> bool {
+        SwapPassSet::from(*self).contains(*set)
+    }
+
+    pub fn add_pass(&self, pass: SwapPass) -> Result<Self, InvalidSwapPassSelectionError> {
+        if self.includes_pass(pass) {
+            Err(InvalidSwapPassSelectionError::Duplicate(pass))
+        } else {
+            let new_pass_option = Some(pass);
+            Ok(self
+                .0
+                .iter()
+                .filter(|pass_option| pass_option != &&new_pass_option)
+                .chain(std::iter::once(&new_pass_option))
+                .enumerate()
+                .fold(Self::EMPTY, |mut acc, (i, pass_option)| {
+                    acc.0[i] = *pass_option;
+                    acc
+                }))
+        }
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &SwapPass> {
+        self.0
+            .iter()
+            .filter(|&&pass_option| pass_option.is_some())
+            .map(|pass_option| pass_option.as_ref().unwrap())
+    }
+}
+
+impl From<SwapPass> for SwapPassSequence {
+    fn from(pass: SwapPass) -> Self {
+        Self::from_passes(std::iter::once(pass)).unwrap()
+    }
+}
+
+impl TryFrom<SwapPassSet> for SwapPassSequence {
+    type Error = InvalidSwapPassSelectionError;
+
+    fn try_from(set: SwapPassSet) -> Result<Self, Self::Error> {
+        Self::from_passes(set.iter().map(|&pass| pass))
+    }
+}
+
+impl IntoIterator for SwapPassSequence {
+    type Item = SwapPass;
+    type IntoIter = std::iter::Map<
+        std::iter::Filter<
+            std::array::IntoIter<Option<Self::Item>, { constant::count_swap::N_CHANNEL }>,
+            for<'r> fn(&'r Option<Self::Item>) -> bool,
+        >,
+        fn(Option<Self::Item>) -> Self::Item,
+    >;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0
+            .into_iter()
+            .filter(Option::<Self::Item>::is_some as for<'r> fn(&'r Option<Self::Item>) -> bool)
+            .map(Option::<Self::Item>::unwrap)
     }
 }
 
@@ -198,9 +335,9 @@ impl CountSwapInputLayout {
         }
     }
 
-    pub fn get_selection(&self) -> SwapPassSelection {
+    pub fn get_set(&self) -> SwapPassSet {
         self.do_segment.iter().zip(SwapPass::PASSES.iter()).fold(
-            SwapPassSelection::empty(),
+            SwapPassSet::empty(),
             |acc, (&flag, &pass)| {
                 if flag == 0 {
                     acc
@@ -211,12 +348,12 @@ impl CountSwapInputLayout {
         )
     }
 
-    pub fn update_selection(&mut self, selection: SwapPassSelection) -> bool {
-        if self.get_selection() == selection {
+    pub fn update_set(&mut self, set: SwapPassSet) -> bool {
+        if self.get_set() == set {
             false
         } else {
             self.do_segment =
-                SwapPass::PASSES.map(|swap_pass| u32::from(selection.includes_pass(swap_pass)));
+                SwapPass::PASSES.map(|swap_pass| u32::from(set.includes_pass(swap_pass)));
             true
         }
     }

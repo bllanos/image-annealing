@@ -12,10 +12,11 @@ mod input;
 mod output;
 
 pub use input::{
-    InvalidSwapParametersError, SwapInput, SwapParameters, SwapPass, SwapPassSelection,
+    InvalidSwapPassSelectionError, SwapInput, SwapParameters, SwapPass, SwapPassSequence,
+    SwapPassSet,
 };
 pub use output::{
-    SwapFullOutput, SwapPartialOutput, SwapPassSelectionSwapRatio, SwapPassSwapRatio, SwapRatio,
+    SwapFullOutput, SwapPartialOutput, SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio,
 };
 
 pub struct Swap {
@@ -23,8 +24,8 @@ pub struct Swap {
     validator: Option<ValidatePermutation>,
     input_permutation: Option<ValidatedPermutation>,
     input_displacement_goal: Option<DisplacementGoal>,
-    is_first_pass: bool,
-    remaining_passes: Vec<SwapPass>,
+    sequence: SwapPassSequence,
+    remaining_passes: Option<<SwapPassSequence as IntoIterator>::IntoIter>,
     swap_acceptance_threshold: f32,
     do_count_swap: bool,
     has_given_partial_output: bool,
@@ -46,11 +47,10 @@ impl Swap {
             validator,
             input_permutation: None,
             input_displacement_goal: input.displacement_goal.take(),
-            is_first_pass: true,
-            // TODO use the selected swap passes, in reverse
-            remaining_passes: vec![SwapPass::Horizontal],
-            swap_acceptance_threshold: parameters.swap_acceptance_threshold(),
-            do_count_swap: parameters.count_swap(),
+            sequence: parameters.sequence,
+            remaining_passes: None,
+            swap_acceptance_threshold: parameters.swap_acceptance_threshold,
+            do_count_swap: parameters.count_swap,
             has_given_partial_output: false,
             has_given_full_output: false,
         }
@@ -99,39 +99,47 @@ impl CompletionStatusHolder for Swap {
                 }
                 Ok(OutputStatus::NoNewOutput)
             }
-            None => match self.remaining_passes.pop() {
-                Some(pass) => {
-                    if self.is_first_pass {
-                        if let Some(ref displacement_goal) = self.input_displacement_goal {
-                            check_dimensions_match2(system, displacement_goal)?;
-                        }
-
-                        system.operation_swap(&SwapOperationInput {
-                            pass,
-                            acceptance_threshold: self.swap_acceptance_threshold,
-                            permutation: self.input_permutation.as_ref(),
-                            displacement_goal: self.input_displacement_goal.as_ref(),
-                        })?;
-                        self.is_first_pass = false;
-                    } else {
-                        system.operation_swap(&SwapOperationInput::from_pass_and_threshold(
-                            pass,
-                            self.swap_acceptance_threshold,
-                        ))?;
+            None => {
+                let is_first_pass = match self.remaining_passes {
+                    Some(_) => false,
+                    None => {
+                        self.remaining_passes = Some(self.sequence.into_iter());
+                        true
                     }
-                    Ok(OutputStatus::NoNewOutput)
+                };
+                match self.remaining_passes.as_mut().unwrap().next() {
+                    Some(pass) => {
+                        if is_first_pass {
+                            if let Some(ref displacement_goal) = self.input_displacement_goal {
+                                check_dimensions_match2(system, displacement_goal)?;
+                            }
+
+                            system.operation_swap(&SwapOperationInput {
+                                pass,
+                                acceptance_threshold: self.swap_acceptance_threshold,
+                                permutation: self.input_permutation.as_ref(),
+                                displacement_goal: self.input_displacement_goal.as_ref(),
+                            })?;
+                        } else {
+                            system.operation_swap(&SwapOperationInput::from_pass_and_threshold(
+                                pass,
+                                self.swap_acceptance_threshold,
+                            ))?;
+                        }
+                        Ok(OutputStatus::NoNewOutput)
+                    }
+                    None => {
+                        let output_status = if self.do_count_swap {
+                            system.operation_count_swap(self.sequence)?;
+                            OutputStatus::FinalPartialAndFullOutput
+                        } else {
+                            OutputStatus::FinalFullOutput
+                        };
+                        self.completion_status = CompletionStatus::Finished;
+                        Ok(output_status)
+                    }
                 }
-                None => {
-                    let output_status = if self.do_count_swap {
-                        system.operation_count_swap()?;
-                        OutputStatus::FinalPartialAndFullOutput
-                    } else {
-                        OutputStatus::FinalFullOutput
-                    };
-                    self.completion_status = CompletionStatus::Finished;
-                    Ok(output_status)
-                }
-            },
+            }
         }
     }
 }
@@ -146,7 +154,7 @@ impl FinalOutputHolder<SwapPartialOutput> for Swap {
 
     fn unchecked_output(&mut self, system: &mut System) -> Option<SwapPartialOutput> {
         system
-            .output_count_swap()
+            .output_count_swap(&self.sequence)
             .ok()
             .map(|counts| SwapPartialOutput {
                 counts: Box::new(counts),

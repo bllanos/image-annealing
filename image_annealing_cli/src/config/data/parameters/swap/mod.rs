@@ -1,4 +1,5 @@
 use super::super::number::{InvalidNonnegativeProperFractionError, NonnegativeProperFraction};
+use image_annealing::compute::SwapPassSequence;
 use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
@@ -102,16 +103,48 @@ impl TryFrom<UnverifiedSwapStopConfig> for SwapStopConfig {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
+pub enum SwapPass {
+    Horizontal,
+    Vertical,
+    OffsetHorizontal,
+    OffsetVertical,
+}
+
+impl From<image_annealing::compute::SwapPass> for SwapPass {
+    fn from(value: image_annealing::compute::SwapPass) -> Self {
+        match value {
+            image_annealing::compute::SwapPass::Horizontal => Self::Horizontal,
+            image_annealing::compute::SwapPass::Vertical => Self::Vertical,
+            image_annealing::compute::SwapPass::OffsetHorizontal => Self::OffsetHorizontal,
+            image_annealing::compute::SwapPass::OffsetVertical => Self::OffsetVertical,
+        }
+    }
+}
+
+impl From<SwapPass> for image_annealing::compute::SwapPass {
+    fn from(value: SwapPass) -> Self {
+        match value {
+            SwapPass::Horizontal => Self::Horizontal,
+            SwapPass::Vertical => Self::Vertical,
+            SwapPass::OffsetHorizontal => Self::OffsetHorizontal,
+            SwapPass::OffsetVertical => Self::OffsetVertical,
+        }
+    }
+}
+
 #[derive(Clone, Deserialize)]
 pub struct UnverifiedSwapParametersConfig {
     pub stop: UnverifiedSwapStopConfig,
     pub swap_acceptance_threshold: f32,
+    pub swap_pass_sequence: Vec<SwapPass>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SwapParametersConfig {
     pub stop: SwapStopConfig,
     pub swap_acceptance_threshold: f32,
+    pub swap_pass_sequence: SwapPassSequence,
 }
 
 impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
@@ -121,6 +154,12 @@ impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
         Ok(Self {
             stop: value.stop.try_into()?,
             swap_acceptance_threshold: value.swap_acceptance_threshold,
+            swap_pass_sequence: SwapPassSequence::from_passes(
+                value
+                    .swap_pass_sequence
+                    .into_iter()
+                    .map(<image_annealing::compute::SwapPass as From<SwapPass>>::from),
+            )?,
         })
     }
 }

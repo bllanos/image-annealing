@@ -1,11 +1,23 @@
-use image_annealing::compute;
 use image_annealing::compute::format::{ImageFileWriter, ImageFormat, VectorFieldImageBuffer};
+use image_annealing::compute::{self, SwapPassSequence};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{
     AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, PermutationPath,
     SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
 };
 use std::error::Error;
+
+fn make_swap_parameters() -> SwapParametersConfig {
+    SwapParametersConfig {
+        stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+        swap_acceptance_threshold: Default::default(),
+        swap_pass_sequence: SwapPassSequence::from_passes([
+            compute::SwapPass::Vertical,
+            compute::SwapPass::OffsetVertical,
+        ])
+        .unwrap(),
+    }
+}
 
 #[test]
 fn swap_valid() -> Result<(), Box<dyn Error>> {
@@ -30,10 +42,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
                 ]),
             ),
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
-            parameters: SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold: Default::default(),
-            },
+            parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },
     };
@@ -66,10 +75,7 @@ fn swap_invalid() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath::from_raw(
                 test_utils::make_test_output_path_string(["cli_swap_invalid"]),
             ),
-            parameters: SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold: Default::default(),
-            },
+            parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },
     };
@@ -96,10 +102,7 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath::from_raw(
                 test_utils::make_test_output_path_string(["cli_swap_invalid_permutation_format"]),
             ),
-            parameters: SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold: Default::default(),
-            },
+            parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },
     };
@@ -129,10 +132,7 @@ fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
                     "cli_swap_invalid_displacement_goal_format",
                 ]),
             ),
-            parameters: SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold: Default::default(),
-            },
+            parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },
     };
@@ -163,10 +163,7 @@ fn save_missing_directory() -> Result<(), Box<dyn Error>> {
                 ]),
             ),
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
-            parameters: SwapParametersConfig {
-                stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold: Default::default(),
-            },
+            parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },
     };

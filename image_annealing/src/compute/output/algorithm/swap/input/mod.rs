@@ -1,100 +1,37 @@
 use crate::{CandidatePermutation, DisplacementGoal};
 use std::default::Default;
-use std::error::Error;
-use std::fmt;
 
-pub use super::super::super::super::link::swap::{SwapPass, SwapPassSelection};
-
-#[derive(Debug, Clone)]
-pub enum InvalidSwapParametersError {
-    NoPassesSelected,
-}
-
-impl fmt::Display for InvalidSwapParametersError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            InvalidSwapParametersError::NoPassesSelected => {
-                write!(f, "selection of swap passes is empty")
-            }
-        }
-    }
-}
-
-impl Error for InvalidSwapParametersError {}
+pub use super::super::super::super::link::swap::{
+    InvalidSwapPassSelectionError, SwapPass, SwapPassSequence, SwapPassSet,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SwapParameters {
-    selection: SwapPassSelection,
-    swap_acceptance_threshold: f32,
-    count_swap: bool,
+    pub sequence: SwapPassSequence,
+    pub swap_acceptance_threshold: f32,
+    pub count_swap: bool,
 }
 
 impl SwapParameters {
-    pub fn new(
-        selection: SwapPassSelection,
+    pub fn from_sequence(sequence: SwapPassSequence) -> Self {
+        Self::from_sequence_and_threshold(sequence, Default::default())
+    }
+
+    pub fn from_sequence_and_threshold(
+        sequence: SwapPassSequence,
         swap_acceptance_threshold: f32,
-        count_swap: bool,
-    ) -> Result<Self, InvalidSwapParametersError> {
-        if selection.is_empty() {
-            Err(InvalidSwapParametersError::NoPassesSelected)
-        } else {
-            Ok(Self {
-                selection,
-                swap_acceptance_threshold,
-                count_swap,
-            })
+    ) -> Self {
+        Self {
+            sequence,
+            swap_acceptance_threshold,
+            count_swap: false,
         }
-    }
-
-    pub fn from_selection(
-        selection: SwapPassSelection,
-    ) -> Result<Self, InvalidSwapParametersError> {
-        Self::from_selection_and_threshold(selection, Default::default())
-    }
-
-    pub fn from_selection_and_threshold(
-        selection: SwapPassSelection,
-        swap_acceptance_threshold: f32,
-    ) -> Result<Self, InvalidSwapParametersError> {
-        Self::new(selection, swap_acceptance_threshold, false)
-    }
-
-    pub fn set_selection(
-        &mut self,
-        selection: SwapPassSelection,
-    ) -> Result<(), InvalidSwapParametersError> {
-        if selection.is_empty() {
-            Err(InvalidSwapParametersError::NoPassesSelected)
-        } else {
-            self.selection = selection;
-            Ok(())
-        }
-    }
-
-    pub fn set_swap_acceptance_threshold(&mut self, swap_acceptance_threshold: f32) {
-        self.swap_acceptance_threshold = swap_acceptance_threshold;
-    }
-
-    pub fn set_count_swap(&mut self, count_swap: bool) {
-        self.count_swap = count_swap;
-    }
-
-    pub fn selection(&self) -> SwapPassSelection {
-        self.selection
-    }
-
-    pub fn swap_acceptance_threshold(&self) -> f32 {
-        self.swap_acceptance_threshold
-    }
-
-    pub fn count_swap(&self) -> bool {
-        self.count_swap
     }
 }
 
 impl Default for SwapParameters {
     fn default() -> Self {
-        Self::from_selection(SwapPassSelection::all()).unwrap()
+        Self::from_sequence(SwapPassSequence::all())
     }
 }
 

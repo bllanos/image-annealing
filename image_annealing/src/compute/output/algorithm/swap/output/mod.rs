@@ -25,14 +25,14 @@ pub trait SwapPassSwapRatio: SwapRatio + fmt::Display {
     fn pass(&self) -> SwapPass;
 }
 
-pub trait SwapPassSelectionSwapRatio: SwapRatio + fmt::Display {
+pub trait SwapPassSequenceSwapRatio: SwapRatio + fmt::Display {
     fn passes<'a, 'b>(&'a self) -> Box<dyn Iterator<Item = &'a dyn SwapPassSwapRatio> + 'b>
     where
         'a: 'b;
 }
 
 pub struct SwapPartialOutput {
-    pub counts: Box<dyn SwapPassSelectionSwapRatio>,
+    pub counts: Box<dyn SwapPassSequenceSwapRatio>,
 }
 
 pub struct SwapFullOutput {

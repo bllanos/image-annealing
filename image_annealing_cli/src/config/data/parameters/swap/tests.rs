@@ -152,9 +152,10 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
 
 mod swap_parameters_config_try_from_unverified_swap_parameters_config {
     use super::super::{
-        SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedSwapParametersConfig,
-        UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
+        SwapParametersConfig, SwapPass, SwapStopConfig, SwapStopThreshold,
+        UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
     };
+    use image_annealing::compute::{self, SwapPassSequence};
     use std::error::Error;
 
     #[test]
@@ -165,11 +166,16 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapsAccepted(0)
                 ),
-                swap_acceptance_threshold
+                swap_acceptance_threshold,
+                swap_pass_sequence: vec![SwapPass::OffsetHorizontal, SwapPass::Vertical],
             })?,
             SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                swap_acceptance_threshold
+                swap_acceptance_threshold,
+                swap_pass_sequence: SwapPassSequence::from_passes([
+                    compute::SwapPass::OffsetHorizontal,
+                    compute::SwapPass::Vertical
+                ])?
             }
         );
         Ok(())
@@ -183,6 +189,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                     UnverifiedSwapStopThreshold::SwapAcceptanceFraction(1.0),
                 ),
                 swap_acceptance_threshold: Default::default(),
+                swap_pass_sequence: vec![SwapPass::OffsetHorizontal, SwapPass::Vertical],
             }),
             "1 is not less than one",
         );

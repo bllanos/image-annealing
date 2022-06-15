@@ -3,9 +3,7 @@ use crate::config::{
     DisplacementGoalPath, PermutationPath, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
 };
 use image_annealing::compute::format::ImageFileWriter;
-use image_annealing::compute::{
-    Dispatcher, SwapInput, SwapParameters, SwapPartialOutput, SwapPassSelection,
-};
+use image_annealing::compute::{Dispatcher, SwapInput, SwapParameters, SwapPartialOutput};
 use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
 use std::error::Error;
 
@@ -33,26 +31,24 @@ fn run_swap(
     displacement_goal: Option<DisplacementGoal>,
     parameters: &SwapParametersConfig,
 ) -> Result<ValidatedPermutation, Box<dyn Error>> {
-    // TODO Input the SwapPassSelection from the SwapParametersConfig
-    let swap_pass_selection = SwapPassSelection::HORIZONTAL;
     let (swap_parameters, threshold) = match parameters.stop {
         SwapStopConfig::Bounded {
             threshold: Some(threshold_variant),
             ..
         }
         | SwapStopConfig::Unbounded(threshold_variant) => (
-            SwapParameters::new(
-                swap_pass_selection,
-                parameters.swap_acceptance_threshold,
-                true,
-            )?,
+            SwapParameters {
+                sequence: parameters.swap_pass_sequence,
+                swap_acceptance_threshold: parameters.swap_acceptance_threshold,
+                count_swap: true,
+            },
             Some(threshold_variant),
         ),
         _ => (
-            SwapParameters::from_selection_and_threshold(
-                swap_pass_selection,
+            SwapParameters::from_sequence_and_threshold(
+                parameters.swap_pass_sequence,
                 parameters.swap_acceptance_threshold,
-            )?,
+            ),
             None,
         ),
     };

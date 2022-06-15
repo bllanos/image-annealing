@@ -6,27 +6,42 @@ fn create_system_single_pixel() -> System {
 }
 
 mod operation_count_swap {
+    use super::super::super::link::swap::SwapPassSequence;
     use std::error::Error;
 
     #[test]
     fn no_preceding_swaps() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
-            system.operation_count_swap(),
-            "no swap passes have occurred since the last count swap operation",
+            system.operation_count_swap(SwapPassSequence::all()),
+            "not all selected swap passes were counted during the last count swap operation",
         );
         Ok(())
     }
 }
 
 mod output_count_swap {
+    use super::super::super::link::swap::SwapPass;
+    use super::super::SwapOperationInput;
+    use crate::DisplacementGoal;
     use std::error::Error;
 
     #[test]
-    fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
+    fn no_preceding_count_swap_operation() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
+        let pass = SwapPass::Horizontal;
+        system.operation_create_permutation()?;
+        let permutation = system.output_permutation()?;
+        system.operation_swap(&SwapOperationInput {
+            pass,
+            acceptance_threshold: Default::default(),
+            permutation: None,
+            displacement_goal: Some(&DisplacementGoal::from_vector_field(
+                permutation.into_inner(),
+            )?),
+        })?;
         test_utils::assert_error_contains(
-            system.output_count_swap(),
+            system.output_count_swap(&pass.into()),
             "no current output swap counts exist",
         );
         Ok(())

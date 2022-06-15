@@ -1,6 +1,4 @@
-use image_annealing::compute::{
-    self, Config, OutputStatus, SwapInput, SwapParameters, SwapPassSelection,
-};
+use image_annealing::compute::{self, Config, OutputStatus, SwapInput, SwapParameters, SwapPass};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::error::Error;
 use test_utils::algorithm::assert_step_until_success;
@@ -78,7 +76,7 @@ fn skip_count_swap() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher(&Config {
         image_dimensions: dimensions,
     })?;
-    let swap_parameters = SwapParameters::from_selection(SwapPassSelection::HORIZONTAL)?;
+    let swap_parameters = SwapParameters::from_sequence(SwapPass::Horizontal.into());
     let mut algorithm = dispatcher.swap(
         SwapInput {
             candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
