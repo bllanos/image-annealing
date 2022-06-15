@@ -238,25 +238,20 @@ impl SwapPassSequence {
         if self.includes_pass(pass) {
             Err(InvalidSwapPassSelectionError::Duplicate(pass))
         } else {
-            let new_pass_option = Some(pass);
             Ok(self
-                .0
                 .iter()
-                .filter(|pass_option| pass_option != &&new_pass_option)
-                .chain(std::iter::once(&new_pass_option))
+                .filter(|&&current_pass| current_pass != pass)
+                .chain(std::iter::once(&pass))
                 .enumerate()
-                .fold(Self::EMPTY, |mut acc, (i, pass_option)| {
-                    acc.0[i] = *pass_option;
+                .fold(Self::EMPTY, |mut acc, (i, new_pass)| {
+                    acc.0[i] = Some(*new_pass);
                     acc
                 }))
         }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &SwapPass> {
-        self.0
-            .iter()
-            .filter(|&&pass_option| pass_option.is_some())
-            .map(|pass_option| pass_option.as_ref().unwrap())
+        self.0.iter().filter_map(Option::<SwapPass>::as_ref)
     }
 }
 
@@ -276,19 +271,13 @@ impl TryFrom<SwapPassSet> for SwapPassSequence {
 
 impl IntoIterator for SwapPassSequence {
     type Item = SwapPass;
-    type IntoIter = std::iter::Map<
-        std::iter::Filter<
-            std::array::IntoIter<Option<Self::Item>, { constant::count_swap::N_CHANNEL }>,
-            for<'r> fn(&'r Option<Self::Item>) -> bool,
-        >,
-        fn(Option<Self::Item>) -> Self::Item,
+    type IntoIter = std::iter::FilterMap<
+        std::array::IntoIter<Option<Self::Item>, { constant::count_swap::N_CHANNEL }>,
+        fn(Option<Self::Item>) -> Option<Self::Item>,
     >;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.0
-            .into_iter()
-            .filter(Option::<Self::Item>::is_some as for<'r> fn(&'r Option<Self::Item>) -> bool)
-            .map(Option::<Self::Item>::unwrap)
+        self.0.into_iter().filter_map(std::convert::identity)
     }
 }
 

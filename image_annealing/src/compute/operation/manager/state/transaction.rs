@@ -52,7 +52,7 @@ impl fmt::Display for InsufficientOutputError {
             Self::CountSwap => write!(f, "no current output swap counts exist",),
             Self::CountSwapPass => write!(
                 f,
-                "not all selected swap passes were counted during the last count swap operation"
+                "not all selected swap passes were counted during the last count swap operation, if one was performed"
             ),
             Self::SwapPass => write!(
                 f,

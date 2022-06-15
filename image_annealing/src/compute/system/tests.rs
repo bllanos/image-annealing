@@ -14,7 +14,7 @@ mod operation_count_swap {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
             system.operation_count_swap(SwapPassSequence::all()),
-            "not all selected swap passes were counted during the last count swap operation",
+            "not all selected swap passes have occurred since the last count swap operation",
         );
         Ok(())
     }
@@ -42,7 +42,7 @@ mod output_count_swap {
         })?;
         test_utils::assert_error_contains(
             system.output_count_swap(&pass.into()),
-            "no current output swap counts exist",
+            "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
         Ok(())
     }
