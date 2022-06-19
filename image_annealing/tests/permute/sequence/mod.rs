@@ -6,7 +6,7 @@ use image_annealing::compute::{
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::assert_step_until_success;
+use test_utils::algorithm::{assert_correct_default_swap_full_output, assert_step_until_success};
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
 use test_utils::permutation::DimensionsAndPermutation;
 
@@ -66,15 +66,14 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
         },
         &swap_parameters,
     );
-    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    let output = algorithm.full_output().unwrap();
-    assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-    assert_eq!(
-        *output.input_displacement_goal.unwrap().as_ref(),
-        expected_displacement_goal
+    assert_correct_default_swap_full_output(
+        algorithm.as_mut(),
+        &permutation,
+        &expected_displacement_goal,
+        &expected_permutation,
     );
-    assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
     assert_correct_swap_count_output(
         algorithm.partial_output(),
         &swap_parameters,

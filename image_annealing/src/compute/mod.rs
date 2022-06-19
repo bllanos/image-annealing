@@ -17,7 +17,7 @@ pub use output::algorithm::permute::{PermuteInput, PermuteOutput, PermuteParamet
 pub use output::algorithm::swap::{
     InvalidSwapPassSelectionError, SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput,
     SwapPass, SwapPassSequence, SwapPassSequenceSwapRatio, SwapPassSet, SwapPassSwapRatio,
-    SwapRatio,
+    SwapRatio, SwapReturnedInput,
 };
 pub use output::algorithm::validate_permutation::{
     ValidatePermutationInput, ValidatePermutationParameters,

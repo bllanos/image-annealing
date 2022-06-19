@@ -17,6 +17,7 @@ pub use input::{
 };
 pub use output::{
     SwapFullOutput, SwapPartialOutput, SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio,
+    SwapReturnedInput,
 };
 
 pub struct Swap {
@@ -25,7 +26,8 @@ pub struct Swap {
     input_permutation: Option<ValidatedPermutation>,
     input_displacement_goal: Option<DisplacementGoal>,
     sequence: SwapPassSequence,
-    remaining_passes: Option<<SwapPassSequence as IntoIterator>::IntoIter>,
+    remaining_passes: Option<std::iter::Peekable<<SwapPassSequence as IntoIterator>::IntoIter>>,
+    previous_pass: Option<SwapPass>,
     swap_acceptance_threshold: f32,
     do_count_swap: bool,
     has_given_partial_output: bool,
@@ -49,6 +51,7 @@ impl Swap {
             input_displacement_goal: input.displacement_goal.take(),
             sequence: parameters.sequence,
             remaining_passes: None,
+            previous_pass: None,
             swap_acceptance_threshold: parameters.swap_acceptance_threshold,
             do_count_swap: parameters.count_swap,
             has_given_partial_output: false,
@@ -65,7 +68,38 @@ impl Swap {
     }
 
     pub fn full_output(&mut self, system: &mut System) -> Option<SwapFullOutput> {
-        FinalOutputHolder::<SwapFullOutput>::checked_output(self, system)
+        if self.has_given_full_output {
+            None
+        } else {
+            match self.completion_status {
+                CompletionStatus::Failed => None,
+                _ => match self.previous_pass {
+                    Some(pass) => {
+                        self.has_given_full_output = true;
+                        system
+                            .output_permutation()
+                            .ok()
+                            .map(|output_permutation| SwapFullOutput {
+                                input: {
+                                    let permutation = self.input_permutation.take();
+                                    let displacement_goal = self.input_displacement_goal.take();
+                                    if permutation.is_some() || displacement_goal.is_some() {
+                                        Some(SwapReturnedInput {
+                                            permutation,
+                                            displacement_goal,
+                                        })
+                                    } else {
+                                        None
+                                    }
+                                },
+                                output_permutation,
+                                pass,
+                            })
+                    }
+                    None => None,
+                },
+            }
+        }
     }
 }
 
@@ -79,31 +113,24 @@ impl CompletionStatusHolder for Swap {
     }
 
     fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
-        match self.validator.take() {
+        let output_status = match self.validator.take() {
             Some(mut v) => {
                 debug_assert!(self.input_permutation.is_none());
 
                 let status = v.step(system)?;
-                match status {
-                    OutputStatus::NoNewOutput
-                    | OutputStatus::NewPartialOutput
-                    | OutputStatus::NewFullOutput
-                    | OutputStatus::NewPartialAndFullOutput
-                    | OutputStatus::FinalPartialOutput => {
-                        self.validator = Some(v);
-                    }
-                    OutputStatus::FinalFullOutput | OutputStatus::FinalPartialAndFullOutput => {
-                        self.input_permutation =
-                            v.full_output().map(|output| output.validated_permutation);
-                    }
+                if status.is_final() && status.is_full() {
+                    self.input_permutation =
+                        v.full_output().map(|output| output.validated_permutation);
+                } else {
+                    self.validator = Some(v);
                 }
-                Ok(OutputStatus::NoNewOutput)
+                OutputStatus::NoNewOutput
             }
             None => {
                 let is_first_pass = match self.remaining_passes {
                     Some(_) => false,
                     None => {
-                        self.remaining_passes = Some(self.sequence.into_iter());
+                        self.remaining_passes = Some(self.sequence.into_iter().peekable());
                         true
                     }
                 };
@@ -126,21 +153,33 @@ impl CompletionStatusHolder for Swap {
                                 self.swap_acceptance_threshold,
                             ))?;
                         }
-                        Ok(OutputStatus::NoNewOutput)
+                        self.previous_pass = Some(pass);
+                        self.has_given_full_output = false;
+                        match self.remaining_passes.as_mut().unwrap().peek() {
+                            Some(_) => OutputStatus::NewFullOutput,
+                            None => {
+                                if self.do_count_swap {
+                                    OutputStatus::NewFullOutput
+                                } else {
+                                    self.completion_status = CompletionStatus::Finished;
+                                    OutputStatus::FinalFullOutput
+                                }
+                            }
+                        }
                     }
                     None => {
-                        let output_status = if self.do_count_swap {
+                        if self.do_count_swap {
                             system.operation_count_swap(self.sequence)?;
-                            OutputStatus::FinalPartialAndFullOutput
+                            self.completion_status = CompletionStatus::Finished;
+                            OutputStatus::FinalPartialOutput
                         } else {
-                            OutputStatus::FinalFullOutput
-                        };
-                        self.completion_status = CompletionStatus::Finished;
-                        Ok(output_status)
+                            unreachable!()
+                        }
                     }
                 }
             }
-        }
+        };
+        Ok(output_status)
     }
 }
 
@@ -158,26 +197,6 @@ impl FinalOutputHolder<SwapPartialOutput> for Swap {
             .ok()
             .map(|counts| SwapPartialOutput {
                 counts: Box::new(counts),
-            })
-    }
-}
-
-impl FinalOutputHolder<SwapFullOutput> for Swap {
-    fn has_given_output(&self) -> bool {
-        self.has_given_full_output
-    }
-    fn set_has_given_output(&mut self) {
-        self.has_given_full_output = true;
-    }
-
-    fn unchecked_output(&mut self, system: &mut System) -> Option<SwapFullOutput> {
-        system
-            .output_permutation()
-            .ok()
-            .map(|output_permutation| SwapFullOutput {
-                input_permutation: self.input_permutation.take(),
-                input_displacement_goal: self.input_displacement_goal.take(),
-                output_permutation,
             })
     }
 }

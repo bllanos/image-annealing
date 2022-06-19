@@ -2,17 +2,18 @@ mod run_swap {
     use crate::config::{IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
     use image_annealing::compute::{
         Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
-        Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters,
+        Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters, SwapAlgorithm,
         SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPass, SwapPassSequence,
         SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm,
         ValidatePermutationInput, ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
-    use image_annealing::{CandidatePermutation, DisplacementGoal};
+    use image_annealing::{
+        CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation,
+    };
     use std::error::Error;
     use std::fmt;
     use std::num::NonZeroUsize;
-    use test_utils::permutation::DimensionsAndPermutation;
 
     #[derive(Clone)]
     struct TestSwapRatio(usize, usize);
@@ -58,20 +59,32 @@ mod run_swap {
     struct SwapDispatcher {
         run_swap_input: RunSwapInput,
         output_swap_counts: Vec<TestSwapRatio>,
+        output_permutations: <Vec<ValidatedPermutation> as IntoIterator>::IntoIter,
         swap_round_index: usize,
         step_index: usize,
+        remaining_passes: Option<std::iter::Peekable<<SwapPassSequence as IntoIterator>::IntoIter>>,
+        previous_pass: Option<SwapPass>,
         partial_output_call_count: usize,
     }
 
     impl SwapDispatcher {
-        const FINAL_STEP_INDEX: usize = 5;
+        const FINAL_STEP_INDEX: usize = 4;
 
-        pub fn new(run_swap_input: RunSwapInput, output_swap_counts: Vec<TestSwapRatio>) -> Self {
+        pub fn new(
+            run_swap_input: RunSwapInput,
+            output_swap_counts: Vec<TestSwapRatio>,
+            output_permutations: Vec<ValidatedPermutation>,
+        ) -> Self {
+            // TODO replace `1` with a value that depends on `run_swap_input.parameters`
+            assert_eq!(output_permutations.len(), 1);
             let instance = Self {
                 run_swap_input,
                 output_swap_counts,
+                output_permutations: output_permutations.into_iter(),
                 swap_round_index: 0,
                 step_index: 0,
+                remaining_passes: None,
+                previous_pass: None,
                 partial_output_call_count: 0,
             };
             if instance.expected_count_swap_flag() {
@@ -157,7 +170,7 @@ mod run_swap {
             mut self: Box<Self>,
             input: SwapInput,
             parameters: &SwapParameters,
-        ) -> Box<dyn Algorithm<SwapPartialOutput, SwapFullOutput>> {
+        ) -> Box<SwapAlgorithm> {
             assert!(self.swap_round_index < self.expected_number_of_rounds());
             assert_eq!(
                 parameters,
@@ -188,6 +201,14 @@ mod run_swap {
                     }
                 );
             }
+            self.remaining_passes = Some(
+                self.run_swap_input
+                    .parameters
+                    .swap_pass_sequence
+                    .into_iter()
+                    .peekable(),
+            );
+            self.previous_pass = None;
             self.swap_round_index += 1;
             self
         }
@@ -212,24 +233,48 @@ mod run_swap {
                         OutputStatus::NewPartialOutput
                     }
                 }
-                2 => OutputStatus::NewFullOutput,
-                3 => {
+                2 => {
                     if self.expected_count_swap_flag() {
                         OutputStatus::NoNewOutput
                     } else {
                         OutputStatus::NewPartialAndFullOutput
                     }
                 }
-                4 => {
-                    if self.expected_count_swap_flag() {
-                        OutputStatus::FinalPartialAndFullOutput
-                    } else {
-                        OutputStatus::FinalFullOutput
+                3 => {
+                    let (pass_option, is_last_pass) = self
+                        .remaining_passes
+                        .as_mut()
+                        .map(|iter| (iter.next(), iter.peek().is_none()))
+                        .unwrap();
+                    match pass_option {
+                        Some(_) => {
+                            self.previous_pass = pass_option;
+                            if self.expected_count_swap_flag() {
+                                OutputStatus::NewFullOutput
+                            } else {
+                                if is_last_pass {
+                                    self.step_index += 1;
+                                    OutputStatus::FinalFullOutput
+                                } else {
+                                    OutputStatus::NewFullOutput
+                                }
+                            }
+                        }
+                        None => {
+                            self.step_index += 1;
+                            if self.expected_count_swap_flag() {
+                                OutputStatus::FinalPartialOutput
+                            } else {
+                                unreachable!()
+                            }
+                        }
                     }
                 }
                 _ => unreachable!(),
             };
-            self.step_index += 1;
+            if self.step_index < 3 {
+                self.step_index += 1;
+            }
             Ok(status)
         }
 
@@ -253,20 +298,11 @@ mod run_swap {
                     // even if only to print them to the user.
                     assert_eq!(self.partial_output_call_count, expected_rounds);
                 }
-                let output_permutation_buffer = self
-                    .run_swap_input
-                    .candidate_permutation
-                    .take()
-                    .unwrap()
-                    .into_inner();
+
                 Some(SwapFullOutput {
-                    input_permutation: None,
-                    input_displacement_goal: None,
-                    output_permutation: unsafe {
-                        validation::vector_field_into_validated_permutation_unchecked(
-                            output_permutation_buffer,
-                        )
-                    },
+                    input: None,
+                    output_permutation: self.output_permutations.next().unwrap(),
+                    pass: self.previous_pass.unwrap(),
                 })
             } else {
                 unreachable!()
@@ -283,11 +319,23 @@ mod run_swap {
         parameters: SwapParametersConfig,
         swap_ratios: Vec<TestSwapRatio>,
     ) -> Result<(), Box<dyn Error>> {
-        let DimensionsAndPermutation { permutation, .. } = test_utils::permutation::non_identity();
+        // TODO replace `1` with a value that depends on `run_swap()` parameters
+        let dimensions = ImageDimensions::new(1, 1)?;
+        let permutation = test_utils::permutation::identity_with_dimensions(
+            dimensions.width(),
+            dimensions.height(),
+        )
+        .permutation;
         let candidate_permutation = CandidatePermutation::new(permutation.clone()).unwrap();
-        let validated_permutation = unsafe {
-            validation::vector_field_into_validated_permutation_unchecked(permutation.clone())
-        };
+        // TODO replace `1` with a value that depends on `run_swap()` parameters
+        let validated_permutations = (0..1)
+            .map(|i| unsafe {
+                validation::vector_field_into_validated_permutation_unchecked(
+                    test_utils::permutation::line_with_first_texel_moved(dimensions.width(), i)
+                        .permutation,
+                )
+            })
+            .collect::<Vec<_>>();
         let run_swap_input = RunSwapInput {
             candidate_permutation: Some(candidate_permutation),
             displacement_goal: Some(
@@ -296,7 +344,11 @@ mod run_swap {
             parameters,
         };
 
-        let dispatcher = Box::new(SwapDispatcher::new(run_swap_input.clone(), swap_ratios));
+        let dispatcher = Box::new(SwapDispatcher::new(
+            run_swap_input.clone(),
+            swap_ratios,
+            validated_permutations.clone(),
+        ));
         assert_eq!(
             super::super::run_swap(
                 dispatcher,
@@ -305,7 +357,7 @@ mod run_swap {
                 &run_swap_input.parameters
             )
             .collect::<Result<Vec<_>, _>>()?,
-            vec![validated_permutation]
+            validated_permutations
         );
         Ok(())
     }

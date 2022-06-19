@@ -6,7 +6,7 @@ pub mod algorithm;
 pub mod conversion;
 pub mod format;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum OutputStatus {
     NoNewOutput,
     NewPartialOutput,
@@ -20,13 +20,33 @@ pub enum OutputStatus {
 impl OutputStatus {
     pub fn is_final(&self) -> bool {
         match self {
-            OutputStatus::NoNewOutput
+            Self::NoNewOutput
             | Self::NewFullOutput
             | Self::NewPartialOutput
             | Self::NewPartialAndFullOutput => false,
             Self::FinalPartialOutput | Self::FinalFullOutput | Self::FinalPartialAndFullOutput => {
                 true
             }
+        }
+    }
+
+    pub fn is_partial(&self) -> bool {
+        match self {
+            Self::NoNewOutput | Self::NewFullOutput | Self::FinalFullOutput => false,
+            Self::NewPartialOutput
+            | Self::NewPartialAndFullOutput
+            | Self::FinalPartialOutput
+            | Self::FinalPartialAndFullOutput => true,
+        }
+    }
+
+    pub fn is_full(&self) -> bool {
+        match self {
+            Self::NoNewOutput | Self::NewPartialOutput | Self::FinalPartialOutput => false,
+            Self::NewFullOutput
+            | Self::NewPartialAndFullOutput
+            | Self::FinalFullOutput
+            | Self::FinalPartialAndFullOutput => true,
         }
     }
 }

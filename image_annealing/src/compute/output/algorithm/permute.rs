@@ -84,18 +84,10 @@ impl CompletionStatusHolder for Permute {
                 debug_assert!(self.permutation.is_none());
 
                 let status = v.step(system)?;
-                match status {
-                    OutputStatus::NoNewOutput
-                    | OutputStatus::NewPartialOutput
-                    | OutputStatus::NewFullOutput
-                    | OutputStatus::NewPartialAndFullOutput
-                    | OutputStatus::FinalPartialOutput => {
-                        self.validator = Some(v);
-                    }
-                    OutputStatus::FinalFullOutput | OutputStatus::FinalPartialAndFullOutput => {
-                        self.permutation =
-                            v.full_output().map(|output| output.validated_permutation);
-                    }
+                if status.is_final() && status.is_full() {
+                    self.permutation = v.full_output().map(|output| output.validated_permutation);
+                } else {
+                    self.validator = Some(v);
                 }
                 Ok(OutputStatus::NoNewOutput)
             }

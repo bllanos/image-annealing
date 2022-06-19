@@ -35,10 +35,15 @@ pub struct SwapPartialOutput {
     pub counts: Box<dyn SwapPassSequenceSwapRatio>,
 }
 
+pub struct SwapReturnedInput {
+    pub permutation: Option<ValidatedPermutation>,
+    pub displacement_goal: Option<DisplacementGoal>,
+}
+
 pub struct SwapFullOutput {
-    pub input_permutation: Option<ValidatedPermutation>,
-    pub input_displacement_goal: Option<DisplacementGoal>,
+    pub input: Option<SwapReturnedInput>,
     pub output_permutation: ValidatedPermutation,
+    pub pass: SwapPass,
 }
 
 #[cfg(test)]

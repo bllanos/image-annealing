@@ -2,7 +2,9 @@ mod accept_all_swap {
     use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
-    use test_utils::algorithm::assert_step_until_success;
+    use test_utils::algorithm::{
+        assert_correct_default_swap_full_output, assert_step_until_success,
+    };
     use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_utils::permutation::DimensionsAndPermutation;
 
@@ -28,16 +30,14 @@ mod accept_all_swap {
             },
             &swap_parameters,
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-        let output = algorithm.full_output().unwrap();
-        assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-        assert_eq!(
-            *output.input_displacement_goal.unwrap().as_ref(),
-            expected_displacement_goal
+        assert_correct_default_swap_full_output(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
         );
-        assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
-        assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
             &swap_parameters,
@@ -70,15 +70,14 @@ mod accept_all_swap {
             },
             &swap_parameters,
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-        let output = algorithm.full_output().unwrap();
-        assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-        assert_eq!(
-            *output.input_displacement_goal.unwrap().as_ref(),
-            expected_displacement_goal
+        assert_correct_default_swap_full_output(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
         );
-        assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
         assert_correct_swap_count_output(
             algorithm.partial_output(),
             &swap_parameters,
@@ -94,7 +93,9 @@ mod select_swap {
     use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
-    use test_utils::algorithm::assert_step_until_success;
+    use test_utils::algorithm::{
+        assert_correct_default_swap_full_output, assert_step_until_success,
+    };
     use test_utils::displacement_goal;
     use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_utils::permutation::DimensionsAndPermutation;
@@ -128,16 +129,14 @@ mod select_swap {
             },
             &swap_parameters,
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-        let output = algorithm.full_output().unwrap();
-        assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-        assert_eq!(
-            *output.input_displacement_goal.unwrap().as_ref(),
-            expected_displacement_goal
+        assert_correct_default_swap_full_output(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
         );
-        assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
-        assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
             &swap_parameters,
@@ -181,16 +180,14 @@ mod select_swap {
             },
             &swap_parameters,
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-        let output = algorithm.full_output().unwrap();
-        assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-        assert_eq!(
-            *output.input_displacement_goal.unwrap().as_ref(),
-            expected_displacement_goal
+        assert_correct_default_swap_full_output(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
         );
-        assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
-        assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
             &swap_parameters,
@@ -209,7 +206,9 @@ mod swap_acceptance_threshold {
     };
     use image_annealing::CandidatePermutation;
     use std::error::Error;
-    use test_utils::algorithm::assert_step_until_success;
+    use test_utils::algorithm::{
+        assert_correct_default_swap_full_output, assert_step_until_success,
+    };
     use test_utils::displacement_goal;
     use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_utils::permutation::DimensionsAndPermutation;
@@ -230,8 +229,9 @@ mod swap_acceptance_threshold {
             image_dimensions: dimensions,
         })?;
         let mut swap_acceptance_threshold = -2.0;
+        let pass = SwapPass::Horizontal;
         let mut swap_parameters = SwapParameters {
-            sequence: SwapPass::Horizontal.into(),
+            sequence: pass.into(),
             swap_acceptance_threshold,
             count_swap: true,
         };
@@ -242,16 +242,14 @@ mod swap_acceptance_threshold {
             },
             &swap_parameters,
         );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-        let output = algorithm.full_output().unwrap();
-        assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-        assert_eq!(
-            *output.input_displacement_goal.unwrap().as_ref(),
-            expected_displacement_goal
+        assert_correct_default_swap_full_output(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
         );
-        assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
-        assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
             &swap_parameters,
@@ -265,12 +263,12 @@ mod swap_acceptance_threshold {
         swap_acceptance_threshold = 1.0 - 2.0_f32.sqrt();
         swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold - epsilon;
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -293,15 +291,15 @@ mod swap_acceptance_threshold {
         ];
         let expected_permutation_last_row_swapped = conversion::to_image(&dimensions, &v);
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_last_row_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -316,15 +314,15 @@ mod swap_acceptance_threshold {
         swap_acceptance_threshold = 0.0;
         swap_parameters.swap_acceptance_threshold = swap_acceptance_threshold - epsilon;
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_last_row_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -347,15 +345,15 @@ mod swap_acceptance_threshold {
         ];
         let expected_permutation_last_two_rows_swapped = conversion::to_image(&dimensions, &v);
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_last_two_rows_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -368,15 +366,15 @@ mod swap_acceptance_threshold {
         dispatcher = algorithm.return_to_dispatcher();
 
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_last_row_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -400,15 +398,15 @@ mod swap_acceptance_threshold {
         ];
         let expected_permutation_middle_row_swapped = conversion::to_image(&dimensions, &v);
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_middle_row_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -421,15 +419,15 @@ mod swap_acceptance_threshold {
         dispatcher = algorithm.return_to_dispatcher();
 
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_last_row_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),
@@ -452,15 +450,15 @@ mod swap_acceptance_threshold {
         ];
         let expected_permutation_first_two_rows_swapped = conversion::to_image(&dimensions, &v);
         algorithm = dispatcher.swap(Default::default(), &swap_parameters);
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
+        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
         let output = algorithm.full_output().unwrap();
-        assert!(output.input_permutation.is_none());
-        assert!(output.input_displacement_goal.is_none());
+        assert!(output.input.is_none());
         assert_eq!(
             *output.output_permutation.as_ref(),
             expected_permutation_first_two_rows_swapped
         );
+        assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
             algorithm.partial_output(),

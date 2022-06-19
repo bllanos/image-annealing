@@ -202,6 +202,23 @@ pub fn reflect_around_center() -> DimensionsAndPermutation {
     }
 }
 
+pub fn line_with_first_texel_moved(
+    length: usize,
+    first_pixel_shift: usize,
+) -> DimensionsAndPermutation {
+    assert!(first_pixel_shift < length);
+    let dimensions = ImageDimensions::new(length, 1).unwrap();
+    let v: Vec<_> = std::iter::once(VectorFieldEntry(first_pixel_shift.try_into().unwrap(), 0))
+        .chain(std::iter::repeat(VectorFieldEntry(-1, 0)).take(first_pixel_shift))
+        .chain(std::iter::repeat(VectorFieldEntry(0, 0)).take(length - first_pixel_shift - 1))
+        .collect();
+
+    DimensionsAndPermutation {
+        permutation: conversion::to_image(&dimensions, &v),
+        dimensions,
+    }
+}
+
 pub fn assert_is_identity(permutation: &ValidatedPermutation) {
     let converted_permutation = conversion::to_vec(permutation.as_ref());
     let dim = permutation.dimensions();

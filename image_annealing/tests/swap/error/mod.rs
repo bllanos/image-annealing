@@ -2,7 +2,9 @@ use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
+use test_utils::algorithm::{
+    assert_correct_default_swap_full_output, assert_step_until_error, assert_step_until_success,
+};
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
 use test_utils::permutation::DimensionsAndPermutation;
 
@@ -27,7 +29,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_error(
         algorithm.as_mut(),
-        OutputStatus::FinalPartialAndFullOutput,
+        OutputStatus::FinalPartialOutput,
         "mismatch in image dimensions, (width, height) = (3, 3) and (width, height) = (2, 3)",
     );
     Ok(())
@@ -54,7 +56,7 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_error(
         algorithm.as_mut(),
-        OutputStatus::FinalPartialAndFullOutput,
+        OutputStatus::FinalPartialOutput,
         "mismatch in image dimensions, (width, height) = (2, 3) and (width, height) = (3, 3)",
     );
     Ok(())
@@ -77,7 +79,7 @@ fn forget_permutation() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_error(
         algorithm.as_mut(),
-        OutputStatus::FinalPartialAndFullOutput,
+        OutputStatus::FinalPartialOutput,
         "an input permutation must be provided as there is none to reuse",
     );
     Ok(())
@@ -102,7 +104,7 @@ fn forget_displacement_goal() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_error(
         algorithm.as_mut(),
-        OutputStatus::FinalPartialAndFullOutput,
+        OutputStatus::FinalPartialOutput,
         "an input displacement goal field must be provided as there is none to reuse",
     );
     Ok(())
@@ -136,7 +138,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         },
         &swap_parameters,
     );
-    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
+    assert_step_until_error(algorithm.as_mut(), OutputStatus::FinalPartialOutput, "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)");
 
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.swap(
@@ -148,14 +150,13 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         },
         &swap_parameters,
     );
-    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialAndFullOutput)?;
-    let output = algorithm.full_output().unwrap();
-    assert_eq!(*output.input_permutation.unwrap().as_ref(), permutation);
-    assert_eq!(
-        *output.input_displacement_goal.unwrap().as_ref(),
-        expected_displacement_goal
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
+    assert_correct_default_swap_full_output(
+        algorithm.as_mut(),
+        &permutation,
+        &expected_displacement_goal,
+        &expected_permutation,
     );
-    assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
     assert_correct_swap_count_output(
         algorithm.partial_output(),
         &swap_parameters,
