@@ -138,6 +138,7 @@ pub struct UnverifiedSwapParametersConfig {
     pub stop: UnverifiedSwapStopConfig,
     pub swap_acceptance_threshold: f32,
     pub swap_pass_sequence: Vec<SwapPass>,
+    pub output_intermediate_permutations: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -145,6 +146,7 @@ pub struct SwapParametersConfig {
     pub stop: SwapStopConfig,
     pub swap_acceptance_threshold: f32,
     pub swap_pass_sequence: SwapPassSequence,
+    pub output_intermediate_permutations: bool,
 }
 
 impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
@@ -160,6 +162,7 @@ impl TryFrom<UnverifiedSwapParametersConfig> for SwapParametersConfig {
                     .into_iter()
                     .map(<image_annealing::compute::SwapPass as From<SwapPass>>::from),
             )?,
+            output_intermediate_permutations: value.output_intermediate_permutations,
         })
     }
 }

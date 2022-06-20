@@ -52,13 +52,13 @@ fn run_and_save(
         AlgorithmConfig::Swap {
             candidate_permutation,
             displacement_goal,
-            permutation_output_path_no_extension,
+            permutation_output_path_prefix,
             parameters,
         } => swap::run_and_save_swap(
             dispatcher,
             candidate_permutation,
             displacement_goal,
-            permutation_output_path_no_extension,
+            permutation_output_path_prefix,
             parameters,
         )?,
         AlgorithmConfig::ValidatePermutation {

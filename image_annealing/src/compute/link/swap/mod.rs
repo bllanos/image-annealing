@@ -20,6 +20,15 @@ impl SwapPass {
 
     const OFFSET: usize = 1;
 
+    pub fn snake_case_name(&self) -> &'static str {
+        match self {
+            Self::Horizontal => "horizontal",
+            Self::Vertical => "vertical",
+            Self::OffsetHorizontal => "offset_horizontal",
+            Self::OffsetVertical => "offset_vertical",
+        }
+    }
+
     pub(in super::super) fn swap_workgroup_grid_dimensions(
         &self,
         image_dimensions: &ImageDimensions,

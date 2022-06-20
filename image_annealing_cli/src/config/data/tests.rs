@@ -169,6 +169,7 @@ mod config_try_from_unverified_config {
                 ),
                 swap_acceptance_threshold: SWAP_ACCEPTANCE_THRESHOLD,
                 swap_pass_sequence: vec![SwapPass::Vertical, SwapPass::OffsetVertical],
+                output_intermediate_permutations: false,
             }
         }
 
@@ -181,6 +182,7 @@ mod config_try_from_unverified_config {
                     compute::SwapPass::OffsetVertical,
                 ])
                 .unwrap(),
+                output_intermediate_permutations: false,
             }
         }
 
@@ -193,7 +195,7 @@ mod config_try_from_unverified_config {
                 displacement_goal: String::from(
                     "../test_data/image/displacement_goal/identity_displacement_goal.png",
                 ),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+                permutation_output_path_prefix: String::from("permutation_out"),
                 parameters: make_unverified_swap_parameters(),
             };
             let r: Config = unverified_config.try_into()?;
@@ -215,7 +217,7 @@ mod config_try_from_unverified_config {
                                 "identity_displacement_goal.png"
                             ])
                         ),
-                        permutation_output_path_no_extension: PermutationPath::from_raw_clone(
+                        permutation_output_path_prefix: PermutationPath::from_raw_clone(
                             "permutation_out"
                         ),
                         parameters: make_swap_parameters()
@@ -233,7 +235,7 @@ mod config_try_from_unverified_config {
                 displacement_goal: String::from(
                     "../test_data/image/displacement_goal/identity_displacement_goal.png",
                 ),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+                permutation_output_path_prefix: String::from("permutation_out"),
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
@@ -252,7 +254,7 @@ mod config_try_from_unverified_config {
                 displacement_goal: String::from(
                     "../test_data/image/displacement_goal/not_found.png",
                 ),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+                permutation_output_path_prefix: String::from("permutation_out"),
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
@@ -271,7 +273,7 @@ mod config_try_from_unverified_config {
                 displacement_goal: String::from(
                     "../test_data/image/displacement_goal/identity_larger_displacement_goal.png",
                 ),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+                permutation_output_path_prefix: String::from("permutation_out"),
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
@@ -290,7 +292,7 @@ mod config_try_from_unverified_config {
                 displacement_goal: String::from(
                     "../test_data/image/displacement_goal/identity_displacement_goal.png",
                 ),
-                permutation_output_path_no_extension: String::from("permutation_out"),
+                permutation_output_path_prefix: String::from("permutation_out"),
                 parameters: UnverifiedSwapParametersConfig {
                     stop: UnverifiedSwapStopConfig::Unbounded(
                         UnverifiedSwapStopThreshold::SwapAcceptanceFraction(2.0),

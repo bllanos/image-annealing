@@ -49,7 +49,7 @@ pub enum UnverifiedConfig {
     Swap {
         candidate_permutation: String,
         displacement_goal: String,
-        permutation_output_path_no_extension: String,
+        permutation_output_path_prefix: String,
         parameters: UnverifiedSwapParametersConfig,
     },
     ValidatePermutation {
@@ -70,7 +70,7 @@ pub enum AlgorithmConfig {
     Swap {
         candidate_permutation: PermutationPath,
         displacement_goal: DisplacementGoalPath,
-        permutation_output_path_no_extension: PermutationPath,
+        permutation_output_path_prefix: PermutationPath,
         parameters: SwapParametersConfig,
     },
     ValidatePermutation {
@@ -126,7 +126,7 @@ impl TryFrom<UnverifiedConfig> for Config {
             UnverifiedConfig::Swap {
                 candidate_permutation,
                 displacement_goal,
-                permutation_output_path_no_extension,
+                permutation_output_path_prefix,
                 parameters,
             } => {
                 let (candidate_permutation_checked, permutation_dimensions) =
@@ -138,8 +138,8 @@ impl TryFrom<UnverifiedConfig> for Config {
                     AlgorithmConfig::Swap {
                         candidate_permutation: candidate_permutation_checked,
                         displacement_goal: displacement_goal_checked,
-                        permutation_output_path_no_extension: PermutationPath::from_output_path(
-                            permutation_output_path_no_extension,
+                        permutation_output_path_prefix: PermutationPath::from_output_path(
+                            permutation_output_path_prefix,
                         ),
                         parameters: parameters.try_into()?,
                     },

@@ -1,5 +1,6 @@
 mod run_swap {
-    use crate::config::{IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
+    use super::super::TaggedPermutation;
+    use crate::config::{SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
     use image_annealing::compute::{
         Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
         Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters, SwapAlgorithm,
@@ -8,12 +9,9 @@ mod run_swap {
         ValidatePermutationInput, ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
-    use image_annealing::{
-        CandidatePermutation, DisplacementGoal, ImageDimensions, ValidatedPermutation,
-    };
+    use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
     use std::error::Error;
     use std::fmt;
-    use std::num::NonZeroUsize;
 
     #[derive(Clone)]
     struct TestSwapRatio(usize, usize);
@@ -49,6 +47,57 @@ mod run_swap {
         }
     }
 
+    fn expected_number_of_rounds(
+        stop_config: &SwapStopConfig,
+        swap_counts: &Vec<TestSwapRatio>,
+    ) -> usize {
+        match stop_config {
+            SwapStopConfig::Bounded {
+                iteration_count,
+                threshold: threshold_option,
+            } => match threshold_option {
+                None => iteration_count.get(),
+                Some(threshold) => std::cmp::min(
+                    swap_counts
+                        .iter()
+                        .take_while(|swap_count| match threshold {
+                            SwapStopThreshold::SwapsAccepted(accepted) => {
+                                swap_count.accepted() > *accepted
+                            }
+                            SwapStopThreshold::SwapAcceptanceFraction(fraction) => {
+                                swap_count.accepted_fraction() > fraction.get()
+                            }
+                        })
+                        .count()
+                        + 1,
+                    iteration_count.get(),
+                ),
+            },
+            SwapStopConfig::Unbounded(threshold) => {
+                swap_counts
+                    .iter()
+                    .take_while(|swap_count| match threshold {
+                        SwapStopThreshold::SwapsAccepted(accepted) => {
+                            swap_count.accepted() > *accepted
+                        }
+                        SwapStopThreshold::SwapAcceptanceFraction(fraction) => {
+                            swap_count.accepted_fraction() > fraction.get()
+                        }
+                    })
+                    .count()
+                    + 1
+            }
+        }
+    }
+
+    fn expected_number_of_passes(
+        parameters: &SwapParametersConfig,
+        swap_counts: &Vec<TestSwapRatio>,
+    ) -> usize {
+        expected_number_of_rounds(&parameters.stop, swap_counts)
+            * parameters.swap_pass_sequence.iter().count()
+    }
+
     #[derive(Clone)]
     struct RunSwapInput {
         candidate_permutation: Option<CandidatePermutation>,
@@ -64,19 +113,24 @@ mod run_swap {
         step_index: usize,
         remaining_passes: Option<std::iter::Peekable<<SwapPassSequence as IntoIterator>::IntoIter>>,
         previous_pass: Option<SwapPass>,
-        partial_output_call_count: usize,
     }
 
     impl SwapDispatcher {
-        const FINAL_STEP_INDEX: usize = 4;
+        const FINAL_STEP_INDEX: usize = 3;
 
         pub fn new(
             run_swap_input: RunSwapInput,
             output_swap_counts: Vec<TestSwapRatio>,
             output_permutations: Vec<ValidatedPermutation>,
         ) -> Self {
-            // TODO replace `1` with a value that depends on `run_swap_input.parameters`
-            assert_eq!(output_permutations.len(), 1);
+            assert_eq!(
+                output_permutations.len(),
+                if run_swap_input.parameters.output_intermediate_permutations {
+                    expected_number_of_passes(&run_swap_input.parameters, &output_swap_counts)
+                } else {
+                    1
+                }
+            );
             let instance = Self {
                 run_swap_input,
                 output_swap_counts,
@@ -85,7 +139,6 @@ mod run_swap {
                 step_index: 0,
                 remaining_passes: None,
                 previous_pass: None,
-                partial_output_call_count: 0,
             };
             if instance.expected_count_swap_flag() {
                 assert_eq!(
@@ -109,43 +162,10 @@ mod run_swap {
         }
 
         fn expected_number_of_rounds(&self) -> usize {
-            match self.run_swap_input.parameters.stop {
-                SwapStopConfig::Bounded {
-                    iteration_count,
-                    threshold: threshold_option,
-                } => match threshold_option {
-                    None => iteration_count.get(),
-                    Some(threshold) => std::cmp::min(
-                        self.output_swap_counts
-                            .iter()
-                            .take_while(|swap_count| match threshold {
-                                SwapStopThreshold::SwapsAccepted(accepted) => {
-                                    swap_count.accepted() > accepted
-                                }
-                                SwapStopThreshold::SwapAcceptanceFraction(fraction) => {
-                                    swap_count.accepted_fraction() > fraction.get()
-                                }
-                            })
-                            .count()
-                            + 1,
-                        iteration_count.get(),
-                    ),
-                },
-                SwapStopConfig::Unbounded(threshold) => {
-                    self.output_swap_counts
-                        .iter()
-                        .take_while(|swap_count| match threshold {
-                            SwapStopThreshold::SwapsAccepted(accepted) => {
-                                swap_count.accepted() > accepted
-                            }
-                            SwapStopThreshold::SwapAcceptanceFraction(fraction) => {
-                                swap_count.accepted_fraction() > fraction.get()
-                            }
-                        })
-                        .count()
-                        + 1
-                }
-            }
+            expected_number_of_rounds(
+                &self.run_swap_input.parameters.stop,
+                &self.output_swap_counts,
+            )
         }
     }
 
@@ -208,8 +228,9 @@ mod run_swap {
                     .into_iter()
                     .peekable(),
             );
-            self.previous_pass = None;
             self.swap_round_index += 1;
+            self.step_index = 0;
+            self.previous_pass = None;
             self
         }
 
@@ -234,13 +255,6 @@ mod run_swap {
                     }
                 }
                 2 => {
-                    if self.expected_count_swap_flag() {
-                        OutputStatus::NoNewOutput
-                    } else {
-                        OutputStatus::NewPartialAndFullOutput
-                    }
-                }
-                3 => {
                     let (pass_option, is_last_pass) = self
                         .remaining_passes
                         .as_mut()
@@ -249,15 +263,15 @@ mod run_swap {
                     match pass_option {
                         Some(_) => {
                             self.previous_pass = pass_option;
-                            if self.expected_count_swap_flag() {
-                                OutputStatus::NewFullOutput
-                            } else {
-                                if is_last_pass {
+                            if is_last_pass {
+                                if self.expected_count_swap_flag() {
+                                    OutputStatus::NewFullOutput
+                                } else {
                                     self.step_index += 1;
                                     OutputStatus::FinalFullOutput
-                                } else {
-                                    OutputStatus::NewFullOutput
                                 }
+                            } else {
+                                OutputStatus::NewFullOutput
                             }
                         }
                         None => {
@@ -272,7 +286,7 @@ mod run_swap {
                 }
                 _ => unreachable!(),
             };
-            if self.step_index < 3 {
+            if self.step_index < 2 {
                 self.step_index += 1;
             }
             Ok(status)
@@ -280,7 +294,6 @@ mod run_swap {
 
         fn partial_output(&mut self) -> Option<SwapPartialOutput> {
             if self.expected_count_swap_flag() && self.step_index == Self::FINAL_STEP_INDEX {
-                self.partial_output_call_count += 1;
                 Some(SwapPartialOutput {
                     counts: Box::new(self.output_swap_counts[self.swap_round_index - 1].clone()),
                 })
@@ -290,99 +303,140 @@ mod run_swap {
         }
 
         fn full_output(&mut self) -> Option<SwapFullOutput> {
-            let expected_rounds = self.expected_number_of_rounds();
-            if self.swap_round_index == expected_rounds && self.step_index == Self::FINAL_STEP_INDEX
+            if !(self
+                .run_swap_input
+                .parameters
+                .output_intermediate_permutations
+                || (self.swap_round_index == self.expected_number_of_rounds()
+                    && self.step_index == Self::FINAL_STEP_INDEX))
             {
-                if self.expected_count_swap_flag() {
-                    // Assert that client code accessed swap count values every round,
-                    // even if only to print them to the user.
-                    assert_eq!(self.partial_output_call_count, expected_rounds);
-                }
-
-                Some(SwapFullOutput {
-                    input: None,
-                    output_permutation: self.output_permutations.next().unwrap(),
-                    pass: self.previous_pass.unwrap(),
-                })
-            } else {
                 unreachable!()
             }
+            Some(SwapFullOutput {
+                input: None,
+                output_permutation: self.output_permutations.next().unwrap(),
+                pass: self.previous_pass.unwrap(),
+            })
         }
 
-        fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-            self.step_index = 0;
+        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
             self
         }
     }
 
     fn test_run_swap_with_parameters(
-        parameters: SwapParametersConfig,
+        stop: SwapStopConfig,
         swap_ratios: Vec<TestSwapRatio>,
     ) -> Result<(), Box<dyn Error>> {
-        // TODO replace `1` with a value that depends on `run_swap()` parameters
-        let dimensions = ImageDimensions::new(1, 1)?;
-        let permutation = test_utils::permutation::identity_with_dimensions(
-            dimensions.width(),
-            dimensions.height(),
-        )
-        .permutation;
-        let candidate_permutation = CandidatePermutation::new(permutation.clone()).unwrap();
-        // TODO replace `1` with a value that depends on `run_swap()` parameters
-        let validated_permutations = (0..1)
-            .map(|i| unsafe {
-                validation::vector_field_into_validated_permutation_unchecked(
-                    test_utils::permutation::line_with_first_texel_moved(dimensions.width(), i)
-                        .permutation,
-                )
-            })
-            .collect::<Vec<_>>();
-        let run_swap_input = RunSwapInput {
-            candidate_permutation: Some(candidate_permutation),
-            displacement_goal: Some(
-                DisplacementGoal::from_raw_candidate_permutation(permutation).unwrap(),
-            ),
-            parameters,
-        };
+        for swap_pass_sequence in [
+            SwapPassSequence::from(SwapPass::Vertical),
+            SwapPassSequence::from_passes([SwapPass::OffsetVertical, SwapPass::Horizontal])?,
+            SwapPassSequence::all(),
+        ] {
+            for output_intermediate_permutations in [false, true] {
+                let parameters = SwapParametersConfig {
+                    stop: stop.clone(),
+                    swap_acceptance_threshold: 2.0,
+                    swap_pass_sequence,
+                    output_intermediate_permutations,
+                };
 
-        let dispatcher = Box::new(SwapDispatcher::new(
-            run_swap_input.clone(),
-            swap_ratios,
-            validated_permutations.clone(),
-        ));
-        assert_eq!(
-            super::super::run_swap(
-                dispatcher,
-                run_swap_input.candidate_permutation,
-                run_swap_input.displacement_goal,
-                &run_swap_input.parameters
-            )
-            .collect::<Result<Vec<_>, _>>()?,
-            validated_permutations
-        );
-        Ok(())
-    }
+                let number_of_output_permutations = if output_intermediate_permutations {
+                    expected_number_of_passes(&parameters, &swap_ratios)
+                } else {
+                    1
+                };
+                let width = number_of_output_permutations + 3;
+                let validated_permutations = (3..width)
+                    .map(|first_pixel_shift| unsafe {
+                        validation::vector_field_into_validated_permutation_unchecked(
+                            test_utils::permutation::line_with_first_texel_moved(
+                                width,
+                                first_pixel_shift,
+                            )
+                            .permutation,
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                let run_swap_input = RunSwapInput {
+                    candidate_permutation: Some(
+                        CandidatePermutation::new(
+                            test_utils::permutation::line_with_first_texel_moved(width, 1)
+                                .permutation,
+                        )
+                        .unwrap(),
+                    ),
+                    displacement_goal: Some(
+                        DisplacementGoal::from_raw_candidate_permutation(
+                            test_utils::permutation::line_with_first_texel_moved(width, 2)
+                                .permutation,
+                        )
+                        .unwrap(),
+                    ),
+                    parameters,
+                };
 
-    fn make_base_swap_parameters_config() -> SwapParametersConfig {
-        SwapParametersConfig {
-            stop: SwapStopConfig::Bounded {
-                iteration_count: IterationCount(NonZeroUsize::new(1).unwrap()),
-                threshold: None,
-            },
-            swap_acceptance_threshold: 2.0,
-            swap_pass_sequence: SwapPassSequence::from_passes([
-                SwapPass::OffsetVertical,
-                SwapPass::Horizontal,
-            ])
-            .unwrap(),
+                let dispatcher = Box::new(SwapDispatcher::new(
+                    run_swap_input.clone(),
+                    swap_ratios.clone(),
+                    validated_permutations.clone(),
+                ));
+
+                let passes_per_round = run_swap_input.parameters.swap_pass_sequence.iter().count();
+                assert_eq!(
+                    super::super::run_swap(
+                        dispatcher,
+                        run_swap_input.candidate_permutation,
+                        run_swap_input.displacement_goal,
+                        &run_swap_input.parameters
+                    )
+                    .collect::<Result<Vec<_>, _>>()?,
+                    validated_permutations
+                        .into_iter()
+                        .enumerate()
+                        .zip(
+                            run_swap_input
+                                .parameters
+                                .swap_pass_sequence
+                                .into_iter()
+                                .cycle()
+                        )
+                        .map(|((i, permutation), pass)| {
+                            if output_intermediate_permutations {
+                                TaggedPermutation {
+                                    permutation,
+                                    round_index: i / passes_per_round,
+                                    pass_index: i % passes_per_round,
+                                    pass,
+                                }
+                            } else {
+                                TaggedPermutation {
+                                    permutation,
+                                    round_index: expected_number_of_rounds(
+                                        &run_swap_input.parameters.stop,
+                                        &swap_ratios,
+                                    ) - 1,
+                                    pass_index: passes_per_round - 1,
+                                    pass: *run_swap_input
+                                        .parameters
+                                        .swap_pass_sequence
+                                        .iter()
+                                        .last()
+                                        .unwrap(),
+                                }
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                );
+            }
         }
+        Ok(())
     }
 
     mod one_swap_rounds {
         mod bounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{IterationCount, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
             use std::num::NonZeroUsize;
 
@@ -390,39 +444,36 @@ mod run_swap {
 
             #[test]
             fn iteration_count_only() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = Vec::new();
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: None,
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = Vec::new();
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn iteration_count_first() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = vec![TestSwapRatio(1, 1)];
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = vec![TestSwapRatio(1, 1)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             mod threshold_first {
                 use super::super::super::TestSwapRatio;
                 use crate::config::{
-                    IterationCount, NonnegativeProperFraction, SwapParametersConfig,
-                    SwapStopConfig, SwapStopThreshold,
+                    IterationCount, NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold,
                 };
                 use std::error::Error;
                 use std::num::NonZeroUsize;
@@ -431,38 +482,37 @@ mod run_swap {
 
                 #[test]
                 fn none_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(0, 0)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(0, 0)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 1)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 1)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 1)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
@@ -470,76 +520,67 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 1)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn all_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 2)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(2)),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 2)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
             }
         }
 
         mod unbounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
 
             #[test]
             fn none_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![TestSwapRatio(0, 0)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![TestSwapRatio(2, 1)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
+                let swap_ratios = vec![TestSwapRatio(2, 1)];
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
                         NonnegativeProperFraction::new(0.5)?,
                     )),
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = vec![TestSwapRatio(2, 1)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn all_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(2)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![TestSwapRatio(2, 2)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(2)),
+                    swap_ratios,
+                )
             }
         }
     }
@@ -547,9 +588,7 @@ mod run_swap {
     mod two_swap_rounds {
         mod bounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{IterationCount, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
             use std::num::NonZeroUsize;
 
@@ -557,39 +596,36 @@ mod run_swap {
 
             #[test]
             fn iteration_count_only() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = Vec::new();
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: None,
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = Vec::new();
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn iteration_count_first() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = vec![TestSwapRatio(1, 1); 2];
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = vec![TestSwapRatio(1, 1); 2];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             mod threshold_first {
                 use super::super::super::TestSwapRatio;
                 use crate::config::{
-                    IterationCount, NonnegativeProperFraction, SwapParametersConfig,
-                    SwapStopConfig, SwapStopThreshold,
+                    IterationCount, NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold,
                 };
                 use std::error::Error;
                 use std::num::NonZeroUsize;
@@ -598,38 +634,37 @@ mod run_swap {
 
                 #[test]
                 fn none_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
                             threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
@@ -637,51 +672,44 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
             }
         }
 
         mod unbounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
 
             #[test]
             fn none_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![TestSwapRatio(2, 1), TestSwapRatio(2, 0)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
+                let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
                         NonnegativeProperFraction::new(0.5)?,
                     )),
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = vec![TestSwapRatio(2, 2), TestSwapRatio(2, 1)];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
         }
     }
@@ -689,9 +717,7 @@ mod run_swap {
     mod three_swap_rounds {
         mod bounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                IterationCount, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{IterationCount, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
             use std::num::NonZeroUsize;
 
@@ -699,39 +725,36 @@ mod run_swap {
 
             #[test]
             fn iteration_count_only() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = Vec::new();
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: None,
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = Vec::new();
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn iteration_count_first() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Bounded {
+                let swap_ratios = vec![TestSwapRatio(1, 1); 3];
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Bounded {
                         iteration_count: IterationCount(
                             NonZeroUsize::new(ITERATION_COUNT_LIMIT).unwrap(),
                         ),
                         threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
                     },
-                    ..super::super::make_base_swap_parameters_config()
-                };
-                let swap_ratios = vec![TestSwapRatio(1, 1); 3];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    swap_ratios,
+                )
             }
 
             mod threshold_first {
                 use super::super::super::TestSwapRatio;
                 use crate::config::{
-                    IterationCount, NonnegativeProperFraction, SwapParametersConfig,
-                    SwapStopConfig, SwapStopThreshold,
+                    IterationCount, NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold,
                 };
                 use std::error::Error;
                 use std::num::NonZeroUsize;
@@ -740,46 +763,49 @@ mod run_swap {
 
                 #[test]
                 fn none_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
-                            iteration_count: IterationCount(
-                                NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
-                            ),
-                            threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
-                        },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
                     let swap_ratios = vec![
                         TestSwapRatio(2, 1),
                         TestSwapRatio(2, 1),
                         TestSwapRatio(2, 0),
                     ];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
+                            iteration_count: IterationCount(
+                                NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
+                            ),
+                            threshold: Some(SwapStopThreshold::SwapsAccepted(0)),
+                        },
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
-                            iteration_count: IterationCount(
-                                NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
-                            ),
-                            threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
-                        },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
                     let swap_ratios = vec![
                         TestSwapRatio(2, 2),
                         TestSwapRatio(2, 2),
                         TestSwapRatio(2, 1),
                     ];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
+                            iteration_count: IterationCount(
+                                NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
+                            ),
+                            threshold: Some(SwapStopThreshold::SwapsAccepted(1)),
+                        },
+                        swap_ratios,
+                    )
                 }
 
                 #[test]
                 fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                    let parameters = SwapParametersConfig {
-                        stop: SwapStopConfig::Bounded {
+                    let swap_ratios = vec![
+                        TestSwapRatio(2, 2),
+                        TestSwapRatio(2, 2),
+                        TestSwapRatio(2, 1),
+                    ];
+                    super::super::super::test_run_swap_with_parameters(
+                        SwapStopConfig::Bounded {
                             iteration_count: IterationCount(
                                 NonZeroUsize::new(ITERATION_COUNT_LIMIT_ADD_ONE).unwrap(),
                             ),
@@ -787,67 +813,56 @@ mod run_swap {
                                 NonnegativeProperFraction::new(0.5)?,
                             )),
                         },
-                        ..super::super::super::make_base_swap_parameters_config()
-                    };
-                    let swap_ratios = vec![
-                        TestSwapRatio(2, 2),
-                        TestSwapRatio(2, 2),
-                        TestSwapRatio(2, 1),
-                    ];
-                    super::super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                        swap_ratios,
+                    )
                 }
             }
         }
 
         mod unbounded {
             use super::super::TestSwapRatio;
-            use crate::config::{
-                NonnegativeProperFraction, SwapParametersConfig, SwapStopConfig, SwapStopThreshold,
-            };
+            use crate::config::{NonnegativeProperFraction, SwapStopConfig, SwapStopThreshold};
             use std::error::Error;
 
             #[test]
             fn none_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 1),
                     TestSwapRatio(2, 1),
                     TestSwapRatio(2, 0),
                 ];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 1),
                 ];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(1)),
+                    swap_ratios,
+                )
             }
 
             #[test]
             fn some_accepted_fraction() -> Result<(), Box<dyn Error>> {
-                let parameters = SwapParametersConfig {
-                    stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
-                        NonnegativeProperFraction::new(0.5)?,
-                    )),
-                    ..super::super::make_base_swap_parameters_config()
-                };
                 let swap_ratios = vec![
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 2),
                     TestSwapRatio(2, 1),
                 ];
-                super::super::test_run_swap_with_parameters(parameters, swap_ratios)
+                super::super::test_run_swap_with_parameters(
+                    SwapStopConfig::Unbounded(SwapStopThreshold::SwapAcceptanceFraction(
+                        NonnegativeProperFraction::new(0.5)?,
+                    )),
+                    swap_ratios,
+                )
             }
         }
     }

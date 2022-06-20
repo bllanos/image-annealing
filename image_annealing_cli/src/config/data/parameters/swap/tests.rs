@@ -168,6 +168,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                 ),
                 swap_acceptance_threshold,
                 swap_pass_sequence: vec![SwapPass::OffsetHorizontal, SwapPass::Vertical],
+                output_intermediate_permutations: true,
             })?,
             SwapParametersConfig {
                 stop: SwapStopConfig::Unbounded(SwapStopThreshold::SwapsAccepted(0)),
@@ -175,7 +176,8 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                 swap_pass_sequence: SwapPassSequence::from_passes([
                     compute::SwapPass::OffsetHorizontal,
                     compute::SwapPass::Vertical
-                ])?
+                ])?,
+                output_intermediate_permutations: true,
             }
         );
         Ok(())
@@ -190,6 +192,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                 ),
                 swap_acceptance_threshold: Default::default(),
                 swap_pass_sequence: vec![SwapPass::OffsetHorizontal, SwapPass::Vertical],
+                output_intermediate_permutations: true,
             }),
             "1 is not less than one",
         );
