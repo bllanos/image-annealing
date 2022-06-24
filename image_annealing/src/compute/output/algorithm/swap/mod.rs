@@ -113,16 +113,15 @@ impl CompletionStatusHolder for Swap {
     }
 
     fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
-        let output_status = match self.validator.take() {
-            Some(mut v) => {
+        let output_status = match self.validator.as_mut() {
+            Some(v) => {
                 debug_assert!(self.input_permutation.is_none());
 
                 let status = v.step(system)?;
                 if status.is_final() && status.is_full() {
                     self.input_permutation =
                         v.full_output().map(|output| output.validated_permutation);
-                } else {
-                    self.validator = Some(v);
+                    self.validator = None;
                 }
                 OutputStatus::NoNewOutput
             }

@@ -79,22 +79,21 @@ impl CompletionStatusHolder for Permute {
     }
 
     fn unchecked_step(&mut self, system: &mut System) -> Result<OutputStatus, Box<dyn Error>> {
-        match self.validator.take() {
-            Some(mut v) => {
+        match self.validator.as_mut() {
+            Some(v) => {
                 debug_assert!(self.permutation.is_none());
 
                 let status = v.step(system)?;
                 if status.is_final() && status.is_full() {
                     self.permutation = v.full_output().map(|output| output.validated_permutation);
-                } else {
-                    self.validator = Some(v);
+                    self.validator = None;
                 }
                 Ok(OutputStatus::NoNewOutput)
             }
             None => {
-                let image_option = self.input.original_image.take();
+                let image_option = self.input.original_image.as_ref();
                 match image_option {
-                    Some(ref image) => {
+                    Some(image) => {
                         check_dimensions_match2(system, image)?;
                         let input_format = image.format();
                         match self.permuted_image_format {
@@ -121,9 +120,8 @@ impl CompletionStatusHolder for Permute {
 
                 system.operation_permute(&PermuteOperationInput {
                     permutation: self.permutation.as_ref(),
-                    image: image_option.as_ref(),
+                    image: image_option,
                 })?;
-                self.input.original_image = image_option;
                 self.completion_status = CompletionStatus::Finished;
                 Ok(OutputStatus::FinalFullOutput)
             }
