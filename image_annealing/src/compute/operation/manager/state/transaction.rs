@@ -40,7 +40,6 @@ impl Error for InsufficientInputError {}
 #[derive(Debug, Clone)]
 pub enum InsufficientOutputError {
     CountSwap,
-    CountSwapPass,
     SwapPass,
     Permutation,
     PermutedImage,
@@ -49,8 +48,7 @@ pub enum InsufficientOutputError {
 impl fmt::Display for InsufficientOutputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::CountSwap => write!(f, "no current output swap counts exist",),
-            Self::CountSwapPass => write!(
+            Self::CountSwap => write!(
                 f,
                 "not all selected swap passes were counted during the last count swap operation, if one was performed"
             ),
@@ -314,10 +312,10 @@ impl ResourceStateManager {
                     commit_state,
                 ))
             } else {
-                Err(Box::new(InsufficientOutputError::CountSwap))
+                unreachable!("no current output swap counts exist");
             }
         } else {
-            Err(Box::new(InsufficientOutputError::CountSwapPass))
+            Err(Box::new(InsufficientOutputError::CountSwap))
         }
     }
 

@@ -6,7 +6,9 @@ fn create_system_single_pixel() -> System {
 }
 
 mod operation_count_swap {
-    use super::super::super::link::swap::SwapPassSequence;
+    use super::super::super::link::swap::{SwapPass, SwapPassSequence};
+    use super::super::SwapOperationInput;
+    use crate::DisplacementGoal;
     use std::error::Error;
 
     #[test]
@@ -14,6 +16,34 @@ mod operation_count_swap {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
             system.operation_count_swap(SwapPassSequence::all()),
+            "not all selected swap passes have occurred since the last count swap operation",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn missing_preceding_swaps_since_last_count() -> Result<(), Box<dyn Error>> {
+        let mut system = super::create_system_single_pixel();
+        let pass = SwapPass::Horizontal;
+        system.operation_create_permutation()?;
+        let permutation = system.output_permutation()?;
+        system.operation_swap(&SwapOperationInput {
+            pass,
+            acceptance_threshold: Default::default(),
+            permutation: None,
+            displacement_goal: Some(&DisplacementGoal::from_vector_field(
+                permutation.into_inner(),
+            )?),
+        })?;
+        system.operation_count_swap(pass.into())?;
+        system.operation_swap(&SwapOperationInput {
+            pass: SwapPass::Vertical,
+            acceptance_threshold: Default::default(),
+            permutation: None,
+            displacement_goal: None,
+        })?;
+        test_utils::assert_error_contains(
+            system.operation_count_swap(pass.into()),
             "not all selected swap passes have occurred since the last count swap operation",
         );
         Ok(())
@@ -42,6 +72,28 @@ mod output_count_swap {
         })?;
         test_utils::assert_error_contains(
             system.output_count_swap(&pass.into()),
+            "not all selected swap passes were counted during the last count swap operation, if one was performed",
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn missing_swaps_in_last_count() -> Result<(), Box<dyn Error>> {
+        let mut system = super::create_system_single_pixel();
+        let pass = SwapPass::Horizontal;
+        system.operation_create_permutation()?;
+        let permutation = system.output_permutation()?;
+        system.operation_swap(&SwapOperationInput {
+            pass,
+            acceptance_threshold: Default::default(),
+            permutation: None,
+            displacement_goal: Some(&DisplacementGoal::from_vector_field(
+                permutation.into_inner(),
+            )?),
+        })?;
+        system.operation_count_swap(pass.into())?;
+        test_utils::assert_error_contains(
+            system.output_count_swap(&SwapPass::Vertical.into()),
             "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
         Ok(())
