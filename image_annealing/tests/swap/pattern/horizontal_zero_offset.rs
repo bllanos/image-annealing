@@ -90,7 +90,7 @@ mod accept_all_swap {
 mod select_swap {
     use image_annealing::compute::conversion::{self, VectorFieldEntry};
     use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
-    use image_annealing::{CandidatePermutation, DisplacementGoal};
+    use image_annealing::CandidatePermutation;
     use std::error::Error;
     use test_utils::algorithm::{
         assert_correct_default_swap_full_output, assert_step_until_success,
@@ -141,56 +141,6 @@ mod select_swap {
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![1]),
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn reject_out_of_bounds() -> Result<(), Box<dyn Error>> {
-        let DimensionsAndPermutation {
-            permutation,
-            dimensions,
-        } = test_utils::permutation::identity_with_dimensions(3, 3);
-        let v = vec![
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(1, 0),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(1, 0),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(1, 0),
-        ];
-        let expected_permutation = permutation.clone();
-        let displacement_goal =
-            DisplacementGoal::from_vector_field(conversion::to_image(&dimensions, &v))?;
-        let expected_displacement_goal = displacement_goal.as_ref().clone();
-
-        let dispatcher = compute::create_dispatcher(&Config {
-            image_dimensions: dimensions,
-        })?;
-        let swap_parameters = test_utils::algorithm::default_swap_parameters();
-        let mut algorithm = dispatcher.swap(
-            SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
-                displacement_goal: Some(displacement_goal),
-            },
-            &swap_parameters,
-        );
-        assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
-
-        assert_correct_default_swap_full_output(
-            algorithm.as_mut(),
-            &permutation,
-            &expected_displacement_goal,
-            &expected_permutation,
-        );
-        assert_correct_swap_count_output(
-            algorithm.as_mut(),
-            &swap_parameters,
-            &dimensions,
-            SwapAcceptedCount::None,
         );
         Ok(())
     }
