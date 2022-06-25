@@ -105,6 +105,44 @@ pub fn non_identity_horizontal_swap_forward_permute(
     permuted_image
 }
 
+pub fn eight_cycle() -> DimensionsAndPermutation {
+    let dimensions = ImageDimensions::new(3, 3).unwrap();
+    let v = vec![
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(-1, 0),
+        VectorFieldEntry(-1, 0),
+    ];
+    DimensionsAndPermutation {
+        permutation: conversion::to_image(&dimensions, &v),
+        dimensions,
+    }
+}
+
+pub fn eight_cycle2() -> DimensionsAndPermutation {
+    let dimensions = ImageDimensions::new(3, 3).unwrap();
+    let v = vec![
+        VectorFieldEntry(2, 0),
+        VectorFieldEntry(1, 1),
+        VectorFieldEntry(0, 2),
+        VectorFieldEntry(1, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-1, 1),
+        VectorFieldEntry(0, -2),
+        VectorFieldEntry(-1, -1),
+        VectorFieldEntry(-2, 0),
+    ];
+    DimensionsAndPermutation {
+        permutation: conversion::to_image(&dimensions, &v),
+        dimensions,
+    }
+}
+
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::new(513, 513).unwrap();
     let mut v = vec![VectorFieldEntry(0, 0); dimensions.count()];
