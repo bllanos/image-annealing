@@ -158,7 +158,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         &expected_permutation,
     );
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,

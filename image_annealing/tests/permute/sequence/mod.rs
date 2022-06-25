@@ -75,7 +75,7 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
         &expected_permutation,
     );
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,

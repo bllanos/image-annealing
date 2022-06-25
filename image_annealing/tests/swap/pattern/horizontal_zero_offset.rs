@@ -39,12 +39,11 @@ mod accept_all_swap {
             &expected_permutation,
         );
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::All,
         );
-        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 
@@ -79,7 +78,7 @@ mod accept_all_swap {
             &expected_permutation,
         );
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::All,
@@ -138,12 +137,11 @@ mod select_swap {
             &expected_permutation,
         );
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![1]),
         );
-        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 
@@ -189,12 +187,11 @@ mod select_swap {
             &expected_permutation,
         );
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::None,
         );
-        assert!(algorithm.partial_output().is_none());
         Ok(())
     }
 }
@@ -251,12 +248,11 @@ mod swap_acceptance_threshold {
             &expected_permutation,
         );
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::None,
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -271,12 +267,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::None,
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -302,12 +297,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![1]),
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -325,12 +319,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::None,
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -356,12 +349,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![1]),
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -377,12 +369,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![1]),
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -409,12 +400,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![2]),
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -430,12 +420,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::Some(vec![2]),
         );
-        assert!(algorithm.partial_output().is_none());
 
         dispatcher = algorithm.return_to_dispatcher();
 
@@ -461,12 +450,11 @@ mod swap_acceptance_threshold {
         assert_eq!(output.pass, pass);
         assert!(algorithm.full_output().is_none());
         assert_correct_swap_count_output(
-            algorithm.partial_output(),
+            algorithm.as_mut(),
             &swap_parameters,
             &dimensions,
             SwapAcceptedCount::All,
         );
-        assert!(algorithm.partial_output().is_none());
 
         Ok(())
     }

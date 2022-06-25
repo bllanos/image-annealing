@@ -55,7 +55,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
     assert_eq!(output.pass, SwapPass::Horizontal);
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,
@@ -126,7 +126,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
     assert_eq!(output.pass, SwapPass::Horizontal);
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,
@@ -165,7 +165,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
         &expected_permutation,
     );
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,
@@ -198,7 +198,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
         &expected_permutation,
     );
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,
@@ -237,7 +237,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
         &intermediate_permutation,
     );
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::All,
@@ -255,7 +255,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
     );
     assert_eq!(output.pass, SwapPass::Horizontal);
     assert_correct_swap_count_output(
-        algorithm.partial_output(),
+        algorithm.as_mut(),
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::None,

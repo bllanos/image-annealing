@@ -1,6 +1,6 @@
 use image_annealing::compute::conversion::VectorFieldEntry;
 use image_annealing::compute::format::VectorFieldImageBuffer;
-use image_annealing::compute::{SwapParameters, SwapPartialOutput};
+use image_annealing::compute::{SwapAlgorithm, SwapParameters, SwapPartialOutput};
 use image_annealing::ImageDimensions;
 
 pub fn swap(vector_field: &VectorFieldImageBuffer) -> VectorFieldImageBuffer {
@@ -34,11 +34,12 @@ pub enum SwapAcceptedCount {
 }
 
 pub fn assert_correct_swap_count_output(
-    output: Option<SwapPartialOutput>,
+    algorithm: &mut SwapAlgorithm,
     parameters: &SwapParameters,
     image_dimensions: &ImageDimensions,
     swaps_accepted: SwapAcceptedCount,
 ) {
+    let output = algorithm.partial_output();
     assert_eq!(output.is_some(), parameters.count_swap);
     if let Some(SwapPartialOutput { counts }) = output {
         let is_none_accepted = match swaps_accepted {
@@ -94,4 +95,5 @@ pub fn assert_correct_swap_count_output(
             }
         );
     }
+    assert!(algorithm.partial_output().is_none());
 }
