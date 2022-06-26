@@ -4,7 +4,7 @@ use image_annealing::compute::{
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::error::Error;
-use test_utils::algorithm::{assert_correct_default_swap_full_output, assert_step_until_success};
+use test_utils::algorithm::assert_step_until_success;
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
 use test_utils::permutation::DimensionsAndPermutation;
 
@@ -38,12 +38,20 @@ fn test_swap_pass_sequence(
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    assert_correct_default_swap_full_output(
-        algorithm.as_mut(),
-        &permutation,
-        &expected_displacement_goal,
-        &expected_permutation,
+    let mut output = algorithm.full_output().unwrap();
+    let returned_input = output.input.as_mut().unwrap();
+    assert_eq!(
+        returned_input.permutation.as_mut().unwrap().as_ref(),
+        &permutation
     );
+    assert_eq!(
+        returned_input.displacement_goal.as_mut().unwrap().as_ref(),
+        &expected_displacement_goal
+    );
+    assert_eq!(output.output_permutation.as_ref(), &expected_permutation);
+    assert_eq!(&output.pass, sequence.iter().next().unwrap());
+    assert!(algorithm.full_output().is_none());
+
     assert_correct_swap_count_output(
         algorithm.as_mut(),
         &swap_parameters,
@@ -53,8 +61,63 @@ fn test_swap_pass_sequence(
     Ok(())
 }
 
+fn eight_cycle_horizontal_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(2, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-1, -1),
+        VectorFieldEntry(-1, 0),
+    ]
+}
+
+fn eight_cycle_vertical_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(0, 2),
+        VectorFieldEntry(1, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(-1, 0),
+        VectorFieldEntry(-1, 0),
+    ]
+}
+
+fn eight_cycle_offset_horizontal_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(1, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-2, 0),
+    ]
+}
+
+fn eight_cycle_offset_vertical_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-1, 1),
+        VectorFieldEntry(0, -2),
+        VectorFieldEntry(-1, 0),
+        VectorFieldEntry(0, 0),
+    ]
+}
+
 mod single_pass {
-    use image_annealing::compute::conversion::VectorFieldEntry;
     use image_annealing::compute::SwapPass;
     use std::error::Error;
 
@@ -62,17 +125,34 @@ mod single_pass {
     fn horizontal() -> Result<(), Box<dyn Error>> {
         super::test_swap_pass_sequence(
             SwapPass::Horizontal.into(),
-            &vec![
-                VectorFieldEntry(2, 0),
-                VectorFieldEntry(0, 0),
-                VectorFieldEntry(0, 1),
-                VectorFieldEntry(0, -1),
-                VectorFieldEntry(0, 0),
-                VectorFieldEntry(0, 1),
-                VectorFieldEntry(0, 0),
-                VectorFieldEntry(-1, -1),
-                VectorFieldEntry(-1, 0),
-            ],
+            &super::eight_cycle_horizontal_swap(),
+            vec![2],
+        )
+    }
+
+    #[test]
+    fn vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPass::Vertical.into(),
+            &super::eight_cycle_vertical_swap(),
+            vec![2],
+        )
+    }
+
+    #[test]
+    fn offset_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPass::OffsetHorizontal.into(),
+            &super::eight_cycle_offset_horizontal_swap(),
+            vec![2],
+        )
+    }
+
+    #[test]
+    fn offset_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPass::OffsetVertical.into(),
+            &super::eight_cycle_offset_vertical_swap(),
             vec![2],
         )
     }

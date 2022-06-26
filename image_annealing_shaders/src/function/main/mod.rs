@@ -34,24 +34,39 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   let coords1 : vec2<i32> = vec2<i32>(i32(global_id.x) * (displacement.x + 1), i32(global_id.y) * (displacement.y + 1)) + parameters.offset;
   let coords2 : vec2<i32> = coords1 + displacement;
   let dimensions : vec2<i32> = textureDimensions(input_permutation);
-  if(coords1.x < dimensions.x && coords1.y < dimensions.y) {{
-    let input_permutation_vector1 : vec2<i32> = load_permutation_vector(coords1);
-    var output_permutation_vector1 : vec2<i32> = input_permutation_vector1;
 
-    if(coords2.x < dimensions.x && coords2.y < dimensions.y) {{
-      let input_permutation_vector2 : vec2<i32> = load_permutation_vector(coords2);
-      var output_permutation_vector2 : vec2<i32> = input_permutation_vector2;
+  var input_permutation_vector1 : vec2<i32> = vec2<i32>(0, 0);
+  var output_permutation_vector1 : vec2<i32> = vec2<i32>(0, 0);
+  let in_bounds1 = coords1.x >= 0 && coords1.y >= 0 && coords1.x < dimensions.x && coords1.y < dimensions.y;
 
-      if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < parameters.acceptance_threshold) {{
-        output_permutation_vector1 = input_permutation_vector2 + displacement;
-        output_permutation_vector2 = input_permutation_vector1 - displacement;
-        count = 1.0;
-      }}
+  var input_permutation_vector2 : vec2<i32> = vec2<i32>(0, 0);
+  var output_permutation_vector2 : vec2<i32> = vec2<i32>(0, 0);
+  let in_bounds2 = coords2.x >= 0 && coords2.y >= 0 && coords2.x < dimensions.x && coords2.y < dimensions.y;
 
-      store_permutation_vector(coords2, output_permutation_vector2);
+  if(in_bounds1) {{
+    input_permutation_vector1 = load_permutation_vector(coords1);
+    output_permutation_vector1 = input_permutation_vector1;
+  }}
+
+  if(in_bounds2) {{
+    input_permutation_vector2 = load_permutation_vector(coords2);
+    output_permutation_vector2 = input_permutation_vector2;
+  }}
+
+  if(in_bounds1 && in_bounds2) {{
+    if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < parameters.acceptance_threshold) {{
+      output_permutation_vector1 = input_permutation_vector2 + displacement;
+      output_permutation_vector2 = input_permutation_vector1 - displacement;
+      count = 1.0;
     }}
+  }}
 
+  if(in_bounds1) {{
     store_permutation_vector(coords1, output_permutation_vector1);
+  }}
+
+  if(in_bounds2) {{
+    store_permutation_vector(coords2, output_permutation_vector2);
   }}
 
   partial_sum[local_id] = count;

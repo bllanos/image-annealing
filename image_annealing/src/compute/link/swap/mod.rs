@@ -104,8 +104,14 @@ impl SwapPass {
     fn offset_vector(&self) -> [i32; 2] {
         match self {
             Self::Horizontal | Self::Vertical => [0, 0],
-            Self::OffsetHorizontal => [1, 0],
-            Self::OffsetVertical => [0, 1],
+            Self::OffsetHorizontal => [
+                -(<usize as TryInto<i32>>::try_into(Self::OFFSET).unwrap()),
+                0,
+            ],
+            Self::OffsetVertical => [
+                0,
+                -(<usize as TryInto<i32>>::try_into(Self::OFFSET).unwrap()),
+            ],
         }
     }
 
