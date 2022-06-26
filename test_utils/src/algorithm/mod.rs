@@ -72,14 +72,14 @@ pub fn assert_correct_default_swap_full_output(
     displacement_goal: &VectorFieldImageBuffer,
     expected_permutation: &VectorFieldImageBuffer,
 ) {
-    let mut output = algorithm.full_output().unwrap();
-    let returned_input = output.input.as_mut().unwrap();
+    let output = algorithm.full_output().unwrap();
+    let returned_input = output.input.as_ref().unwrap();
     assert_eq!(
-        returned_input.permutation.as_mut().unwrap().as_ref(),
+        returned_input.permutation.as_ref().unwrap().as_ref(),
         input_permutation
     );
     assert_eq!(
-        returned_input.displacement_goal.as_mut().unwrap().as_ref(),
+        returned_input.displacement_goal.as_ref().unwrap().as_ref(),
         displacement_goal
     );
     assert_eq!(output.output_permutation.as_ref(), expected_permutation);
