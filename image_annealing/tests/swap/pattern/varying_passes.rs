@@ -145,6 +145,34 @@ fn eight_cycle_offset_vertical_swap() -> Vec<VectorFieldEntry> {
     ]
 }
 
+fn eight_cycle_horizontal_vertical_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(2, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 2),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-1, -1),
+        VectorFieldEntry(-1, 0),
+    ]
+}
+
+fn eight_cycle_offset_vertical_offset_horizontal_swap() -> Vec<VectorFieldEntry> {
+    vec![
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(1, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(-1, 1),
+        VectorFieldEntry(0, -2),
+        VectorFieldEntry(1, 0),
+        VectorFieldEntry(-2, 0),
+    ]
+}
+
 mod single_pass {
     use image_annealing::compute::SwapPass;
     use std::error::Error;
@@ -197,17 +225,7 @@ mod two_passes {
             SwapPassSequence::from_passes([SwapPass::Horizontal, SwapPass::Vertical])?,
             [
                 super::eight_cycle_horizontal_swap(),
-                vec![
-                    VectorFieldEntry(2, 0),
-                    VectorFieldEntry(0, 0),
-                    VectorFieldEntry(0, 2),
-                    VectorFieldEntry(0, -1),
-                    VectorFieldEntry(0, 0),
-                    VectorFieldEntry(0, 0),
-                    VectorFieldEntry(0, 0),
-                    VectorFieldEntry(-1, -1),
-                    VectorFieldEntry(-1, 0),
-                ],
+                super::eight_cycle_horizontal_vertical_swap(),
             ],
             vec![2, 1],
         )
@@ -439,19 +457,65 @@ mod two_passes {
             SwapPassSequence::from_passes([SwapPass::OffsetVertical, SwapPass::OffsetHorizontal])?,
             [
                 super::eight_cycle_offset_vertical_swap(),
+                super::eight_cycle_offset_vertical_offset_horizontal_swap(),
+            ],
+            vec![2, 2],
+        )
+    }
+}
+
+mod all_passes {
+    use image_annealing::compute::conversion::VectorFieldEntry;
+    use image_annealing::compute::SwapPassSequence;
+    use std::error::Error;
+
+    #[test]
+    fn all() -> Result<(), Box<dyn Error>> {
+        let second_permutation = super::eight_cycle_horizontal_vertical_swap();
+        super::test_swap_pass_sequence(
+            SwapPassSequence::all(),
+            [
+                super::eight_cycle_horizontal_swap(),
+                second_permutation.clone(),
+                second_permutation,
                 vec![
-                    VectorFieldEntry(1, 0),
-                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(2, 0),
                     VectorFieldEntry(0, 0),
-                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 2),
+                    VectorFieldEntry(0, 1),
                     VectorFieldEntry(0, 0),
                     VectorFieldEntry(-1, 1),
                     VectorFieldEntry(0, -2),
-                    VectorFieldEntry(1, 0),
-                    VectorFieldEntry(-2, 0),
+                    VectorFieldEntry(-1, -1),
+                    VectorFieldEntry(0, -1),
                 ],
             ],
-            vec![2, 2],
+            vec![2, 1, 0, 2],
+        )
+    }
+
+    #[test]
+    fn all_reverse() -> Result<(), Box<dyn Error>> {
+        let third_permutation = vec![
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(1, 1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(1, -1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(-1, 1),
+            VectorFieldEntry(0, -2),
+            VectorFieldEntry(1, 0),
+            VectorFieldEntry(-2, 0),
+        ];
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes(SwapPassSequence::all().into_iter().rev())?,
+            [
+                super::eight_cycle_offset_vertical_swap(),
+                super::eight_cycle_offset_vertical_offset_horizontal_swap(),
+                third_permutation.clone(),
+                third_permutation,
+            ],
+            vec![2, 2, 1, 0],
         )
     }
 }
