@@ -1,7 +1,8 @@
+use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
 use image_annealing::compute::{
     self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
-    SwapInput, SwapPass,
+    SwapInput, SwapParameters, SwapPass,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::default::Default;
@@ -259,6 +260,106 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
         &swap_parameters,
         &dimensions,
         SwapAcceptedCount::None,
+    );
+    Ok(())
+}
+
+#[test]
+fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::eight_cycle();
+    let intermediate_permutation = conversion::to_image(
+        &dimensions,
+        &vec![
+            VectorFieldEntry(1, 0),
+            VectorFieldEntry(1, 0),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(-1, 1),
+            VectorFieldEntry(0, -2),
+            VectorFieldEntry(-1, 0),
+            VectorFieldEntry(0, 0),
+        ],
+    );
+    let final_permutation = conversion::to_image(
+        &dimensions,
+        &vec![
+            VectorFieldEntry(2, 0),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(-1, 1),
+            VectorFieldEntry(0, -2),
+            VectorFieldEntry(-1, 0),
+            VectorFieldEntry(0, 0),
+        ],
+    );
+
+    let intermediate_displacement_goal = DisplacementGoal::from_raw_candidate_permutation(
+        test_utils::permutation::eight_cycle2().permutation,
+    )?;
+    let expected_intermediate_displacement_goal = intermediate_displacement_goal.as_ref().clone();
+
+    let mut dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dimensions,
+    })?;
+    let pass = SwapPass::OffsetVertical;
+    let mut swap_parameters = SwapParameters::from_sequence(pass.into());
+    assert!(!swap_parameters.count_swap);
+
+    let mut algorithm = dispatcher.swap(
+        SwapInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            displacement_goal: Some(intermediate_displacement_goal),
+        },
+        &swap_parameters,
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output().unwrap();
+    let returned_input = output.input.as_ref().unwrap();
+    assert_eq!(
+        returned_input.permutation.as_ref().unwrap().as_ref(),
+        &permutation
+    );
+    assert_eq!(
+        returned_input.displacement_goal.as_ref().unwrap().as_ref(),
+        &expected_intermediate_displacement_goal
+    );
+    assert_eq!(
+        output.output_permutation.as_ref(),
+        &intermediate_permutation
+    );
+    assert_eq!(output.pass, pass);
+    assert!(algorithm.full_output().is_none());
+
+    assert_correct_swap_count_output(
+        algorithm.as_mut(),
+        &swap_parameters,
+        &dimensions,
+        SwapAcceptedCount::Some(vec![2]),
+    );
+    dispatcher = algorithm.return_to_dispatcher();
+
+    swap_parameters = test_utils::algorithm::default_swap_parameters();
+    algorithm = dispatcher.swap(Default::default(), &swap_parameters);
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
+
+    let output = algorithm.full_output().unwrap();
+    assert!(output.input.is_none());
+    assert_eq!(*output.output_permutation.as_ref(), final_permutation);
+    assert_eq!(output.pass, SwapPass::Horizontal);
+    assert!(algorithm.full_output().is_none());
+
+    assert_correct_swap_count_output(
+        algorithm.as_mut(),
+        &swap_parameters,
+        &dimensions,
+        SwapAcceptedCount::Some(vec![1]),
     );
     Ok(())
 }
