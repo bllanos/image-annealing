@@ -212,6 +212,248 @@ mod two_passes {
             vec![2, 1],
         )
     }
+
+    #[test]
+    fn horizontal_offset_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::Horizontal, SwapPass::OffsetHorizontal])?,
+            [
+                super::eight_cycle_horizontal_swap(),
+                vec![
+                    VectorFieldEntry(2, 0),
+                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(-1, 0),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, -1),
+                    VectorFieldEntry(-1, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn horizontal_offset_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::Horizontal, SwapPass::OffsetVertical])?,
+            [
+                super::eight_cycle_horizontal_swap(),
+                vec![
+                    VectorFieldEntry(2, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, 1),
+                    VectorFieldEntry(0, -2),
+                    VectorFieldEntry(-1, -1),
+                    VectorFieldEntry(0, 0),
+                ],
+            ],
+            vec![2, 2],
+        )
+    }
+
+    #[test]
+    fn vertical_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::Vertical, SwapPass::Horizontal])?,
+            [
+                super::eight_cycle_vertical_swap(),
+                vec![
+                    VectorFieldEntry(2, 0),
+                    VectorFieldEntry(-1, 0),
+                    VectorFieldEntry(0, 2),
+                    VectorFieldEntry(1, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, -1),
+                    VectorFieldEntry(-1, 0),
+                ],
+            ],
+            vec![2, 2],
+        )
+    }
+
+    #[test]
+    fn vertical_offset_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::Vertical, SwapPass::OffsetHorizontal])?,
+            [
+                super::eight_cycle_vertical_swap(),
+                vec![
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(0, 2),
+                    VectorFieldEntry(1, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-2, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn vertical_offset_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::Vertical, SwapPass::OffsetVertical])?,
+            [
+                super::eight_cycle_vertical_swap(),
+                vec![
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(0, 2),
+                    VectorFieldEntry(1, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, 1),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(-1, 0),
+                    VectorFieldEntry(0, -1),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn offset_horizontal_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetHorizontal, SwapPass::Horizontal])?,
+            [
+                super::eight_cycle_offset_horizontal_swap(),
+                vec![
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(-1, -1),
+                    VectorFieldEntry(-2, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn offset_horizontal_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetHorizontal, SwapPass::Vertical])?,
+            [
+                super::eight_cycle_offset_horizontal_swap(),
+                vec![
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(0, 2),
+                    VectorFieldEntry(1, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(0, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-2, 0),
+                ],
+            ],
+            vec![2, 2],
+        )
+    }
+
+    #[test]
+    fn offset_horizontal_offset_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetHorizontal, SwapPass::OffsetVertical])?,
+            [
+                super::eight_cycle_offset_horizontal_swap(),
+                vec![
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(0, -2),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-2, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn offset_vertical_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetVertical, SwapPass::Horizontal])?,
+            [
+                super::eight_cycle_offset_vertical_swap(),
+                vec![
+                    VectorFieldEntry(2, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, 1),
+                    VectorFieldEntry(0, -2),
+                    VectorFieldEntry(-1, 0),
+                    VectorFieldEntry(0, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn offset_vertical_vertical() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetVertical, SwapPass::Vertical])?,
+            [
+                super::eight_cycle_offset_vertical_swap(),
+                vec![
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(0, 1),
+                    VectorFieldEntry(1, -1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, 1),
+                    VectorFieldEntry(0, -2),
+                    VectorFieldEntry(-1, 0),
+                    VectorFieldEntry(0, 0),
+                ],
+            ],
+            vec![2, 1],
+        )
+    }
+
+    #[test]
+    fn offset_vertical_offset_horizontal() -> Result<(), Box<dyn Error>> {
+        super::test_swap_pass_sequence(
+            SwapPassSequence::from_passes([SwapPass::OffsetVertical, SwapPass::OffsetHorizontal])?,
+            [
+                super::eight_cycle_offset_vertical_swap(),
+                vec![
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(1, 1),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(0, 0),
+                    VectorFieldEntry(-1, 1),
+                    VectorFieldEntry(0, -2),
+                    VectorFieldEntry(1, 0),
+                    VectorFieldEntry(-2, 0),
+                ],
+            ],
+            vec![2, 2],
+        )
+    }
 }
 
 mod reject_out_of_bounds {
