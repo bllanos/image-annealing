@@ -1,12 +1,12 @@
 {
   "Swap": {
-    "candidate_permutation": "examples_output/image_annealing_cli_bin_dot_initial_permutation.png",
-    "displacement_goal": "examples_output/image_annealing_cli_bin_dot_displacement_goal.png",
-    "permutation_output_path_prefix": "examples_output/image_annealing_cli_bin_dot_permutation",
+    "candidate_permutation": "examples_output/image_annealing_cli_bin_dot/initial_permutation.png",
+    "displacement_goal": "examples_output/image_annealing_cli_bin_dot/displacement_goal.png",
+    "permutation_output_path_prefix": "examples_output/image_annealing_cli_bin_dot/swap_permutations/permutation",
     "parameters": {
       "stop": {
         "Bounded": {
-          "iteration_count": 100,
+          "iteration_count": 10,
           "threshold": {
             "SwapsAccepted": 0
           }

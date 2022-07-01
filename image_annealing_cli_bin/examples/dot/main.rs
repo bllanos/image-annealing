@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut image_path_no_extension = PathBuf::new();
     image_path_no_extension
-        .extend(["examples_output", "image_annealing_cli_bin_dot_image"].into_iter());
+        .extend(["examples_output", "image_annealing_cli_bin_dot", "image"].into_iter());
     let image_path =
         synthesis::white_dot(&dimensions).save_add_extension(image_path_no_extension)?;
     println!("Saved input image to {}", image_path.display());
@@ -22,7 +22,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     displacement_goal_path_no_extension.extend(
         [
             "examples_output",
-            "image_annealing_cli_bin_dot_displacement_goal",
+            "image_annealing_cli_bin_dot",
+            "displacement_goal",
         ]
         .into_iter(),
     );

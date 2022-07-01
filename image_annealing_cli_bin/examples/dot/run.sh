@@ -5,24 +5,32 @@
 #
 # This script is intended to be a simple demonstration of the CLI, and is not written to be robust or fast.
 
+BASE_OUTPUT_DIRECTORY="examples_output/image_annealing_cli_bin_dot"
+SWAP_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/swap_permutations"
+IMAGE_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/permuted_images"
+rm -rf "${BASE_OUTPUT_DIRECTORY}"
+mkdir -p "${BASE_OUTPUT_DIRECTORY}"
+mkdir -p "${SWAP_OUTPUT_DIRECTORY}"
+mkdir -p "${IMAGE_OUTPUT_DIRECTORY}"
+
 cargo run -p image_annealing_cli_bin --example dot
 
-cargo run -p image_annealing_cli_bin -- image_annealing_cli_bin/examples/dot/config/create_permutation.json
+cargo build -p image_annealing_cli_bin --release --bins
 
-cargo run -p image_annealing_cli_bin -- image_annealing_cli_bin/examples/dot/config/swap.json
+target/release/main image_annealing_cli_bin/examples/dot/config/create_permutation.json
 
-INPUT_IMAGE_FILE="examples_output/image_annealing_cli_bin_dot_image.png"
-IMAGE_OUTPUT_DIRECTORY="examples_output/image_annealing_cli_bin_dot_permuted_images"
-mkdir -p "${IMAGE_OUTPUT_DIRECTORY}"
+target/release/main image_annealing_cli_bin/examples/dot/config/swap.json
+
+INPUT_IMAGE_FILE="${BASE_OUTPUT_DIRECTORY}/image.png"
 cp "${INPUT_IMAGE_FILE}" "${IMAGE_OUTPUT_DIRECTORY}/0.png"
 
-PERMUTE_CONFIG_FILE="examples_output/image_annealing_cli_bin_dot_permute_config.json"
+PERMUTE_CONFIG_FILE="${BASE_OUTPUT_DIRECTORY}/permute_config.json"
 i=1
 ROUND=0
 PASS=0
-NUMBER_OF_FILES=$(find examples_output -maxdepth 1 -type f -name 'image_annealing_cli_bin_dot_permutation*' -printf x | wc -c)
+NUMBER_OF_FILES=$(find "${SWAP_OUTPUT_DIRECTORY}" -maxdepth 1 -type f -name '*.png' -printf x | wc -c)
 while [ $i -le "${NUMBER_OF_FILES}" ]; do
-    PERMUTATION_FILE="examples_output/image_annealing_cli_bin_dot_permutation_round_${ROUND}_pass_${PASS}"
+    PERMUTATION_FILE="${SWAP_OUTPUT_DIRECTORY}/permutation_round_${ROUND}_pass_${PASS}"
     case $PASS in
         0) PERMUTATION_FILE="${PERMUTATION_FILE}_horizontal.png";;
         1) PERMUTATION_FILE="${PERMUTATION_FILE}_vertical.png";;
@@ -42,13 +50,13 @@ while [ $i -le "${NUMBER_OF_FILES}" ]; do
       "Rgba8": "${INPUT_IMAGE_FILE}"
     },
     "permuted_image_output_path_no_extension": {
-      "Rgba8": "${IMAGE_OUTPUT_DIRECTORY}/${i}.png"
+      "Rgba8": "${IMAGE_OUTPUT_DIRECTORY}/${i}"
     }
   }
 }
 _FILE_CONTENTS_
 
-    cargo run -p image_annealing_cli_bin -- "${PERMUTE_CONFIG_FILE}"
+    target/release/main "${PERMUTE_CONFIG_FILE}"
 
     i=$(( i + 1 ))
     PASS=$(( PASS + 1 ))

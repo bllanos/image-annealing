@@ -2,6 +2,6 @@
   "CreatePermutation": {
     "image_width": 32,
     "image_height": 32,
-    "permutation_output_path_no_extension": "examples_output/image_annealing_cli_bin_dot_initial_permutation"
+    "permutation_output_path_no_extension": "examples_output/image_annealing_cli_bin_dot/initial_permutation"
   }
 }
