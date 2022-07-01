@@ -5,8 +5,11 @@
     "permutation_output_path_prefix": "examples_output/image_annealing_cli_bin_dot_permutation",
     "parameters": {
       "stop": {
-        "Unbounded": {
-          "SwapsAccepted": 0
+        "Bounded": {
+          "iteration_count": 100,
+          "threshold": {
+            "SwapsAccepted": 0
+          }
         }
       },
       "swap_acceptance_threshold": 0,
