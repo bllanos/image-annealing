@@ -4,7 +4,7 @@ pub fn potential_energy<W: Write>(mut writer: W) -> std::io::Result<()> {
     writeln!(
         writer,
         "fn potential_energy(distance: f32) -> f32 {{
-  return 1.0 - (1.0 / (distance + 1.0));
+  return distance / (distance + 1.0);
 }}"
     )
 }
