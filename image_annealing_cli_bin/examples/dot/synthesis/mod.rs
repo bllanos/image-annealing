@@ -72,12 +72,19 @@ pub fn dot_goal(dimensions: &ImageDimensions) -> DisplacementGoal {
                     vector_from_center_integer.0.abs(),
                     vector_from_center_integer.1.abs(),
                 );
-                let scale = VectorFieldEntryComponent::MAX / max_component;
-                VectorFieldEntry(
-                    scale * vector_from_center_integer.0,
-                    scale * vector_from_center_integer.1,
-                )
-                .to_pixel()
+                let entry = if max_component == 0 {
+                    VectorFieldEntry(
+                        VectorFieldEntryComponent::MAX,
+                        VectorFieldEntryComponent::MAX,
+                    )
+                } else {
+                    let scale = VectorFieldEntryComponent::MAX / max_component;
+                    VectorFieldEntry(
+                        scale * vector_from_center_integer.0,
+                        scale * vector_from_center_integer.1,
+                    )
+                };
+                entry.to_pixel()
             }
         },
     );
