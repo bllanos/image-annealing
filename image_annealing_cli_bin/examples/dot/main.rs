@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 mod synthesis;
 
-const IMAGE_WIDTH: usize = 257;
+const IMAGE_WIDTH: usize = 200;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(IMAGE_WIDTH, IMAGE_WIDTH)?;

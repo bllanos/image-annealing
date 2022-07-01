@@ -6,7 +6,7 @@
     "parameters": {
       "stop": {
         "Bounded": {
-          "iteration_count": 65,
+          "iteration_count": 50,
           "threshold": {
             "SwapsAccepted": 0
           }

@@ -29,6 +29,7 @@ i=1
 ROUND=0
 PASS=0
 NUMBER_OF_FILES=$(find "${SWAP_OUTPUT_DIRECTORY}" -maxdepth 1 -type f -name '*.png' -printf x | wc -c)
+FIELD_WIDTH=${#NUMBER_OF_FILES}
 while [ $i -le "${NUMBER_OF_FILES}" ]; do
     PERMUTATION_FILE="${SWAP_OUTPUT_DIRECTORY}/permutation_round_${ROUND}_pass_${PASS}"
     case $PASS in
@@ -42,6 +43,7 @@ while [ $i -le "${NUMBER_OF_FILES}" ]; do
     esac
     echo "Permuting with ${PERMUTATION_FILE}"
 
+    PADDED_NUMBER="$(printf "%0${FIELD_WIDTH}d" "$i")"
     cat << _FILE_CONTENTS_ > "${PERMUTE_CONFIG_FILE}"
 {
   "Permute": {
@@ -50,7 +52,7 @@ while [ $i -le "${NUMBER_OF_FILES}" ]; do
       "Rgba8": "${INPUT_IMAGE_FILE}"
     },
     "permuted_image_output_path_no_extension": {
-      "Rgba8": "${IMAGE_OUTPUT_DIRECTORY}/${i}"
+      "Rgba8": "${IMAGE_OUTPUT_DIRECTORY}/${PADDED_NUMBER}"
     }
   }
 }
@@ -65,3 +67,11 @@ _FILE_CONTENTS_
         ROUND=$(( ROUND + 1 ))
     fi
 done
+
+# Animated GIF generation requires imagemagick to be installed.
+# See https://askubuntu.com/questions/43763/tool-to-convert-a-sequence-of-numbered-png-files-to-an-animated-gif
+# Uncomment the following lines to generate an animation file
+
+# ANIMATION_FILE="image_annealing_cli_bin/examples/dot/animation.gif"
+# echo "Updating animation ${ANIMATION_FILE}..."
+# convert -delay 0 -loop 0 "${IMAGE_OUTPUT_DIRECTORY}/*.png" "${ANIMATION_FILE}"

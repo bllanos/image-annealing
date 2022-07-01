@@ -1,7 +1,6 @@
 use image_annealing::compute::conversion::{VectorFieldEntry, VectorFieldEntryComponent};
 use image_annealing::compute::format::Rgba8Image;
 use image_annealing::{DisplacementGoal, ImageDimensions};
-use std::f64::consts::PI;
 
 struct DotGeometry {
     radius_squared: f64,
@@ -11,9 +10,10 @@ struct DotGeometry {
 
 impl DotGeometry {
     pub fn new(dimensions: &ImageDimensions) -> Self {
-        let dot_area = dimensions.count() as f64 / 2.0;
+        let min_dimension = std::cmp::min(dimensions.width(), dimensions.height());
+        let radius = min_dimension / 2;
         Self {
-            radius_squared: dot_area / PI,
+            radius_squared: (radius * radius) as f64,
             x: dimensions.width() as f64 / 2.0,
             y: dimensions.height() as f64 / 2.0,
         }
