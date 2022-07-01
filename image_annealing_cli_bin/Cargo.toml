@@ -9,3 +9,11 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 image_annealing_cli = { path = "../image_annealing_cli" }
+
+[dev-dependencies]
+image = "0.24.2"
+image_annealing = { path = "../image_annealing" }
+
+[[example]]
+name = "dot"
+test = true

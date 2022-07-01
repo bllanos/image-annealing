@@ -1,0 +1,22 @@
+{
+  "Swap": {
+    "candidate_permutation": "examples_output/image_annealing_cli_bin_dot_initial_permutation.png",
+    "displacement_goal": "examples_output/image_annealing_cli_bin_dot_displacement_goal.png",
+    "permutation_output_path_prefix": "examples_output/image_annealing_cli_bin_dot_permutation",
+    "parameters": {
+      "stop": {
+        "Unbounded": {
+          "SwapsAccepted": 0
+        }
+      },
+      "swap_acceptance_threshold": 0,
+      "swap_pass_sequence": [
+        "Horizontal",
+        "Vertical",
+        "OffsetHorizontal",
+        "OffsetVertical"
+      ],
+      "output_intermediate_permutations": true
+    }
+  }
+}
