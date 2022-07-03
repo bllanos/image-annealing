@@ -1,7 +1,7 @@
 use image_annealing_shaders::output;
 use std::env;
+use std::error::Error;
 use std::path::PathBuf;
-use std::process;
 
 fn parse_args<T>(args: T) -> Option<PathBuf>
 where
@@ -14,10 +14,13 @@ where
     args_iter.next().map(PathBuf::from)
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let path = parse_args(env::args());
-    if let Err(err) = output::write_default_files(path) {
-        eprintln!("Processing error: {}", err);
-        process::exit(1);
+    match output::write_default_files(path) {
+        Err(err) => {
+            eprintln!("Processing error: {}", err);
+            Err(err)
+        }
+        Ok(_) => Ok(()),
     }
 }

@@ -1,19 +1,19 @@
 use image_annealing_cli::{cli, config};
 use std::env;
-use std::process;
+use std::error::Error;
 
-fn main() {
-    let parse_result = config::parse_args(env::args());
-    match parse_result {
+fn main() -> Result<(), Box<dyn Error>> {
+    match config::parse_args(env::args()) {
         Err(err) => {
             eprintln!("Configuration error: {}", err);
-            process::exit(1);
+            Err(err)
         }
-        Ok(parsed_config) => {
-            if let Err(err) = cli::run(parsed_config) {
+        Ok(parsed_config) => match cli::run(parsed_config) {
+            Err(err) => {
                 eprintln!("Processing error: {}", err);
-                process::exit(1);
+                Err(err)
             }
-        }
+            Ok(_) => Ok(()),
+        },
     }
 }
