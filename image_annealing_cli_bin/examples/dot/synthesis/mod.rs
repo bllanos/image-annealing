@@ -2,6 +2,7 @@ use image_annealing::compute::conversion::{VectorFieldEntry, VectorFieldEntryCom
 use image_annealing::compute::format::Rgba8Image;
 use image_annealing::{DisplacementGoal, ImageDimensions};
 
+#[derive(Debug, PartialEq)]
 struct DotGeometry {
     radius_squared: f64,
     x: f64,
@@ -91,3 +92,6 @@ pub fn dot_goal(dimensions: &ImageDimensions) -> DisplacementGoal {
 
     DisplacementGoal::from_vector_field(image).unwrap()
 }
+
+#[cfg(test)]
+mod tests;
