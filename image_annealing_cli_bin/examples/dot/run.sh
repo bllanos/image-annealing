@@ -35,14 +35,16 @@ target/release/main "${CREATE_PERMUTATION_CONFIG_FILE}"
 target/release/main image_annealing_cli_bin/examples/dot/config/swap.json
 
 INPUT_IMAGE_FILE="${BASE_OUTPUT_DIRECTORY}/image.png"
-cp "${INPUT_IMAGE_FILE}" "${IMAGE_OUTPUT_DIRECTORY}/0.png"
+
+NUMBER_OF_FILES=$(find "${SWAP_OUTPUT_DIRECTORY}" -maxdepth 1 -type f -name '*.png' -printf x | wc -c)
+FIELD_WIDTH=${#NUMBER_OF_FILES}
+PADDED_NUMBER="$(printf "%0${FIELD_WIDTH}d" "0")"
+cp "${INPUT_IMAGE_FILE}" "${IMAGE_OUTPUT_DIRECTORY}/${PADDED_NUMBER}.png"
 
 PERMUTE_CONFIG_FILE="${BASE_OUTPUT_DIRECTORY}/permute_config.json"
 i=1
 ROUND=0
 PASS=0
-NUMBER_OF_FILES=$(find "${SWAP_OUTPUT_DIRECTORY}" -maxdepth 1 -type f -name '*.png' -printf x | wc -c)
-FIELD_WIDTH=${#NUMBER_OF_FILES}
 while [ $i -le "${NUMBER_OF_FILES}" ]; do
     PERMUTATION_FILE="${SWAP_OUTPUT_DIRECTORY}/permutation_round_${ROUND}_pass_${PASS}"
     case $PASS in
