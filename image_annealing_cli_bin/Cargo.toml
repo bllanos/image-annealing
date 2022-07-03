@@ -13,6 +13,7 @@ image_annealing_cli = { path = "../image_annealing_cli" }
 [dev-dependencies]
 image = "0.24.2"
 image_annealing = { path = "../image_annealing" }
+test_utils = { path = "../test_utils" }
 
 [[example]]
 name = "dot"

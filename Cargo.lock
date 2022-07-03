@@ -571,6 +571,7 @@ dependencies = [
  "image",
  "image_annealing",
  "image_annealing_cli",
+ "test_utils",
 ]
 
 [[package]]

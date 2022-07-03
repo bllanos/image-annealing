@@ -5,6 +5,8 @@
 #
 # This script is intended to be a simple demonstration of the CLI, and is not written to be robust or fast.
 
+IMAGE_WIDTH=200
+
 BASE_OUTPUT_DIRECTORY="examples_output/image_annealing_cli_bin_dot"
 SWAP_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/swap_permutations"
 IMAGE_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/permuted_images"
@@ -13,11 +15,22 @@ mkdir -p "${BASE_OUTPUT_DIRECTORY}"
 mkdir -p "${SWAP_OUTPUT_DIRECTORY}"
 mkdir -p "${IMAGE_OUTPUT_DIRECTORY}"
 
-cargo run -p image_annealing_cli_bin --example dot
+cargo run -p image_annealing_cli_bin --example dot -- "${IMAGE_WIDTH}"
+
+CREATE_PERMUTATION_CONFIG_FILE="${BASE_OUTPUT_DIRECTORY}/create_permutation_config.json"
+cat << _FILE_CONTENTS_ > "${CREATE_PERMUTATION_CONFIG_FILE}"
+{
+  "CreatePermutation": {
+    "image_width": ${IMAGE_WIDTH},
+    "image_height": ${IMAGE_WIDTH},
+    "permutation_output_path_no_extension": "${BASE_OUTPUT_DIRECTORY}/initial_permutation"
+  }
+}
+_FILE_CONTENTS_
 
 cargo build -p image_annealing_cli_bin --release --bins
 
-target/release/main image_annealing_cli_bin/examples/dot/config/create_permutation.json
+target/release/main "${CREATE_PERMUTATION_CONFIG_FILE}"
 
 target/release/main image_annealing_cli_bin/examples/dot/config/swap.json
 
