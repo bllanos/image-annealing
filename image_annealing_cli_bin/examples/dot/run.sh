@@ -15,7 +15,7 @@ mkdir -p "${BASE_OUTPUT_DIRECTORY}"
 mkdir -p "${SWAP_OUTPUT_DIRECTORY}"
 mkdir -p "${IMAGE_OUTPUT_DIRECTORY}"
 
-cargo run -p image_annealing_cli_bin --example dot -- "${IMAGE_WIDTH}"
+cargo run -p image_annealing_cli_bin --release --example dot -- "${IMAGE_WIDTH}"
 
 CREATE_PERMUTATION_CONFIG_FILE="${BASE_OUTPUT_DIRECTORY}/create_permutation_config.json"
 cat << _FILE_CONTENTS_ > "${CREATE_PERMUTATION_CONFIG_FILE}"
