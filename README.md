@@ -24,6 +24,7 @@ Instructions for running the example are in [`image_annealing_cli_bin/examples/d
   - [Getting started](#getting-started)
 - [Troubleshooting](#troubleshooting)
   - [Code panics with errors such as BadDisplay, BadContext, or NotInitialized](#code-panics-with-errors-such-as-baddisplay-badcontext-or-notinitialized)
+  - [Error message: actual format of image ... is not the expected format of 8/16-bit RGBA](#error-message-actual-format-of-image--is-not-the-expected-format-of-816-bit-rgba)
 - [Usage overview](#usage-overview)
   - [Data types](#data-types)
     - [Vector fields](#vector-fields)
@@ -95,6 +96,25 @@ The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but h
 You may need to tell [wgpu](https://wgpu.rs/) to use a particular graphics backend.
 
 Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/compute/device.rs) to the backend you wish to use. Refer to [wgpu's documentation](https://docs.rs/wgpu/latest/wgpu/struct.Backends.html) for a list of backends. In the future, we may allow the backend to be set by an easier method, such as an environment variable, for example.
+
+### Error message: actual format of image ... is not the expected format of 8/16-bit RGBA
+
+This error can mean several things, but the most common reason is that you have provided an input image that does not have an alpha channel. As mentioned [below](#data-types), the code operates on images with alpha channels.
+
+Other possible causes of this error include:
+- Providing an image with 8-bits per color channel, as opposed to 16-bits, or vice versa.
+- Providing an image that does not have four color channels (Red, Green, Blue, and Alpha).
+
+We recommend using a tool such as [ImageMagick](https://imagemagick.org/) to pre-process images before providing them as inputs. For example, the following ImageMagick command converts a JPEG image to a PNG image with an alpha channel ([reference](https://imagemagick.org/script/command-line-options.php#alpha)):
+
+```bash
+convert -alpha opaque "rgb_image.jpeg" "rgba_image.png"
+```
+
+The code is strict with respect to input image formats for several reasons:
+1. To help users notice when they input the wrong image files by mistake
+2. To allow for easier substitution of general [images](#images) for [vector fields](#vector-fields), which must have four channels, by requiring that general images also have four channels
+3. To simplify the codebase by delegating image format handling to external tools and libraries
 
 ## Usage overview
 

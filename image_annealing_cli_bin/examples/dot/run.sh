@@ -7,6 +7,9 @@
 
 IMAGE_WIDTH=200
 
+# Stop the script on any error
+set -e -u -o pipefail
+
 BASE_OUTPUT_DIRECTORY="examples_output/image_annealing_cli_bin_dot"
 SWAP_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/swap_permutations"
 IMAGE_OUTPUT_DIRECTORY="${BASE_OUTPUT_DIRECTORY}/permuted_images"
@@ -35,6 +38,14 @@ target/release/main "${CREATE_PERMUTATION_CONFIG_FILE}"
 target/release/main image_annealing_cli_bin/examples/dot/config/swap.json
 
 INPUT_IMAGE_FILE="${BASE_OUTPUT_DIRECTORY}/image.png"
+
+# Example of using [ImageMagick](https://imagemagick.org/) to make sure the input image has an alpha channel
+# See https://imagemagick.org/script/command-line-options.php#alpha
+# Uncomment and update the following lines if you want to use an input image file
+# that may not have the expected format.
+#
+# RAW_INPUT_IMAGE_FILE="some_image.jpeg"
+# convert -alpha opaque "${RAW_INPUT_IMAGE_FILE}" "${INPUT_IMAGE_FILE}"
 
 NUMBER_OF_FILES=$(find "${SWAP_OUTPUT_DIRECTORY}" -maxdepth 1 -type f -name '*.png' -printf x | wc -c)
 FIELD_WIDTH=${#NUMBER_OF_FILES}
@@ -83,10 +94,10 @@ _FILE_CONTENTS_
     fi
 done
 
-# Animated GIF generation requires imagemagick to be installed.
+# Animated GIF generation requires [ImageMagick](https://imagemagick.org/) to be installed.
 # See https://askubuntu.com/questions/43763/tool-to-convert-a-sequence-of-numbered-png-files-to-an-animated-gif
 # Uncomment the following lines to generate an animation file
 
 # ANIMATION_FILE="image_annealing_cli_bin/examples/dot/animation.gif"
 # echo "Updating animation ${ANIMATION_FILE}..."
-# convert -delay 0 -loop 0 "${IMAGE_OUTPUT_DIRECTORY}/*.png" "${ANIMATION_FILE}"
+# convert -loop 0 "${IMAGE_OUTPUT_DIRECTORY}/*.png" "${ANIMATION_FILE}"
