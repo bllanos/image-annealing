@@ -100,4 +100,4 @@ done
 
 # ANIMATION_FILE="image_annealing_cli_bin/examples/dot/animation.gif"
 # echo "Updating animation ${ANIMATION_FILE}..."
-# convert -loop 0 "${IMAGE_OUTPUT_DIRECTORY}/*.png" "${ANIMATION_FILE}"
+# convert -dispose none "${IMAGE_OUTPUT_DIRECTORY}/*.png" -set delay 1 -loop 0 "${ANIMATION_FILE}"
