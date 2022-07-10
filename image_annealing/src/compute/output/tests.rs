@@ -11,6 +11,28 @@ mod output_status {
         assert!(OutputStatus::FinalFullOutput.is_final());
         assert!(OutputStatus::FinalPartialAndFullOutput.is_final());
     }
+
+    #[test]
+    fn is_partial() {
+        assert!(!OutputStatus::NoNewOutput.is_partial());
+        assert!(OutputStatus::NewPartialOutput.is_partial());
+        assert!(!OutputStatus::NewFullOutput.is_partial());
+        assert!(OutputStatus::NewPartialAndFullOutput.is_partial());
+        assert!(OutputStatus::FinalPartialOutput.is_partial());
+        assert!(!OutputStatus::FinalFullOutput.is_partial());
+        assert!(OutputStatus::FinalPartialAndFullOutput.is_partial());
+    }
+
+    #[test]
+    fn is_full() {
+        assert!(!OutputStatus::NoNewOutput.is_full());
+        assert!(!OutputStatus::NewPartialOutput.is_full());
+        assert!(OutputStatus::NewFullOutput.is_full());
+        assert!(OutputStatus::NewPartialAndFullOutput.is_full());
+        assert!(!OutputStatus::FinalPartialOutput.is_full());
+        assert!(OutputStatus::FinalFullOutput.is_full());
+        assert!(OutputStatus::FinalPartialAndFullOutput.is_full());
+    }
 }
 
 mod algorithm {
