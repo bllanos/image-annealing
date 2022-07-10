@@ -16,6 +16,34 @@ mod swap_pass {
         assert!(counts.iter().all(|&count| count == 0));
     }
 
+    mod snake_case_name {
+        use super::super::super::SwapPass;
+
+        #[test]
+        fn horizontal() {
+            let str = SwapPass::Horizontal.snake_case_name();
+            assert_eq!(str, "horizontal");
+        }
+
+        #[test]
+        fn vertical() {
+            let str = SwapPass::Vertical.snake_case_name();
+            assert_eq!(str, "vertical");
+        }
+
+        #[test]
+        fn offset_horizontal() {
+            let str = SwapPass::OffsetHorizontal.snake_case_name();
+            assert_eq!(str, "offset_horizontal");
+        }
+
+        #[test]
+        fn offset_vertical() {
+            let str = SwapPass::OffsetVertical.snake_case_name();
+            assert_eq!(str, "offset_vertical");
+        }
+    }
+
     mod swap_workgroup_grid_dimensions {
         use super::super::super::super::super::operation::WorkgroupGridDimensions;
         use super::super::super::SwapPass;
@@ -141,6 +169,54 @@ mod swap_pass {
         Ok(())
     }
 
+    mod displacement_vector {
+        use super::super::super::SwapPass;
+
+        #[test]
+        fn horizontal() {
+            assert_eq!(SwapPass::Horizontal.displacement_vector(), [1, 0]);
+        }
+
+        #[test]
+        fn vertical() {
+            assert_eq!(SwapPass::Vertical.displacement_vector(), [0, 1]);
+        }
+
+        #[test]
+        fn offset_horizontal() {
+            assert_eq!(SwapPass::OffsetHorizontal.displacement_vector(), [1, 0]);
+        }
+
+        #[test]
+        fn offset_vertical() {
+            assert_eq!(SwapPass::OffsetVertical.displacement_vector(), [0, 1]);
+        }
+    }
+
+    mod offset_vector {
+        use super::super::super::SwapPass;
+
+        #[test]
+        fn horizontal() {
+            assert_eq!(SwapPass::Horizontal.offset_vector(), [0, 0]);
+        }
+
+        #[test]
+        fn vertical() {
+            assert_eq!(SwapPass::Vertical.offset_vector(), [0, 0]);
+        }
+
+        #[test]
+        fn offset_horizontal() {
+            assert_eq!(SwapPass::OffsetHorizontal.offset_vector(), [-1, 0]);
+        }
+
+        #[test]
+        fn offset_vertical() {
+            assert_eq!(SwapPass::OffsetVertical.offset_vector(), [0, -1]);
+        }
+    }
+
     mod display {
         use super::super::super::SwapPass;
 
@@ -175,6 +251,59 @@ mod swap_pass {
 }
 
 mod swap_pass_set {
+    mod from_passes {
+        use super::super::super::{SwapPass, SwapPassSet};
+
+        #[test]
+        fn empty() {
+            assert_eq!(SwapPassSet::from_passes([]), SwapPassSet::empty());
+        }
+
+        #[test]
+        fn single_pass() {
+            assert_eq!(
+                SwapPassSet::from_passes([SwapPass::Vertical]),
+                SwapPassSet::VERTICAL
+            );
+        }
+
+        #[test]
+        fn three_passes_in_order() {
+            assert_eq!(
+                SwapPassSet::from_passes([
+                    SwapPass::Vertical,
+                    SwapPass::OffsetHorizontal,
+                    SwapPass::OffsetVertical
+                ]),
+                SwapPassSet::VERTICAL
+                    | SwapPassSet::OFFSET_HORIZONTAL
+                    | SwapPassSet::OFFSET_VERTICAL
+            );
+        }
+
+        #[test]
+        fn three_passes_reverse_order() {
+            assert_eq!(
+                SwapPassSet::from_passes([
+                    SwapPass::OffsetVertical,
+                    SwapPass::OffsetHorizontal,
+                    SwapPass::Vertical,
+                ]),
+                SwapPassSet::VERTICAL
+                    | SwapPassSet::OFFSET_HORIZONTAL
+                    | SwapPassSet::OFFSET_VERTICAL
+            );
+        }
+
+        #[test]
+        fn all() {
+            assert_eq!(
+                SwapPassSet::from_passes(SwapPass::PASSES),
+                SwapPassSet::all()
+            );
+        }
+    }
+
     mod includes_pass {
         use super::super::super::{SwapPass, SwapPassSet};
 
@@ -392,9 +521,138 @@ mod swap_pass_set {
             assert!(count == 0);
         }
     }
+
+    mod from_sequence {
+        use super::super::super::{SwapPass, SwapPassSequence, SwapPassSet};
+        use std::error::Error;
+
+        #[test]
+        fn single_pass() {
+            assert_eq!(
+                SwapPassSet::from(SwapPassSequence::from(SwapPass::Vertical)),
+                SwapPassSet::VERTICAL
+            );
+        }
+
+        #[test]
+        fn three_passes_in_order() -> Result<(), Box<dyn Error>> {
+            assert_eq!(
+                SwapPassSet::from(SwapPassSequence::from_passes([
+                    SwapPass::Vertical,
+                    SwapPass::OffsetHorizontal,
+                    SwapPass::OffsetVertical
+                ])?),
+                SwapPassSet::VERTICAL
+                    | SwapPassSet::OFFSET_HORIZONTAL
+                    | SwapPassSet::OFFSET_VERTICAL
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn three_passes_reverse_order() -> Result<(), Box<dyn Error>> {
+            assert_eq!(
+                SwapPassSet::from(SwapPassSequence::from_passes([
+                    SwapPass::OffsetVertical,
+                    SwapPass::OffsetHorizontal,
+                    SwapPass::Vertical,
+                ])?),
+                SwapPassSet::VERTICAL
+                    | SwapPassSet::OFFSET_HORIZONTAL
+                    | SwapPassSet::OFFSET_VERTICAL
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn all() {
+            assert_eq!(
+                SwapPassSet::from(SwapPassSequence::all()),
+                SwapPassSet::all()
+            );
+        }
+    }
 }
 
 mod swap_pass_sequence {
+    use super::super::{SwapPass, SwapPassSequence};
+
+    mod from_passes {
+        use super::super::super::{SwapPass, SwapPassSequence};
+        use std::error::Error;
+
+        #[test]
+        fn empty() {
+            test_utils::assert_error_contains(
+                SwapPassSequence::from_passes([]),
+                "selection of swap passes is empty",
+            );
+        }
+
+        #[test]
+        fn single_pass() -> Result<(), Box<dyn Error>> {
+            let passes = [SwapPass::Vertical];
+            assert!(SwapPassSequence::from_passes(passes)?
+                .into_iter()
+                .eq(passes));
+            Ok(())
+        }
+
+        #[test]
+        fn three_passes_in_order() -> Result<(), Box<dyn Error>> {
+            let passes = [
+                SwapPass::Vertical,
+                SwapPass::OffsetHorizontal,
+                SwapPass::OffsetVertical,
+            ];
+            assert!(SwapPassSequence::from_passes(passes)?
+                .into_iter()
+                .eq(passes));
+            Ok(())
+        }
+
+        #[test]
+        fn three_passes_reverse_order() -> Result<(), Box<dyn Error>> {
+            let passes = [
+                SwapPass::OffsetVertical,
+                SwapPass::OffsetHorizontal,
+                SwapPass::Vertical,
+            ];
+            assert!(SwapPassSequence::from_passes(passes)?
+                .into_iter()
+                .eq(passes));
+            Ok(())
+        }
+
+        #[test]
+        fn duplicate() {
+            let passes = [
+                SwapPass::OffsetHorizontal,
+                SwapPass::OffsetVertical,
+                SwapPass::OffsetHorizontal,
+                SwapPass::Vertical,
+            ];
+            test_utils::assert_error_contains(
+                SwapPassSequence::from_passes(passes),
+                "attempt to select horizontal swaps, with offset pass multiple times",
+            );
+        }
+
+        #[test]
+        fn all() -> Result<(), Box<dyn Error>> {
+            assert_eq!(
+                SwapPassSequence::from_passes(SwapPass::PASSES)?,
+                SwapPassSequence::all()
+            );
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn all() {
+        assert!(SwapPassSequence::all().into_iter().eq(SwapPass::PASSES));
+    }
+
     mod includes_pass {
         use super::super::super::{SwapPass, SwapPassSequence};
 
@@ -616,6 +874,52 @@ mod swap_pass_sequence {
                     SwapPass::OffsetVertical => count -= 1,
                 });
             assert!(count == 0);
+        }
+    }
+
+    mod try_from_set {
+        use super::super::super::{SwapPass, SwapPassSequence, SwapPassSet};
+        use std::error::Error;
+
+        #[test]
+        fn empty() {
+            test_utils::assert_error_contains(
+                SwapPassSequence::try_from(SwapPassSet::empty()),
+                "selection of swap passes is empty",
+            );
+        }
+
+        #[test]
+        fn single_pass() -> Result<(), Box<dyn Error>> {
+            assert!(SwapPassSequence::try_from(SwapPassSet::VERTICAL)?
+                .into_iter()
+                .eq([SwapPass::Vertical]));
+            Ok(())
+        }
+
+        #[test]
+        fn three_passes() -> Result<(), Box<dyn Error>> {
+            assert!(SwapPassSequence::try_from(
+                SwapPassSet::VERTICAL
+                    | SwapPassSet::OFFSET_HORIZONTAL
+                    | SwapPassSet::OFFSET_VERTICAL
+            )?
+            .into_iter()
+            .eq([
+                SwapPass::Vertical,
+                SwapPass::OffsetHorizontal,
+                SwapPass::OffsetVertical
+            ]));
+            Ok(())
+        }
+
+        #[test]
+        fn all() -> Result<(), Box<dyn Error>> {
+            assert_eq!(
+                SwapPassSequence::try_from(SwapPassSet::all())?,
+                SwapPassSequence::all()
+            );
+            Ok(())
         }
     }
 }
