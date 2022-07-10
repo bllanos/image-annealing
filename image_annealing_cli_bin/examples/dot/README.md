@@ -22,7 +22,7 @@ The example is a [Bash](https://www.gnu.org/software/bash/) script, [`run.sh`](.
 
 ## Generating an animated GIF
 
-If you have [ImageMagick](https://imagemagick.org/) installed, you can uncomment the lines at the bottom of [`run.sh`](./run.sh) that use ImageMagick to generate the animated GIF shown above. As presently written, the script will overwrite `animation.gif`.
+If you have [ImageMagick](https://imagemagick.org/) installed, you can uncomment the lines at the bottom of [`run.sh`](./run.sh) that use ImageMagick to generate the animated GIF shown above. As presently written, the script will overwrite `examples_output/image_annealing_cli_bin_dot/animation.gif`.
 
 ## What is happening in the animation?
 

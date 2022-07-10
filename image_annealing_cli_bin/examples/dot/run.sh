@@ -152,6 +152,6 @@ done
 # of image files. ImageMagick is easy to use from a script.
 # Uncomment the following lines to generate an animation file.
 
-# ANIMATION_FILE="image_annealing_cli_bin/examples/dot/animation.gif"
-# echo "Updating animation ${ANIMATION_FILE}..."
+# ANIMATION_FILE="${BASE_OUTPUT_DIRECTORY}/animation.gif"
+# echo "Generating animation ${ANIMATION_FILE}..."
 # convert -dispose none "${IMAGE_OUTPUT_DIRECTORY}/*.png" -set delay 1 -loop 0 "${ANIMATION_FILE}"
