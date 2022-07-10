@@ -1,5 +1,5 @@
 mod run_swap {
-    use super::super::TaggedPermutation;
+    use super::super::iter::TaggedPermutation;
     use crate::config::{SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
     use image_annealing::compute::{
         Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
