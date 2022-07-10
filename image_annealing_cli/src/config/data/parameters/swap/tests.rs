@@ -150,6 +150,61 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
     }
 }
 
+mod swap_pass {
+    mod from_and_into_swap_pass {
+        use super::super::super::SwapPass;
+        use image_annealing::compute::SwapPass as ImageAnnealingSwapPass;
+
+        #[test]
+        fn horizontal() {
+            assert_eq!(
+                SwapPass::from(ImageAnnealingSwapPass::Horizontal),
+                SwapPass::Horizontal
+            );
+            assert_eq!(
+                ImageAnnealingSwapPass::from(SwapPass::Horizontal),
+                ImageAnnealingSwapPass::Horizontal
+            );
+        }
+
+        #[test]
+        fn vertical() {
+            assert_eq!(
+                SwapPass::from(ImageAnnealingSwapPass::Vertical),
+                SwapPass::Vertical
+            );
+            assert_eq!(
+                ImageAnnealingSwapPass::from(SwapPass::Vertical),
+                ImageAnnealingSwapPass::Vertical
+            );
+        }
+
+        #[test]
+        fn offset_horizontal() {
+            assert_eq!(
+                SwapPass::from(ImageAnnealingSwapPass::OffsetHorizontal),
+                SwapPass::OffsetHorizontal
+            );
+            assert_eq!(
+                ImageAnnealingSwapPass::from(SwapPass::OffsetHorizontal),
+                ImageAnnealingSwapPass::OffsetHorizontal
+            );
+        }
+
+        #[test]
+        fn offset_vertical() {
+            assert_eq!(
+                SwapPass::from(ImageAnnealingSwapPass::OffsetVertical),
+                SwapPass::OffsetVertical
+            );
+            assert_eq!(
+                ImageAnnealingSwapPass::from(SwapPass::OffsetVertical),
+                ImageAnnealingSwapPass::OffsetVertical
+            );
+        }
+    }
+}
+
 mod swap_parameters_config_try_from_unverified_swap_parameters_config {
     use super::super::{
         SwapParametersConfig, SwapPass, SwapStopConfig, SwapStopThreshold,
@@ -195,6 +250,40 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
                 output_intermediate_permutations: true,
             }),
             "1 is not less than one",
+        );
+    }
+
+    #[test]
+    fn empty_sequence() {
+        test_utils::assert_error_contains(
+            SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
+                stop: UnverifiedSwapStopConfig::Unbounded(
+                    UnverifiedSwapStopThreshold::SwapsAccepted(0),
+                ),
+                swap_acceptance_threshold: Default::default(),
+                swap_pass_sequence: vec![],
+                output_intermediate_permutations: true,
+            }),
+            "selection of swap passes is empty",
+        );
+    }
+
+    #[test]
+    fn duplicate_pass() {
+        test_utils::assert_error_contains(
+            SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
+                stop: UnverifiedSwapStopConfig::Unbounded(
+                    UnverifiedSwapStopThreshold::SwapsAccepted(0),
+                ),
+                swap_acceptance_threshold: Default::default(),
+                swap_pass_sequence: vec![
+                    SwapPass::OffsetHorizontal,
+                    SwapPass::Vertical,
+                    SwapPass::OffsetHorizontal,
+                ],
+                output_intermediate_permutations: true,
+            }),
+            "attempt to select horizontal swaps, with offset pass multiple times",
         );
     }
 }
