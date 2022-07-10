@@ -265,7 +265,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![VectorFieldEntry(
+                &[VectorFieldEntry(
                     VectorFieldEntryComponent::MAX,
                     VectorFieldEntryComponent::MAX,
                 )]
@@ -281,7 +281,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![VectorFieldEntry(0, 1,), VectorFieldEntry(0, -1,)]
+                &[VectorFieldEntry(0, 1,), VectorFieldEntry(0, -1,)]
             ),
         );
         Ok(())
@@ -294,7 +294,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![VectorFieldEntry(1, 0,), VectorFieldEntry(-1, 0,)]
+                &[VectorFieldEntry(1, 0,), VectorFieldEntry(-1, 0,)]
             ),
         );
         Ok(())
@@ -307,7 +307,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![
+                &[
                     VectorFieldEntry(
                         -VectorFieldEntryComponent::MAX,
                         -VectorFieldEntryComponent::MAX,
@@ -337,7 +337,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![
+                &[
                     VectorFieldEntry(1, 1,),
                     VectorFieldEntry(-1, 1,),
                     VectorFieldEntry(-VectorFieldEntryComponent::MAX, 0,),
@@ -357,7 +357,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![
+                &[
                     VectorFieldEntry(1, 1,),
                     VectorFieldEntry(0, -VectorFieldEntryComponent::MAX,),
                     VectorFieldEntry(-1, 1,),
@@ -377,7 +377,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![
+                &[
                     VectorFieldEntry(1, 1,),
                     VectorFieldEntry(0, -VectorFieldEntryComponent::MAX,),
                     VectorFieldEntry(-1, 1,),
@@ -405,7 +405,7 @@ mod dot_goal {
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
                 &dimensions,
-                &vec![
+                &[
                     VectorFieldEntry(2, 2,),
                     VectorFieldEntry(-max_div2, -max_sub1,),
                     VectorFieldEntry(max_div2, -max_sub1,),

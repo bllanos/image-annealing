@@ -35,7 +35,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     ];
     let full_output_paths = paths_no_extension
         .iter()
-        .map(|path| VectorFieldImageBuffer::make_filename(path))
+        .map(VectorFieldImageBuffer::make_filename)
         .collect::<Vec<_>>();
     for full_output_path in full_output_paths.iter() {
         assert!(!full_output_path.is_file());

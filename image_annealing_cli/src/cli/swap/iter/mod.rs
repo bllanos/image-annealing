@@ -65,10 +65,8 @@ impl Iterator for SwapIter {
                             status = algorithm.step()?;
                         }
                         let full_output = algorithm.full_output().unwrap();
-                        if !status.is_final() {
-                            if full_output.pass == self.last_pass {
-                                status = algorithm.step_until_finished()?
-                            }
+                        if !status.is_final() && full_output.pass == self.last_pass {
+                            status = algorithm.step_until_finished()?
                         }
                         output = Some(TaggedPermutation {
                             permutation: full_output.output_permutation,

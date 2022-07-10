@@ -280,19 +280,18 @@ impl TryFrom<SwapPassSet> for SwapPassSequence {
     type Error = InvalidSwapPassSelectionError;
 
     fn try_from(set: SwapPassSet) -> Result<Self, Self::Error> {
-        Self::from_passes(set.iter().map(|&pass| pass))
+        Self::from_passes(set.iter().copied())
     }
 }
 
 impl IntoIterator for SwapPassSequence {
     type Item = SwapPass;
-    type IntoIter = std::iter::FilterMap<
+    type IntoIter = std::iter::Flatten<
         std::array::IntoIter<Option<Self::Item>, { constant::count_swap::N_CHANNEL }>,
-        fn(Option<Self::Item>) -> Option<Self::Item>,
     >;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter().filter_map(std::convert::identity)
+        self.0.into_iter().flatten()
     }
 }
 

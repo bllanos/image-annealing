@@ -165,6 +165,17 @@ pub(crate) fn validate_permutation(
     })
 }
 
+/// Cast a vector field to a permutation without checking if the vector field satisfies
+/// permutation constraints
+///
+/// # Safety
+///
+/// If the vector field does not satisfy permutation constraints, operations that assume
+/// it does satisfy the constraints will produce invalid results.
+///
+/// Furthermore, permutation constraints allow code to assume that vectors map to independent data.
+/// Therefore, violation of the constraints may also lead to nondeterministic behavior, such as
+/// caused by race conditions.
 pub unsafe fn vector_field_into_validated_permutation_unchecked(
     vector_field: VectorFieldImageBuffer,
 ) -> ValidatedPermutation {

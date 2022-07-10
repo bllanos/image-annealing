@@ -272,7 +272,7 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::eight_cycle();
     let intermediate_permutation = conversion::to_image(
         &dimensions,
-        &vec![
+        &[
             VectorFieldEntry(1, 0),
             VectorFieldEntry(1, 0),
             VectorFieldEntry(0, 1),
@@ -286,7 +286,7 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
     );
     let final_permutation = conversion::to_image(
         &dimensions,
-        &vec![
+        &[
             VectorFieldEntry(2, 0),
             VectorFieldEntry(0, 0),
             VectorFieldEntry(0, 1),

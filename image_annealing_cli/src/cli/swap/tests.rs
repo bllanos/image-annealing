@@ -49,7 +49,7 @@ mod run_swap {
 
     fn expected_number_of_rounds(
         stop_config: &SwapStopConfig,
-        swap_counts: &Vec<TestSwapRatio>,
+        swap_counts: &[TestSwapRatio],
     ) -> usize {
         match stop_config {
             SwapStopConfig::Bounded {
@@ -92,7 +92,7 @@ mod run_swap {
 
     fn expected_number_of_passes(
         parameters: &SwapParametersConfig,
-        swap_counts: &Vec<TestSwapRatio>,
+        swap_counts: &[TestSwapRatio],
     ) -> usize {
         expected_number_of_rounds(&parameters.stop, swap_counts)
             * parameters.swap_pass_sequence.iter().count()

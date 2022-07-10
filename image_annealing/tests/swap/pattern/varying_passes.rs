@@ -580,7 +580,7 @@ mod reject_out_of_bounds {
         run_test(
             3,
             1,
-            &vec![
+            &[
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(1, 0),
@@ -593,7 +593,7 @@ mod reject_out_of_bounds {
         run_test(
             1,
             3,
-            &vec![
+            &[
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(0, 1),
@@ -603,11 +603,11 @@ mod reject_out_of_bounds {
 
     #[test]
     fn offset_horizontal() -> Result<(), Box<dyn Error>> {
-        run_test(2, 1, &vec![VectorFieldEntry(-1, 0), VectorFieldEntry(1, 0)])
+        run_test(2, 1, &[VectorFieldEntry(-1, 0), VectorFieldEntry(1, 0)])
     }
 
     #[test]
     fn offset_vertical() -> Result<(), Box<dyn Error>> {
-        run_test(1, 2, &vec![VectorFieldEntry(0, -1), VectorFieldEntry(0, 1)])
+        run_test(1, 2, &[VectorFieldEntry(0, -1), VectorFieldEntry(0, 1)])
     }
 }
