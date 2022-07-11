@@ -10,7 +10,7 @@ pub fn compute_shader_annotation<W: Write>(
 ) -> std::io::Result<()> {
     writeln!(
         writer,
-        "[[stage(compute), workgroup_size({}, {}, {})]]",
+        "@compute @workgroup_size({}, {}, {})",
         workgroup_dimensions.x(),
         workgroup_dimensions.y(),
         workgroup_dimensions.z()
