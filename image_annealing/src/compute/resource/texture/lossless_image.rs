@@ -2,7 +2,7 @@ use super::super::super::output::format::LosslessImage;
 use super::data::TextureData;
 use super::{Texture, TextureDatatype};
 use crate::{ImageDimensions, ImageDimensionsHolder};
-use core::num::NonZeroU32;
+use std::num::NonZeroU32;
 
 pub struct LosslessImageTexture {}
 
