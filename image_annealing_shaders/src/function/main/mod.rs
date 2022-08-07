@@ -43,29 +43,29 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   var output_permutation_vector2 : vec2<i32> = vec2<i32>(0, 0);
   let in_bounds2 = coords2.x >= 0 && coords2.y >= 0 && coords2.x < dimensions.x && coords2.y < dimensions.y;
 
-  if(in_bounds1) {{
+  if in_bounds1 {{
     input_permutation_vector1 = load_permutation_vector(coords1);
     output_permutation_vector1 = input_permutation_vector1;
   }}
 
-  if(in_bounds2) {{
+  if in_bounds2 {{
     input_permutation_vector2 = load_permutation_vector(coords2);
     output_permutation_vector2 = input_permutation_vector2;
   }}
 
-  if(in_bounds1 && in_bounds2) {{
-    if(swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < parameters.acceptance_threshold) {{
+  if in_bounds1 && in_bounds2 {{
+    if swap_cost(coords1, displacement, input_permutation_vector1, input_permutation_vector2) < parameters.acceptance_threshold {{
       output_permutation_vector1 = input_permutation_vector2 + displacement;
       output_permutation_vector2 = input_permutation_vector1 - displacement;
       count = 1.0;
     }}
   }}
 
-  if(in_bounds1) {{
+  if in_bounds1 {{
     store_permutation_vector(coords1, output_permutation_vector1);
   }}
 
-  if(in_bounds2) {{
+  if in_bounds2 {{
     store_permutation_vector(coords2, output_permutation_vector2);
   }}
 
@@ -74,9 +74,9 @@ pub fn swap<W: Write>(mut writer: W) -> std::io::Result<()> {
 
   reduce_partial_sum(local_id);
 
-  if (local_id == 0u) {{
+  if local_id == 0u {{
     let workgroup_index : u32 = workgroup_id.x + (workgroup_id.y * num_workgroups.x) + (workgroup_id.z * num_workgroups.x * num_workgroups.y);
-    count_output.arr[parameters.count_output_offset + workgroup_index] = partial_sum[local_id];
+    count_output[parameters.count_output_offset + workgroup_index] = partial_sum[local_id];
   }}
 }}"
   )
@@ -96,18 +96,18 @@ pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
   let global_id : u32 = local_id + (workgroup_id.x + (workgroup_id.y * num_workgroups.x) + (workgroup_id.z * num_workgroups.x * num_workgroups.y)) * workgroup_invocations;
 
   var local_sum : vec4<f32> = vec4<f32>(0.0);
-  for(var channel: u32 = 0u; channel < n_channel; channel = channel + 1u) {{
-    if (parameters.do_segment[channel] != 0u) {{
+  for(var channel: u32 = 0u; channel < n_channel; channel++) {{
+    if parameters.do_segment[channel] != 0u {{
       var i : u32 = parameters.segment_start[channel] + global_id;
       let end : u32 = parameters.segment_end[channel];
       loop {{
-        if (i >= end) {{
+        if i >= end {{
             break;
         }}
 
-        local_sum[channel] = local_sum[channel] + input.arr[i];
+        local_sum[channel] += input[i];
 
-        i = i + total_invocations;
+        i += total_invocations;
       }}
     }}
   }}
@@ -117,8 +117,8 @@ pub fn count_swap<W: Write>(mut writer: W) -> std::io::Result<()> {
 
   reduce_partial_sum(local_id);
 
-  if (local_id == 0u) {{
-    output.arr[workgroup_id.x] = partial_sum[local_id];
+  if local_id == 0u {{
+    output[workgroup_id.x] = partial_sum[local_id];
   }}
 }}"
   )
