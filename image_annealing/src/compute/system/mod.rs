@@ -6,6 +6,7 @@ use super::output::format::{ImageFormat, LosslessImage};
 use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use std::error::Error;
 
+pub use super::device::DevicePollType;
 pub use super::operation::manager::{PermuteOperationInput, SwapOperationInput};
 
 pub struct System {
@@ -15,8 +16,8 @@ pub struct System {
 }
 
 impl System {
-    pub fn new(image_dimensions: &ImageDimensions) -> Result<Self, Box<dyn Error>> {
-        let device = futures::executor::block_on(DeviceManager::new())?;
+    pub async fn new(image_dimensions: &ImageDimensions) -> Result<Self, Box<dyn Error>> {
+        let device = DeviceManager::new().await?;
         let operations = OperationManager::new(device.device(), image_dimensions);
         Ok(Self {
             device,
@@ -47,22 +48,33 @@ impl System {
         self.operations.swap(&self.device, input)
     }
 
-    pub fn output_count_swap(
+    pub async fn output_count_swap(
         &mut self,
+        poll_type: DevicePollType,
         sequence: &SwapPassSequence,
     ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
-        self.operations.output_count_swap(&self.device, sequence)
+        self.operations
+            .output_count_swap(&self.device, poll_type, sequence)
+            .await
     }
 
-    pub fn output_permutation(&mut self) -> Result<ValidatedPermutation, Box<dyn Error>> {
-        self.operations.output_permutation(&self.device)
-    }
-
-    pub fn output_permuted_image(
+    pub async fn output_permutation(
         &mut self,
+        poll_type: DevicePollType,
+    ) -> Result<ValidatedPermutation, Box<dyn Error>> {
+        self.operations
+            .output_permutation(&self.device, poll_type)
+            .await
+    }
+
+    pub async fn output_permuted_image(
+        &mut self,
+        poll_type: DevicePollType,
         format: ImageFormat,
     ) -> Result<LosslessImage, Box<dyn Error>> {
-        self.operations.output_permuted_image(&self.device, format)
+        self.operations
+            .output_permuted_image(&self.device, poll_type, format)
+            .await
     }
 }
 

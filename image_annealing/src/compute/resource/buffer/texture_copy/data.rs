@@ -1,7 +1,7 @@
 use super::super::super::texture::{Texture, TEXTURE_ARRAY_LAYERS};
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
-use super::super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
+use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::ImageDimensions;
 use std::num::NonZeroU32;
 
@@ -55,16 +55,36 @@ impl TextureCopyBufferData {
         }
     }
 
-    pub fn request_chunked_map_read<T>(
+    pub async fn collect_elements<T>(
         &self,
         output_chunk_size: usize,
         output_chunk_mapper: fn(&[u8]) -> T,
-    ) -> ChunkedMappedBuffer<T> {
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<T> {
         self.0
-            .request_chunked_map_read(output_chunk_size, output_chunk_mapper)
+            .collect_elements(
+                output_chunk_size,
+                output_chunk_mapper,
+                device_manager,
+                poll_type,
+            )
+            .await
     }
 
-    pub fn request_plain_map_read(&self) -> PlainMappedBuffer {
-        self.0.request_plain_map_read()
+    pub async fn collect_raw(
+        &self,
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<u8> {
+        self.0.collect_raw(device_manager, poll_type).await
+    }
+
+    pub fn width(&self) -> usize {
+        self.0.dimensions().width()
+    }
+
+    pub fn height(&self) -> usize {
+        self.0.dimensions().height()
     }
 }

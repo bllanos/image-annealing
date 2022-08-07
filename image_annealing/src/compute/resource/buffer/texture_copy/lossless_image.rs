@@ -1,8 +1,8 @@
 use super::super::super::texture::{
     LosslessImageOutputTexture, LosslessImageTexture, Texture, TextureDatatype,
 };
-use super::super::map::{PlainMappedBuffer, PlainReadMappableBuffer};
 use super::data::TextureCopyBufferData;
+use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::ImageDimensions;
 
 pub struct LosslessImageOutputBuffer(TextureCopyBufferData);
@@ -22,10 +22,20 @@ impl LosslessImageOutputBuffer {
 
         encoder.copy_texture_to_buffer(image.copy_view(), self.0.copy_view(), image.dimensions());
     }
-}
 
-impl<'a> PlainReadMappableBuffer<'a> for LosslessImageOutputBuffer {
-    fn request_map_read(&'a self) -> PlainMappedBuffer<'a> {
-        self.0.request_plain_map_read()
+    pub async fn collect(
+        &self,
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<u8> {
+        self.0.collect_raw(device_manager, poll_type).await
+    }
+
+    pub fn width(&self) -> usize {
+        self.0.width()
+    }
+
+    pub fn height(&self) -> usize {
+        self.0.height()
     }
 }

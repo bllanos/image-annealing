@@ -6,7 +6,6 @@ mod storage;
 mod texture_copy;
 mod uniform;
 
-pub use map::{ChunkedReadMappableBuffer, MappedBuffer, PlainReadMappableBuffer};
 pub use staging::CountSwapOutputBuffer;
 pub use storage::{CountSwapInputBuffer, CountSwapOutputStorageBuffer};
 pub use texture_copy::LosslessImageOutputBuffer;

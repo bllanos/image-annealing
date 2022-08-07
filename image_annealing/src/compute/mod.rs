@@ -6,7 +6,7 @@ mod output;
 mod resource;
 mod system;
 
-pub use dispatch::{create_dispatcher, Config, Dispatcher};
+pub use dispatch::{create_dispatcher, create_dispatcher_block, Config, Dispatcher};
 pub use dispatch::{
     CreatePermutationAlgorithm, PermuteAlgorithm, SwapAlgorithm, ValidatePermutationAlgorithm,
 };

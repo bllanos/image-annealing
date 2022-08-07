@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt;
+use std::task::Context;
 
 #[derive(Debug, Clone)]
 pub struct DeviceRequestError;
@@ -11,6 +12,21 @@ impl fmt::Display for DeviceRequestError {
 }
 
 impl Error for DeviceRequestError {}
+
+#[derive(Clone, Copy)]
+pub enum DevicePollType {
+    Wait,
+    Poll,
+}
+
+impl From<DevicePollType> for wgpu::Maintain {
+    fn from(value: DevicePollType) -> Self {
+        match value {
+            DevicePollType::Wait => Self::Wait,
+            DevicePollType::Poll => Self::Poll,
+        }
+    }
+}
 
 pub struct DeviceManager {
     device: wgpu::Device,
@@ -47,7 +63,8 @@ impl DeviceManager {
         &self.queue
     }
 
-    pub fn wait_for_device(&self) {
-        self.device.poll(wgpu::Maintain::Wait);
+    pub fn poll_device(&self, poll_type: DevicePollType, cx: &mut Context<'_>) {
+        self.device.poll(poll_type.into());
+        cx.waker().wake_by_ref();
     }
 }

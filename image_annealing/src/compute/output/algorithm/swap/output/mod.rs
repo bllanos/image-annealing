@@ -32,7 +32,7 @@ pub trait SwapPassSequenceSwapRatio: SwapRatio + fmt::Display {
 }
 
 pub struct SwapPartialOutput {
-    pub counts: Box<dyn SwapPassSequenceSwapRatio>,
+    pub counts: Box<dyn SwapPassSequenceSwapRatio + Send>,
 }
 
 pub struct SwapReturnedInput {

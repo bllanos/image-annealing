@@ -16,7 +16,7 @@ impl Shader {
 
 pub fn count_swap_shader(device: &wgpu::Device) -> Shader {
     Shader {
-        shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("count_swap_shader_module"),
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!(
                 "COUNT_SWAP_SHADER"
@@ -27,7 +27,7 @@ pub fn count_swap_shader(device: &wgpu::Device) -> Shader {
 
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
     Shader {
-        shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("create_permutation_shader_module"),
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!(
                 "CREATE_PERMUTATION_SHADER"
@@ -38,7 +38,7 @@ pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
 
 pub fn permute_shader(device: &wgpu::Device) -> Shader {
     Shader {
-        shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("permute_shader_module"),
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!("PERMUTE_SHADER")))),
         }),
@@ -47,7 +47,7 @@ pub fn permute_shader(device: &wgpu::Device) -> Shader {
 
 pub fn swap_shader(device: &wgpu::Device) -> Shader {
     Shader {
-        shader: device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("swap_shader_module"),
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!("SWAP_SHADER")))),
         }),

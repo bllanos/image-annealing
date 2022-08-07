@@ -1,7 +1,8 @@
-use super::super::super::system::System;
+use super::super::super::system::{DevicePollType, System};
 use super::super::OutputStatus;
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::ValidatedPermutation;
+use async_trait::async_trait;
 use std::error::Error;
 
 pub struct CreatePermutationParameters {}
@@ -29,12 +30,16 @@ impl CreatePermutation {
         self.checked_step(system)
     }
 
-    pub fn partial_output(&self) -> Option<()> {
+    pub async fn partial_output(&self, _poll_type: DevicePollType) -> Option<()> {
         None
     }
 
-    pub fn full_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
-        self.checked_output(system)
+    pub async fn full_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<CreatePermutationOutput> {
+        self.checked_output(system, poll_type).await
     }
 }
 
@@ -54,6 +59,7 @@ impl CompletionStatusHolder for CreatePermutation {
     }
 }
 
+#[async_trait]
 impl FinalOutputHolder<CreatePermutationOutput> for CreatePermutation {
     fn has_given_output(&self) -> bool {
         self.has_given_output
@@ -63,9 +69,14 @@ impl FinalOutputHolder<CreatePermutationOutput> for CreatePermutation {
         self.has_given_output = true;
     }
 
-    fn unchecked_output(&mut self, system: &mut System) -> Option<CreatePermutationOutput> {
+    async fn unchecked_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<CreatePermutationOutput> {
         system
-            .output_permutation()
+            .output_permutation(poll_type)
+            .await
             .ok()
             .map(|validated_permutation| CreatePermutationOutput {
                 validated_permutation,

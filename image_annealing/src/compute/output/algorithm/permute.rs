@@ -1,4 +1,4 @@
-use super::super::super::system::{PermuteOperationInput, System};
+use super::super::super::system::{DevicePollType, PermuteOperationInput, System};
 use super::super::format::{ImageFormat, ImageFormatError, LosslessImage};
 use super::super::OutputStatus;
 use super::validate_permutation::{
@@ -7,6 +7,7 @@ use super::validate_permutation::{
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::{CandidatePermutation, ValidatedPermutation};
+use async_trait::async_trait;
 use std::default::Default;
 use std::error::Error;
 
@@ -60,12 +61,16 @@ impl Permute {
         self.checked_step(system)
     }
 
-    pub fn partial_output(&self) -> Option<()> {
+    pub async fn partial_output(&self, _poll_type: DevicePollType) -> Option<()> {
         None
     }
 
-    pub fn full_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
-        self.checked_output(system)
+    pub async fn full_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<PermuteOutput> {
+        self.checked_output(system, poll_type).await
     }
 }
 
@@ -129,6 +134,7 @@ impl CompletionStatusHolder for Permute {
     }
 }
 
+#[async_trait]
 impl FinalOutputHolder<PermuteOutput> for Permute {
     fn has_given_output(&self) -> bool {
         self.has_given_output
@@ -137,9 +143,14 @@ impl FinalOutputHolder<PermuteOutput> for Permute {
         self.has_given_output = true;
     }
 
-    fn unchecked_output(&mut self, system: &mut System) -> Option<PermuteOutput> {
+    async fn unchecked_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<PermuteOutput> {
         system
-            .output_permuted_image(self.permuted_image_format.unwrap())
+            .output_permuted_image(poll_type, self.permuted_image_format.unwrap())
+            .await
             .ok()
             .map(|permuted_image| PermuteOutput {
                 permutation: self.permutation.take(),

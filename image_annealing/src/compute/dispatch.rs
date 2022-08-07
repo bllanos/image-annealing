@@ -10,8 +10,9 @@ use super::output::algorithm::validate_permutation::{
     ValidatePermutationParameters,
 };
 use super::output::{Algorithm, OutputStatus};
-use super::system::System;
+use super::system::{DevicePollType, System};
 use crate::ImageDimensions;
+use async_trait::async_trait;
 use std::error::Error;
 use std::fmt;
 
@@ -20,8 +21,12 @@ pub struct Config {
     pub image_dimensions: ImageDimensions,
 }
 
-pub fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
-    Ok(Box::new(DispatcherImplementation::new(config)?))
+pub async fn create_dispatcher(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
+    Ok(Box::new(DispatcherImplementation::new(config).await?))
+}
+
+pub fn create_dispatcher_block(config: &Config) -> Result<Box<dyn Dispatcher>, Box<dyn Error>> {
+    futures::executor::block_on(create_dispatcher(config))
 }
 
 pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput>;
@@ -114,9 +119,9 @@ struct DispatcherImplementation {
 }
 
 impl DispatcherImplementation {
-    fn new(config: &Config) -> Result<Self, Box<dyn Error>> {
+    async fn new(config: &Config) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            system: System::new(&config.image_dimensions)?,
+            system: System::new(&config.image_dimensions).await?,
             algorithm: AlgorithmChoice::None,
         })
     }
@@ -166,19 +171,38 @@ impl Dispatcher for DispatcherImplementation {
     }
 }
 
+#[async_trait]
 impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm
             .as_mut_create_permutation()
             .step(&mut self.system)
     }
-    fn partial_output(&mut self) -> Option<()> {
-        self.algorithm.as_ref_create_permutation().partial_output()
+    async fn partial_output(&mut self) -> Option<()> {
+        self.algorithm
+            .as_ref_create_permutation()
+            .partial_output(DevicePollType::Poll)
+            .await
     }
-    fn full_output(&mut self) -> Option<CreatePermutationOutput> {
+    fn partial_output_block(&mut self) -> Option<()> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_ref_create_permutation()
+                .partial_output(DevicePollType::Wait),
+        )
+    }
+    async fn full_output(&mut self) -> Option<CreatePermutationOutput> {
         self.algorithm
             .as_mut_create_permutation()
-            .full_output(&mut self.system)
+            .full_output(&mut self.system, DevicePollType::Poll)
+            .await
+    }
+    fn full_output_block(&mut self) -> Option<CreatePermutationOutput> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_mut_create_permutation()
+                .full_output(&mut self.system, DevicePollType::Wait),
+        )
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.clear_algorithm();
@@ -186,17 +210,36 @@ impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
     }
 }
 
+#[async_trait]
 impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm.as_mut_permute().step(&mut self.system)
     }
-    fn partial_output(&mut self) -> Option<()> {
-        self.algorithm.as_ref_permute().partial_output()
+    async fn partial_output(&mut self) -> Option<()> {
+        self.algorithm
+            .as_ref_permute()
+            .partial_output(DevicePollType::Poll)
+            .await
     }
-    fn full_output(&mut self) -> Option<PermuteOutput> {
+    fn partial_output_block(&mut self) -> Option<()> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_ref_permute()
+                .partial_output(DevicePollType::Wait),
+        )
+    }
+    async fn full_output(&mut self) -> Option<PermuteOutput> {
         self.algorithm
             .as_mut_permute()
-            .full_output(&mut self.system)
+            .full_output(&mut self.system, DevicePollType::Poll)
+            .await
+    }
+    fn full_output_block(&mut self) -> Option<PermuteOutput> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_mut_permute()
+                .full_output(&mut self.system, DevicePollType::Wait),
+        )
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.clear_algorithm();
@@ -204,17 +247,36 @@ impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
     }
 }
 
+#[async_trait]
 impl Algorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm.as_mut_swap().step(&mut self.system)
     }
-    fn partial_output(&mut self) -> Option<SwapPartialOutput> {
+    async fn partial_output(&mut self) -> Option<SwapPartialOutput> {
         self.algorithm
             .as_mut_swap()
-            .partial_output(&mut self.system)
+            .partial_output(&mut self.system, DevicePollType::Poll)
+            .await
     }
-    fn full_output(&mut self) -> Option<SwapFullOutput> {
-        self.algorithm.as_mut_swap().full_output(&mut self.system)
+    fn partial_output_block(&mut self) -> Option<SwapPartialOutput> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_mut_swap()
+                .partial_output(&mut self.system, DevicePollType::Wait),
+        )
+    }
+    async fn full_output(&mut self) -> Option<SwapFullOutput> {
+        self.algorithm
+            .as_mut_swap()
+            .full_output(&mut self.system, DevicePollType::Poll)
+            .await
+    }
+    fn full_output_block(&mut self) -> Option<SwapFullOutput> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_mut_swap()
+                .full_output(&mut self.system, DevicePollType::Wait),
+        )
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
         self.clear_algorithm();
@@ -222,18 +284,28 @@ impl Algorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {
     }
 }
 
+#[async_trait]
 impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
         self.algorithm
             .as_mut_validate_permutation()
             .step(&mut self.system)
     }
-    fn partial_output(&mut self) -> Option<()> {
+    async fn partial_output(&mut self) -> Option<()> {
+        std::future::ready(
+            <Self as Algorithm<(), ValidatePermutationOutput>>::partial_output_block(self),
+        )
+        .await
+    }
+    fn partial_output_block(&mut self) -> Option<()> {
         self.algorithm
             .as_ref_validate_permutation()
             .partial_output()
     }
-    fn full_output(&mut self) -> Option<ValidatePermutationOutput> {
+    async fn full_output(&mut self) -> Option<ValidatePermutationOutput> {
+        std::future::ready(self.full_output_block()).await
+    }
+    fn full_output_block(&mut self) -> Option<ValidatePermutationOutput> {
         self.algorithm.as_mut_validate_permutation().full_output()
     }
     fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {

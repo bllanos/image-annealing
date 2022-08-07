@@ -1,9 +1,6 @@
-use super::super::device::DeviceManager;
+use super::super::device::{DeviceManager, DevicePollType};
 use super::super::format::{ImageFormat, LosslessImage, VectorFieldImageBuffer};
 use super::super::link::swap::SwapPassSequence;
-use super::super::resource::buffer::{
-    ChunkedReadMappableBuffer, MappedBuffer, PlainReadMappableBuffer,
-};
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
@@ -108,9 +105,10 @@ impl OperationManager {
         Ok(())
     }
 
-    pub fn output_count_swap(
+    pub async fn output_count_swap(
         &mut self,
         device: &DeviceManager,
+        poll_type: DevicePollType,
         sequence: &SwapPassSequence,
     ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
         let mut encoder = device
@@ -123,11 +121,11 @@ impl OperationManager {
                 .output_count_swap(&self.resources, &mut encoder, sequence)?;
         device.queue().submit(Some(encoder.finish()));
 
-        let mut mapped_buffer = self.resources.count_swap_output_buffer().request_map_read();
-
-        device.wait_for_device();
-
-        let result = mapped_buffer.collect_mapped_buffer();
+        let result = self
+            .resources
+            .count_swap_output_buffer()
+            .collect(device, poll_type)
+            .await;
         transaction.set_commit();
 
         assert_eq!(result.len(), 1);
@@ -138,9 +136,10 @@ impl OperationManager {
         ))
     }
 
-    pub fn output_permutation(
+    pub async fn output_permutation(
         &mut self,
         device: &DeviceManager,
+        poll_type: DevicePollType,
     ) -> Result<ValidatedPermutation, Box<dyn Error>> {
         let mut encoder = device
             .device()
@@ -152,21 +151,15 @@ impl OperationManager {
             .output_permutation(&self.resources, &mut encoder)?;
         device.queue().submit(Some(encoder.finish()));
 
-        let mut mapped_buffer = self
-            .resources
-            .permutation_output_buffer()
-            .request_map_read();
-
-        device.wait_for_device();
-
-        let result = mapped_buffer.collect_mapped_buffer();
+        let buffer = self.resources.permutation_output_buffer();
+        let result = buffer.collect(device, poll_type).await;
 
         transaction.set_commit();
         Ok(unsafe {
             validation::vector_field_into_validated_permutation_unchecked(
                 VectorFieldImageBuffer::from_vec(
-                    mapped_buffer.width(),
-                    mapped_buffer.height(),
+                    buffer.width().try_into().unwrap(),
+                    buffer.height().try_into().unwrap(),
                     result,
                 )
                 .unwrap(),
@@ -174,9 +167,10 @@ impl OperationManager {
         })
     }
 
-    pub fn output_permuted_image(
+    pub async fn output_permuted_image(
         &mut self,
         device: &DeviceManager,
+        poll_type: DevicePollType,
         format: ImageFormat,
     ) -> Result<LosslessImage, Box<dyn Error>> {
         let mut encoder = device
@@ -189,20 +183,14 @@ impl OperationManager {
             .output_permuted_image(&self.resources, &mut encoder)?;
         device.queue().submit(Some(encoder.finish()));
 
-        let mut mapped_buffer = self
-            .resources
-            .lossless_image_output_buffer()
-            .request_map_read();
-
-        device.wait_for_device();
-
-        let result = mapped_buffer.collect_mapped_buffer();
+        let buffer = self.resources.lossless_image_output_buffer();
+        let result = buffer.collect(device, poll_type).await;
 
         transaction.set_commit();
         Ok(LosslessImage::from_texture_data(
             format,
-            mapped_buffer.width(),
-            mapped_buffer.height(),
+            buffer.width().try_into().unwrap(),
+            buffer.height().try_into().unwrap(),
             result,
         ))
     }

@@ -1,4 +1,5 @@
 use super::dispatch::Dispatcher;
+use async_trait::async_trait;
 use std::error::Error;
 use std::fmt;
 
@@ -79,10 +80,18 @@ impl fmt::Display for AlreadyFinishedError {
 
 impl Error for AlreadyFinishedError {}
 
-pub trait Algorithm<PartialOutput, FullOutput> {
+#[async_trait]
+pub trait Algorithm<PartialOutput: Send, FullOutput: Send> {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>>;
-    fn partial_output(&mut self) -> Option<PartialOutput>;
-    fn full_output(&mut self) -> Option<FullOutput>;
+
+    async fn partial_output(&mut self) -> Option<PartialOutput>;
+
+    fn partial_output_block(&mut self) -> Option<PartialOutput>;
+
+    async fn full_output(&mut self) -> Option<FullOutput>;
+
+    fn full_output_block(&mut self) -> Option<FullOutput>;
+
     fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher>;
 
     fn step_until(&mut self, status: OutputStatus) -> Result<(), Box<dyn Error>> {

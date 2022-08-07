@@ -1,4 +1,4 @@
-use super::super::super::system::{SwapOperationInput, System};
+use super::super::super::system::{DevicePollType, SwapOperationInput, System};
 use super::super::OutputStatus;
 use super::validate_permutation::{
     ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
@@ -6,6 +6,7 @@ use super::validate_permutation::{
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::{DisplacementGoal, ValidatedPermutation};
+use async_trait::async_trait;
 use std::error::Error;
 
 mod input;
@@ -63,41 +64,50 @@ impl Swap {
         self.checked_step(system)
     }
 
-    pub fn partial_output(&mut self, system: &mut System) -> Option<SwapPartialOutput> {
-        FinalOutputHolder::<SwapPartialOutput>::checked_output(self, system)
+    pub async fn partial_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<SwapPartialOutput> {
+        FinalOutputHolder::<SwapPartialOutput>::checked_output(self, system, poll_type).await
     }
 
-    pub fn full_output(&mut self, system: &mut System) -> Option<SwapFullOutput> {
+    pub async fn full_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<SwapFullOutput> {
         if self.has_given_full_output {
             None
         } else {
             match self.completion_status {
                 CompletionStatus::Failed => None,
-                _ => match self.previous_pass {
-                    Some(pass) => {
-                        self.has_given_full_output = true;
-                        system
-                            .output_permutation()
-                            .ok()
-                            .map(|output_permutation| SwapFullOutput {
-                                input: {
-                                    let permutation = self.input_permutation.take();
-                                    let displacement_goal = self.input_displacement_goal.take();
-                                    if permutation.is_some() || displacement_goal.is_some() {
-                                        Some(SwapReturnedInput {
-                                            permutation,
-                                            displacement_goal,
-                                        })
-                                    } else {
-                                        None
-                                    }
+                _ => {
+                    match self.previous_pass {
+                        Some(pass) => {
+                            self.has_given_full_output = true;
+                            system.output_permutation(poll_type).await.ok().map(
+                                |output_permutation| SwapFullOutput {
+                                    input: {
+                                        let permutation = self.input_permutation.take();
+                                        let displacement_goal = self.input_displacement_goal.take();
+                                        if permutation.is_some() || displacement_goal.is_some() {
+                                            Some(SwapReturnedInput {
+                                                permutation,
+                                                displacement_goal,
+                                            })
+                                        } else {
+                                            None
+                                        }
+                                    },
+                                    output_permutation,
+                                    pass,
                                 },
-                                output_permutation,
-                                pass,
-                            })
+                            )
+                        }
+                        None => None,
                     }
-                    None => None,
-                },
+                }
             }
         }
     }
@@ -182,6 +192,7 @@ impl CompletionStatusHolder for Swap {
     }
 }
 
+#[async_trait]
 impl FinalOutputHolder<SwapPartialOutput> for Swap {
     fn has_given_output(&self) -> bool {
         self.has_given_partial_output
@@ -190,9 +201,14 @@ impl FinalOutputHolder<SwapPartialOutput> for Swap {
         self.has_given_partial_output = true;
     }
 
-    fn unchecked_output(&mut self, system: &mut System) -> Option<SwapPartialOutput> {
+    async fn unchecked_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<SwapPartialOutput> {
         system
-            .output_count_swap(&self.sequence)
+            .output_count_swap(poll_type, &self.sequence)
+            .await
             .ok()
             .map(|counts| SwapPartialOutput {
                 counts: Box::new(counts),

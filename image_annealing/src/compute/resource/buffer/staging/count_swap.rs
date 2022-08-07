@@ -1,9 +1,11 @@
 use super::super::data::BufferData;
 use super::super::dimensions::BufferDimensions;
-use super::super::map::{ChunkedMappedBuffer, ChunkedReadMappableBuffer};
 use super::super::storage::CountSwapOutputStorageBuffer;
+use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::compute::link::swap::CountSwapOutput;
 use crate::compute::operation::WorkgroupGridDimensions;
+
+type BufferElement = CountSwapOutput;
 
 pub struct CountSwapOutputBuffer(BufferData);
 
@@ -11,7 +13,7 @@ impl CountSwapOutputBuffer {
     pub fn new(device: &wgpu::Device) -> Self {
         let buffer_dimensions = BufferDimensions::new_buffer(
             WorkgroupGridDimensions::count_swap().count(),
-            <Self as ChunkedReadMappableBuffer>::Element::SIZE,
+            BufferElement::SIZE,
         );
         Self(BufferData::create_output_buffer(
             device,
@@ -32,20 +34,26 @@ impl CountSwapOutputBuffer {
         );
     }
 
-    fn output_chunk_mapper(chunk: &[u8]) -> <Self as ChunkedReadMappableBuffer>::Element {
-        <Self as ChunkedReadMappableBuffer>::Element::from_ne_bytes(chunk.try_into().unwrap())
+    fn output_chunk_mapper(chunk: &[u8]) -> BufferElement {
+        BufferElement::from_ne_bytes(chunk.try_into().unwrap())
+    }
+
+    pub async fn collect(
+        &self,
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<BufferElement> {
+        self.0
+            .collect_elements(
+                BufferElement::SIZE,
+                Self::output_chunk_mapper,
+                device_manager,
+                poll_type,
+            )
+            .await
     }
 
     pub(in super::super) fn dimensions(&self) -> &BufferDimensions {
         self.0.dimensions()
-    }
-}
-
-impl<'a> ChunkedReadMappableBuffer<'a> for CountSwapOutputBuffer {
-    type Element = CountSwapOutput;
-
-    fn request_map_read(&'a self) -> ChunkedMappedBuffer<'a, Self::Element> {
-        self.0
-            .request_chunked_map_read(Self::Element::SIZE, Self::output_chunk_mapper)
     }
 }

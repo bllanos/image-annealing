@@ -116,7 +116,7 @@ impl WorkgroupGridDimensions {
     }
 
     pub fn dispatch(&self, cpass: &mut wgpu::ComputePass) {
-        cpass.dispatch(self.x(), self.y(), self.z());
+        cpass.dispatch_workgroups(self.x(), self.y(), self.z());
     }
 }
 

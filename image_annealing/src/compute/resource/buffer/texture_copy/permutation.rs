@@ -1,10 +1,12 @@
 use super::super::super::texture::{
     PermutationOutputTexture, PermutationTexture, Texture, TextureDatatype,
 };
-use super::super::map::{ChunkedMappedBuffer, ChunkedReadMappableBuffer};
 use super::data::TextureCopyBufferData;
+use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::compute::format::VectorFieldImageBufferComponent;
 use crate::ImageDimensions;
+
+type BufferElement = VectorFieldImageBufferComponent;
 
 pub struct PermutationOutputBuffer(TextureCopyBufferData);
 
@@ -28,18 +30,30 @@ impl PermutationOutputBuffer {
         );
     }
 
-    fn output_chunk_mapper(chunk: &[u8]) -> <Self as ChunkedReadMappableBuffer>::Element {
-        <Self as ChunkedReadMappableBuffer>::Element::from_be_bytes(chunk.try_into().unwrap())
+    fn output_chunk_mapper(chunk: &[u8]) -> BufferElement {
+        BufferElement::from_be_bytes(chunk.try_into().unwrap())
     }
-}
 
-impl<'a> ChunkedReadMappableBuffer<'a> for PermutationOutputBuffer {
-    type Element = VectorFieldImageBufferComponent;
+    pub async fn collect(
+        &self,
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<BufferElement> {
+        self.0
+            .collect_elements(
+                std::mem::size_of::<BufferElement>(),
+                Self::output_chunk_mapper,
+                device_manager,
+                poll_type,
+            )
+            .await
+    }
 
-    fn request_map_read(&self) -> ChunkedMappedBuffer<Self::Element> {
-        self.0.request_chunked_map_read(
-            std::mem::size_of::<Self::Element>(),
-            Self::output_chunk_mapper,
-        )
+    pub fn width(&self) -> usize {
+        self.0.width()
+    }
+
+    pub fn height(&self) -> usize {
+        self.0.height()
     }
 }

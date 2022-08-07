@@ -1,5 +1,6 @@
 use super::dimensions::BufferDimensions;
-use super::map::{ChunkedMappedBuffer, PlainMappedBuffer};
+use super::map::BufferSliceMapFuture;
+use crate::compute::device::{DeviceManager, DevicePollType};
 
 pub struct BufferData {
     dimensions: BufferDimensions,
@@ -72,27 +73,52 @@ impl BufferData {
         )
     }
 
-    pub fn request_chunked_map_read<T>(
+    pub async fn collect_elements<T>(
         &self,
         output_chunk_size: usize,
         output_chunk_mapper: fn(&[u8]) -> T,
-    ) -> ChunkedMappedBuffer<T> {
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<T> {
         let buffer_slice = self.buffer.slice(..);
-        let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
-        ChunkedMappedBuffer::new(
-            buffer_slice,
-            buffer_future,
-            &self.dimensions,
-            &self.buffer,
-            output_chunk_size,
-            output_chunk_mapper,
-        )
+        let fut = BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type);
+        fut.await.unwrap();
+        let data = buffer_slice.get_mapped_range();
+        let output = match self.dimensions.padding() {
+            Some(padding) => data
+                .chunks(padding.padded_bytes_per_row())
+                .flat_map(|c| c[..padding.unpadded_bytes_per_row()].chunks_exact(output_chunk_size))
+                .map(output_chunk_mapper)
+                .collect::<Vec<T>>(),
+            None => data
+                .chunks_exact(output_chunk_size)
+                .map(output_chunk_mapper)
+                .collect::<Vec<T>>(),
+        };
+        drop(data);
+        self.buffer.unmap(); // Free host memory
+        output
     }
 
-    pub fn request_plain_map_read(&self) -> PlainMappedBuffer {
+    pub async fn collect_raw(
+        &self,
+        device_manager: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Vec<u8> {
         let buffer_slice = self.buffer.slice(..);
-        let buffer_future = Box::pin(buffer_slice.map_async(wgpu::MapMode::Read));
-        PlainMappedBuffer::new(buffer_slice, buffer_future, &self.dimensions, &self.buffer)
+        let fut = BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type);
+        fut.await.unwrap();
+        let data = buffer_slice.get_mapped_range();
+        let output = match self.dimensions.padding() {
+            Some(padding) => data
+                .chunks(padding.padded_bytes_per_row())
+                .flat_map(|c| c[..padding.unpadded_bytes_per_row()].to_vec())
+                .collect::<Vec<u8>>(),
+            None => data.to_vec(),
+        };
+        drop(data);
+        self.buffer.unmap(); // Free host memory
+        output
     }
 
     pub fn dimensions(&self) -> &BufferDimensions {

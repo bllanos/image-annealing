@@ -1,145 +1,55 @@
-use super::dimensions::BufferDimensions;
-use core::future::Future;
+use crate::compute::device::{DeviceManager, DevicePollType};
+use std::error::Error;
+use std::future::Future;
 use std::pin::Pin;
+use std::task::{Context, Poll};
 
-pub trait MappedBuffer<'a, T> {
-    fn collect_mapped_buffer(&mut self) -> Vec<T>;
-
-    fn width(&self) -> u32;
-
-    fn height(&self) -> u32;
+pub struct BufferSliceMapFuture<'a> {
+    device_manager: &'a DeviceManager,
+    poll_type: DevicePollType,
+    future: Pin<
+        Box<
+            futures_intrusive::channel::shared::ChannelReceiveFuture<
+                parking_lot::RawMutex,
+                Result<(), wgpu::BufferAsyncError>,
+            >,
+        >,
+    >,
 }
 
-type BufferFuture = Pin<Box<dyn Future<Output = Result<(), wgpu::BufferAsyncError>> + Send>>;
-
-pub struct ChunkedMappedBuffer<'a, T> {
-    buffer_slice: wgpu::BufferSlice<'a>,
-    buffer_future: Option<BufferFuture>,
-    buffer_dimensions: &'a BufferDimensions,
-    buffer: &'a wgpu::Buffer,
-    output_chunk_size: usize,
-    output_chunk_mapper: fn(&[u8]) -> T,
-}
-
-impl<'a, T> ChunkedMappedBuffer<'a, T> {
-    pub(super) fn new(
-        slice: wgpu::BufferSlice<'a>,
-        buffer_future: BufferFuture,
-        buffer_dimensions: &'a BufferDimensions,
-        buffer: &'a wgpu::Buffer,
-        output_chunk_size: usize,
-        output_chunk_mapper: fn(&[u8]) -> T,
+impl<'a> BufferSliceMapFuture<'a> {
+    pub fn new(
+        buffer_slice: &wgpu::BufferSlice,
+        device_manager: &'a DeviceManager,
+        poll_type: DevicePollType,
     ) -> Self {
+        let (sender, receiver) = futures_intrusive::channel::shared::generic_oneshot_channel();
+        buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+            sender.send(result).unwrap()
+        });
+
         Self {
-            buffer_slice: slice,
-            buffer_future: Some(buffer_future),
-            buffer_dimensions,
-            buffer,
-            output_chunk_size,
-            output_chunk_mapper,
+            device_manager,
+            poll_type,
+            future: Box::pin(receiver.receive()),
         }
     }
 }
 
-impl<'a, T> MappedBuffer<'a, T> for ChunkedMappedBuffer<'a, T> {
-    fn collect_mapped_buffer(&mut self) -> Vec<T> {
-        let fut = self
-            .buffer_future
-            .take()
-            .expect("buffer data has already been collected");
-        futures::executor::block_on(async move { fut.await.unwrap() });
-        let data = self.buffer_slice.get_mapped_range();
-        match self.buffer_dimensions.padding() {
-            Some(padding) => data
-                .chunks(padding.padded_bytes_per_row())
-                .flat_map(|c| {
-                    c[..padding.unpadded_bytes_per_row()].chunks_exact(self.output_chunk_size)
-                })
-                .map(self.output_chunk_mapper)
-                .collect::<Vec<T>>(),
-            None => data
-                .chunks_exact(self.output_chunk_size)
-                .map(self.output_chunk_mapper)
-                .collect::<Vec<T>>(),
+impl<'a> Future for BufferSliceMapFuture<'a> {
+    type Output = Result<(), Box<dyn Error>>;
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        match self.future.as_mut().poll(cx) {
+            Poll::Ready(result) => Poll::Ready(
+                result
+                    .unwrap()
+                    .map_err(|err| Box::new(err) as Box<dyn Error>),
+            ),
+            Poll::Pending => {
+                self.device_manager.poll_device(self.poll_type, cx);
+                Poll::Pending
+            }
         }
     }
-
-    fn width(&self) -> u32 {
-        self.buffer_dimensions.width().try_into().unwrap()
-    }
-
-    fn height(&self) -> u32 {
-        self.buffer_dimensions.height().try_into().unwrap()
-    }
-}
-
-impl<T> Drop for ChunkedMappedBuffer<'_, T> {
-    fn drop(&mut self) {
-        self.buffer.unmap(); // Free host memory
-    }
-}
-
-pub struct PlainMappedBuffer<'a> {
-    buffer_slice: wgpu::BufferSlice<'a>,
-    buffer_future: Option<BufferFuture>,
-    buffer_dimensions: &'a BufferDimensions,
-    buffer: &'a wgpu::Buffer,
-}
-
-impl<'a> PlainMappedBuffer<'a> {
-    pub(super) fn new(
-        slice: wgpu::BufferSlice<'a>,
-        buffer_future: BufferFuture,
-        buffer_dimensions: &'a BufferDimensions,
-        buffer: &'a wgpu::Buffer,
-    ) -> Self {
-        Self {
-            buffer_slice: slice,
-            buffer_future: Some(buffer_future),
-            buffer_dimensions,
-            buffer,
-        }
-    }
-}
-
-impl<'a> MappedBuffer<'a, u8> for PlainMappedBuffer<'a> {
-    fn collect_mapped_buffer(&mut self) -> Vec<u8> {
-        let fut = self
-            .buffer_future
-            .take()
-            .expect("buffer data has already been collected");
-        futures::executor::block_on(async move { fut.await.unwrap() });
-        let data = self.buffer_slice.get_mapped_range();
-        match self.buffer_dimensions.padding() {
-            Some(padding) => data
-                .chunks(padding.padded_bytes_per_row())
-                .flat_map(|c| c[..padding.unpadded_bytes_per_row()].to_vec())
-                .collect::<Vec<u8>>(),
-            None => data.to_vec(),
-        }
-    }
-
-    fn width(&self) -> u32 {
-        self.buffer_dimensions.width().try_into().unwrap()
-    }
-
-    fn height(&self) -> u32 {
-        self.buffer_dimensions.height().try_into().unwrap()
-    }
-}
-
-impl Drop for PlainMappedBuffer<'_> {
-    fn drop(&mut self) {
-        self.buffer.unmap(); // Free host memory
-    }
-}
-
-pub trait ChunkedReadMappableBuffer<'a> {
-    type Element;
-
-    fn request_map_read(&'a self) -> ChunkedMappedBuffer<'a, Self::Element>;
-}
-
-pub trait PlainReadMappableBuffer<'a> {
-    fn request_map_read(&'a self) -> PlainMappedBuffer<'a>;
 }

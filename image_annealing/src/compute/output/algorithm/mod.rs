@@ -1,5 +1,6 @@
-use super::super::system::System;
+use super::super::system::{DevicePollType, System};
 use super::{AlreadyFailedError, AlreadyFinishedError, OutputStatus};
+use async_trait::async_trait;
 use std::error::Error;
 
 pub mod create_permutation;
@@ -44,19 +45,29 @@ trait CompletionStatusHolder {
     }
 }
 
-trait FinalOutputHolder<Output>: CompletionStatusHolder {
+#[async_trait]
+trait FinalOutputHolder<Output: Send>: CompletionStatusHolder {
     fn has_given_output(&self) -> bool;
     fn set_has_given_output(&mut self);
-    fn unchecked_output(&mut self, system: &mut System) -> Option<Output>;
+    async fn unchecked_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<Output>;
 
-    fn checked_output(&mut self, system: &mut System) -> Option<Output> {
+    async fn checked_output(
+        &mut self,
+        system: &mut System,
+        poll_type: DevicePollType,
+    ) -> Option<Output> {
         if self.has_given_output() {
             None
         } else {
-            match self.get_status() {
+            let status = self.get_status();
+            match status {
                 CompletionStatus::Finished => {
                     self.set_has_given_output();
-                    self.unchecked_output(system)
+                    self.unchecked_output(system, poll_type).await
                 }
                 _ => None,
             }
