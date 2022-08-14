@@ -29,10 +29,10 @@ pub fn create_dispatcher_block(config: &Config) -> Result<Box<dyn Dispatcher>, B
     futures::executor::block_on(create_dispatcher(config))
 }
 
-pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput>;
-pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput>;
-pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput>;
-pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput>;
+pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput> + Send;
+pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput> + Send;
+pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput> + Send;
+pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput> + Send;
 
 pub trait Dispatcher {
     fn create_permutation(

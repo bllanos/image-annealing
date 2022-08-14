@@ -597,6 +597,8 @@ dependencies = [
 name = "image_annealing_cli"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "futures",
  "image_annealing",
  "serde",
  "serde_json",

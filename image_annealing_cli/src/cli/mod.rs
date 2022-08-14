@@ -10,7 +10,7 @@ mod loader;
 mod swap;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let dispatcher = compute::create_dispatcher(&config.dispatcher)?;
+    let dispatcher = compute::create_dispatcher_block(&config.dispatcher)?;
     run_and_save(dispatcher, &config.algorithm)?;
     Ok(())
 }
@@ -26,7 +26,7 @@ fn run_and_save(
             let mut algorithm = dispatcher
                 .create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
             algorithm.step_until_finished()?;
-            let permutation = algorithm.full_output().unwrap().validated_permutation;
+            let permutation = algorithm.full_output_block().unwrap().validated_permutation;
             let output_path = permutation.save_add_extension(path)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
@@ -45,7 +45,7 @@ fn run_and_save(
                 &Default::default(),
             );
             algorithm.step_until_finished()?;
-            let img = algorithm.full_output().unwrap().permuted_image;
+            let img = algorithm.full_output_block().unwrap().permuted_image;
             let output_path = img.save_add_extension(path.to_vec().as_slice())?;
             println!("Wrote permuted image to: {:?}", output_path);
         }

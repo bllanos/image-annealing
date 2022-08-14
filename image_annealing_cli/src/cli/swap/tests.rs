@@ -1,6 +1,7 @@
 mod run_swap {
     use super::super::iter::TaggedPermutation;
     use crate::config::{SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
+    use async_trait::async_trait;
     use image_annealing::compute::{
         Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
         Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters, SwapAlgorithm,
@@ -243,6 +244,7 @@ mod run_swap {
         }
     }
 
+    #[async_trait]
     impl Algorithm<SwapPartialOutput, SwapFullOutput> for SwapDispatcher {
         fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
             let status = match self.step_index {
@@ -292,7 +294,7 @@ mod run_swap {
             Ok(status)
         }
 
-        fn partial_output(&mut self) -> Option<SwapPartialOutput> {
+        async fn partial_output(&mut self) -> Option<SwapPartialOutput> {
             if self.expected_count_swap_flag() && self.step_index == Self::FINAL_STEP_INDEX {
                 Some(SwapPartialOutput {
                     counts: Box::new(self.output_swap_counts[self.swap_round_index - 1].clone()),
@@ -302,7 +304,11 @@ mod run_swap {
             }
         }
 
-        fn full_output(&mut self) -> Option<SwapFullOutput> {
+        fn partial_output_block(&mut self) -> Option<SwapPartialOutput> {
+            unreachable!()
+        }
+
+        async fn full_output(&mut self) -> Option<SwapFullOutput> {
             if !(self
                 .run_swap_input
                 .parameters
@@ -317,6 +323,10 @@ mod run_swap {
                 output_permutation: self.output_permutations.next().unwrap(),
                 pass: self.previous_pass.unwrap(),
             })
+        }
+
+        fn full_output_block(&mut self) -> Option<SwapFullOutput> {
+            unreachable!()
         }
 
         fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
@@ -383,14 +393,20 @@ mod run_swap {
                 ));
 
                 let passes_per_round = run_swap_input.parameters.swap_pass_sequence.iter().count();
+
+                let mut iter = super::super::run_swap(
+                    dispatcher,
+                    run_swap_input.candidate_permutation,
+                    run_swap_input.displacement_goal,
+                    &run_swap_input.parameters,
+                );
+                let mut tagged_permutations: Vec<TaggedPermutation> =
+                    Vec::with_capacity(validated_permutations.len());
+                while let Some(result) = iter.next() {
+                    tagged_permutations.push(futures::executor::block_on(result)?);
+                }
                 assert_eq!(
-                    super::super::run_swap(
-                        dispatcher,
-                        run_swap_input.candidate_permutation,
-                        run_swap_input.displacement_goal,
-                        &run_swap_input.parameters
-                    )
-                    .collect::<Result<Vec<_>, _>>()?,
+                    tagged_permutations,
                     validated_permutations
                         .into_iter()
                         .enumerate()

@@ -16,13 +16,14 @@ pub fn run_and_save_swap(
     parameters: &SwapParametersConfig,
 ) -> Result<(), Box<dyn Error>> {
     let mut output_path = None;
-    for result in run_swap(
+    let mut iter = run_swap(
         dispatcher,
         Some(loader::load_candidate_permutation(candidate_permutation)?),
         Some(loader::load_displacement_goal(displacement_goal)?),
         parameters,
-    ) {
-        let tagged_permutation = result?;
+    );
+    while let Some(result) = iter.next() {
+        let tagged_permutation = futures::executor::block_on(result)?;
         let path_no_extension = format!(
             "{}_round_{}_pass_{}_{}",
             permutation_output_path_prefix,
