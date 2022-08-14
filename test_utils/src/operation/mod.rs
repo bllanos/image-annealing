@@ -39,7 +39,7 @@ pub fn assert_correct_swap_count_output(
     image_dimensions: &ImageDimensions,
     swaps_accepted: SwapAcceptedCount,
 ) {
-    let output = algorithm.partial_output();
+    let output = algorithm.partial_output_block();
     assert_eq!(output.is_some(), parameters.count_swap);
     if let Some(SwapPartialOutput { counts }) = output {
         let is_none_accepted = match swaps_accepted {
@@ -95,5 +95,5 @@ pub fn assert_correct_swap_count_output(
             }
         );
     }
-    assert!(algorithm.partial_output().is_none());
+    assert!(algorithm.partial_output_block().is_none());
 }

@@ -22,7 +22,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm =
@@ -40,7 +40,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert!(output.input.as_ref().unwrap().permutation.is_none());
     assert_eq!(
         output
@@ -75,7 +75,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     let permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -87,7 +87,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_lossless_image);
     assert_eq!(
@@ -111,7 +111,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert!(output.input.as_ref().unwrap().permutation.is_none());
     assert_eq!(
         output
@@ -146,7 +146,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let mut expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
@@ -218,7 +218,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
         DisplacementGoal::from_raw_candidate_permutation(intermediate_permutation.clone())?;
     let expected_intermediate_displacement_goal = intermediate_displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
@@ -248,7 +248,7 @@ fn run_twice_reflect_around_center() -> Result<(), Box<dyn Error>> {
     algorithm = dispatcher.swap(Default::default(), &swap_parameters);
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert!(output.input.is_none());
     assert_eq!(
         *output.output_permutation.as_ref(),
@@ -304,7 +304,7 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
     )?;
     let expected_intermediate_displacement_goal = intermediate_displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let pass = SwapPass::OffsetVertical;
@@ -320,7 +320,7 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     let returned_input = output.input.as_ref().unwrap();
     assert_eq!(
         returned_input.permutation.as_ref().unwrap().as_ref(),
@@ -335,7 +335,7 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
         &intermediate_permutation
     );
     assert_eq!(output.pass, pass);
-    assert!(algorithm.full_output().is_none());
+    assert!(algorithm.full_output_block().is_none());
 
     assert_correct_swap_count_output(
         algorithm.as_mut(),
@@ -349,11 +349,11 @@ fn run_twice_previous_pass_not_counted() -> Result<(), Box<dyn Error>> {
     algorithm = dispatcher.swap(Default::default(), &swap_parameters);
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert!(output.input.is_none());
     assert_eq!(*output.output_permutation.as_ref(), final_permutation);
     assert_eq!(output.pass, SwapPass::Horizontal);
-    assert!(algorithm.full_output().is_none());
+    assert!(algorithm.full_output_block().is_none());
 
     assert_correct_swap_count_output(
         algorithm.as_mut(),

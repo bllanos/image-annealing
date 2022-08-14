@@ -25,7 +25,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -46,7 +46,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
         &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_lossless_image);
     assert_eq!(output.permuted_image, permuted_lossless_image);
@@ -65,7 +65,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
         &invalid_dimensions,
     ))?);
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -95,7 +95,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         &other_dimensions,
     ))?);
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: other_dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -116,7 +116,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
 #[test]
 fn forget_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4).unwrap();
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })
     .unwrap();
@@ -146,7 +146,7 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::identity();
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })
     .unwrap();
@@ -178,7 +178,7 @@ fn forgot_format() -> Result<(), Box<dyn Error>> {
     let permuted_image = test_utils::permutation::identity_permute(&original_image);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -190,7 +190,7 @@ fn forgot_format() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_lossless_image);
     assert_eq!(
@@ -225,7 +225,7 @@ fn format_mismatch() -> Result<(), Box<dyn Error>> {
     let original_image = test_utils::image::coordinates_to_colors(&dimensions);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(

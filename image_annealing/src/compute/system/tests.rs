@@ -2,12 +2,12 @@ use super::System;
 use crate::ImageDimensions;
 
 fn create_system_single_pixel() -> System {
-    System::new(&ImageDimensions::new(1, 1).unwrap()).unwrap()
+    futures::executor::block_on(System::new(&ImageDimensions::new(1, 1).unwrap())).unwrap()
 }
 
 mod operation_count_swap {
     use super::super::super::link::swap::{SwapPass, SwapPassSequence};
-    use super::super::SwapOperationInput;
+    use super::super::{DevicePollType, SwapOperationInput};
     use crate::DisplacementGoal;
     use std::error::Error;
 
@@ -26,7 +26,8 @@ mod operation_count_swap {
         let mut system = super::create_system_single_pixel();
         let pass = SwapPass::Horizontal;
         system.operation_create_permutation()?;
-        let permutation = system.output_permutation()?;
+        let permutation =
+            futures::executor::block_on(system.output_permutation(DevicePollType::Wait))?;
         system.operation_swap(&SwapOperationInput {
             pass,
             acceptance_threshold: Default::default(),
@@ -52,7 +53,7 @@ mod operation_count_swap {
 
 mod output_count_swap {
     use super::super::super::link::swap::SwapPass;
-    use super::super::SwapOperationInput;
+    use super::super::{DevicePollType, SwapOperationInput};
     use crate::DisplacementGoal;
     use std::error::Error;
 
@@ -61,7 +62,8 @@ mod output_count_swap {
         let mut system = super::create_system_single_pixel();
         let pass = SwapPass::Horizontal;
         system.operation_create_permutation()?;
-        let permutation = system.output_permutation()?;
+        let permutation =
+            futures::executor::block_on(system.output_permutation(DevicePollType::Wait))?;
         system.operation_swap(&SwapOperationInput {
             pass,
             acceptance_threshold: Default::default(),
@@ -71,7 +73,7 @@ mod output_count_swap {
             )?),
         })?;
         test_utils::assert_error_contains(
-            system.output_count_swap(&pass.into()),
+            futures::executor::block_on(system.output_count_swap(DevicePollType::Wait, &pass.into())),
             "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
         Ok(())
@@ -82,7 +84,8 @@ mod output_count_swap {
         let mut system = super::create_system_single_pixel();
         let pass = SwapPass::Horizontal;
         system.operation_create_permutation()?;
-        let permutation = system.output_permutation()?;
+        let permutation =
+            futures::executor::block_on(system.output_permutation(DevicePollType::Wait))?;
         system.operation_swap(&SwapOperationInput {
             pass,
             acceptance_threshold: Default::default(),
@@ -93,7 +96,7 @@ mod output_count_swap {
         })?;
         system.operation_count_swap(pass.into())?;
         test_utils::assert_error_contains(
-            system.output_count_swap(&SwapPass::Vertical.into()),
+            futures::executor::block_on(system.output_count_swap(DevicePollType::Wait,&SwapPass::Vertical.into())),
             "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
         Ok(())
@@ -101,13 +104,14 @@ mod output_count_swap {
 }
 
 mod output_permutation {
+    use super::super::DevicePollType;
     use std::error::Error;
 
     #[test]
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
-            system.output_permutation(),
+            futures::executor::block_on(system.output_permutation(DevicePollType::Wait)),
             "an output permutation does not exist or has been invalidated",
         );
         Ok(())
@@ -116,13 +120,16 @@ mod output_permutation {
 
 mod output_permuted_image {
     use super::super::super::output::format::ImageFormat;
+    use super::super::DevicePollType;
     use std::error::Error;
 
     #[test]
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
-            system.output_permuted_image(ImageFormat::Rgba8),
+            futures::executor::block_on(
+                system.output_permuted_image(DevicePollType::Wait, ImageFormat::Rgba8),
+            ),
             "an output image does not exist or has been invalidated",
         );
         Ok(())

@@ -73,7 +73,7 @@ fn skip_count_swap() -> Result<(), Box<dyn Error>> {
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = SwapParameters::from_sequence(SwapPass::Horizontal.into());

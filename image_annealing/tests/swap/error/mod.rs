@@ -17,7 +17,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
     let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: other_dimensions,
     })?;
     let mut algorithm = dispatcher.swap(
@@ -44,7 +44,7 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
     let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
     let displacement_goal = test_utils::displacement_goal::identity(&other_dimensions);
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.swap(
@@ -66,7 +66,7 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
 fn forget_permutation() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(3, 4)?;
     let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
 
@@ -91,7 +91,7 @@ fn forget_displacement_goal() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_utils::permutation::identity();
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
 
@@ -127,7 +127,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     } = test_utils::permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();

@@ -38,6 +38,7 @@ mod output_status {
 mod algorithm {
     use super::super::super::dispatch::Dispatcher;
     use super::super::{Algorithm, OutputStatus};
+    use async_trait::async_trait;
     use std::error::Error;
 
     struct ZeroStepAlgorithm(usize);
@@ -48,6 +49,7 @@ mod algorithm {
         }
     }
 
+    #[async_trait]
     impl Algorithm<(), ()> for ZeroStepAlgorithm {
         fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
             if self.0 == 0 {
@@ -58,11 +60,19 @@ mod algorithm {
             }
         }
 
-        fn partial_output(&mut self) -> Option<()> {
+        async fn partial_output(&mut self) -> Option<()> {
             unreachable!()
         }
 
-        fn full_output(&mut self) -> Option<()> {
+        fn partial_output_block(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        async fn full_output(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        fn full_output_block(&mut self) -> Option<()> {
             unreachable!()
         }
 
@@ -79,6 +89,7 @@ mod algorithm {
         }
     }
 
+    #[async_trait]
     impl Algorithm<(), ()> for OneStepAlgorithm {
         fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
             match self.0 {
@@ -94,11 +105,19 @@ mod algorithm {
             }
         }
 
-        fn partial_output(&mut self) -> Option<()> {
+        async fn partial_output(&mut self) -> Option<()> {
             unreachable!()
         }
 
-        fn full_output(&mut self) -> Option<()> {
+        fn partial_output_block(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        async fn full_output(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        fn full_output_block(&mut self) -> Option<()> {
             unreachable!()
         }
 
@@ -115,6 +134,7 @@ mod algorithm {
         }
     }
 
+    #[async_trait]
     impl Algorithm<(), ()> for TwoStepAlgorithm {
         fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
             match self.0 {
@@ -134,11 +154,19 @@ mod algorithm {
             }
         }
 
-        fn partial_output(&mut self) -> Option<()> {
+        async fn partial_output(&mut self) -> Option<()> {
             unreachable!()
         }
 
-        fn full_output(&mut self) -> Option<()> {
+        fn partial_output_block(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        async fn full_output(&mut self) -> Option<()> {
+            unreachable!()
+        }
+
+        fn full_output_block(&mut self) -> Option<()> {
             unreachable!()
         }
 
@@ -185,6 +213,7 @@ mod algorithm {
     mod step_until_finished {
         use super::super::super::super::dispatch::Dispatcher;
         use super::super::super::{Algorithm, OutputStatus};
+        use async_trait::async_trait;
         use std::error::Error;
 
         struct OneStepUnfinishedAlgorithm(usize);
@@ -195,6 +224,7 @@ mod algorithm {
             }
         }
 
+        #[async_trait]
         impl Algorithm<(), ()> for OneStepUnfinishedAlgorithm {
             fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
                 match self.0 {
@@ -210,11 +240,19 @@ mod algorithm {
                 }
             }
 
-            fn partial_output(&mut self) -> Option<()> {
+            async fn partial_output(&mut self) -> Option<()> {
                 unreachable!()
             }
 
-            fn full_output(&mut self) -> Option<()> {
+            fn partial_output_block(&mut self) -> Option<()> {
+                unreachable!()
+            }
+
+            async fn full_output(&mut self) -> Option<()> {
+                unreachable!()
+            }
+
+            fn full_output_block(&mut self) -> Option<()> {
                 unreachable!()
             }
 

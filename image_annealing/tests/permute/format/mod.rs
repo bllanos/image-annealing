@@ -56,7 +56,7 @@ fn permute_lossless_image(original_image: LosslessImage) -> Result<(), Box<dyn E
         }
     };
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
 
@@ -69,7 +69,7 @@ fn permute_lossless_image(original_image: LosslessImage) -> Result<(), Box<dyn E
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_image);
     assert_eq!(output.permuted_image, permuted_image);

@@ -4,14 +4,20 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+type MapResult = Result<(), wgpu::BufferAsyncError>;
+
 pub struct BufferSliceMapFuture<'a> {
     device_manager: &'a DeviceManager,
     poll_type: DevicePollType,
+    _receiver: futures_intrusive::channel::shared::GenericOneshotReceiver<
+        parking_lot::RawMutex,
+        MapResult,
+    >,
     future: Pin<
         Box<
             futures_intrusive::channel::shared::ChannelReceiveFuture<
                 parking_lot::RawMutex,
-                Result<(), wgpu::BufferAsyncError>,
+                MapResult,
             >,
         >,
     >,
@@ -27,11 +33,13 @@ impl<'a> BufferSliceMapFuture<'a> {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             sender.send(result).unwrap()
         });
+        let future = Box::pin(receiver.receive());
 
         Self {
             device_manager,
             poll_type,
-            future: Box::pin(receiver.receive()),
+            _receiver: receiver,
+            future,
         }
     }
 }

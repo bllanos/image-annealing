@@ -13,7 +13,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = permutation::identity();
     let expected = permutation.clone();
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.validate_permutation(
@@ -23,9 +23,9 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
         &ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     assert_eq!(*output.as_ref(), expected);
-    assert!(algorithm.full_output().is_none());
+    assert!(algorithm.full_output_block().is_none());
     Ok(())
 }
 
@@ -42,7 +42,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     } = permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.validate_permutation(
@@ -61,7 +61,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
         &ValidatePermutationParameters {},
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     assert_eq!(*output.as_ref(), expected);
     Ok(())
 }
@@ -75,7 +75,7 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
     let invalid_dimensions =
         ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: invalid_dimensions,
     })?;
     let mut algorithm = dispatcher.validate_permutation(

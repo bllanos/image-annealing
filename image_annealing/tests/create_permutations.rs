@@ -13,22 +13,22 @@ use test_utils::permutation::DimensionsAndPermutation;
 #[test]
 fn run_once() -> Result<(), Box<dyn Error>> {
     let dim = ImageDimensions::new(3, 4)?;
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dim,
     })?;
     let mut algorithm =
         dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
-    assert!(algorithm.full_output().is_none());
+    assert!(algorithm.full_output_block().is_none());
     Ok(())
 }
 
 #[test]
 fn run_twice() -> Result<(), Box<dyn Error>> {
     let dim = ImageDimensions::new(35, 42)?;
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dim,
     })?;
 
@@ -42,7 +42,7 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
         dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
     Ok(())
 }
@@ -60,7 +60,7 @@ fn overwrite_permute() -> Result<(), Box<dyn Error>> {
     )?);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.permute(
@@ -72,7 +72,7 @@ fn overwrite_permute() -> Result<(), Box<dyn Error>> {
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap();
+    let output = algorithm.full_output_block().unwrap();
     assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_lossless_image);
     assert_eq!(output.permuted_image, permuted_lossless_image);
@@ -83,7 +83,7 @@ fn overwrite_permute() -> Result<(), Box<dyn Error>> {
         dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
     Ok(())
 }
@@ -99,7 +99,7 @@ fn overwrite_swap() -> Result<(), Box<dyn Error>> {
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let mut dispatcher = compute::create_dispatcher(&Config {
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
@@ -130,7 +130,7 @@ fn overwrite_swap() -> Result<(), Box<dyn Error>> {
         dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
-    let output = algorithm.full_output().unwrap().validated_permutation;
+    let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
     Ok(())
 }

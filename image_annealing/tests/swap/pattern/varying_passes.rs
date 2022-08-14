@@ -29,7 +29,7 @@ where
     )?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-    let dispatcher = compute::create_dispatcher(&Config {
+    let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let swap_parameters = SwapParameters {
@@ -46,8 +46,8 @@ where
 
     let full_output_iter = sequence.iter().map(|_| {
         assert_step_until_success(algorithm.as_mut(), OutputStatus::NewFullOutput).unwrap();
-        let output = algorithm.full_output().unwrap();
-        assert!(algorithm.full_output().is_none());
+        let output = algorithm.full_output_block().unwrap();
+        assert!(algorithm.full_output_block().is_none());
         output
     });
 
@@ -547,7 +547,7 @@ mod reject_out_of_bounds {
         ))?;
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
-        let dispatcher = compute::create_dispatcher(&Config {
+        let dispatcher = compute::create_dispatcher_block(&Config {
             image_dimensions: dimensions,
         })?;
         let swap_parameters = test_utils::algorithm::default_swap_parameters();
