@@ -1,12 +1,15 @@
 use super::loader;
 use crate::config::{DisplacementGoalPath, PermutationPath, SwapParametersConfig, SwapStopConfig};
-use image_annealing::compute::format::ImageFileWriter;
+use futures::join;
 use image_annealing::compute::{Dispatcher, SwapInput, SwapParameters};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::error::Error;
 
 mod iter;
-use iter::SwapIter;
+mod output;
+
+use iter::{SwapIter, TaggedPermutation};
+use output::TaggedPermutationWriter;
 
 pub fn run_and_save_swap(
     dispatcher: Box<dyn Dispatcher>,
@@ -15,31 +18,30 @@ pub fn run_and_save_swap(
     permutation_output_path_prefix: &PermutationPath,
     parameters: &SwapParametersConfig,
 ) -> Result<(), Box<dyn Error>> {
-    let mut output_path = None;
     let mut iter = run_swap(
         dispatcher,
         Some(loader::load_candidate_permutation(candidate_permutation)?),
         Some(loader::load_displacement_goal(displacement_goal)?),
         parameters,
     );
+    let writer = TaggedPermutationWriter::new(permutation_output_path_prefix);
+    let mut output_permutation: Option<TaggedPermutation> = None;
+
     while let Some(result) = iter.next() {
-        let tagged_permutation = futures::executor::block_on(result)?;
-        let path_no_extension = format!(
-            "{}_round_{}_pass_{}_{}",
-            permutation_output_path_prefix,
-            tagged_permutation.round_index,
-            tagged_permutation.pass_index,
-            tagged_permutation.pass.snake_case_name()
-        );
-        output_path = Some(
-            tagged_permutation
-                .permutation
-                .save_add_extension(path_no_extension)?,
-        );
+        output_permutation = Some(match output_permutation.take() {
+            Some(permutation) => {
+                let join_result =
+                    futures::executor::block_on(async { join!(writer.save(permutation), result) });
+                join_result.0?;
+                join_result.1
+            }
+            None => futures::executor::block_on(result),
+        }?)
     }
-    output_path
-        .iter()
-        .for_each(|path| println!("Wrote final swapped permutation to: {}", path.display()));
+    if let Some(permutation) = output_permutation {
+        let path = futures::executor::block_on(writer.save(permutation))?;
+        println!("Wrote final swapped permutation to: {}", path.display());
+    }
     Ok(())
 }
 
