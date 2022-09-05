@@ -215,7 +215,6 @@ The following is a list of tasks that we hope to complete in the future, time-pe
 - More documentation
 - Detailed guidelines and tips for contributing to the project
 - Improvements to user-friendliness, such as more descriptive error messages
-- Alternative API patterns, such as async/await semantics
 - Leverage more tools, libraries, and frameworks to improve the code, development processes, and collaboration
 
 ## Contributing
