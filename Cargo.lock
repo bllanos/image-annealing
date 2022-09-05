@@ -599,7 +599,9 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
+ "futures-intrusive",
  "image_annealing",
+ "parking_lot 0.12.1",
  "serde",
  "serde_json",
  "test_utils",
