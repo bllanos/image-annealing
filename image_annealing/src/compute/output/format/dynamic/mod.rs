@@ -1,6 +1,6 @@
 use super::{
-    ImageFileReader, ImageFileWriter, Rgba16Image, Rgba16Rgba8Image, Rgba16Rgba8x2Image,
-    Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
+    ImageFileReader, ImageFileWriter, ImageFileWriterSaveError, Rgba16Image, Rgba16Rgba8Image,
+    Rgba16Rgba8x2Image, Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image, Rgba8x4Image,
 };
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use std::error::Error;
@@ -118,7 +118,7 @@ impl LosslessImage {
     pub fn save_add_extension<P: AsRef<Path>>(
         &self,
         paths: &[P],
-    ) -> Result<Vec<PathBuf>, Box<dyn Error>> {
+    ) -> Result<Vec<PathBuf>, ImageFileWriterSaveError> {
         Ok(match self {
             Self::Rgba8(image) => vec![image.save_add_extension(&paths[0])?],
             Self::Rgba8x2(image) => {

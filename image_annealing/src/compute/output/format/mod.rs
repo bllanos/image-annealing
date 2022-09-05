@@ -20,6 +20,10 @@ pub trait ImageFileReader {
         Self: Sized;
 }
 
+pub type ImageFileWriterSaveError = image::error::ImageError;
+
+pub type ImageFileWriterSaveResult = Result<PathBuf, image::error::ImageError>;
+
 pub trait ImageFileWriter {
     const EXTENSION: &'static str;
 
@@ -27,8 +31,6 @@ pub trait ImageFileWriter {
         path_no_extension.as_ref().with_extension(Self::EXTENSION)
     }
 
-    fn save_add_extension<P: AsRef<Path>>(
-        &self,
-        path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>>;
+    fn save_add_extension<P: AsRef<Path>>(&self, path_no_extension: P)
+        -> ImageFileWriterSaveResult;
 }

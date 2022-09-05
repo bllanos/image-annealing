@@ -2,12 +2,13 @@ use super::manipulation;
 use super::{ImageDimensions, ImageDimensionsHolder};
 use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::{
-    ImageFileWriter, Rgba8Image, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
+    ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image, VectorFieldImageBuffer,
+    VectorFieldImageBufferComponent,
 };
 use std::error::Error;
 use std::fmt;
 use std::ops::IndexMut;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PermutationPixelData {
@@ -107,7 +108,7 @@ impl ImageFileWriter for ValidatedPermutation {
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         self.data.save_add_extension(path_no_extension)
     }
 }

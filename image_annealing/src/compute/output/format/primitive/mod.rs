@@ -1,9 +1,11 @@
 use super::super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
-use super::{ImageFileReader, ImageFileWriter, ImageFormat, ImageFormatError};
+use super::{
+    ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, ImageFormat, ImageFormatError,
+};
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use image::{io::Reader as ImageReader, GenericImageView, ImageBuffer};
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub type VectorFieldImageBufferComponent = u8;
 pub type VectorFieldImageBuffer =
@@ -43,7 +45,7 @@ impl ImageFileWriter for ImageBuffer<image::Rgba<u8>, Vec<u8>> {
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         let output_path = Self::make_filename(path_no_extension);
         self.save(&output_path)?;
         Ok(output_path)
@@ -57,7 +59,7 @@ impl ImageFileWriter
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         let output_path = Self::make_filename(path_no_extension);
         self.save(&output_path)?;
         Ok(output_path)
@@ -134,7 +136,7 @@ impl ImageFileWriter for Rgba8Image {
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         self.image.save_add_extension(path_no_extension)
     }
 }
@@ -212,7 +214,7 @@ impl ImageFileWriter for Rgba16Image {
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         self.image.save_add_extension(path_no_extension)
     }
 }

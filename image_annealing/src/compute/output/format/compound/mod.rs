@@ -1,7 +1,7 @@
 use super::super::super::resource::texture::{LosslessImageTexture, TextureDatatype};
 use super::{
-    ImageFileReader, ImageFileWriter, Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent,
-    Rgba8Image, VectorFieldImageBuffer,
+    ImageFileReader, ImageFileWriter, ImageFileWriterSaveError, Rgba16Image, Rgba16ImageBuffer,
+    Rgba16ImageBufferComponent, Rgba8Image, VectorFieldImageBuffer,
 };
 use crate::image_utils::{
     check_dimensions_match2, check_dimensions_match3, check_dimensions_match4,
@@ -35,7 +35,7 @@ impl Rgba8x2Image {
         &self,
         path1_no_extension: P1,
         path2_no_extension: P2,
-    ) -> Result<(PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(
@@ -118,7 +118,7 @@ impl Rgba8x3Image {
         path1_no_extension: P1,
         path2_no_extension: P2,
         path3_no_extension: P3,
-    ) -> Result<(PathBuf, PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(
@@ -236,7 +236,7 @@ impl Rgba8x4Image {
         path2_no_extension: P2,
         path3_no_extension: P3,
         path4_no_extension: P4,
-    ) -> Result<(PathBuf, PathBuf, PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf, PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(
@@ -344,7 +344,7 @@ impl Rgba16x2Image {
         &self,
         path1_no_extension: P1,
         path2_no_extension: P2,
-    ) -> Result<(PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(
@@ -434,7 +434,7 @@ impl Rgba16Rgba8Image {
         &self,
         path1_no_extension: P1,
         path2_no_extension: P2,
-    ) -> Result<(PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(
@@ -525,7 +525,7 @@ impl Rgba16Rgba8x2Image {
         path1_no_extension: P1,
         path2_no_extension: P2,
         path3_no_extension: P3,
-    ) -> Result<(PathBuf, PathBuf, PathBuf), Box<dyn Error>> {
+    ) -> Result<(PathBuf, PathBuf, PathBuf), ImageFileWriterSaveError> {
         self.0
             .save_add_extension(path1_no_extension)
             .and_then(

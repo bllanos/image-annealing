@@ -1,12 +1,12 @@
 use super::manipulation;
 use super::validation::{self, CandidatePermutation, ValidatedPermutation};
 use crate::compute::format::{
-    ImageFileReader, ImageFileWriter, Rgba8Image, VectorFieldImageBuffer,
-    VectorFieldImageBufferComponent,
+    ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image,
+    VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DisplacementGoal(Rgba8Image);
@@ -68,7 +68,7 @@ impl ImageFileWriter for DisplacementGoal {
     fn save_add_extension<P: AsRef<Path>>(
         &self,
         path_no_extension: P,
-    ) -> Result<PathBuf, Box<dyn Error>> {
+    ) -> ImageFileWriterSaveResult {
         self.0.save_add_extension(path_no_extension)
     }
 }
