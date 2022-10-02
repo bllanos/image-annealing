@@ -45,6 +45,36 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn zero_initialized_permutation() -> Result<(), Box<dyn Error>> {
+    let dimensions = ImageDimensions::new(3, 4)?;
+    let dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })?;
+
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let permuted_image = test_utils::permutation::identity_permute(&original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
+
+    let mut algorithm = dispatcher.permute(
+        PermuteInput {
+            original_image: Some(original_lossless_image.clone()),
+            ..Default::default()
+        },
+        &Default::default(),
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output_block().unwrap();
+    assert!(output.permutation.is_none());
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
+    Ok(())
+}
+
+#[test]
 fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,

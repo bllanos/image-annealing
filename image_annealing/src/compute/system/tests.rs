@@ -104,12 +104,43 @@ mod output_count_swap {
 }
 
 mod output_permutation {
-    use super::super::DevicePollType;
+    use super::super::super::format::{LosslessImage, Rgba16Image, VectorFieldImageBuffer};
+    use super::super::{DevicePollType, PermuteOperationInput, System};
+    use crate::image_utils::validation;
+    use crate::ImageDimensions;
     use std::error::Error;
+    use test_utils::permutation::DimensionsAndPermutation;
 
     #[test]
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
+        let output = futures::executor::block_on(system.output_permutation(DevicePollType::Wait))?;
+        assert_eq!(
+            output.as_ref(),
+            &VectorFieldImageBuffer::from_pixel(1, 1, image::Rgba([0, 0, 0, 0]))
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn after_input_permutation() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation {
+            permutation,
+            dimensions,
+        } = test_utils::permutation::non_identity();
+        let image = LosslessImage::Rgba16(Rgba16Image::new(
+            test_utils::image::coordinates_to_colors(&dimensions),
+        )?);
+        let mut system = futures::executor::block_on(System::new(&ImageDimensions::new(
+            dimensions.width(),
+            dimensions.height(),
+        )?))?;
+        system.operation_permute(&PermuteOperationInput {
+            image: Some(&image),
+            permutation: Some(&unsafe {
+                validation::vector_field_into_validated_permutation_unchecked(permutation)
+            }),
+        })?;
         test_utils::assert_error_contains(
             futures::executor::block_on(system.output_permutation(DevicePollType::Wait)),
             "an output permutation does not exist or has been invalidated",

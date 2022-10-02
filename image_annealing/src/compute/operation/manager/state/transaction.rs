@@ -11,7 +11,6 @@ use std::fmt;
 
 #[derive(Debug, Clone)]
 pub enum InsufficientInputError {
-    Permutation,
     OriginalImage,
     DisplacementGoal,
 }
@@ -19,10 +18,6 @@ pub enum InsufficientInputError {
 impl fmt::Display for InsufficientInputError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Permutation => write!(
-                f,
-                "an input permutation must be provided as there is none to reuse"
-            ),
             Self::OriginalImage => write!(
                 f,
                 "an input image must be provided as there is none to reuse"
@@ -112,7 +107,7 @@ impl ResourceStateManager {
                 } else if self.flags.check_permutation_input_texture().is_written() {
                     Ok(commit_state)
                 } else {
-                    Err(InsufficientInputError::Permutation)
+                    unreachable!("there should always be a permutation prior to any operations that require one");
                 }
             }
         }

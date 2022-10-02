@@ -65,6 +65,55 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn zero_initialized_permutation() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::identity();
+    let expected_permutation = test_utils::operation::swap(&permutation);
+    let displacement_goal =
+        DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
+    let expected_displacement_goal = displacement_goal.as_ref().clone();
+
+    let dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })?;
+
+    let swap_parameters = test_utils::algorithm::default_swap_parameters();
+    let mut algorithm = dispatcher.swap(
+        SwapInput {
+            displacement_goal: Some(displacement_goal),
+            ..Default::default()
+        },
+        &swap_parameters,
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
+
+    let output = algorithm.full_output_block().unwrap();
+    assert!(output.input.as_ref().unwrap().permutation.is_none());
+    assert_eq!(
+        output
+            .input
+            .as_ref()
+            .unwrap()
+            .displacement_goal
+            .as_ref()
+            .unwrap()
+            .as_ref(),
+        &expected_displacement_goal
+    );
+    assert_eq!(*output.output_permutation.as_ref(), expected_permutation);
+    assert_eq!(output.pass, SwapPass::Horizontal);
+    assert_correct_swap_count_output(
+        algorithm.as_mut(),
+        &swap_parameters,
+        &dimensions,
+        SwapAcceptedCount::All,
+    );
+    Ok(())
+}
+
+#[test]
 fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,

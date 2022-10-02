@@ -63,29 +63,6 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn forget_permutation() -> Result<(), Box<dyn Error>> {
-    let dimensions = ImageDimensions::new(3, 4)?;
-    let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
-    let dispatcher = compute::create_dispatcher_block(&Config {
-        image_dimensions: dimensions,
-    })?;
-
-    let mut algorithm = dispatcher.swap(
-        SwapInput {
-            displacement_goal: Some(displacement_goal),
-            ..Default::default()
-        },
-        &test_utils::algorithm::default_swap_parameters(),
-    );
-    assert_step_until_error(
-        algorithm.as_mut(),
-        OutputStatus::FinalPartialOutput,
-        "an input permutation must be provided as there is none to reuse",
-    );
-    Ok(())
-}
-
-#[test]
 fn forget_displacement_goal() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,

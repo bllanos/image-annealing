@@ -114,32 +114,6 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn forget_permutation() -> Result<(), Box<dyn Error>> {
-    let dimensions = ImageDimensions::new(3, 4).unwrap();
-    let dispatcher = compute::create_dispatcher_block(&Config {
-        image_dimensions: dimensions,
-    })
-    .unwrap();
-    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::image::coordinates_to_colors(&dimensions),
-    )?);
-
-    let mut algorithm = dispatcher.permute(
-        PermuteInput {
-            original_image: Some(original_lossless_image),
-            ..Default::default()
-        },
-        &Default::default(),
-    );
-    assert_step_until_error(
-        algorithm.as_mut(),
-        OutputStatus::FinalFullOutput,
-        "an input permutation must be provided as there is none to reuse",
-    );
-    Ok(())
-}
-
-#[test]
 fn forget_image() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
