@@ -2,16 +2,16 @@
 
 use std::marker::PhantomData;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Zero;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Written;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Stale;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ResourceStateMachine<State> {
     state: PhantomData<State>,
 }
@@ -46,7 +46,7 @@ impl From<ResourceStateMachine<Stale>> for ResourceStateMachine<Written> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ResourceStateMachineWrapper {
     Zero(ResourceStateMachine<Zero>),
     Written(ResourceStateMachine<Written>),
