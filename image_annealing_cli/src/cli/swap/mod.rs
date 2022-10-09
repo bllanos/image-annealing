@@ -30,8 +30,11 @@ pub fn run_and_save_swap(
     while let Some(result) = iter.next() {
         output_permutation = Some(match output_permutation.take() {
             Some(permutation) => {
-                let join_result =
-                    futures::executor::block_on(async { join!(writer.save(permutation), result) });
+                let join_result = futures::executor::block_on(async {
+                    // `join!` is used instead of `try_join!` because the previous permutation
+                    // should be saved even if there is an error creating the next permutation.
+                    join!(writer.save(permutation), result)
+                });
                 join_result.0?;
                 join_result.1
             }

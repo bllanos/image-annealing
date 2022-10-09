@@ -50,7 +50,7 @@ impl CountSwapOutputStorageBuffer {
         ))
     }
 
-    pub fn dimensions(&self) -> &BufferDimensions {
+    pub(in super::super) fn dimensions(&self) -> &BufferDimensions {
         self.0.dimensions()
     }
 

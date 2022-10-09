@@ -22,7 +22,7 @@ pub trait ImageFileReader {
 
 pub type ImageFileWriterSaveError = image::error::ImageError;
 
-pub type ImageFileWriterSaveResult = Result<PathBuf, image::error::ImageError>;
+pub type ImageFileWriterSaveResult = Result<PathBuf, ImageFileWriterSaveError>;
 
 pub trait ImageFileWriter {
     const EXTENSION: &'static str;
