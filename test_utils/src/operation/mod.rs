@@ -33,13 +33,12 @@ pub enum SwapAcceptedCount {
     All,
 }
 
-pub fn assert_correct_swap_count_output(
-    algorithm: &mut SwapAlgorithm,
+fn assert_correct_swap_count_output_inner(
+    output: Option<SwapPartialOutput>,
     parameters: &SwapParameters,
     image_dimensions: &ImageDimensions,
     swaps_accepted: SwapAcceptedCount,
 ) {
-    let output = algorithm.partial_output_block();
     assert_eq!(output.is_some(), parameters.count_swap);
     if let Some(SwapPartialOutput { counts }) = output {
         let is_none_accepted = match swaps_accepted {
@@ -95,5 +94,26 @@ pub fn assert_correct_swap_count_output(
             }
         );
     }
+}
+
+pub fn assert_correct_swap_count_output(
+    algorithm: &mut SwapAlgorithm,
+    parameters: &SwapParameters,
+    image_dimensions: &ImageDimensions,
+    swaps_accepted: SwapAcceptedCount,
+) {
+    let output = algorithm.partial_output_block();
+    assert_correct_swap_count_output_inner(output, parameters, image_dimensions, swaps_accepted);
     assert!(algorithm.partial_output_block().is_none());
+}
+
+pub async fn assert_correct_swap_count_output_async(
+    algorithm: &mut SwapAlgorithm,
+    parameters: &SwapParameters,
+    image_dimensions: &ImageDimensions,
+    swaps_accepted: SwapAcceptedCount,
+) {
+    let output = algorithm.partial_output().await;
+    assert_correct_swap_count_output_inner(output, parameters, image_dimensions, swaps_accepted);
+    assert!(algorithm.partial_output().await.is_none());
 }

@@ -3,9 +3,14 @@ use image_annealing::compute::{
     self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
     SwapInput,
 };
-use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
+use image_annealing::{
+    CandidatePermutation, DisplacementGoal, ImageDimensions, ImageDimensionsHolder,
+};
 use std::error::Error;
-use test_utils::algorithm::{assert_correct_default_swap_full_output, assert_step_until_success};
+use test_utils::algorithm::{
+    assert_correct_default_swap_full_output, assert_step_until_success,
+    assert_step_until_success_async,
+};
 use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
 use test_utils::permutation;
 use test_utils::permutation::DimensionsAndPermutation;
@@ -21,8 +26,30 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
+    assert_eq!(output.dimensions(), &dim);
     assert!(algorithm.full_output_block().is_none());
     Ok(())
+}
+
+async fn run_once_async_inner() -> Result<(), Box<dyn Error>> {
+    let dim = ImageDimensions::new(3, 4)?;
+    let dispatcher = compute::create_dispatcher(&Config {
+        image_dimensions: dim,
+    })
+    .await?;
+    let mut algorithm =
+        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    assert_step_until_success_async(algorithm.as_mut(), OutputStatus::FinalFullOutput).await?;
+    let output = algorithm.full_output().await.unwrap().validated_permutation;
+    permutation::assert_is_identity(&output);
+    assert_eq!(output.dimensions(), &dim);
+    assert!(algorithm.full_output().await.is_none());
+    Ok(())
+}
+
+#[test]
+fn run_once_async() -> Result<(), Box<dyn Error>> {
+    futures::executor::block_on(run_once_async_inner())
 }
 
 #[test]

@@ -1,5 +1,7 @@
 use image_annealing::compute::format::VectorFieldImageBuffer;
-use image_annealing::compute::{Algorithm, OutputStatus, SwapAlgorithm, SwapParameters, SwapPass};
+use image_annealing::compute::{
+    Algorithm, OutputStatus, SwapAlgorithm, SwapFullOutput, SwapParameters, SwapPass,
+};
 use std::collections::HashSet;
 use std::error::Error;
 
@@ -18,6 +20,21 @@ fn assert_output_vacancies<PartialOutput: Send, FullOutput: Send>(
     }
 }
 
+async fn assert_output_vacancies_async<PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+    statuses: HashSet<OutputStatus>,
+) {
+    let no_full_statuses = !statuses.iter().any(OutputStatus::is_full);
+    if statuses.iter().any(OutputStatus::is_partial) {
+        if no_full_statuses {
+            assert!(algorithm.full_output().await.is_none());
+        }
+    } else if no_full_statuses {
+        assert!(algorithm.partial_output().await.is_none());
+        assert!(algorithm.full_output().await.is_none());
+    }
+}
+
 pub fn assert_step_until_success<PartialOutput: Send, FullOutput: Send>(
     algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
     status: OutputStatus,
@@ -33,6 +50,30 @@ pub fn assert_step_until_success<PartialOutput: Send, FullOutput: Send>(
         }
     }
     assert_output_vacancies(algorithm, status_set);
+    if status.is_final() {
+        crate::assert_error_contains(
+            algorithm.step(),
+            "Algorithm::step cannot be called after the final output has been computed",
+        );
+    }
+    Ok(())
+}
+
+pub async fn assert_step_until_success_async<PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+    status: OutputStatus,
+) -> Result<(), Box<dyn Error>> {
+    assert!(algorithm.partial_output().await.is_none());
+    assert!(algorithm.full_output().await.is_none());
+    let mut status_set = HashSet::<OutputStatus>::new();
+    loop {
+        let current_status = algorithm.step()?;
+        status_set.insert(current_status);
+        if current_status == status {
+            break;
+        }
+    }
+    assert_output_vacancies_async(algorithm, status_set).await;
     if status.is_final() {
         crate::assert_error_contains(
             algorithm.step(),
@@ -66,13 +107,13 @@ pub fn default_swap_parameters() -> SwapParameters {
     }
 }
 
-pub fn assert_correct_default_swap_full_output(
-    algorithm: &mut SwapAlgorithm,
+fn assert_correct_default_swap_full_output_inner(
+    output_option: Option<SwapFullOutput>,
     input_permutation: &VectorFieldImageBuffer,
     displacement_goal: &VectorFieldImageBuffer,
     expected_permutation: &VectorFieldImageBuffer,
 ) {
-    let output = algorithm.full_output_block().unwrap();
+    let output = output_option.unwrap();
     let returned_input = output.input.as_ref().unwrap();
     assert_eq!(
         returned_input.permutation.as_ref().unwrap().as_ref(),
@@ -84,5 +125,36 @@ pub fn assert_correct_default_swap_full_output(
     );
     assert_eq!(output.output_permutation.as_ref(), expected_permutation);
     assert_eq!(output.pass, SwapPass::Horizontal);
+}
+
+pub fn assert_correct_default_swap_full_output(
+    algorithm: &mut SwapAlgorithm,
+    input_permutation: &VectorFieldImageBuffer,
+    displacement_goal: &VectorFieldImageBuffer,
+    expected_permutation: &VectorFieldImageBuffer,
+) {
+    let output = algorithm.full_output_block();
+    assert_correct_default_swap_full_output_inner(
+        output,
+        input_permutation,
+        displacement_goal,
+        expected_permutation,
+    );
     assert!(algorithm.full_output_block().is_none());
+}
+
+pub async fn assert_correct_default_swap_full_output_async(
+    algorithm: &mut SwapAlgorithm,
+    input_permutation: &VectorFieldImageBuffer,
+    displacement_goal: &VectorFieldImageBuffer,
+    expected_permutation: &VectorFieldImageBuffer,
+) {
+    let output = algorithm.full_output().await;
+    assert_correct_default_swap_full_output_inner(
+        output,
+        input_permutation,
+        displacement_goal,
+        expected_permutation,
+    );
+    assert!(algorithm.full_output().await.is_none());
 }

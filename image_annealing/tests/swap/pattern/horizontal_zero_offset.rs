@@ -3,9 +3,12 @@ mod accept_all_swap {
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
     use test_utils::algorithm::{
-        assert_correct_default_swap_full_output, assert_step_until_success,
+        assert_correct_default_swap_full_output, assert_correct_default_swap_full_output_async,
+        assert_step_until_success, assert_step_until_success_async,
     };
-    use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
+    use test_utils::operation::{
+        assert_correct_swap_count_output, assert_correct_swap_count_output_async, SwapAcceptedCount,
+    };
     use test_utils::permutation::DimensionsAndPermutation;
 
     #[test]
@@ -45,6 +48,53 @@ mod accept_all_swap {
             SwapAcceptedCount::All,
         );
         Ok(())
+    }
+
+    async fn run_once_identity_async_inner() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation {
+            permutation,
+            dimensions,
+        } = test_utils::permutation::identity();
+        let expected_permutation = test_utils::operation::swap(&permutation);
+        let displacement_goal =
+            DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
+        let expected_displacement_goal = displacement_goal.as_ref().clone();
+
+        let dispatcher = compute::create_dispatcher(&Config {
+            image_dimensions: dimensions,
+        })
+        .await?;
+        let swap_parameters = test_utils::algorithm::default_swap_parameters();
+        let mut algorithm = dispatcher.swap(
+            SwapInput {
+                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                displacement_goal: Some(displacement_goal),
+            },
+            &swap_parameters,
+        );
+        assert_step_until_success_async(algorithm.as_mut(), OutputStatus::FinalPartialOutput)
+            .await?;
+
+        assert_correct_default_swap_full_output_async(
+            algorithm.as_mut(),
+            &permutation,
+            &expected_displacement_goal,
+            &expected_permutation,
+        )
+        .await;
+        assert_correct_swap_count_output_async(
+            algorithm.as_mut(),
+            &swap_parameters,
+            &dimensions,
+            SwapAcceptedCount::All,
+        )
+        .await;
+        Ok(())
+    }
+
+    #[test]
+    fn run_once_identity_async() -> Result<(), Box<dyn Error>> {
+        futures::executor::block_on(run_once_identity_async_inner())
     }
 
     #[test]
