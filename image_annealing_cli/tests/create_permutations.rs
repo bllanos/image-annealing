@@ -1,8 +1,9 @@
-use image_annealing::compute::format::{ImageFileWriter, VectorFieldImageBuffer};
-use image_annealing::{compute, ImageDimensions};
+use image_annealing::compute::format::{ImageFileReader, ImageFileWriter, VectorFieldImageBuffer};
+use image_annealing::{compute, CandidatePermutation, ImageDimensions};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
 use std::error::Error;
+use test_utils::permutation;
 
 #[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
@@ -20,7 +21,8 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
     };
     cli::run(config)?;
 
-    assert!(full_output_path.is_file());
+    let output_permutation = CandidatePermutation::load(&full_output_path)?;
+    permutation::assert_is_identity(&output_permutation);
     std::fs::remove_file(full_output_path)?;
 
     Ok(())

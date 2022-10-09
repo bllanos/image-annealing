@@ -1,5 +1,9 @@
-use image_annealing::compute::format::{ImageFileWriter, ImageFormat, VectorFieldImageBuffer};
+use image_annealing::compute::conversion::{self, VectorFieldEntry};
+use image_annealing::compute::format::{
+    ImageFileReader, ImageFileWriter, ImageFormat, VectorFieldImageBuffer,
+};
 use image_annealing::compute::{self, SwapPassSequence};
+use image_annealing::ImageDimensions;
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{
     AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, IterationCount, PermutationPath,
@@ -26,6 +30,7 @@ fn make_swap_parameters() -> SwapParametersConfig {
 
 #[test]
 fn swap_valid() -> Result<(), Box<dyn Error>> {
+    // Ensure output files do not already exist
     let path_prefix = test_utils::make_test_output_path_string(["cli_swap"]);
     let paths_no_extension = [
         format!("{}_round_0_pass_0_vertical", path_prefix),
@@ -41,31 +46,95 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
         assert!(!full_output_path.is_file());
     }
 
-    let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
-            "image",
-            "permutation",
-            "identity_permutation.png",
-        ]))?;
+    // Synthesize input files
+    let dimensions = ImageDimensions::new(1, 6)?;
+    let input_permutation = conversion::to_image(
+        &dimensions,
+        &vec![
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, -1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 0),
+        ],
+    );
+    let input_permutation_path_prefix =
+        test_utils::make_test_output_path(["cli_swap_input_permutation"]);
+    let input_permutation_path =
+        input_permutation.save_add_extension(&input_permutation_path_prefix)?;
+
+    let input_displacement_goal = conversion::to_image(
+        &dimensions,
+        &vec![
+            VectorFieldEntry(0, 3),
+            VectorFieldEntry(0, 3),
+            VectorFieldEntry(0, 3),
+            VectorFieldEntry(0, -3),
+            VectorFieldEntry(0, -3),
+            VectorFieldEntry(0, -3),
+        ],
+    );
+    let input_displacement_goal_path_prefix =
+        test_utils::make_test_output_path(["cli_swap_input_displacement_goal"]);
+    let input_displacement_goal_path =
+        input_displacement_goal.save_add_extension(&input_displacement_goal_path_prefix)?;
+
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
-            candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath::from_raw(
-                test_utils::make_test_data_path_string([
-                    "image",
-                    "displacement_goal",
-                    "identity_displacement_goal.png",
-                ]),
+            candidate_permutation: PermutationPath::from_raw_clone(
+                input_permutation_path.to_str().unwrap(),
+            ),
+            displacement_goal: DisplacementGoalPath::from_raw_clone(
+                input_displacement_goal_path.to_str().unwrap(),
             ),
             permutation_output_path_prefix: PermutationPath::from_raw(path_prefix),
             parameters: make_swap_parameters(),
         },
-        dispatcher: compute::Config { image_dimensions },
+        dispatcher: compute::Config {
+            image_dimensions: dimensions,
+        },
     };
     cli::run(config)?;
 
+    for (i, full_output_path) in full_output_paths.iter().enumerate() {
+        let output_permutation = VectorFieldImageBuffer::load(full_output_path)?;
+        let expected_permutation = match i {
+            0 => vec![
+                VectorFieldEntry(0, 1),
+                VectorFieldEntry(0, -1),
+                VectorFieldEntry(0, 1),
+                VectorFieldEntry(0, -1),
+                VectorFieldEntry(0, 1),
+                VectorFieldEntry(0, -1),
+            ],
+            1 => vec![
+                VectorFieldEntry(0, 1),
+                VectorFieldEntry(0, 2),
+                VectorFieldEntry(0, -2),
+                VectorFieldEntry(0, 2),
+                VectorFieldEntry(0, -2),
+                VectorFieldEntry(0, -1),
+            ],
+            2 | 3 => vec![
+                VectorFieldEntry(0, 3),
+                VectorFieldEntry(0, 0),
+                VectorFieldEntry(0, 3),
+                VectorFieldEntry(0, -3),
+                VectorFieldEntry(0, 0),
+                VectorFieldEntry(0, -3),
+            ],
+            _ => unreachable!(),
+        };
+        assert_eq!(
+            conversion::to_vec(&output_permutation),
+            expected_permutation
+        );
+    }
+
+    std::fs::remove_file(input_permutation_path)?;
+    std::fs::remove_file(input_displacement_goal_path)?;
     for full_output_path in full_output_paths {
-        assert!(full_output_path.is_file());
         std::fs::remove_file(full_output_path)?;
     }
 

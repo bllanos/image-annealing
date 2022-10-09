@@ -1,7 +1,7 @@
 use image::ImageBuffer;
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{Rgba16ImageBuffer, VectorFieldImageBuffer};
-use image_annealing::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
+use image_annealing::ImageDimensions;
 
 pub struct DimensionsAndPermutation {
     pub permutation: VectorFieldImageBuffer,
@@ -257,10 +257,9 @@ pub fn line_with_first_texel_moved(
     }
 }
 
-pub fn assert_is_identity(permutation: &ValidatedPermutation) {
+pub fn assert_is_identity<T: AsRef<VectorFieldImageBuffer>>(permutation: T) {
     let converted_permutation = conversion::to_vec(permutation.as_ref());
-    let dim = permutation.dimensions();
-    let mut expected: Vec<VectorFieldEntry> = Vec::with_capacity(dim.count());
-    expected.resize(dim.count(), VectorFieldEntry(0, 0));
-    assert_eq!(converted_permutation, expected);
+    assert!(converted_permutation
+        .iter()
+        .all(|element| *element == VectorFieldEntry(0, 0)));
 }
