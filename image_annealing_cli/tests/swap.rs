@@ -50,7 +50,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::new(1, 6)?;
     let input_permutation = conversion::to_image(
         &dimensions,
-        &vec![
+        &[
             VectorFieldEntry(0, 1),
             VectorFieldEntry(0, -1),
             VectorFieldEntry(0, 0),
@@ -66,7 +66,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
 
     let input_displacement_goal = conversion::to_image(
         &dimensions,
-        &vec![
+        &[
             VectorFieldEntry(0, 3),
             VectorFieldEntry(0, 3),
             VectorFieldEntry(0, 3),
@@ -100,7 +100,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     for (i, full_output_path) in full_output_paths.iter().enumerate() {
         let output_permutation = VectorFieldImageBuffer::load(full_output_path)?;
         let expected_permutation = match i {
-            0 => vec![
+            0 => &[
                 VectorFieldEntry(0, 1),
                 VectorFieldEntry(0, -1),
                 VectorFieldEntry(0, 1),
@@ -108,7 +108,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
                 VectorFieldEntry(0, 1),
                 VectorFieldEntry(0, -1),
             ],
-            1 => vec![
+            1 => &[
                 VectorFieldEntry(0, 1),
                 VectorFieldEntry(0, 2),
                 VectorFieldEntry(0, -2),
@@ -116,7 +116,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
                 VectorFieldEntry(0, -2),
                 VectorFieldEntry(0, -1),
             ],
-            2 | 3 => vec![
+            2 | 3 => &[
                 VectorFieldEntry(0, 3),
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(0, 3),
@@ -127,7 +127,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
             _ => unreachable!(),
         };
         assert_eq!(
-            conversion::to_vec(&output_permutation),
+            &conversion::to_vec(&output_permutation),
             expected_permutation
         );
     }

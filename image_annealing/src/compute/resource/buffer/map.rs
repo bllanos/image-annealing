@@ -48,7 +48,10 @@ impl<'a> Future for BufferSliceMapFuture<'a> {
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         match self.future.as_mut().poll(cx) {
-            Poll::Ready(result) => Poll::Ready(result.unwrap().unwrap()),
+            Poll::Ready(result) => {
+                result.unwrap().unwrap();
+                Poll::Ready(())
+            }
             Poll::Pending => {
                 self.device_manager.poll_device(self.poll_type, cx);
                 Poll::Pending
