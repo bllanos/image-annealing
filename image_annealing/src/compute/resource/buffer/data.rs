@@ -81,8 +81,7 @@ impl BufferData {
         poll_type: DevicePollType,
     ) -> Vec<T> {
         let buffer_slice = self.buffer.slice(..);
-        let fut = BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type);
-        fut.await.unwrap();
+        BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type).await;
         let data = buffer_slice.get_mapped_range();
         let output = match self.dimensions.padding() {
             Some(padding) => data
@@ -106,8 +105,7 @@ impl BufferData {
         poll_type: DevicePollType,
     ) -> Vec<u8> {
         let buffer_slice = self.buffer.slice(..);
-        let fut = BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type);
-        fut.await.unwrap();
+        BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type).await;
         let data = buffer_slice.get_mapped_range();
         let output = match self.dimensions.padding() {
             Some(padding) => data

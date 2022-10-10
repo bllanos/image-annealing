@@ -1,5 +1,4 @@
 use crate::compute::device::{DeviceManager, DevicePollType};
-use std::error::Error;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -45,15 +44,11 @@ impl<'a> BufferSliceMapFuture<'a> {
 }
 
 impl<'a> Future for BufferSliceMapFuture<'a> {
-    type Output = Result<(), Box<dyn Error>>;
+    type Output = ();
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         match self.future.as_mut().poll(cx) {
-            Poll::Ready(result) => Poll::Ready(
-                result
-                    .unwrap()
-                    .map_err(|err| Box::new(err) as Box<dyn Error>),
-            ),
+            Poll::Ready(result) => Poll::Ready(result.unwrap().unwrap()),
             Poll::Pending => {
                 self.device_manager.poll_device(self.poll_type, cx);
                 Poll::Pending
