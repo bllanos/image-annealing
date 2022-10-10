@@ -4,13 +4,23 @@ mod header;
 
 pub use header::SHADER_ENTRY_POINT;
 
-pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
+fn create_identity_vector_field<W: Write>(mut writer: W, subtype: &str) -> std::io::Result<()> {
     header::global_invocation_id_header(&mut writer)?;
     writeln!(
         writer,
-        "  textureStore(output_permutation, vec2<i32>(global_id.xy), vec4<u32>(0u,0u,0u,0u));
-}}"
+        "  let coords : vec2<i32> = vec2<i32>(global_id.xy);
+  store_{}_vector(coords, vec2<i32>(0, 0));
+}}",
+        subtype
     )
+}
+
+pub fn create_displacement_goal_default<W: Write>(mut writer: W) -> std::io::Result<()> {
+    create_identity_vector_field(&mut writer, "displacement_goal")
+}
+
+pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
+    create_identity_vector_field(&mut writer, "permutation")
 }
 
 pub fn forward_permute<W: Write>(mut writer: W) -> std::io::Result<()> {

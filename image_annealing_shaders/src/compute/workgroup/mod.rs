@@ -24,6 +24,10 @@ impl WorkgroupDimensions {
         Self::horizontal_line(256u32)
     }
 
+    pub fn create_displacement_goal() -> Self {
+        Self::texture_patch()
+    }
+
     pub fn create_permutation() -> Self {
         Self::texture_patch()
     }

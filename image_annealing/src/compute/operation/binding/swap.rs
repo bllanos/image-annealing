@@ -32,7 +32,7 @@ impl SwapBinding {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
+                    binding: binding_constants::INPUT_DISPLACEMENT_GOAL_INDEX,
                     visibility: wgpu::ShaderStages::COMPUTE,
                     ty: DisplacementGoalInputTexture::binding_description(),
                     count: None,
@@ -67,7 +67,7 @@ impl SwapBinding {
                     resource: swap_parameters_buffer.binding_resource(),
                 },
                 wgpu::BindGroupEntry {
-                    binding: binding_constants::DISPLACEMENT_GOAL_INDEX,
+                    binding: binding_constants::INPUT_DISPLACEMENT_GOAL_INDEX,
                     resource: wgpu::BindingResource::TextureView(
                         displacement_goal_input_texture.view(),
                     ),

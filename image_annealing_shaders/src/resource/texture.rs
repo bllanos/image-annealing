@@ -22,6 +22,13 @@ pub fn lossless_image_output<W: Write>(mut writer: W) -> std::io::Result<()> {
     )
 }
 
-pub fn displacement_goal<W: Write>(mut writer: W) -> std::io::Result<()> {
-    writeln!(writer, "var displacement_goal : texture_2d<u32>;",)
+pub fn displacement_goal_input<W: Write>(mut writer: W) -> std::io::Result<()> {
+    writeln!(writer, "var input_displacement_goal : texture_2d<u32>;",)
+}
+
+pub fn displacement_goal_output<W: Write>(mut writer: W) -> std::io::Result<()> {
+    writeln!(
+        writer,
+        "var output_displacement_goal : texture_storage_2d<rgba8uint, write>;",
+    )
 }

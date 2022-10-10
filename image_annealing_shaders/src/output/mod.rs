@@ -30,6 +30,7 @@ impl Error for OutputDirectoryError {}
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct OutputConfig<'a> {
     pub count_swap: Option<Cow<'a, Path>>,
+    pub create_displacement_goal_default: Option<Cow<'a, Path>>,
     pub create_permutation: Option<Cow<'a, Path>>,
     pub permute: Option<Cow<'a, Path>>,
     pub swap: Option<Cow<'a, Path>>,
@@ -47,6 +48,9 @@ impl<'a> OutputConfig<'a> {
             if path.is_dir() {
                 Ok(Self {
                     count_swap: Some(Cow::from(path.join("count_swap.wgsl"))),
+                    create_displacement_goal_default: Some(Cow::from(
+                        path.join("create_displacement_goal_default.wgsl"),
+                    )),
                     create_permutation: Some(Cow::from(path.join("create_permutation.wgsl"))),
                     permute: Some(Cow::from(path.join("permute.wgsl"))),
                     swap: Some(Cow::from(path.join("swap.wgsl"))),
@@ -66,6 +70,10 @@ pub fn write_files(config: &OutputConfig) -> std::io::Result<()> {
     if let Some(path) = config.count_swap.as_ref() {
         let mut f = File::create(path)?;
         shader::count_swap(&mut f)?;
+    }
+    if let Some(path) = config.create_displacement_goal_default.as_ref() {
+        let mut f = File::create(path)?;
+        shader::create_displacement_goal_default(&mut f)?;
     }
     if let Some(path) = config.create_permutation.as_ref() {
         let mut f = File::create(path)?;

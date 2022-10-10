@@ -52,6 +52,13 @@ fn count_swap() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn create_displacement_goal_default() -> Result<(), Box<dyn Error>> {
+    let mut v: Vec<u8> = Vec::new();
+    shader::create_displacement_goal_default(&mut v)?;
+    validate_shader(&String::from_utf8(v)?)
+}
+
+#[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
     let mut v: Vec<u8> = Vec::new();
     shader::create_permutation(&mut v)?;
