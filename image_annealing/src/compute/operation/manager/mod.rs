@@ -4,14 +4,14 @@ use super::super::link::swap::SwapPassSequence;
 use super::super::resource::manager::ResourceManager;
 use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
-use crate::{ImageDimensions, ValidatedPermutation};
+use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::error::Error;
 
 mod input;
 mod output;
 mod state;
 
-pub use input::{PermuteOperationInput, SwapOperationInput};
+pub use input::{CreateDisplacementGoalOperationInput, PermuteOperationInput, SwapOperationInput};
 pub use output::CountSwapOperationOutput;
 use state::ResourceStateManager;
 
@@ -47,6 +47,24 @@ impl OperationManager {
                 label: Some("count_swap_command_encoder"),
             });
         self.pipelines.count_swap(&mut encoder);
+        queue.submit(Some(encoder.finish()));
+        Ok(())
+    }
+
+    pub fn create_displacement_goal(
+        &mut self,
+        device: &DeviceManager,
+        input: &CreateDisplacementGoalOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("create_displacement_goal_command_encoder"),
+            });
+        let queue = device.queue();
+        self.state
+            .create_displacement_goal(&self.resources, queue, &mut encoder, input)?;
+        self.pipelines.create_displacement_goal(&mut encoder);
         queue.submit(Some(encoder.finish()));
         Ok(())
     }
@@ -129,6 +147,34 @@ impl OperationManager {
             sequence,
             &self.image_dimensions,
         ))
+    }
+
+    pub async fn output_displacement_goal(
+        &mut self,
+        device: &DeviceManager,
+        poll_type: DevicePollType,
+    ) -> Result<DisplacementGoal, Box<dyn Error>> {
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("output_displacement_goal_command_encoder"),
+            });
+        self.state
+            .output_displacement_goal(&self.resources, &mut encoder)?;
+        device.queue().submit(Some(encoder.finish()));
+
+        let buffer = self.resources.displacement_goal_output_buffer();
+        let result = buffer.collect(device, poll_type).await;
+
+        Ok(DisplacementGoal::from_vector_field(
+            VectorFieldImageBuffer::from_vec(
+                buffer.width().try_into().unwrap(),
+                buffer.height().try_into().unwrap(),
+                result,
+            )
+            .unwrap(),
+        )
+        .unwrap())
     }
 
     pub async fn output_permutation(

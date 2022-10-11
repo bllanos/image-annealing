@@ -12,13 +12,12 @@ mod operation_count_swap {
     use std::error::Error;
 
     #[test]
-    fn no_preceding_swaps() -> Result<(), Box<dyn Error>> {
+    fn no_preceding_swaps() {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
             system.operation_count_swap(SwapPassSequence::all()),
             "not all selected swap passes have occurred since the last count swap operation",
         );
-        Ok(())
     }
 
     #[test]
@@ -103,6 +102,19 @@ mod output_count_swap {
     }
 }
 
+mod output_displacement_goal {
+    use super::super::DevicePollType;
+
+    #[test]
+    fn no_preceding_operations() {
+        let mut system = super::create_system_single_pixel();
+        test_utils::assert_error_contains(
+            futures::executor::block_on(system.output_displacement_goal(DevicePollType::Wait)),
+            "an output displacement goal field does not exist or has been invalidated",
+        );
+    }
+}
+
 mod output_permutation {
     use super::super::super::format::{LosslessImage, Rgba16Image, VectorFieldImageBuffer};
     use super::super::{DevicePollType, PermuteOperationInput, System};
@@ -152,10 +164,9 @@ mod output_permutation {
 mod output_permuted_image {
     use super::super::super::output::format::ImageFormat;
     use super::super::DevicePollType;
-    use std::error::Error;
 
     #[test]
-    fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
+    fn no_preceding_operations() {
         let mut system = super::create_system_single_pixel();
         test_utils::assert_error_contains(
             futures::executor::block_on(
@@ -163,6 +174,5 @@ mod output_permuted_image {
             ),
             "an output image does not exist or has been invalidated",
         );
-        Ok(())
     }
 }

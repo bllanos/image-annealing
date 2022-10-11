@@ -8,8 +8,9 @@ mod uniform;
 
 pub use staging::CountSwapOutputBuffer;
 pub use storage::{CountSwapInputBuffer, CountSwapOutputStorageBuffer};
-pub use texture_copy::LosslessImageOutputBuffer;
-pub use texture_copy::PermutationOutputBuffer;
+pub use texture_copy::{
+    DisplacementGoalOutputBuffer, LosslessImageOutputBuffer, PermutationOutputBuffer,
+};
 pub use uniform::{CountSwapInputLayoutBuffer, SwapParametersBuffer};
 
 pub trait BindableBuffer {

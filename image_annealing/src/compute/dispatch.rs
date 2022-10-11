@@ -1,3 +1,7 @@
+use super::output::algorithm::create_displacement_goal::{
+    CreateDisplacementGoal, CreateDisplacementGoalInput, CreateDisplacementGoalOutput,
+    CreateDisplacementGoalParameters,
+};
 use super::output::algorithm::create_permutation::{
     CreatePermutation, CreatePermutationInput, CreatePermutationOutput, CreatePermutationParameters,
 };
@@ -29,12 +33,18 @@ pub fn create_dispatcher_block(config: &Config) -> Result<Box<dyn Dispatcher>, B
     futures::executor::block_on(create_dispatcher(config))
 }
 
+pub type CreateDisplacementGoalAlgorithm = dyn Algorithm<(), CreateDisplacementGoalOutput> + Send;
 pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput> + Send;
 pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput> + Send;
 pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput> + Send;
 pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput> + Send;
 
 pub trait Dispatcher {
+    fn create_displacement_goal(
+        self: Box<Self>,
+        input: CreateDisplacementGoalInput,
+        parameters: &CreateDisplacementGoalParameters,
+    ) -> Box<CreateDisplacementGoalAlgorithm>;
     fn create_permutation(
         self: Box<Self>,
         input: CreatePermutationInput,
@@ -62,6 +72,7 @@ impl fmt::Debug for dyn Dispatcher {
 #[allow(clippy::large_enum_variant)]
 enum AlgorithmChoice {
     None,
+    CreateDisplacementGoal(CreateDisplacementGoal),
     CreatePermutation(CreatePermutation),
     Permute(Permute),
     Swap(Swap),
@@ -69,6 +80,18 @@ enum AlgorithmChoice {
 }
 
 impl AlgorithmChoice {
+    fn as_ref_create_displacement_goal(&self) -> &CreateDisplacementGoal {
+        match self {
+            AlgorithmChoice::CreateDisplacementGoal(inner) => inner,
+            _ => unreachable!("expected AlgorithmChoice::CreateDisplacementGoal"),
+        }
+    }
+    fn as_mut_create_displacement_goal(&mut self) -> &mut CreateDisplacementGoal {
+        match self {
+            AlgorithmChoice::CreateDisplacementGoal(ref mut inner) => inner,
+            _ => unreachable!("expected AlgorithmChoice::CreateDisplacementGoal"),
+        }
+    }
     fn as_ref_create_permutation(&self) -> &CreatePermutation {
         match self {
             AlgorithmChoice::CreatePermutation(inner) => inner,
@@ -132,6 +155,16 @@ impl DispatcherImplementation {
 }
 
 impl Dispatcher for DispatcherImplementation {
+    fn create_displacement_goal(
+        mut self: Box<Self>,
+        input: CreateDisplacementGoalInput,
+        parameters: &CreateDisplacementGoalParameters,
+    ) -> Box<CreateDisplacementGoalAlgorithm> {
+        self.algorithm =
+            AlgorithmChoice::CreateDisplacementGoal(CreateDisplacementGoal::new(input, parameters));
+        self
+    }
+
     fn create_permutation(
         mut self: Box<Self>,
         input: CreatePermutationInput,
@@ -167,6 +200,45 @@ impl Dispatcher for DispatcherImplementation {
     ) -> Box<ValidatePermutationAlgorithm> {
         self.algorithm =
             AlgorithmChoice::ValidatePermutation(ValidatePermutation::new(input, parameters));
+        self
+    }
+}
+
+#[async_trait]
+impl Algorithm<(), CreateDisplacementGoalOutput> for DispatcherImplementation {
+    fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
+        self.algorithm
+            .as_mut_create_displacement_goal()
+            .step(&mut self.system)
+    }
+    async fn partial_output(&mut self) -> Option<()> {
+        self.algorithm
+            .as_ref_create_displacement_goal()
+            .partial_output(DevicePollType::Poll)
+            .await
+    }
+    fn partial_output_block(&mut self) -> Option<()> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_ref_create_displacement_goal()
+                .partial_output(DevicePollType::Wait),
+        )
+    }
+    async fn full_output(&mut self) -> Option<CreateDisplacementGoalOutput> {
+        self.algorithm
+            .as_mut_create_displacement_goal()
+            .full_output(&mut self.system, DevicePollType::Poll)
+            .await
+    }
+    fn full_output_block(&mut self) -> Option<CreateDisplacementGoalOutput> {
+        futures::executor::block_on(
+            self.algorithm
+                .as_mut_create_displacement_goal()
+                .full_output(&mut self.system, DevicePollType::Wait),
+        )
+    }
+    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
+        self.clear_algorithm();
         self
     }
 }

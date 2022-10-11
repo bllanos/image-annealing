@@ -8,10 +8,14 @@ mod system;
 
 pub use dispatch::{create_dispatcher, create_dispatcher_block, Config, Dispatcher};
 pub use dispatch::{
-    CreatePermutationAlgorithm, PermuteAlgorithm, SwapAlgorithm, ValidatePermutationAlgorithm,
+    CreateDisplacementGoalAlgorithm, CreatePermutationAlgorithm, PermuteAlgorithm, SwapAlgorithm,
+    ValidatePermutationAlgorithm,
+};
+pub use output::algorithm::create_displacement_goal::{
+    CreateDisplacementGoalInput, CreateDisplacementGoalOutput, CreateDisplacementGoalParameters,
 };
 pub use output::algorithm::create_permutation::{
-    CreatePermutationInput, CreatePermutationParameters,
+    CreatePermutationInput, CreatePermutationOutput, CreatePermutationParameters,
 };
 pub use output::algorithm::permute::{PermuteInput, PermuteOutput, PermuteParameters};
 pub use output::algorithm::swap::{

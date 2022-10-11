@@ -4,13 +4,13 @@ mod lossless_image;
 mod permutation;
 
 pub(super) use data::TEXTURE_ARRAY_LAYERS;
-pub use displacement_goal::DisplacementGoalInputTexture;
-pub use lossless_image::LosslessImageInputTexture;
-pub use lossless_image::LosslessImageOutputTexture;
-pub use lossless_image::LosslessImageTexture;
-pub use permutation::PermutationInputTexture;
-pub use permutation::PermutationOutputTexture;
-pub use permutation::PermutationTexture;
+pub use displacement_goal::{
+    DisplacementGoalInputTexture, DisplacementGoalOutputTexture, DisplacementGoalTexture,
+};
+pub use lossless_image::{
+    LosslessImageInputTexture, LosslessImageOutputTexture, LosslessImageTexture,
+};
+pub use permutation::{PermutationInputTexture, PermutationOutputTexture, PermutationTexture};
 
 pub trait TextureDatatype {
     type Component;

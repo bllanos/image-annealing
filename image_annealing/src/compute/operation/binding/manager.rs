@@ -2,6 +2,7 @@ use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::shader::WorkgroupGridDimensions;
 use super::count_swap::CountSwapBinding;
+use super::create_displacement_goal::CreateDisplacementGoalBinding;
 use super::create_permutation::CreatePermutationBinding;
 use super::permute::PermuteBinding;
 use super::swap::SwapBinding;
@@ -10,6 +11,7 @@ use image_annealing_shaders::binding as binding_constants;
 
 pub struct BindingManager {
     count_swap_binding: CountSwapBinding,
+    create_displacement_goal_binding: CreateDisplacementGoalBinding,
     create_permutation_binding: CreatePermutationBinding,
     permute_binding: PermuteBinding,
     swap_binding: SwapBinding,
@@ -19,6 +21,7 @@ impl BindingManager {
     pub fn new(device: &wgpu::Device, resources: &ResourceManager) -> Self {
         Self {
             count_swap_binding: CountSwapBinding::new(device, resources),
+            create_displacement_goal_binding: CreateDisplacementGoalBinding::new(device, resources),
             create_permutation_binding: CreatePermutationBinding::new(device, resources),
             permute_binding: PermuteBinding::new(device, resources),
             swap_binding: SwapBinding::new(device, resources),
@@ -36,6 +39,22 @@ impl BindingManager {
 
     pub fn count_swap_grid_dimensions(&self) -> &WorkgroupGridDimensions {
         self.count_swap_binding.workgroup_grid_dimensions()
+    }
+
+    pub fn bind_create_displacement_goal<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
+        self.create_displacement_goal_binding.bind(
+            binding_constants::create_displacement_goal::GROUP_INDEX,
+            cpass,
+        );
+    }
+
+    pub fn create_displacement_goal_layout(&self) -> &wgpu::BindGroupLayout {
+        self.create_displacement_goal_binding.layout()
+    }
+
+    pub fn create_displacement_goal_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+        self.create_displacement_goal_binding
+            .workgroup_grid_dimensions()
     }
 
     pub fn bind_create_permutation<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {

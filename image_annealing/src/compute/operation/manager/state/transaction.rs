@@ -3,7 +3,9 @@ use super::super::super::super::link::swap::{
 };
 use super::super::super::super::output::format::LosslessImage;
 use super::super::super::super::resource::manager::ResourceManager;
-use super::super::{PermuteOperationInput, SwapOperationInput};
+use super::super::{
+    CreateDisplacementGoalOperationInput, PermuteOperationInput, SwapOperationInput,
+};
 use super::data::AllResourcesState;
 use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::error::Error;
@@ -36,6 +38,7 @@ impl Error for InsufficientInputError {}
 pub enum InsufficientOutputError {
     CountSwap,
     SwapPass,
+    DisplacementGoal,
     Permutation,
     PermutedImage,
 }
@@ -50,6 +53,10 @@ impl fmt::Display for InsufficientOutputError {
             Self::SwapPass => write!(
                 f,
                 "not all selected swap passes have occurred since the last count swap operation"
+            ),
+            Self::DisplacementGoal => write!(
+                f,
+                "an output displacement goal field does not exist or has been invalidated",
             ),
             Self::Permutation => write!(
                 f,
@@ -119,6 +126,7 @@ impl ResourceStateManager {
         resources: &ResourceManager,
         queue: &wgpu::Queue,
         image: &Option<&'a LosslessImage>,
+        accept_missing: bool,
     ) -> Result<AllResourcesState, InsufficientInputError> {
         match image {
             Some(image) => {
@@ -127,6 +135,8 @@ impl ResourceStateManager {
             }
             None => {
                 if self.flags.check_lossless_image_input_texture() {
+                    Ok(commit_state)
+                } else if accept_missing {
                     Ok(commit_state)
                 } else {
                     Err(InsufficientInputError::OriginalImage)
@@ -140,9 +150,11 @@ impl ResourceStateManager {
         commit_state: AllResourcesState,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
-        image: &Option<&'a DisplacementGoal>,
+        encoder: &mut wgpu::CommandEncoder,
+        displacement_goal: &Option<&'a DisplacementGoal>,
+        accept_missing: bool,
     ) -> Result<AllResourcesState, InsufficientInputError> {
-        match image {
+        match displacement_goal {
             Some(displacement_goal) => {
                 resources
                     .displacement_goal_input_texture()
@@ -150,11 +162,14 @@ impl ResourceStateManager {
                 Ok(commit_state.input_displacement_goal())
             }
             None => {
-                if self
-                    .flags
-                    .check_displacement_goal_input_texture()
-                    .is_written()
-                {
+                if self.flags.check_displacement_goal_output_texture() {
+                    resources
+                        .displacement_goal_input_texture()
+                        .copy(encoder, resources.displacement_goal_output_texture());
+                    Ok(commit_state.recycle_output_displacement_goal())
+                } else if self.flags.check_displacement_goal_input_texture() {
+                    Ok(commit_state)
+                } else if accept_missing {
                     Ok(commit_state)
                 } else {
                     Err(InsufficientInputError::DisplacementGoal)
@@ -190,6 +205,29 @@ impl ResourceStateManager {
         }
     }
 
+    pub fn create_displacement_goal(
+        &mut self,
+        resources: &ResourceManager,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        input: &CreateDisplacementGoalOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        let mut commit_state = self.flags.clone();
+        commit_state = self.input_displacement_goal(
+            commit_state,
+            resources,
+            queue,
+            encoder,
+            &input.displacement_goal,
+            true,
+        )?;
+        commit_state =
+            self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
+        commit_state = self.input_image(commit_state, resources, queue, &input.image, true)?;
+        self.flags = commit_state.create_displacement_goal();
+        Ok(())
+    }
+
     pub fn can_skip_create_permutation(&self) -> bool {
         self.flags.check_permutation_input_texture().is_zero()
     }
@@ -209,7 +247,7 @@ impl ResourceStateManager {
         let mut commit_state = self.flags.clone().clear_output_lossless_image();
         commit_state =
             self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
-        commit_state = self.input_image(commit_state, resources, queue, &input.image)?;
+        commit_state = self.input_image(commit_state, resources, queue, &input.image, false)?;
         self.flags = commit_state.permute_lossless_image();
         Ok(())
     }
@@ -229,8 +267,14 @@ impl ResourceStateManager {
             .clear_output_count_swap();
         commit_state =
             self.input_permutation(commit_state, resources, queue, encoder, &input.permutation)?;
-        commit_state =
-            self.input_displacement_goal(commit_state, resources, queue, &input.displacement_goal)?;
+        commit_state = self.input_displacement_goal(
+            commit_state,
+            resources,
+            queue,
+            encoder,
+            &input.displacement_goal,
+            false,
+        )?;
         self.flags = commit_state.finish_swap(input.pass);
 
         self.swap_parameters
@@ -264,6 +308,24 @@ impl ResourceStateManager {
             }
         } else {
             Err(Box::new(InsufficientOutputError::CountSwap))
+        }
+    }
+
+    pub fn output_displacement_goal(
+        &mut self,
+        resources: &ResourceManager,
+        encoder: &mut wgpu::CommandEncoder,
+    ) -> Result<(), Box<dyn Error>> {
+        if self.flags.check_displacement_goal_output_texture() {
+            if !self.flags.check_displacement_goal_output_buffer() {
+                resources
+                    .displacement_goal_output_buffer()
+                    .load(encoder, resources.displacement_goal_output_texture());
+                self.flags = self.flags.clone().output_displacement_goal();
+            }
+            Ok(())
+        } else {
+            Err(Box::new(InsufficientOutputError::DisplacementGoal))
         }
     }
 

@@ -11,6 +11,8 @@ pub struct AllResourcesState {
     count_swap_output_storage_buffer: ResourceStateMachineWrapper,
     count_swap_output_buffer: ResourceStateMachineWrapper,
     displacement_goal_input_texture: ResourceStateMachineWrapper,
+    displacement_goal_output_texture: ResourceStateMachineWrapper,
+    displacement_goal_output_buffer: ResourceStateMachineWrapper,
     permutation_input_texture: ResourceStateMachineWrapper,
     permutation_output_texture: ResourceStateMachineWrapper,
     permutation_output_buffer: ResourceStateMachineWrapper,
@@ -26,6 +28,8 @@ impl AllResourcesState {
             count_swap_output_storage_buffer: ResourceStateMachineWrapper::new(),
             count_swap_output_buffer: ResourceStateMachineWrapper::new(),
             displacement_goal_input_texture: ResourceStateMachineWrapper::new(),
+            displacement_goal_output_texture: ResourceStateMachineWrapper::new(),
+            displacement_goal_output_buffer: ResourceStateMachineWrapper::new(),
             permutation_input_texture: ResourceStateMachineWrapper::new(),
             permutation_output_texture: ResourceStateMachineWrapper::new(),
             permutation_output_buffer: ResourceStateMachineWrapper::new(),
@@ -47,8 +51,16 @@ impl AllResourcesState {
         self.count_swap_output_buffer.is_written()
     }
 
-    pub fn check_displacement_goal_input_texture(&self) -> &ResourceStateMachineWrapper {
-        &self.displacement_goal_input_texture
+    pub fn check_displacement_goal_input_texture(&self) -> bool {
+        self.displacement_goal_input_texture.is_written()
+    }
+
+    pub fn check_displacement_goal_output_texture(&self) -> bool {
+        self.displacement_goal_output_texture.is_written()
+    }
+
+    pub fn check_displacement_goal_output_buffer(&self) -> bool {
+        self.displacement_goal_output_buffer.is_written()
     }
 
     pub fn check_permutation_input_texture(&self) -> &ResourceStateMachineWrapper {
@@ -92,6 +104,14 @@ impl AllResourcesState {
         }
     }
 
+    pub fn clear_output_displacement_goal(self) -> Self {
+        Self {
+            displacement_goal_output_texture: self.displacement_goal_output_texture.clear(),
+            displacement_goal_output_buffer: self.displacement_goal_output_buffer.clear(),
+            ..self
+        }
+    }
+
     pub fn clear_output_permutation(self) -> Self {
         Self {
             permutation_output_texture: self.permutation_output_texture.clear(),
@@ -109,10 +129,9 @@ impl AllResourcesState {
     }
 
     pub fn input_displacement_goal(self) -> Self {
-        Self {
-            displacement_goal_input_texture: self.displacement_goal_input_texture.write(),
-            ..self
-        }
+        let mut next = self.clear_output_displacement_goal();
+        next.displacement_goal_input_texture = next.displacement_goal_input_texture.write();
+        next
     }
 
     pub fn input_permutation(self) -> Self {
@@ -130,6 +149,13 @@ impl AllResourcesState {
     pub fn finish_count_swap(self) -> Self {
         let mut next = self.clear_count_swap_pass_set();
         next.count_swap_output_storage_buffer = next.count_swap_output_storage_buffer.write();
+        next
+    }
+
+    pub fn create_displacement_goal(self) -> Self {
+        let mut next = self.clear_output_displacement_goal();
+        next.displacement_goal_input_texture = next.displacement_goal_input_texture.clear();
+        next.displacement_goal_output_texture = next.displacement_goal_output_texture.write();
         next
     }
 
@@ -172,6 +198,13 @@ impl AllResourcesState {
         next
     }
 
+    pub fn recycle_output_displacement_goal(self) -> Self {
+        Self {
+            displacement_goal_input_texture: self.displacement_goal_output_texture.clone(),
+            ..self
+        }
+    }
+
     pub fn recycle_output_permutation(self) -> Self {
         Self {
             permutation_input_texture: self.permutation_output_texture.clone(),
@@ -182,6 +215,13 @@ impl AllResourcesState {
     pub fn output_count_swap(self) -> Self {
         Self {
             count_swap_output_buffer: self.count_swap_output_storage_buffer.clone(),
+            ..self
+        }
+    }
+
+    pub fn output_displacement_goal(self) -> Self {
+        Self {
+            displacement_goal_output_buffer: self.displacement_goal_output_texture.clone(),
             ..self
         }
     }

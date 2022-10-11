@@ -1,11 +1,11 @@
 use super::buffer::{
     CountSwapInputBuffer, CountSwapInputLayoutBuffer, CountSwapOutputBuffer,
-    CountSwapOutputStorageBuffer, LosslessImageOutputBuffer, PermutationOutputBuffer,
-    SwapParametersBuffer,
+    CountSwapOutputStorageBuffer, DisplacementGoalOutputBuffer, LosslessImageOutputBuffer,
+    PermutationOutputBuffer, SwapParametersBuffer,
 };
 use super::texture::{
-    DisplacementGoalInputTexture, LosslessImageInputTexture, LosslessImageOutputTexture,
-    PermutationInputTexture, PermutationOutputTexture,
+    DisplacementGoalInputTexture, DisplacementGoalOutputTexture, LosslessImageInputTexture,
+    LosslessImageOutputTexture, PermutationInputTexture, PermutationOutputTexture,
 };
 use crate::ImageDimensions;
 
@@ -15,6 +15,8 @@ pub struct ResourceManager {
     count_swap_output_buffer: CountSwapOutputBuffer,
     count_swap_output_storage_buffer: CountSwapOutputStorageBuffer,
     displacement_goal_input_texture: DisplacementGoalInputTexture,
+    displacement_goal_output_texture: DisplacementGoalOutputTexture,
+    displacement_goal_output_buffer: DisplacementGoalOutputBuffer,
     permutation_input_texture: PermutationInputTexture,
     permutation_output_texture: PermutationOutputTexture,
     permutation_output_buffer: PermutationOutputBuffer,
@@ -35,6 +37,14 @@ impl ResourceManager {
             count_swap_output_buffer,
             count_swap_output_storage_buffer,
             displacement_goal_input_texture: DisplacementGoalInputTexture::new(
+                device,
+                image_dimensions,
+            ),
+            displacement_goal_output_texture: DisplacementGoalOutputTexture::new(
+                device,
+                image_dimensions,
+            ),
+            displacement_goal_output_buffer: DisplacementGoalOutputBuffer::new(
                 device,
                 image_dimensions,
             ),
@@ -69,6 +79,14 @@ impl ResourceManager {
 
     pub fn displacement_goal_input_texture(&self) -> &DisplacementGoalInputTexture {
         &self.displacement_goal_input_texture
+    }
+
+    pub fn displacement_goal_output_texture(&self) -> &DisplacementGoalOutputTexture {
+        &self.displacement_goal_output_texture
+    }
+
+    pub fn displacement_goal_output_buffer(&self) -> &DisplacementGoalOutputBuffer {
+        &self.displacement_goal_output_buffer
     }
 
     pub fn permutation_input_texture(&self) -> &PermutationInputTexture {

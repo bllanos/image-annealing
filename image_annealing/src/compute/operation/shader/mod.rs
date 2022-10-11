@@ -25,6 +25,17 @@ pub fn count_swap_shader(device: &wgpu::Device) -> Shader {
     }
 }
 
+pub fn create_displacement_goal_default_shader(device: &wgpu::Device) -> Shader {
+    Shader {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("create_displacement_goal_default_shader_module"),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!(
+                "CREATE_DISPLACEMENT_GOAL_DEFAULT_SHADER"
+            )))),
+        }),
+    }
+}
+
 pub fn create_permutation_shader(device: &wgpu::Device) -> Shader {
     Shader {
         shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {

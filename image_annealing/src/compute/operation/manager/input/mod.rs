@@ -4,6 +4,13 @@ use crate::{DisplacementGoal, ValidatedPermutation};
 use std::default::Default;
 
 #[derive(Default)]
+pub struct CreateDisplacementGoalOperationInput<'a> {
+    pub displacement_goal: Option<&'a DisplacementGoal>,
+    pub permutation: Option<&'a ValidatedPermutation>,
+    pub image: Option<&'a LosslessImage>,
+}
+
+#[derive(Default)]
 pub struct PermuteOperationInput<'a> {
     pub permutation: Option<&'a ValidatedPermutation>,
     pub image: Option<&'a LosslessImage>,

@@ -3,11 +3,13 @@ mod run_swap {
     use crate::config::{SwapParametersConfig, SwapStopConfig, SwapStopThreshold};
     use async_trait::async_trait;
     use image_annealing::compute::{
-        Algorithm, CreatePermutationAlgorithm, CreatePermutationInput, CreatePermutationParameters,
-        Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput, PermuteParameters, SwapAlgorithm,
-        SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPass, SwapPassSequence,
-        SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm,
-        ValidatePermutationInput, ValidatePermutationParameters,
+        Algorithm, CreateDisplacementGoalAlgorithm, CreateDisplacementGoalInput,
+        CreateDisplacementGoalParameters, CreatePermutationAlgorithm, CreatePermutationInput,
+        CreatePermutationParameters, Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput,
+        PermuteParameters, SwapAlgorithm, SwapFullOutput, SwapInput, SwapParameters,
+        SwapPartialOutput, SwapPass, SwapPassSequence, SwapPassSequenceSwapRatio,
+        SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm, ValidatePermutationInput,
+        ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
     use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
@@ -171,6 +173,14 @@ mod run_swap {
     }
 
     impl Dispatcher for SwapDispatcher {
+        fn create_displacement_goal(
+            self: Box<Self>,
+            _input: CreateDisplacementGoalInput,
+            _parameters: &CreateDisplacementGoalParameters,
+        ) -> Box<CreateDisplacementGoalAlgorithm> {
+            unreachable!()
+        }
+
         fn create_permutation(
             self: Box<Self>,
             _input: CreatePermutationInput,

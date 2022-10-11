@@ -3,6 +3,7 @@ use super::{AlreadyFailedError, AlreadyFinishedError, OutputStatus};
 use async_trait::async_trait;
 use std::error::Error;
 
+pub mod create_displacement_goal;
 pub mod create_permutation;
 pub mod permute;
 pub mod swap;

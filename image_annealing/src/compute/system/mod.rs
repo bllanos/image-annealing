@@ -3,11 +3,13 @@ use super::link::swap::SwapPassSequence;
 use super::operation::manager::CountSwapOperationOutput;
 use super::operation::manager::OperationManager;
 use super::output::format::{ImageFormat, LosslessImage};
-use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
+use crate::{DisplacementGoal, ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use std::error::Error;
 
 pub use super::device::DevicePollType;
-pub use super::operation::manager::{PermuteOperationInput, SwapOperationInput};
+pub use super::operation::manager::{
+    CreateDisplacementGoalOperationInput, PermuteOperationInput, SwapOperationInput,
+};
 
 pub struct System {
     device: DeviceManager,
@@ -33,6 +35,14 @@ impl System {
         self.operations.count_swap(&self.device, sequence)
     }
 
+    pub fn operation_create_displacement_goal(
+        &mut self,
+        input: &CreateDisplacementGoalOperationInput,
+    ) -> Result<(), Box<dyn Error>> {
+        self.operations
+            .create_displacement_goal(&self.device, input)
+    }
+
     pub fn operation_create_permutation(&mut self) -> Result<(), Box<dyn Error>> {
         self.operations.create_permutation(&self.device)
     }
@@ -55,6 +65,15 @@ impl System {
     ) -> Result<CountSwapOperationOutput, Box<dyn Error>> {
         self.operations
             .output_count_swap(&self.device, poll_type, sequence)
+            .await
+    }
+
+    pub async fn output_displacement_goal(
+        &mut self,
+        poll_type: DevicePollType,
+    ) -> Result<DisplacementGoal, Box<dyn Error>> {
+        self.operations
+            .output_displacement_goal(&self.device, poll_type)
             .await
     }
 
