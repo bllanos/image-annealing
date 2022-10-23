@@ -1,7 +1,7 @@
 use image_annealing::compute::format::{ImageFormat, LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
-    PermuteParameters, SwapInput,
+    self, Config, CreateDisplacementGoalParameters, CreatePermutationInput,
+    CreatePermutationParameters, OutputStatus, PermuteInput, PermuteParameters, SwapInput,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
 use std::default::Default;
@@ -66,6 +66,45 @@ fn zero_initialized_permutation() -> Result<(), Box<dyn Error>> {
 
     let output = algorithm.full_output_block().unwrap();
     assert!(output.permutation.is_none());
+    assert_eq!(output.original_image.unwrap(), original_lossless_image);
+    assert_eq!(
+        output.permuted_image,
+        LosslessImage::Rgba16(Rgba16Image::new(permuted_image)?)
+    );
+    Ok(())
+}
+
+#[test]
+fn ignore_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::non_identity();
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })?;
+
+    let mut algorithm = dispatcher
+        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+    dispatcher = algorithm.return_to_dispatcher();
+
+    let expected_permutation = permutation.clone();
+    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let permuted_image = test_utils::permutation::non_identity_forward_permute(&original_image);
+    let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
+
+    let mut algorithm = dispatcher.permute(
+        PermuteInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            original_image: Some(original_lossless_image.clone()),
+        },
+        &Default::default(),
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+
+    let output = algorithm.full_output_block().unwrap();
+    assert_eq!(*output.permutation.unwrap().as_ref(), expected_permutation);
     assert_eq!(output.original_image.unwrap(), original_lossless_image);
     assert_eq!(
         output.permuted_image,
