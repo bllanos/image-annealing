@@ -35,7 +35,7 @@ where
         .next()
         .ok_or("expected a square image side length as a command-line argument")?
         .parse()?;
-    Ok(ImageDimensions::new(image_width, image_width)?)
+    Ok(ImageDimensions::try_new(image_width, image_width)?)
 }
 
 /// Generate input data for the example
@@ -128,7 +128,7 @@ mod tests {
         #[test]
         fn success() -> Result<(), Box<dyn Error>> {
             let v = vec![String::from("12"), String::from("325")];
-            assert_eq!(parse_args(v)?, ImageDimensions::new(325, 325)?,);
+            assert_eq!(parse_args(v)?, ImageDimensions::try_new(325, 325)?,);
             Ok(())
         }
     }

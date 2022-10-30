@@ -25,7 +25,7 @@ fn non_identity() -> Result<(), Box<dyn Error>> {
         VectorFieldEntry(1, -1),
         VectorFieldEntry(-1, 0),
     ];
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
     let expected = conversion::to_image(&dimensions, &v);
     let inverse = invert_permutation(&validation::validate_permutation(permutation)?);
     assert_eq!(inverse, expected);

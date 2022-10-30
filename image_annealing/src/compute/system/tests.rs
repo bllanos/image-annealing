@@ -2,7 +2,7 @@ use super::System;
 use crate::ImageDimensions;
 
 fn create_system_single_pixel() -> System {
-    futures::executor::block_on(System::new(&ImageDimensions::new(1, 1).unwrap())).unwrap()
+    futures::executor::block_on(System::new(&ImageDimensions::try_new(1, 1).unwrap())).unwrap()
 }
 
 mod operation_count_swap {
@@ -143,7 +143,7 @@ mod output_permutation {
         let image = LosslessImage::Rgba16(Rgba16Image::new(
             test_utils::image::coordinates_to_colors(&dimensions),
         )?);
-        let mut system = futures::executor::block_on(System::new(&ImageDimensions::new(
+        let mut system = futures::executor::block_on(System::new(&ImageDimensions::try_new(
             dimensions.width(),
             dimensions.height(),
         )?))?;

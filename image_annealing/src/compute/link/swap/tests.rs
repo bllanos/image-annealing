@@ -54,7 +54,8 @@ mod swap_pass {
         #[test]
         fn horizontal() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::Horizontal.swap_workgroup_grid_dimensions(&ImageDimensions::new(33, 33)?),
+                SwapPass::Horizontal
+                    .swap_workgroup_grid_dimensions(&ImageDimensions::try_new(33, 33)?),
                 WorkgroupGridDimensions::from_extent(
                     &WorkgroupDimensions::swap(),
                     wgpu::Extent3d {
@@ -70,7 +71,8 @@ mod swap_pass {
         #[test]
         fn vertical() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::Vertical.swap_workgroup_grid_dimensions(&ImageDimensions::new(33, 33)?),
+                SwapPass::Vertical
+                    .swap_workgroup_grid_dimensions(&ImageDimensions::try_new(33, 33)?),
                 WorkgroupGridDimensions::from_extent(
                     &WorkgroupDimensions::swap(),
                     wgpu::Extent3d {
@@ -87,7 +89,7 @@ mod swap_pass {
         fn offset_horizontal() -> Result<(), Box<dyn Error>> {
             assert_eq!(
                 SwapPass::OffsetHorizontal
-                    .swap_workgroup_grid_dimensions(&ImageDimensions::new(33, 33)?),
+                    .swap_workgroup_grid_dimensions(&ImageDimensions::try_new(33, 33)?),
                 WorkgroupGridDimensions::from_extent(
                     &WorkgroupDimensions::swap(),
                     wgpu::Extent3d {
@@ -104,7 +106,7 @@ mod swap_pass {
         fn offset_vertical() -> Result<(), Box<dyn Error>> {
             assert_eq!(
                 SwapPass::OffsetVertical
-                    .swap_workgroup_grid_dimensions(&ImageDimensions::new(33, 33)?),
+                    .swap_workgroup_grid_dimensions(&ImageDimensions::try_new(33, 33)?),
                 WorkgroupGridDimensions::from_extent(
                     &WorkgroupDimensions::swap(),
                     wgpu::Extent3d {
@@ -126,7 +128,7 @@ mod swap_pass {
         #[test]
         fn horizontal() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::Horizontal.total_swaps(&ImageDimensions::new(33, 16)?),
+                SwapPass::Horizontal.total_swaps(&ImageDimensions::try_new(33, 16)?),
                 256
             );
             Ok(())
@@ -135,7 +137,7 @@ mod swap_pass {
         #[test]
         fn vertical() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::Vertical.total_swaps(&ImageDimensions::new(16, 33)?),
+                SwapPass::Vertical.total_swaps(&ImageDimensions::try_new(16, 33)?),
                 256
             );
             Ok(())
@@ -144,7 +146,7 @@ mod swap_pass {
         #[test]
         fn offset_horizontal() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::OffsetHorizontal.total_swaps(&ImageDimensions::new(33, 16)?),
+                SwapPass::OffsetHorizontal.total_swaps(&ImageDimensions::try_new(33, 16)?),
                 256
             );
             Ok(())
@@ -153,7 +155,7 @@ mod swap_pass {
         #[test]
         fn offset_vertical() -> Result<(), Box<dyn Error>> {
             assert_eq!(
-                SwapPass::OffsetVertical.total_swaps(&ImageDimensions::new(16, 33)?),
+                SwapPass::OffsetVertical.total_swaps(&ImageDimensions::try_new(16, 33)?),
                 256
             );
             Ok(())
@@ -163,7 +165,7 @@ mod swap_pass {
     #[test]
     fn total_workgroups() -> Result<(), Box<dyn Error>> {
         assert_eq!(
-            SwapPass::total_workgroups(&ImageDimensions::new(17, 33)?),
+            SwapPass::total_workgroups(&ImageDimensions::try_new(17, 33)?),
             14
         );
         Ok(())
@@ -931,7 +933,7 @@ mod count_swap_input_layout {
 
     #[test]
     fn new() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(17, 33)?;
+        let dimensions = ImageDimensions::try_new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
         assert!(layout.do_segment.iter().all(|&flag| flag == 0));
         let mut first = 0_u32;
@@ -973,7 +975,7 @@ mod count_swap_input_layout {
 
     #[test]
     fn get_set() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(17, 33)?;
+        let dimensions = ImageDimensions::try_new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
         assert_eq!(layout.get_set(), SwapPassSet::empty());
         Ok(())
@@ -981,7 +983,7 @@ mod count_swap_input_layout {
 
     #[test]
     fn update_set() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(17, 33)?;
+        let dimensions = ImageDimensions::try_new(17, 33)?;
         let mut layout = CountSwapInputLayout::new(&dimensions);
         let set = SwapPassSet::HORIZONTAL | SwapPassSet::VERTICAL | SwapPassSet::OFFSET_VERTICAL;
         layout.update_set(set);
@@ -1031,7 +1033,7 @@ mod swap_shader_parameters {
     #[test]
     fn new() -> Result<(), Box<dyn Error>> {
         let parameters = SwapShaderParameters::new();
-        let dimensions = ImageDimensions::new(17, 33)?;
+        let dimensions = ImageDimensions::try_new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
         assert_eq!(parameters.displacement, [0, 0]);
         assert_eq!(parameters.offset, [0, 0]);
@@ -1052,7 +1054,7 @@ mod swap_shader_parameters {
     #[test]
     fn set_pass() -> Result<(), Box<dyn Error>> {
         let mut parameters = SwapShaderParameters::new();
-        let dimensions = ImageDimensions::new(17, 33)?;
+        let dimensions = ImageDimensions::try_new(17, 33)?;
         let layout = CountSwapInputLayout::new(&dimensions);
 
         SwapPass::PASSES

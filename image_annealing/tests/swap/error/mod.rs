@@ -15,7 +15,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let displacement_goal = test_utils::displacement_goal::identity(&dimensions);
-    let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
+    let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: other_dimensions,
@@ -41,7 +41,7 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_utils::permutation::non_identity();
-    let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
+    let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
     let displacement_goal = test_utils::displacement_goal::identity(&other_dimensions);
 
     let dispatcher = compute::create_dispatcher_block(&Config {

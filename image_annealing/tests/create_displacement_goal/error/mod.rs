@@ -14,7 +14,7 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_utils::permutation::non_identity();
-    let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
+    let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: other_dimensions,
@@ -86,7 +86,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_utils::permutation::non_identity();
-    let other_dimensions = ImageDimensions::new(dimensions.width() + 1, dimensions.height())?;
+    let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: other_dimensions,
@@ -108,9 +108,9 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
-    let dimensions = ImageDimensions::new(2, 3)?;
+    let dimensions = ImageDimensions::try_new(2, 3)?;
     let invalid_dimensions =
-        ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
+        ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
     let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
         &invalid_dimensions,
     ))?);

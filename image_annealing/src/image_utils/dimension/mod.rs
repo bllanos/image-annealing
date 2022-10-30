@@ -103,7 +103,11 @@ pub struct ImageDimensions {
 impl ImageDimensions {
     const DEPTH: usize = 1;
 
-    pub fn new<T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy>(
+    pub fn new(width: NonZeroUsize, height: NonZeroUsize) -> Self {
+        Self { width, height }
+    }
+
+    pub fn try_new<T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy>(
         width: T,
         height: T,
     ) -> Result<Self, InvalidDimensionError<T>> {
@@ -113,10 +117,10 @@ impl ImageDimensions {
         let height_usize = height
             .try_into()
             .map_err(|_| InvalidDimensionError::InvalidNumberType(height))?;
-        Ok(ImageDimensions {
-            width: NonZeroUsize::new(width_usize).ok_or(InvalidDimensionError::ZeroWidth)?,
-            height: NonZeroUsize::new(height_usize).ok_or(InvalidDimensionError::ZeroHeight)?,
-        })
+        Ok(Self::new(
+            NonZeroUsize::new(width_usize).ok_or(InvalidDimensionError::ZeroWidth)?,
+            NonZeroUsize::new(height_usize).ok_or(InvalidDimensionError::ZeroHeight)?,
+        ))
     }
 
     pub fn from_image<T>(image: &T) -> Result<Self, InvalidDimensionError<u32>>
@@ -124,12 +128,12 @@ impl ImageDimensions {
         T: GenericImageView,
     {
         let (width, height) = image.dimensions();
-        Self::new(width, height)
+        Self::try_new(width, height)
     }
 
     pub fn from_image_path<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
         let (width, height) = image::image_dimensions(path)?;
-        Ok(Self::new(width, height)?)
+        Ok(Self::try_new(width, height)?)
     }
 
     pub fn width(&self) -> usize {
@@ -209,7 +213,7 @@ impl TryFrom<wgpu::Extent3d> for ImageDimensions {
 
     fn try_from(value: wgpu::Extent3d) -> Result<Self, Self::Error> {
         if <u32 as TryInto<usize>>::try_into(value.depth_or_array_layers).unwrap() == Self::DEPTH {
-            ImageDimensions::new(value.width, value.height)
+            ImageDimensions::try_new(value.width, value.height)
         } else {
             Err(InvalidDimensionError::DepthNotOne)
         }

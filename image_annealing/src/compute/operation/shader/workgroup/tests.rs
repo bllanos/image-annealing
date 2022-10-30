@@ -17,7 +17,7 @@ mod from_image_dimensions_and_stride {
     #[test]
     fn nondivisible_small_extent() -> Result<(), Box<dyn Error>> {
         let workgroup_dimensions = super::create_workgroup_dimensions();
-        let image_dimensions = ImageDimensions::new(
+        let image_dimensions = ImageDimensions::try_new(
             workgroup_dimensions.x() * 2 - 1,
             workgroup_dimensions.y() * 2 - 1,
         )?;

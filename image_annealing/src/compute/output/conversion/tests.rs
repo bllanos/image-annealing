@@ -11,7 +11,7 @@ mod vector_field_entry {
 
     #[test]
     fn from_pixel() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 5)?;
+        let dimensions = ImageDimensions::try_new(3, 5)?;
         let vector = super::make_vector();
         for (k, entry) in vector.iter().enumerate() {
             let (x, y) = dimensions.make_coordinates(k)?;
@@ -25,7 +25,7 @@ mod vector_field_entry {
 
     #[test]
     fn to_pixel() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 5)?;
+        let dimensions = ImageDimensions::try_new(3, 5)?;
         let vector = super::make_vector();
         for (k, entry) in vector.iter().enumerate() {
             let (x, y) = dimensions.make_coordinates(k)?;
@@ -97,7 +97,7 @@ fn image_to_vec() {
 
 #[test]
 fn vec_to_image() -> Result<(), Box<dyn Error>> {
-    let image = super::to_image(&ImageDimensions::new(3, 5)?, &make_vector());
+    let image = super::to_image(&ImageDimensions::try_new(3, 5)?, &make_vector());
     for (x, y, px) in image.enumerate_pixels() {
         assert_eq!(*px, make_pixels(x, y));
     }
@@ -108,7 +108,7 @@ fn vec_to_image() -> Result<(), Box<dyn Error>> {
 #[should_panic(expected = "vector length and image dimensions are incompatible")]
 fn vec_to_image_impossible() {
     super::to_image(
-        &ImageDimensions::new(3, 5).unwrap(),
+        &ImageDimensions::try_new(3, 5).unwrap(),
         &[
             VectorFieldEntry(0, 0),
             VectorFieldEntry(257, 257),

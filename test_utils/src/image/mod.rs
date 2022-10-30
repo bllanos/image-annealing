@@ -59,7 +59,7 @@ where
     <Component as TryFrom<usize>>::Error: std::fmt::Debug,
     image::Rgba<Component>: image::Pixel,
 {
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
     let channel_bias = dimensions.count();
     let image = ImageBuffer::from_fn(
         dimensions.width().try_into().unwrap(),

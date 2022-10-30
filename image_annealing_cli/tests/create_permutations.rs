@@ -11,7 +11,7 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
     let full_output_path = VectorFieldImageBuffer::make_filename(&path);
     assert!(!full_output_path.is_file());
 
-    let dimensions = ImageDimensions::new(3, 4)?;
+    let dimensions = ImageDimensions::try_new(3, 4)?;
     let config = Config {
         algorithm: AlgorithmConfig::CreatePermutation {
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
@@ -39,7 +39,7 @@ fn save_missing_directory() -> Result<(), Box<dyn Error>> {
             permutation_output_path_no_extension: PermutationPath::from_raw(path),
         },
         dispatcher: compute::Config {
-            image_dimensions: ImageDimensions::new(3, 4)?,
+            image_dimensions: ImageDimensions::try_new(3, 4)?,
         },
     };
     test_utils::assert_error_contains(cli::run(config), "No such file or directory");

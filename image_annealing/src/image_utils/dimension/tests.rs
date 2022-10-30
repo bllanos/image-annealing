@@ -4,12 +4,28 @@ use std::error::Error;
 
 mod new {
     use super::super::ImageDimensions;
+    use std::num::NonZeroUsize;
+
+    #[test]
+    fn valid_dimensions() {
+        let dim = ImageDimensions::new(
+            NonZeroUsize::new(63).unwrap(),
+            NonZeroUsize::new(64).unwrap(),
+        );
+        assert_eq!(dim.width(), 63);
+        assert_eq!(dim.height(), 64);
+        assert_eq!(dim.count(), 63 * 64);
+    }
+}
+
+mod try_new {
+    use super::super::ImageDimensions;
     use std::error::Error;
 
     #[test]
     fn negative_width() {
         test_utils::assert_error_contains(
-            ImageDimensions::new(-1, 1),
+            ImageDimensions::try_new(-1, 1),
             "failed to convert -1 to the required type for dimensions",
         )
     }
@@ -17,24 +33,24 @@ mod new {
     #[test]
     fn negative_height() {
         test_utils::assert_error_contains(
-            ImageDimensions::new(1, -1),
+            ImageDimensions::try_new(1, -1),
             "failed to convert -1 to the required type for dimensions",
         )
     }
 
     #[test]
     fn zero_width() {
-        test_utils::assert_error_contains(ImageDimensions::new(0, 1), "width is zero")
+        test_utils::assert_error_contains(ImageDimensions::try_new(0, 1), "width is zero")
     }
 
     #[test]
     fn zero_height() {
-        test_utils::assert_error_contains(ImageDimensions::new(1, 0), "height is zero")
+        test_utils::assert_error_contains(ImageDimensions::try_new(1, 0), "height is zero")
     }
 
     #[test]
     fn valid_dimensions() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert_eq!(dim.width(), 63);
         assert_eq!(dim.height(), 64);
         assert_eq!(dim.count(), 63 * 64);
@@ -89,7 +105,7 @@ mod make_linear_index {
 
     #[test]
     fn negative_x() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_linear_index(-1, 0),
             "failed to convert -1 to the required type for coordinates",
@@ -99,7 +115,7 @@ mod make_linear_index {
 
     #[test]
     fn negative_y() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_linear_index(0, -1),
             "failed to convert -1 to the required type for coordinates",
@@ -109,7 +125,7 @@ mod make_linear_index {
 
     #[test]
     fn large_x() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_linear_index(3, 0),
             "x = 3 is out of bounds (width, height) = (3, 5)",
@@ -119,7 +135,7 @@ mod make_linear_index {
 
     #[test]
     fn large_y() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_linear_index(0, 5),
             "y = 5 is out of bounds (width, height) = (3, 5)",
@@ -129,7 +145,7 @@ mod make_linear_index {
 
     #[test]
     fn valid_coordinates() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         let mut i = dim.make_linear_index(0, 0)?;
         assert_eq!(i, 0);
         i = dim.make_linear_index(1, 0)?;
@@ -150,7 +166,7 @@ mod make_coordinates {
 
     #[test]
     fn negative() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_coordinates(-1),
             "failed to convert -1 to the required type for coordinates",
@@ -160,7 +176,7 @@ mod make_coordinates {
 
     #[test]
     fn large() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         test_utils::assert_error_contains(
             dim.make_coordinates(15),
             "linear index 15 is out of bounds (width, height) = (3, 5)",
@@ -170,7 +186,7 @@ mod make_coordinates {
 
     #[test]
     fn valid_indices() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(3, 5)?;
+        let dim = ImageDimensions::try_new(3, 5)?;
         let mut coordinates = dim.make_coordinates(0)?;
         assert_eq!(coordinates.0, 0);
         assert_eq!(coordinates.1, 0);
@@ -198,7 +214,7 @@ mod make_coordinates {
 
 #[test]
 fn to_extent() -> Result<(), Box<dyn Error>> {
-    let dim = ImageDimensions::new(63, 64)?;
+    let dim = ImageDimensions::try_new(63, 64)?;
     assert_eq!(
         dim.to_extent(),
         wgpu::Extent3d {
@@ -281,7 +297,7 @@ mod partial_eq_extent {
 
     #[test]
     fn zero_depth() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert!(
             dim != wgpu::Extent3d {
                 width: 63,
@@ -294,7 +310,7 @@ mod partial_eq_extent {
 
     #[test]
     fn large_depth() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert!(
             dim != wgpu::Extent3d {
                 width: 63,
@@ -307,7 +323,7 @@ mod partial_eq_extent {
 
     #[test]
     fn different_width() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert!(
             dim != wgpu::Extent3d {
                 width: 64,
@@ -320,7 +336,7 @@ mod partial_eq_extent {
 
     #[test]
     fn different_height() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert!(
             dim != wgpu::Extent3d {
                 width: 63,
@@ -333,7 +349,7 @@ mod partial_eq_extent {
 
     #[test]
     fn equal() -> Result<(), Box<dyn Error>> {
-        let dim = ImageDimensions::new(63, 64)?;
+        let dim = ImageDimensions::try_new(63, 64)?;
         assert!(
             dim == wgpu::Extent3d {
                 width: 63,

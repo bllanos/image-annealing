@@ -101,7 +101,7 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = permutation::non_identity();
     let invalid_dimensions =
-        ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
+        ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: invalid_dimensions,

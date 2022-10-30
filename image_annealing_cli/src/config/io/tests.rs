@@ -44,7 +44,7 @@ mod parse_config_file {
                     ),
                 },
                 dispatcher: compute::Config {
-                    image_dimensions: ImageDimensions::new(20, 25)?
+                    image_dimensions: ImageDimensions::try_new(20, 25)?
                 }
             }
         );

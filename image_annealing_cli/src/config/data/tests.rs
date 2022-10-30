@@ -23,7 +23,7 @@ mod config_try_from_unverified_config {
                         ),
                     },
                     dispatcher: compute::Config {
-                        image_dimensions: ImageDimensions::new(20, 25)?
+                        image_dimensions: ImageDimensions::try_new(20, 25)?
                     }
                 }
             );

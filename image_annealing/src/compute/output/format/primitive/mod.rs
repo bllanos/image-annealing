@@ -94,7 +94,7 @@ impl Rgba8Image {
             .chunks_exact(<LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE)
             .map(|chunk| chunk[0])
             .collect();
-        let dimensions = ImageDimensions::new(width, height).unwrap();
+        let dimensions = ImageDimensions::try_new(width, height).unwrap();
         Self {
             dimensions,
             image: image::RgbaImage::from_vec(width, height, image_data).unwrap(),
@@ -172,7 +172,7 @@ impl Rgba16Image {
             .chunks_exact(<LosslessImageTexture as TextureDatatype>::COMPONENT_SIZE)
             .map(|chunk| Rgba16ImageBufferComponent::from_ne_bytes([chunk[0], chunk[1]]))
             .collect();
-        let dimensions = ImageDimensions::new(width, height).unwrap();
+        let dimensions = ImageDimensions::try_new(width, height).unwrap();
         Self {
             dimensions,
             image: Rgba16ImageBuffer::from_vec(width, height, image_data).unwrap(),

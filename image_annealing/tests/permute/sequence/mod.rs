@@ -12,7 +12,7 @@ use test_utils::permutation::DimensionsAndPermutation;
 
 #[test]
 fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
-    let dimensions = ImageDimensions::new(3, 4)?;
+    let dimensions = ImageDimensions::try_new(3, 4)?;
     let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
@@ -45,7 +45,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn zero_initialized_permutation() -> Result<(), Box<dyn Error>> {
-    let dimensions = ImageDimensions::new(3, 4)?;
+    let dimensions = ImageDimensions::try_new(3, 4)?;
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;

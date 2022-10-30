@@ -106,7 +106,7 @@ mod validate_permutation {
     #[test]
     fn out_of_bounds_right() -> Result<(), Box<dyn Error>> {
         let permutation = conversion::to_image(
-            &ImageDimensions::new(1, 3)?,
+            &ImageDimensions::try_new(1, 3)?,
             &[
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(0, 1),
@@ -123,7 +123,7 @@ mod validate_permutation {
     #[test]
     fn out_of_bounds_up() -> Result<(), Box<dyn Error>> {
         let permutation = conversion::to_image(
-            &ImageDimensions::new(1, 3)?,
+            &ImageDimensions::try_new(1, 3)?,
             &[
                 VectorFieldEntry(0, -1),
                 VectorFieldEntry(0, 1),
@@ -140,7 +140,7 @@ mod validate_permutation {
     #[test]
     fn out_of_bounds_left() -> Result<(), Box<dyn Error>> {
         let permutation = conversion::to_image(
-            &ImageDimensions::new(1, 3)?,
+            &ImageDimensions::try_new(1, 3)?,
             &[
                 VectorFieldEntry(0, 0),
                 VectorFieldEntry(-2, 1),
@@ -157,7 +157,7 @@ mod validate_permutation {
     #[test]
     fn out_of_bounds_down() -> Result<(), Box<dyn Error>> {
         let permutation = conversion::to_image(
-            &ImageDimensions::new(1, 3)?,
+            &ImageDimensions::try_new(1, 3)?,
             &[
                 VectorFieldEntry(0, 3),
                 VectorFieldEntry(0, 1),

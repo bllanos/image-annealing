@@ -47,7 +47,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     }
 
     // Synthesize input files
-    let dimensions = ImageDimensions::new(1, 6)?;
+    let dimensions = ImageDimensions::try_new(1, 6)?;
     let input_permutation = conversion::to_image(
         &dimensions,
         &[

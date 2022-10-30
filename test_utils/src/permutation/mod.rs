@@ -12,7 +12,7 @@ pub fn identity_with_dimensions<T>(width: T, height: T) -> DimensionsAndPermutat
 where
     T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
 {
-    let dimensions = ImageDimensions::new(width, height).unwrap();
+    let dimensions = ImageDimensions::try_new(width, height).unwrap();
     let v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
         permutation: conversion::to_image(&dimensions, &v),
@@ -29,7 +29,7 @@ pub fn identity_permute(image: &Rgba16ImageBuffer) -> Rgba16ImageBuffer {
 }
 
 pub fn duplicate() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
     let v = vec![
         VectorFieldEntry(0, 1),
         VectorFieldEntry(0, 0),
@@ -45,7 +45,7 @@ pub fn duplicate() -> DimensionsAndPermutation {
 }
 
 pub fn non_identity() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
     let v = vec![
         VectorFieldEntry(0, 1),
         VectorFieldEntry(0, 0),
@@ -61,7 +61,7 @@ pub fn non_identity() -> DimensionsAndPermutation {
 }
 
 pub fn non_identity_default_swap() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
     let v = vec![
         VectorFieldEntry(0, 1),
         VectorFieldEntry(0, 0),
@@ -122,7 +122,7 @@ pub fn non_identity_horizontal_swap_forward_permute(
 }
 
 pub fn eight_cycle() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(3, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(3, 3).unwrap();
     let v = vec![
         VectorFieldEntry(1, 0),
         VectorFieldEntry(1, 0),
@@ -141,7 +141,7 @@ pub fn eight_cycle() -> DimensionsAndPermutation {
 }
 
 pub fn eight_cycle2() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(3, 3).unwrap();
+    let dimensions = ImageDimensions::try_new(3, 3).unwrap();
     let v = vec![
         VectorFieldEntry(2, 0),
         VectorFieldEntry(1, 1),
@@ -160,7 +160,7 @@ pub fn eight_cycle2() -> DimensionsAndPermutation {
 }
 
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
-    let dimensions = ImageDimensions::new(513, 513).unwrap();
+    let dimensions = ImageDimensions::try_new(513, 513).unwrap();
     let mut v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     // One cycle
     v[0] = VectorFieldEntry(1, 128); // (0, 0) to (1, 128)
@@ -237,7 +237,7 @@ pub fn reflect_around_center() -> DimensionsAndPermutation {
     // 257 is the smallest odd-numbered size such that permutation vector components will
     // exceed absolute values of 255 and therefore test correct handling of both bytes
     // in permutation vector components.
-    let dimensions = ImageDimensions::new(257, 257).unwrap();
+    let dimensions = ImageDimensions::try_new(257, 257).unwrap();
     let count = dimensions.count();
     let mut v: Vec<VectorFieldEntry> = Vec::with_capacity(count);
     let center_x: i16 = (dimensions.width() / 2).try_into().unwrap();
@@ -261,7 +261,7 @@ pub fn line_with_first_texel_moved(
     first_pixel_shift: usize,
 ) -> DimensionsAndPermutation {
     assert!(first_pixel_shift < length);
-    let dimensions = ImageDimensions::new(length, 1).unwrap();
+    let dimensions = ImageDimensions::try_new(length, 1).unwrap();
     let v: Vec<_> = std::iter::once(VectorFieldEntry(first_pixel_shift.try_into().unwrap(), 0))
         .chain(std::iter::repeat(VectorFieldEntry(-1, 0)).take(first_pixel_shift))
         .chain(std::iter::repeat(VectorFieldEntry(0, 0)).take(length - first_pixel_shift - 1))

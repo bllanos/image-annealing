@@ -14,7 +14,7 @@ use test_utils::permutation::DimensionsAndPermutation;
 
 #[test]
 fn run_once() -> Result<(), Box<dyn Error>> {
-    let dim = ImageDimensions::new(3, 4)?;
+    let dim = ImageDimensions::try_new(3, 4)?;
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dim,
     })?;
@@ -28,7 +28,7 @@ fn run_once() -> Result<(), Box<dyn Error>> {
 }
 
 async fn run_once_async_inner() -> Result<(), Box<dyn Error>> {
-    let dim = ImageDimensions::new(3, 4)?;
+    let dim = ImageDimensions::try_new(3, 4)?;
     let dispatcher = compute::create_dispatcher(&Config {
         image_dimensions: dim,
     })
@@ -49,7 +49,7 @@ fn run_once_async() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn run_twice() -> Result<(), Box<dyn Error>> {
-    let dim = ImageDimensions::new(35, 42)?;
+    let dim = ImageDimensions::try_new(35, 42)?;
     let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dim,
     })?;

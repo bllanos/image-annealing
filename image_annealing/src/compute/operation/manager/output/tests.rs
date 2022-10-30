@@ -128,7 +128,7 @@ mod count_swap_operation_output {
         let output = CountSwapOperationOutput::new(
             &count_swap_output,
             &sequence,
-            &ImageDimensions::new(1, 1)?,
+            &ImageDimensions::try_new(1, 1)?,
         );
         assert_eq!(output.passes().count(), constant::count_swap::N_CHANNEL);
         output
@@ -168,7 +168,7 @@ mod count_swap_operation_output {
         let output = CountSwapOperationOutput::new(
             &count_swap_output,
             &sequence,
-            &ImageDimensions::new(2, 9)?,
+            &ImageDimensions::try_new(2, 9)?,
         );
         assert_eq!(output.passes().count(), 2);
         output
@@ -220,7 +220,7 @@ mod count_swap_operation_output {
         CountSwapOperationOutput::new(
             &count_swap_output,
             &sequence,
-            &ImageDimensions::new(1, 1).unwrap(),
+            &ImageDimensions::try_new(1, 1).unwrap(),
         );
     }
 
@@ -240,7 +240,7 @@ mod count_swap_operation_output {
         CountSwapOperationOutput::new(
             &count_swap_output,
             &sequence,
-            &ImageDimensions::new(2, 2).unwrap(),
+            &ImageDimensions::try_new(2, 2).unwrap(),
         );
     }
 }

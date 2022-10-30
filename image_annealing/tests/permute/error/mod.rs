@@ -60,7 +60,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let invalid_dimensions =
-        ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
+        ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
     let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
         &invalid_dimensions,
     ))?);
@@ -90,7 +90,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_utils::permutation::non_identity();
     let other_dimensions =
-        ImageDimensions::new(dimensions.width() + 1, dimensions.height()).unwrap();
+        ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
     let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
         &other_dimensions,
     ))?);

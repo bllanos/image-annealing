@@ -5,7 +5,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_1_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 1)?;
+        let dimensions = ImageDimensions::try_new(1, 1)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -19,7 +19,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_1_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 2)?;
+        let dimensions = ImageDimensions::try_new(1, 2)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -33,7 +33,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_2_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 1)?;
+        let dimensions = ImageDimensions::try_new(2, 1)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -47,7 +47,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_2_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 2)?;
+        let dimensions = ImageDimensions::try_new(2, 2)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -61,7 +61,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_2_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 3)?;
+        let dimensions = ImageDimensions::try_new(2, 3)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -75,7 +75,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_3_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 2)?;
+        let dimensions = ImageDimensions::try_new(3, 2)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -89,7 +89,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_3_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 3)?;
+        let dimensions = ImageDimensions::try_new(3, 3)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -103,7 +103,7 @@ mod dot_geometry {
 
     #[test]
     fn dimensions_4_4() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(4, 4)?;
+        let dimensions = ImageDimensions::try_new(4, 4)?;
         assert_eq!(
             DotGeometry::new(&dimensions),
             DotGeometry {
@@ -123,7 +123,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_1_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 1)?;
+        let dimensions = ImageDimensions::try_new(1, 1)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_pixel(
@@ -137,7 +137,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_1_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 2)?;
+        let dimensions = ImageDimensions::try_new(1, 2)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_pixel(
@@ -151,7 +151,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_2_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 1)?;
+        let dimensions = ImageDimensions::try_new(2, 1)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_pixel(
@@ -165,7 +165,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_2_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 2)?;
+        let dimensions = ImageDimensions::try_new(2, 2)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_pixel(
@@ -179,7 +179,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_2_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 3)?;
+        let dimensions = ImageDimensions::try_new(2, 3)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_vec(
@@ -197,7 +197,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_3_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 2)?;
+        let dimensions = ImageDimensions::try_new(3, 2)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_vec(
@@ -215,7 +215,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_3_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 3)?;
+        let dimensions = ImageDimensions::try_new(3, 3)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_vec(
@@ -233,7 +233,7 @@ mod white_dot {
 
     #[test]
     fn dimensions_4_4() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(4, 4)?;
+        let dimensions = ImageDimensions::try_new(4, 4)?;
         assert_eq!(
             white_dot(&dimensions),
             image::RgbaImage::from_vec(
@@ -260,7 +260,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_1_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 1)?;
+        let dimensions = ImageDimensions::try_new(1, 1)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -276,7 +276,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_1_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(1, 2)?;
+        let dimensions = ImageDimensions::try_new(1, 2)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -289,7 +289,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_2_1() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 1)?;
+        let dimensions = ImageDimensions::try_new(2, 1)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -302,7 +302,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_2_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 2)?;
+        let dimensions = ImageDimensions::try_new(2, 2)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -332,7 +332,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_2_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(2, 3)?;
+        let dimensions = ImageDimensions::try_new(2, 3)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -352,7 +352,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_3_2() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 2)?;
+        let dimensions = ImageDimensions::try_new(3, 2)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -372,7 +372,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_3_3() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(3, 3)?;
+        let dimensions = ImageDimensions::try_new(3, 3)?;
         assert_eq!(
             dot_goal(&dimensions).as_ref(),
             &conversion::to_image(
@@ -398,7 +398,7 @@ mod dot_goal {
 
     #[test]
     fn dimensions_4_4() -> Result<(), Box<dyn Error>> {
-        let dimensions = ImageDimensions::new(4, 4)?;
+        let dimensions = ImageDimensions::try_new(4, 4)?;
         let max_div2 = VectorFieldEntryComponent::MAX / 2;
         let max_sub1 = VectorFieldEntryComponent::MAX - 1;
         assert_eq!(
