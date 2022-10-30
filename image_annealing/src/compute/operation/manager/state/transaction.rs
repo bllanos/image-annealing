@@ -134,9 +134,7 @@ impl ResourceStateManager {
                 Ok(commit_state.input_lossless_image())
             }
             None => {
-                if self.flags.check_lossless_image_input_texture() {
-                    Ok(commit_state)
-                } else if accept_missing {
+                if self.flags.check_lossless_image_input_texture() || accept_missing {
                     Ok(commit_state)
                 } else {
                     Err(InsufficientInputError::OriginalImage)
@@ -167,9 +165,7 @@ impl ResourceStateManager {
                         .displacement_goal_input_texture()
                         .copy(encoder, resources.displacement_goal_output_texture());
                     Ok(commit_state.recycle_output_displacement_goal())
-                } else if self.flags.check_displacement_goal_input_texture() {
-                    Ok(commit_state)
-                } else if accept_missing {
+                } else if self.flags.check_displacement_goal_input_texture() || accept_missing {
                     Ok(commit_state)
                 } else {
                     Err(InsufficientInputError::DisplacementGoal)
