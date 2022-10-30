@@ -5,6 +5,7 @@ use crate::image_utils::check_dimensions_match2;
 use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
 use std::error::Error;
 
+#[derive(Default)]
 pub struct ValidatePermutationParameters {}
 
 pub struct ValidatePermutationInput {

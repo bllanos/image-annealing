@@ -4,7 +4,7 @@ use super::{Texture, TextureDatatype};
 use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
 use std::num::NonZeroU32;
 
-pub struct PermutationTexture {}
+pub struct PermutationTexture;
 
 impl TextureDatatype for PermutationTexture {
     type Component = VectorFieldEntryComponent;

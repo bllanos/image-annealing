@@ -1,8 +1,5 @@
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
-use image_annealing::compute::{
-    self, Config, CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
-    SwapInput,
-};
+use image_annealing::compute::{self, Config, OutputStatus, PermuteInput, SwapInput};
 use image_annealing::{
     CandidatePermutation, DisplacementGoal, ImageDimensions, ImageDimensionsHolder,
 };
@@ -21,8 +18,7 @@ fn run_once() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dim,
     })?;
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     let output = algorithm.full_output_block().unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
@@ -37,8 +33,7 @@ async fn run_once_async_inner() -> Result<(), Box<dyn Error>> {
         image_dimensions: dim,
     })
     .await?;
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success_async(algorithm.as_mut(), OutputStatus::FinalFullOutput).await?;
     let output = algorithm.full_output().await.unwrap().validated_permutation;
     permutation::assert_is_identity(&output);
@@ -59,14 +54,12 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
         image_dimensions: dim,
     })?;
 
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     dispatcher = algorithm.return_to_dispatcher();
 
-    algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap().validated_permutation;
@@ -106,8 +99,7 @@ fn overwrite_permute() -> Result<(), Box<dyn Error>> {
 
     dispatcher = algorithm.return_to_dispatcher();
 
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap().validated_permutation;
@@ -153,8 +145,7 @@ fn overwrite_swap() -> Result<(), Box<dyn Error>> {
     );
     dispatcher = algorithm.return_to_dispatcher();
 
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap().validated_permutation;

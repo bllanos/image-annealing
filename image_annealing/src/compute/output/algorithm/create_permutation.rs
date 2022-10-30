@@ -5,8 +5,10 @@ use crate::ValidatedPermutation;
 use async_trait::async_trait;
 use std::error::Error;
 
+#[derive(Default)]
 pub struct CreatePermutationParameters {}
 
+#[derive(Default)]
 pub struct CreatePermutationInput {}
 
 pub struct CreatePermutationOutput {

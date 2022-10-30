@@ -1,6 +1,4 @@
-use image_annealing::compute::{
-    self, Config, CreateDisplacementGoalParameters, OutputStatus, SwapInput,
-};
+use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensionsHolder};
 use std::default::Default;
 use std::error::Error;
@@ -46,8 +44,8 @@ fn overwrite_swap_displacement_goal() -> Result<(), Box<dyn Error>> {
     );
     dispatcher = algorithm.return_to_dispatcher();
 
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap();

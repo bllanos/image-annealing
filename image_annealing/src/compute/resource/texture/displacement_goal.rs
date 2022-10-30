@@ -4,7 +4,7 @@ use super::{Texture, TextureDatatype};
 use crate::{DisplacementGoal, ImageDimensions};
 use std::num::NonZeroU32;
 
-pub struct DisplacementGoalTexture {}
+pub struct DisplacementGoalTexture;
 
 impl TextureDatatype for DisplacementGoalTexture {
     type Component = VectorFieldEntryComponent;

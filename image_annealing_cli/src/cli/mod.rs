@@ -1,9 +1,6 @@
 use crate::config::{AlgorithmConfig, Config};
 use image_annealing::compute::format::ImageFileWriter;
-use image_annealing::compute::{
-    self, CreatePermutationInput, CreatePermutationParameters, Dispatcher, PermuteInput,
-    ValidatePermutationInput, ValidatePermutationParameters,
-};
+use image_annealing::compute::{self, Dispatcher, PermuteInput, ValidatePermutationInput};
 use std::error::Error;
 
 mod loader;
@@ -23,8 +20,8 @@ fn run_and_save(
         AlgorithmConfig::CreatePermutation {
             permutation_output_path_no_extension: path,
         } => {
-            let mut algorithm = dispatcher
-                .create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+            let mut algorithm =
+                dispatcher.create_permutation(Default::default(), &Default::default());
             algorithm.step_until_finished()?;
             let permutation = algorithm.full_output_block().unwrap().validated_permutation;
             let output_path = permutation.save_add_extension(path)?;
@@ -70,7 +67,7 @@ fn run_and_save(
                         candidate_permutation,
                     )?,
                 },
-                &ValidatePermutationParameters {},
+                &Default::default(),
             );
             algorithm.step_until_finished()?;
             println!("Candidate permutation '{}' is valid", candidate_permutation);

@@ -1,7 +1,5 @@
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
-use image_annealing::compute::{
-    self, Config, CreateDisplacementGoalInput, CreateDisplacementGoalParameters, OutputStatus,
-};
+use image_annealing::compute::{self, Config, CreateDisplacementGoalInput, OutputStatus};
 use image_annealing::{
     CandidatePermutation, DisplacementGoal, ImageDimensions, ImageDimensionsHolder,
 };
@@ -33,7 +31,7 @@ fn run_once_all_inputs() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             image: Some(lossless_image),
         },
-        &CreateDisplacementGoalParameters {},
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
@@ -57,8 +55,8 @@ fn run_once_no_inputs() -> Result<(), Box<dyn Error>> {
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap();
@@ -78,8 +76,8 @@ async fn run_once_no_inputs_async_inner() -> Result<(), Box<dyn Error>> {
         image_dimensions: dimensions,
     })
     .await?;
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success_async(algorithm.as_mut(), OutputStatus::FinalFullOutput).await?;
 
     let output = algorithm.full_output().await.unwrap();
@@ -117,13 +115,13 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             image: Some(lossless_image),
         },
-        &CreateDisplacementGoalParameters {},
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
 
     let output = algorithm.full_output_block().unwrap();

@@ -1,8 +1,7 @@
 use image_annealing::compute::format::{ImageFormat, LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, Config, CreateDisplacementGoalInput, CreateDisplacementGoalParameters,
-    CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput,
-    PermuteParameters, SwapInput,
+    self, Config, CreateDisplacementGoalInput, OutputStatus, PermuteInput, PermuteParameters,
+    SwapInput,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
 use std::default::Default;
@@ -17,8 +16,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -85,8 +83,8 @@ fn ignore_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
         image_dimensions: dimensions,
     })?;
 
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -134,7 +132,7 @@ fn reuse_create_displacement_goal_inputs() -> Result<(), Box<dyn Error>> {
             image: Some(original_lossless_image),
             ..Default::default()
         },
-        &CreateDisplacementGoalParameters {},
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();

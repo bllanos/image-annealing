@@ -1,9 +1,7 @@
 use super::super::super::system::{CreateDisplacementGoalOperationInput, DevicePollType, System};
 use super::super::format::LosslessImage;
 use super::super::OutputStatus;
-use super::validate_permutation::{
-    ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
-};
+use super::validate_permutation::{ValidatePermutation, ValidatePermutationInput};
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
@@ -11,6 +9,7 @@ use async_trait::async_trait;
 use std::default::Default;
 use std::error::Error;
 
+#[derive(Default)]
 pub struct CreateDisplacementGoalParameters {}
 
 #[derive(Default)]
@@ -45,7 +44,7 @@ impl CreateDisplacementGoal {
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
-                &ValidatePermutationParameters {},
+                &Default::default(),
             )
         });
         Self {

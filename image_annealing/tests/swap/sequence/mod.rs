@@ -1,8 +1,7 @@
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, Config, CreateDisplacementGoalInput, CreateDisplacementGoalParameters,
-    CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput, SwapInput,
+    self, Config, CreateDisplacementGoalInput, OutputStatus, PermuteInput, SwapInput,
     SwapParameters, SwapPass,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
@@ -26,8 +25,7 @@ fn create_identity_permutation() -> Result<(), Box<dyn Error>> {
     let mut dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
-    let mut algorithm =
-        dispatcher.create_permutation(CreatePermutationInput {}, &CreatePermutationParameters {});
+    let mut algorithm = dispatcher.create_permutation(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -124,8 +122,8 @@ fn create_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
         image_dimensions: dimensions,
     })?;
 
-    let mut algorithm = dispatcher
-        .create_displacement_goal(Default::default(), &CreateDisplacementGoalParameters {});
+    let mut algorithm =
+        dispatcher.create_displacement_goal(Default::default(), &Default::default());
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
@@ -176,7 +174,7 @@ fn reuse_create_displacement_goal_inputs() -> Result<(), Box<dyn Error>> {
             candidate_permutation: Some(CandidatePermutation::new(permutation)?),
             ..Default::default()
         },
-        &CreateDisplacementGoalParameters {},
+        &Default::default(),
     );
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();

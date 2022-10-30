@@ -1,9 +1,7 @@
 use super::super::super::system::{DevicePollType, PermuteOperationInput, System};
 use super::super::format::{ImageFormat, ImageFormatError, LosslessImage};
 use super::super::OutputStatus;
-use super::validate_permutation::{
-    ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
-};
+use super::validate_permutation::{ValidatePermutation, ValidatePermutationInput};
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::{CandidatePermutation, ValidatedPermutation};
@@ -44,7 +42,7 @@ impl Permute {
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
-                &ValidatePermutationParameters {},
+                &Default::default(),
             )
         });
         Self {

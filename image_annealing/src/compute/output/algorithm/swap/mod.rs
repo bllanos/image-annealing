@@ -1,8 +1,6 @@
 use super::super::super::system::{DevicePollType, SwapOperationInput, System};
 use super::super::OutputStatus;
-use super::validate_permutation::{
-    ValidatePermutation, ValidatePermutationInput, ValidatePermutationParameters,
-};
+use super::validate_permutation::{ValidatePermutation, ValidatePermutationInput};
 use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::{DisplacementGoal, ValidatedPermutation};
@@ -42,7 +40,7 @@ impl Swap {
                 ValidatePermutationInput {
                     candidate_permutation: permutation,
                 },
-                &ValidatePermutationParameters {},
+                &Default::default(),
             )
         });
         Self {

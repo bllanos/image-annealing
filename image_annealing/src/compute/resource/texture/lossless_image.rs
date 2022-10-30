@@ -4,7 +4,7 @@ use super::{Texture, TextureDatatype};
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use std::num::NonZeroU32;
 
-pub struct LosslessImageTexture {}
+pub struct LosslessImageTexture;
 
 impl TextureDatatype for LosslessImageTexture {
     type Component = u32;
