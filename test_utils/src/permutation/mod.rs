@@ -60,6 +60,22 @@ pub fn non_identity() -> DimensionsAndPermutation {
     }
 }
 
+pub fn non_identity_default_swap() -> DimensionsAndPermutation {
+    let dimensions = ImageDimensions::new(2, 3).unwrap();
+    let v = vec![
+        VectorFieldEntry(0, 1),
+        VectorFieldEntry(0, 0),
+        VectorFieldEntry(0, -1),
+        VectorFieldEntry(-1, 1),
+        VectorFieldEntry(1, -1),
+        VectorFieldEntry(0, 0),
+    ];
+    DimensionsAndPermutation {
+        permutation: conversion::to_image(&dimensions, &v),
+        dimensions,
+    }
+}
+
 pub fn non_identity_forward_permute<Component: 'static>(
     image: &ImageBuffer<
         image::Rgba<Component>,

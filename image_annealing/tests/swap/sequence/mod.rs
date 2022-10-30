@@ -1,8 +1,9 @@
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
 use image_annealing::compute::{
-    self, Config, CreateDisplacementGoalParameters, CreatePermutationInput,
-    CreatePermutationParameters, OutputStatus, PermuteInput, SwapInput, SwapParameters, SwapPass,
+    self, Config, CreateDisplacementGoalInput, CreateDisplacementGoalParameters,
+    CreatePermutationInput, CreatePermutationParameters, OutputStatus, PermuteInput, SwapInput,
+    SwapParameters, SwapPass,
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::default::Default;
@@ -128,17 +129,7 @@ fn create_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
     assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
     dispatcher = algorithm.return_to_dispatcher();
 
-    let expected_permutation = conversion::to_image(
-        &dimensions,
-        &[
-            VectorFieldEntry(0, 1),
-            VectorFieldEntry(0, 0),
-            VectorFieldEntry(0, -1),
-            VectorFieldEntry(-1, 1),
-            VectorFieldEntry(1, -1),
-            VectorFieldEntry(0, 0),
-        ],
-    );
+    let expected_permutation = test_utils::permutation::non_identity_default_swap().permutation;
     let swap_parameters = test_utils::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
@@ -156,6 +147,47 @@ fn create_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
         &permutation
     );
     assert!(returned_input.displacement_goal.is_none());
+    assert_eq!(output.output_permutation.as_ref(), &expected_permutation);
+    assert_eq!(output.pass, SwapPass::Horizontal);
+    assert!(algorithm.full_output_block().is_none());
+
+    assert_correct_swap_count_output(
+        algorithm.as_mut(),
+        &swap_parameters,
+        &dimensions,
+        SwapAcceptedCount::Some(vec![1]),
+    );
+
+    Ok(())
+}
+
+#[test]
+fn reuse_create_displacement_goal_inputs() -> Result<(), Box<dyn Error>> {
+    let DimensionsAndPermutation {
+        permutation,
+        dimensions,
+    } = test_utils::permutation::non_identity();
+    let mut dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })?;
+
+    let mut algorithm = dispatcher.create_displacement_goal(
+        CreateDisplacementGoalInput {
+            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            ..Default::default()
+        },
+        &CreateDisplacementGoalParameters {},
+    );
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalFullOutput)?;
+    dispatcher = algorithm.return_to_dispatcher();
+
+    let expected_permutation = test_utils::permutation::non_identity_default_swap().permutation;
+    let swap_parameters = test_utils::algorithm::default_swap_parameters();
+    let mut algorithm = dispatcher.swap(Default::default(), &swap_parameters);
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
+
+    let output = algorithm.full_output_block().unwrap();
+    assert!(output.input.is_none());
     assert_eq!(output.output_permutation.as_ref(), &expected_permutation);
     assert_eq!(output.pass, SwapPass::Horizontal);
     assert!(algorithm.full_output_block().is_none());
