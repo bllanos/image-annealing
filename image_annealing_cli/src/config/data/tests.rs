@@ -1,7 +1,59 @@
 mod config_try_from_unverified_config {
+    mod create_displacement_goal {
+        use super::super::super::{
+            AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, UnverifiedConfig,
+            UnverifiedCreateDisplacementGoalInputConfig, UnverifiedImageDimensionsConfig,
+        };
+        use image_annealing::{compute, ImageDimensions};
+        use std::error::Error;
+
+        #[test]
+        fn valid() -> Result<(), Box<dyn Error>> {
+            let image_dimensions = ImageDimensions::try_new(20, 25)?;
+            let unverified_config = UnverifiedConfig::CreateDisplacementGoal {
+                input: UnverifiedCreateDisplacementGoalInputConfig::ImageDimensions(
+                    UnverifiedImageDimensionsConfig {
+                        width: image_dimensions.width(),
+                        height: image_dimensions.height(),
+                    },
+                ),
+                displacement_goal_output_path_no_extension: String::from("displacement_goal_out"),
+            };
+            let r: Config = unverified_config.try_into()?;
+            assert_eq!(
+                r,
+                Config {
+                    algorithm: AlgorithmConfig::CreateDisplacementGoal {
+                        input: Default::default(),
+                        displacement_goal_output_path_no_extension:
+                            DisplacementGoalPath::from_raw_clone("displacement_goal_out"),
+                    },
+                    dispatcher: compute::Config { image_dimensions }
+                }
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn invalid_dimensions() {
+            let unverified_config = UnverifiedConfig::CreateDisplacementGoal {
+                input: UnverifiedCreateDisplacementGoalInputConfig::ImageDimensions(
+                    UnverifiedImageDimensionsConfig {
+                        width: 0,
+                        height: 25,
+                    },
+                ),
+                displacement_goal_output_path_no_extension: String::from("displacement_goal_out"),
+            };
+            let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
+            test_utils::assert_error_contains(r, "width is zero");
+        }
+    }
+
     mod create_permutation {
         use super::super::super::{
             AlgorithmConfig, Config, ImagePath, PermutationPath, UnverifiedConfig,
+            UnverifiedImageDimensionsConfig,
         };
         use image_annealing::{compute, ImageDimensions};
         use std::error::Error;
@@ -9,8 +61,10 @@ mod config_try_from_unverified_config {
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
             let unverified_config = UnverifiedConfig::CreatePermutation {
-                image_width: 20,
-                image_height: 25,
+                image_dimensions: UnverifiedImageDimensionsConfig {
+                    width: 20,
+                    height: 25,
+                },
                 permutation_output_path_no_extension: String::from("permutation_out"),
             };
             let r: Config = unverified_config.try_into()?;
@@ -33,8 +87,10 @@ mod config_try_from_unverified_config {
         #[test]
         fn invalid_dimensions() {
             let unverified_config = UnverifiedConfig::CreatePermutation {
-                image_width: 0,
-                image_height: 25,
+                image_dimensions: UnverifiedImageDimensionsConfig {
+                    width: 0,
+                    height: 25,
+                },
                 permutation_output_path_no_extension: String::from("permutation_out"),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);

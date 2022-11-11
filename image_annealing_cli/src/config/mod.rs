@@ -4,12 +4,14 @@ mod data;
 mod io;
 
 pub use data::{
-    AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, InvalidIterationCountError,
-    InvalidNonnegativeProperFractionError, InvalidNonnegativeRationalNumberError, IterationCount,
-    LosslessImagePath, NonnegativeProperFraction, NonnegativeRationalNumber, PermutationPath,
-    SwapParametersConfig, SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
-    UnverifiedIterationCount, UnverifiedSwapParametersConfig, UnverifiedSwapStopConfig,
-    UnverifiedSwapStopThreshold,
+    AlgorithmConfig, Config, CreateDisplacementGoalInputConfig, DisplacementGoalPath, ImagePath,
+    InvalidIterationCountError, InvalidNonnegativeProperFractionError,
+    InvalidNonnegativeRationalNumberError, IterationCount, LosslessImagePath,
+    NonnegativeProperFraction, NonnegativeRationalNumber, PermutationPath, SwapParametersConfig,
+    SwapStopConfig, SwapStopThreshold, UnverifiedConfig,
+    UnverifiedCreateDisplacementGoalInputConfig, UnverifiedCreateDisplacementGoalInputDataConfig,
+    UnverifiedImageDimensionsConfig, UnverifiedIterationCount, UnverifiedSwapParametersConfig,
+    UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
 };
 use io::parse_config_file;
 pub use io::FileNotFoundError;

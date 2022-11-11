@@ -1,7 +1,9 @@
 {
   "CreatePermutation": {
-    "image_width": 20,
-    "image_height": 25,
+    "image_dimensions": {
+      "width": 20,
+      "height": 25
+    },
     "permutation_output_path_no_extension": "permutation_out"
   }
 }

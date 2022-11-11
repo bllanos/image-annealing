@@ -2,13 +2,20 @@ use image_annealing::{compute, DimensionsMismatchError, ImageDimensions};
 use serde::Deserialize;
 use std::error::Error;
 
+mod dimension;
 mod filepath;
+mod input;
 mod number;
 mod parameters;
 
+pub use dimension::UnverifiedImageDimensionsConfig;
 pub use filepath::{
     DisplacementGoalPath, ImagePath, LosslessImagePath, PermutationPath,
     UnverifiedLosslessImagePath,
+};
+pub use input::{
+    CreateDisplacementGoalInputConfig, UnverifiedCreateDisplacementGoalInputConfig,
+    UnverifiedCreateDisplacementGoalInputDataConfig,
 };
 pub use number::{
     InvalidNonnegativeProperFractionError, InvalidNonnegativeRationalNumberError,
@@ -36,9 +43,12 @@ fn check_dimensions_match2<'a>(
 
 #[derive(Deserialize)]
 pub enum UnverifiedConfig {
+    CreateDisplacementGoal {
+        input: UnverifiedCreateDisplacementGoalInputConfig,
+        displacement_goal_output_path_no_extension: String,
+    },
     CreatePermutation {
-        image_width: usize,
-        image_height: usize,
+        image_dimensions: UnverifiedImageDimensionsConfig,
         permutation_output_path_no_extension: String,
     },
     Permute {
@@ -59,6 +69,10 @@ pub enum UnverifiedConfig {
 
 #[derive(Debug, PartialEq)]
 pub enum AlgorithmConfig {
+    CreateDisplacementGoal {
+        input: CreateDisplacementGoalInputConfig,
+        displacement_goal_output_path_no_extension: DisplacementGoalPath,
+    },
     CreatePermutation {
         permutation_output_path_no_extension: PermutationPath,
     },
@@ -89,9 +103,25 @@ impl TryFrom<UnverifiedConfig> for Config {
 
     fn try_from(value: UnverifiedConfig) -> Result<Self, Self::Error> {
         let (algorithm_config, image_dimensions) = match value {
+            UnverifiedConfig::CreateDisplacementGoal {
+                input,
+                displacement_goal_output_path_no_extension,
+            } => {
+                let (input_checked, image_dimensions) =
+                    CreateDisplacementGoalInputConfig::from_config(input)?;
+                (
+                    AlgorithmConfig::CreateDisplacementGoal {
+                        input: input_checked,
+                        displacement_goal_output_path_no_extension:
+                            DisplacementGoalPath::from_output_path(
+                                displacement_goal_output_path_no_extension,
+                            ),
+                    },
+                    image_dimensions,
+                )
+            }
             UnverifiedConfig::CreatePermutation {
-                image_width,
-                image_height,
+                image_dimensions,
                 permutation_output_path_no_extension,
             } => (
                 AlgorithmConfig::CreatePermutation {
@@ -99,7 +129,7 @@ impl TryFrom<UnverifiedConfig> for Config {
                         permutation_output_path_no_extension,
                     ),
                 },
-                ImageDimensions::new(image_width, image_height)?,
+                image_dimensions.try_into()?,
             ),
             UnverifiedConfig::Permute {
                 candidate_permutation,
