@@ -46,8 +46,10 @@ CREATE_PERMUTATION_CONFIG_FILE="${BASE_OUTPUT_DIRECTORY}/create_permutation_conf
 cat << _FILE_CONTENTS_ > "${CREATE_PERMUTATION_CONFIG_FILE}"
 {
   "CreatePermutation": {
-    "image_width": ${IMAGE_WIDTH},
-    "image_height": ${IMAGE_WIDTH},
+    "image_dimensions": {
+      "width": ${IMAGE_WIDTH},
+      "height": ${IMAGE_WIDTH}
+    },
     "permutation_output_path_no_extension": "${BASE_OUTPUT_DIRECTORY}/initial_permutation"
   }
 }
