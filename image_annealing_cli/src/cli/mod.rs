@@ -32,16 +32,13 @@ fn run_and_save(
                 CreateDisplacementGoalInput {
                     displacement_goal: displacement_goal
                         .as_ref()
-                        .map(|path| loader::load_displacement_goal(path))
+                        .map(loader::load_displacement_goal)
                         .transpose()?,
                     candidate_permutation: candidate_permutation
                         .as_ref()
-                        .map(|path| loader::load_candidate_permutation(path))
+                        .map(loader::load_candidate_permutation)
                         .transpose()?,
-                    image: image
-                        .as_ref()
-                        .map(|path| loader::load_image(path))
-                        .transpose()?,
+                    image: image.as_ref().map(loader::load_image).transpose()?,
                 },
                 &Default::default(),
             );
