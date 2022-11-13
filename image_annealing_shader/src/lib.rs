@@ -3,7 +3,6 @@ mod compute;
 pub mod constant;
 mod function;
 mod global;
-pub mod output;
 mod resource;
 pub mod shader;
 mod type_definitions;

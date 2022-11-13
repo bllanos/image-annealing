@@ -2,7 +2,7 @@ use std::env;
 
 fn main() {
     let directory = env::var("OUT_DIR").unwrap();
-    let config = image_annealing_shader::output::write_default_files(Some(directory)).unwrap();
+    let config = image_annealing_shader_cli::output::write_default_files(Some(directory)).unwrap();
     println!(
         "cargo:rustc-env=COUNT_SWAP_SHADER={}",
         config.count_swap.as_ref().unwrap().display()

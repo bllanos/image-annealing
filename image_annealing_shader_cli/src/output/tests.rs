@@ -71,6 +71,7 @@ mod output_config {
 
 mod write_files {
     use super::super::OutputConfig;
+    use image_annealing_shader::shader;
     use std::borrow::Cow;
     use std::error::Error;
 
@@ -84,7 +85,7 @@ mod write_files {
         };
         super::super::write_files(&config)?;
         let mut expected: Vec<u8> = Vec::new();
-        crate::shader::count_swap(&mut expected)?;
+        shader::count_swap(&mut expected)?;
         let actual = std::fs::read(&path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(path)?;
@@ -103,7 +104,7 @@ mod write_files {
         };
         super::super::write_files(&config)?;
         let mut expected: Vec<u8> = Vec::new();
-        crate::shader::create_displacement_goal_default(&mut expected)?;
+        shader::create_displacement_goal_default(&mut expected)?;
         let actual = std::fs::read(&path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(path)?;
@@ -121,7 +122,7 @@ mod write_files {
         };
         super::super::write_files(&config)?;
         let mut expected: Vec<u8> = Vec::new();
-        crate::shader::create_permutation(&mut expected)?;
+        shader::create_permutation(&mut expected)?;
         let actual = std::fs::read(&path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(path)?;
@@ -139,7 +140,7 @@ mod write_files {
         };
         super::super::write_files(&config)?;
         let mut expected: Vec<u8> = Vec::new();
-        crate::shader::permute(&mut expected)?;
+        shader::permute(&mut expected)?;
         let actual = std::fs::read(&path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(path)?;
@@ -157,7 +158,7 @@ mod write_files {
         };
         super::super::write_files(&config)?;
         let mut expected: Vec<u8> = Vec::new();
-        crate::shader::swap(&mut expected)?;
+        shader::swap(&mut expected)?;
         let actual = std::fs::read(&path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(path)?;
@@ -167,6 +168,7 @@ mod write_files {
 }
 
 mod write_default_files {
+    use image_annealing_shader::shader;
     use std::error::Error;
     use std::path::Path;
 
@@ -195,31 +197,31 @@ mod write_default_files {
 
         let mut expected: Vec<u8> = Vec::new();
 
-        crate::shader::count_swap(&mut expected)?;
+        shader::count_swap(&mut expected)?;
         let mut actual = std::fs::read(&count_swap_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(count_swap_path)?;
 
         expected.clear();
-        crate::shader::create_displacement_goal_default(&mut expected)?;
+        shader::create_displacement_goal_default(&mut expected)?;
         actual = std::fs::read(&create_displacement_goal_default_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(create_displacement_goal_default_path)?;
 
         expected.clear();
-        crate::shader::create_permutation(&mut expected)?;
+        shader::create_permutation(&mut expected)?;
         actual = std::fs::read(&create_permutation_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(create_permutation_path)?;
 
         expected.clear();
-        crate::shader::permute(&mut expected)?;
+        shader::permute(&mut expected)?;
         actual = std::fs::read(&permute_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(permute_path)?;
 
         expected.clear();
-        crate::shader::swap(&mut expected)?;
+        shader::swap(&mut expected)?;
         actual = std::fs::read(&swap_path)?;
         assert_eq!(actual, expected);
         std::fs::remove_file(swap_path)?;

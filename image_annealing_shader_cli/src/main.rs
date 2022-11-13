@@ -1,4 +1,4 @@
-use image_annealing_shader::output;
+use image_annealing_shader_cli::output;
 use std::env;
 use std::error::Error;
 use std::path::PathBuf;

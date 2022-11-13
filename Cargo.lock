@@ -567,6 +567,7 @@ dependencies = [
  "futures-intrusive",
  "image",
  "image_annealing_shader",
+ "image_annealing_shader_cli",
  "parking_lot",
  "test_utils",
  "wgpu",
@@ -601,6 +602,14 @@ name = "image_annealing_shader"
 version = "0.1.0"
 dependencies = [
  "naga",
+ "test_utils",
+]
+
+[[package]]
+name = "image_annealing_shader_cli"
+version = "0.1.0"
+dependencies = [
+ "image_annealing_shader",
  "test_utils",
 ]
 

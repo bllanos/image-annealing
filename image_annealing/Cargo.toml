@@ -19,7 +19,7 @@ parking_lot = "0.12.1"
 wgpu = "0.14.0"
 
 [build-dependencies]
-image_annealing_shader = { path = "../image_annealing_shader" }
+image_annealing_shader_cli = { path = "../image_annealing_shader_cli" }
 
 [dev-dependencies]
 test_utils = { path = "../test_utils" }

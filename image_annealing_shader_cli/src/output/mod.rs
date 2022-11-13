@@ -1,4 +1,4 @@
-use crate::shader;
+use image_annealing_shader::shader;
 use std::borrow::Cow;
 use std::default::Default;
 use std::error::Error;

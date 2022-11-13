@@ -4,6 +4,7 @@ members = [
     "image_annealing_cli",
     "image_annealing_cli_bin",
     "image_annealing_shader",
+    "image_annealing_shader_cli",
     "test_utils",
 ]
 resolver = "2"
