@@ -566,7 +566,7 @@ dependencies = [
  "futures",
  "futures-intrusive",
  "image",
- "image_annealing_shaders",
+ "image_annealing_shader",
  "parking_lot",
  "test_utils",
  "wgpu",
@@ -597,7 +597,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "image_annealing_shaders"
+name = "image_annealing_shader"
 version = "0.1.0"
 dependencies = [
  "naga",

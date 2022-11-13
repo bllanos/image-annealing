@@ -5,8 +5,8 @@ use super::super::super::resource::texture::{
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
-use image_annealing_shaders::binding::create_displacement_goal as binding_constants;
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::binding::create_displacement_goal as binding_constants;
+use image_annealing_shader::WorkgroupDimensions;
 
 pub struct CreateDisplacementGoalBinding {
     binding_data: BindingData,

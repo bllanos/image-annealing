@@ -1,6 +1,6 @@
 use super::super::binding::manager::BindingManager;
 use super::super::shader;
-use image_annealing_shaders::SHADER_ENTRY_POINT;
+use image_annealing_shader::SHADER_ENTRY_POINT;
 
 pub struct CountSwapPipeline {
     pipeline: wgpu::ComputePipeline,

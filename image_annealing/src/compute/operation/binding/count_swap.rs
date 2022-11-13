@@ -2,7 +2,7 @@ use super::super::super::resource::buffer::{BindableBuffer, InputBuffer, OutputB
 use super::super::super::resource::manager::ResourceManager;
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
-use image_annealing_shaders::binding::count_swap as binding_constants;
+use image_annealing_shader::binding::count_swap as binding_constants;
 
 pub struct CountSwapBinding {
     binding_data: BindingData,

@@ -1,4 +1,4 @@
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::WorkgroupDimensions;
 
 fn create_workgroup_dimensions() -> WorkgroupDimensions {
     let workgroup_dimensions = WorkgroupDimensions::create_permutation();

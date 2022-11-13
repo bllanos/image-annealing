@@ -8,7 +8,7 @@ use test_utils::permutation::DimensionsAndPermutation;
 mod sum_at_least_two_elements_per_invocation {
     use super::super::border;
     use image_annealing::compute::SwapPass;
-    use image_annealing_shaders::WorkgroupDimensions;
+    use image_annealing_shader::WorkgroupDimensions;
     use std::error::Error;
 
     fn at_least_two_elements_per_invocation() -> usize {

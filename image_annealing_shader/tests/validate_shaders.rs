@@ -1,7 +1,7 @@
 //! References:
 //! https://github.com/gfx-rs/naga/blob/master/cli/src/main.rs
 
-use image_annealing_shaders::shader;
+use image_annealing_shader::shader;
 use std::error::Error;
 
 fn print_err(error: impl Error) {

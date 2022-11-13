@@ -1,7 +1,7 @@
 mod swap_pass {
     use super::super::SwapPass;
     use crate::ImageDimensions;
-    use image_annealing_shaders::constant;
+    use image_annealing_shader::constant;
     use std::error::Error;
 
     #[test]
@@ -48,7 +48,7 @@ mod swap_pass {
         use super::super::super::super::super::operation::WorkgroupGridDimensions;
         use super::super::super::SwapPass;
         use crate::ImageDimensions;
-        use image_annealing_shaders::WorkgroupDimensions;
+        use image_annealing_shader::WorkgroupDimensions;
         use std::error::Error;
 
         #[test]
@@ -430,7 +430,7 @@ mod swap_pass_set {
 
     mod iter {
         use super::super::super::{SwapPass, SwapPassSet};
-        use image_annealing_shaders::constant;
+        use image_annealing_shader::constant;
 
         #[test]
         fn all_passes() {
@@ -784,7 +784,7 @@ mod swap_pass_sequence {
 
     mod iter {
         use super::super::super::{SwapPass, SwapPassSequence};
-        use image_annealing_shaders::constant;
+        use image_annealing_shader::constant;
         use std::error::Error;
 
         #[test]

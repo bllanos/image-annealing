@@ -7,7 +7,7 @@ use super::super::super::resource::texture::{
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
 use crate::ImageDimensions;
-use image_annealing_shaders::binding::swap as binding_constants;
+use image_annealing_shader::binding::swap as binding_constants;
 
 pub struct SwapBinding {
     binding_data: BindingData,

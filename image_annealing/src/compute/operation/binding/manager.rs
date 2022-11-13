@@ -7,7 +7,7 @@ use super::create_permutation::CreatePermutationBinding;
 use super::permute::PermuteBinding;
 use super::swap::SwapBinding;
 use super::Binding;
-use image_annealing_shaders::binding as binding_constants;
+use image_annealing_shader::binding as binding_constants;
 
 pub struct BindingManager {
     count_swap_binding: CountSwapBinding,

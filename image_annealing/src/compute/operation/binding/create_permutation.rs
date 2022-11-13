@@ -2,8 +2,8 @@ use super::super::super::resource::manager::ResourceManager;
 use super::super::super::resource::texture::{PermutationOutputTexture, Texture};
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
-use image_annealing_shaders::binding::create_permutation as binding_constants;
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::binding::create_permutation as binding_constants;
+use image_annealing_shader::WorkgroupDimensions;
 
 pub struct CreatePermutationBinding {
     binding_data: BindingData,

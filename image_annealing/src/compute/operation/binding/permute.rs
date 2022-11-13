@@ -4,8 +4,8 @@ use super::super::super::resource::texture::{
 };
 use super::super::shader::WorkgroupGridDimensions;
 use super::{Binding, BindingData};
-use image_annealing_shaders::binding::permute as binding_constants;
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::binding::permute as binding_constants;
+use image_annealing_shader::WorkgroupDimensions;
 
 pub struct PermuteBinding {
     binding_data: BindingData,

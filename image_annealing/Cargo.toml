@@ -14,12 +14,12 @@ bytemuck = { version = "1.12.3", features = [ "derive" ] }
 futures = "0.3.25"
 futures-intrusive = "0.5.0"
 image = "0.24.5"
-image_annealing_shaders = { path = "../image_annealing_shaders" }
+image_annealing_shader = { path = "../image_annealing_shader" }
 parking_lot = "0.12.1"
 wgpu = "0.14.0"
 
 [build-dependencies]
-image_annealing_shaders = { path = "../image_annealing_shaders" }
+image_annealing_shader = { path = "../image_annealing_shader" }
 
 [dev-dependencies]
 test_utils = { path = "../test_utils" }

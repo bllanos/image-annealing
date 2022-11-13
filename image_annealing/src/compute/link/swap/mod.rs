@@ -1,8 +1,8 @@
 use super::super::operation::WorkgroupGridDimensions;
 use crate::ImageDimensions;
 use bytemuck::{Pod, Zeroable};
-use image_annealing_shaders::constant;
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::constant;
+use image_annealing_shader::WorkgroupDimensions;
 use std::error::Error;
 use std::fmt;
 use std::num::NonZeroU32;

@@ -1,5 +1,5 @@
 use crate::ImageDimensions;
-use image_annealing_shaders::WorkgroupDimensions;
+use image_annealing_shader::WorkgroupDimensions;
 use std::num::NonZeroU32;
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
