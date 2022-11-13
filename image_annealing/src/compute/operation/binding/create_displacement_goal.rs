@@ -80,13 +80,13 @@ impl CreateDisplacementGoalBinding {
         Self {
             binding_data: BindingData { layout, bind_group },
             workgroup_grid_dimensions: WorkgroupGridDimensions::from_extent(
-                &WorkgroupDimensions::create_displacement_goal(),
+                &WorkgroupDimensions::create_displacement_goal_default(),
                 displacement_goal_input_texture.dimensions(),
             ),
         }
     }
 
-    pub fn workgroup_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+    pub fn default_workgroup_grid_dimensions(&self) -> &WorkgroupGridDimensions {
         &self.workgroup_grid_dimensions
     }
 }

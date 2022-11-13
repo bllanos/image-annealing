@@ -1,4 +1,4 @@
-use crate::binding::{count_swap, create_displacement_goal, create_permutation, permute, swap};
+use crate::binding::{count_swap, create_permutation, permute, swap};
 use crate::compute::{self, WorkgroupDimensions};
 use crate::constant;
 use crate::function::{self, conversion, io, main};
@@ -6,16 +6,12 @@ use crate::global;
 use crate::type_definitions;
 use std::io::Write;
 
-pub fn create_displacement_goal_default<W: Write>(mut writer: W) -> std::io::Result<()> {
-    create_displacement_goal::bind_group(&mut writer)?;
-    conversion::i32_to_u16(&mut writer)?;
-    io::store_displacement_goal_vector(&mut writer)?;
-    compute::compute_shader_annotation(
-        &mut writer,
-        WorkgroupDimensions::create_displacement_goal(),
-    )?;
-    main::create_displacement_goal_default(&mut writer)
-}
+mod create_displacement_goal;
+
+pub use create_displacement_goal::{
+    create_displacement_goal_custom, create_displacement_goal_default,
+    CreateDisplacementGoalShaderContent,
+};
 
 pub fn create_permutation<W: Write>(mut writer: W) -> std::io::Result<()> {
     create_permutation::bind_group(&mut writer)?;

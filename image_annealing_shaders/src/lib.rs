@@ -10,3 +10,8 @@ mod type_definitions;
 
 pub use compute::WorkgroupDimensions;
 pub use function::main::SHADER_ENTRY_POINT;
+pub use shader::CreateDisplacementGoalShaderContent;
+
+fn crate_name() -> &'static str {
+    module_path!()
+}

@@ -54,7 +54,7 @@ impl PipelineManager {
             .set_pipeline(&mut cpass);
         self.bindings.bind_create_displacement_goal(&mut cpass);
         self.bindings
-            .create_displacement_goal_grid_dimensions()
+            .create_displacement_goal_default_grid_dimensions()
             .dispatch(&mut cpass);
     }
 

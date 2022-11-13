@@ -24,7 +24,7 @@ impl WorkgroupDimensions {
         Self::horizontal_line(256u32)
     }
 
-    pub fn create_displacement_goal() -> Self {
+    pub fn create_displacement_goal_default() -> Self {
         Self::texture_patch()
     }
 

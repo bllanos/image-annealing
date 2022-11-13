@@ -52,9 +52,9 @@ impl BindingManager {
         self.create_displacement_goal_binding.layout()
     }
 
-    pub fn create_displacement_goal_grid_dimensions(&self) -> &WorkgroupGridDimensions {
+    pub fn create_displacement_goal_default_grid_dimensions(&self) -> &WorkgroupGridDimensions {
         self.create_displacement_goal_binding
-            .workgroup_grid_dimensions()
+            .default_workgroup_grid_dimensions()
     }
 
     pub fn bind_create_permutation<'a: 'b, 'b>(&'a self, cpass: &mut wgpu::ComputePass<'b>) {
