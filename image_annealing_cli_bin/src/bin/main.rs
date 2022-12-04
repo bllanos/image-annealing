@@ -1,19 +1,23 @@
-use image_annealing_cli::{cli, config};
+use image_annealing_cli::args::{self, ParseFailure};
+use image_annealing_cli::cli;
 use std::env;
-use std::error::Error;
+use std::io::{self, Write};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    match config::parse_args(env::args()) {
-        Err(err) => {
-            eprintln!("Configuration error: {}", err);
-            Err(err)
-        }
-        Ok(parsed_config) => match cli::run(parsed_config) {
-            Err(err) => {
-                eprintln!("Processing error: {}", err);
-                Err(err)
+fn main() {
+    match args::parse_args(env::args()) {
+        Err(output) => match output {
+            ParseFailure::Stdout(message) => {
+                io::stdout().write_all(message.as_bytes()).unwrap();
             }
-            Ok(_) => Ok(()),
+            ParseFailure::Stderr(message) => {
+                eprintln!("{}", message);
+            }
         },
+        Ok(parsed_config) => {
+            if let Err(err) = cli::run(parsed_config) {
+                eprintln!("Processing error: {}", err);
+                std::process::exit(1);
+            }
+        }
     }
 }

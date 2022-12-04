@@ -1,7 +1,17 @@
+mod options {
+    use super::super::make_option_parser;
+
+    #[test]
+    fn check_options() {
+        make_option_parser().check_invariants(true)
+    }
+}
+
 mod parse_args {
-    use super::super::{parse_args, AlgorithmConfig, Config, ImagePath, PermutationPath};
+    use super::super::parse_args;
+    use crate::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
+    use bpaf::ParseFailure;
     use image_annealing::{compute, ImageDimensions};
-    use std::error::Error;
 
     #[test]
     #[should_panic(expected = "no arguments (not even the program name)")]
@@ -13,17 +23,18 @@ mod parse_args {
     #[test]
     fn no_config_file() {
         let v = vec![String::from("one")];
-        test_utils::assert_error_contains(
-            parse_args(v),
-            "expected at least one argument for a configuration file's path",
+        let message = parse_args(v).unwrap_err().unwrap_stderr();
+        test_utils::assert_error_contains::<(), String>(
+            Err(message),
+            "pass --help for usage information",
         );
     }
 
     #[test]
-    fn valid_config_file() -> Result<(), Box<dyn Error>> {
+    fn valid_config_file() -> Result<(), ParseFailure> {
         let path =
             test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
-        let v = vec![String::from("one"), path];
+        let v = vec![String::from("one"), String::from("-c"), path];
         let r = parse_args(v)?;
         assert_eq!(
             r,
@@ -34,7 +45,7 @@ mod parse_args {
                     ),
                 },
                 dispatcher: compute::Config {
-                    image_dimensions: ImageDimensions::try_new(20, 25)?
+                    image_dimensions: ImageDimensions::try_new(20, 25).unwrap()
                 }
             }
         );
@@ -42,24 +53,19 @@ mod parse_args {
     }
 
     #[test]
-    fn additional_args() -> Result<(), Box<dyn Error>> {
+    fn additional_args() {
         let path =
             test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
-        let v = vec![String::from("one"), path, String::from("other_arg")];
-        let r = parse_args(v)?;
-        assert_eq!(
-            r,
-            Config {
-                algorithm: AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
-                        "permutation_out"
-                    ),
-                },
-                dispatcher: compute::Config {
-                    image_dimensions: ImageDimensions::try_new(20, 25)?
-                }
-            }
+        let v = vec![
+            String::from("one"),
+            String::from("-c"),
+            path,
+            String::from("other_arg"),
+        ];
+        let message = parse_args(v).unwrap_err().unwrap_stderr();
+        test_utils::assert_error_contains::<(), String>(
+            Err(message),
+            "No such command: `other_arg`",
         );
-        Ok(())
     }
 }
