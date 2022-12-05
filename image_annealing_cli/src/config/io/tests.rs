@@ -6,8 +6,8 @@ mod parse_config_file {
 
     #[test]
     fn missing_config_file() {
-        let path = test_utils::make_test_data_path(["config", "not_found.json"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["config", "not_found.json"]);
+        test_util::assert_error_contains(
             parse_config_file(path),
             "does not exist in the filesystem",
         );
@@ -15,8 +15,8 @@ mod parse_config_file {
 
     #[test]
     fn directory_not_file() {
-        let path = test_utils::make_test_data_path(["config"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["config"]);
+        test_util::assert_error_contains(
             parse_config_file(path),
             "does not exist in the filesystem",
         );
@@ -24,8 +24,8 @@ mod parse_config_file {
 
     #[test]
     fn malformed_config_file() {
-        let path = test_utils::make_test_data_path(["config", "empty.json"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["config", "empty.json"]);
+        test_util::assert_error_contains(
             parse_config_file(path),
             "configuration file deserialization error",
         );
@@ -33,7 +33,7 @@ mod parse_config_file {
 
     #[test]
     fn valid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(["config", "create_permutation", "valid.json"]);
+        let path = test_util::make_test_data_path(["config", "create_permutation", "valid.json"]);
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
@@ -53,9 +53,8 @@ mod parse_config_file {
 
     #[test]
     fn invalid_create_permutation_config_file() {
-        let path =
-            test_utils::make_test_data_path(["config", "create_permutation", "invalid.json"]);
-        test_utils::assert_error_contains(parse_config_file(path), "width is zero");
+        let path = test_util::make_test_data_path(["config", "create_permutation", "invalid.json"]);
+        test_util::assert_error_contains(parse_config_file(path), "width is zero");
     }
 }
 
@@ -66,8 +65,8 @@ mod check_input_path {
 
     #[test]
     fn absent_file() {
-        let path = test_utils::make_test_data_path(["none.png"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["none.png"]);
+        test_util::assert_error_contains(
             check_input_path(path),
             "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
         );
@@ -75,13 +74,13 @@ mod check_input_path {
 
     #[test]
     fn not_a_file() {
-        let path = test_utils::make_test_data_path::<Vec<&Path>, &Path>(Vec::new());
-        test_utils::assert_error_contains(check_input_path(path), "file");
+        let path = test_util::make_test_data_path::<Vec<&Path>, &Path>(Vec::new());
+        test_util::assert_error_contains(check_input_path(path), "file");
     }
 
     #[test]
     fn valid_file() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
         Ok(check_input_path(path)?)
     }
 }

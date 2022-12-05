@@ -22,4 +22,4 @@ wgpu = "0.14.0"
 image_annealing_shader_cli = { path = "../image_annealing_shader_cli" }
 
 [dev-dependencies]
-test_utils = { path = "../test_utils" }
+test_util = { path = "../test_util" }

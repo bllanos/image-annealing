@@ -370,7 +370,7 @@ mod run_swap {
                 let validated_permutations = (3..width)
                     .map(|first_pixel_shift| unsafe {
                         validation::vector_field_into_validated_permutation_unchecked(
-                            test_utils::permutation::line_with_first_texel_moved(
+                            test_util::permutation::line_with_first_texel_moved(
                                 width,
                                 first_pixel_shift,
                             )
@@ -381,14 +381,14 @@ mod run_swap {
                 let run_swap_input = RunSwapInput {
                     candidate_permutation: Some(
                         CandidatePermutation::new(
-                            test_utils::permutation::line_with_first_texel_moved(width, 1)
+                            test_util::permutation::line_with_first_texel_moved(width, 1)
                                 .permutation,
                         )
                         .unwrap(),
                     ),
                     displacement_goal: Some(
                         DisplacementGoal::from_raw_candidate_permutation(
-                            test_utils::permutation::line_with_first_texel_moved(width, 2)
+                            test_util::permutation::line_with_first_texel_moved(width, 2)
                                 .permutation,
                         )
                         .unwrap(),

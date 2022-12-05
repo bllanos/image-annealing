@@ -32,7 +32,7 @@ mod output_config {
 
         #[test]
         fn with_directory() -> Result<(), Box<dyn Error>> {
-            let directory = test_utils::make_test_output_path(std::iter::empty::<&Path>());
+            let directory = test_util::make_test_output_path(std::iter::empty::<&Path>());
             let config = OutputConfig::with_base_directory::<&Path>(Some(&directory))?;
             assert_eq!(
                 &config,
@@ -51,8 +51,8 @@ mod output_config {
 
         #[test]
         fn absent_directory() {
-            let directory = test_utils::make_test_output_path(["none"]);
-            test_utils::assert_error_contains(
+            let directory = test_util::make_test_output_path(["none"]);
+            test_util::assert_error_contains(
                 OutputConfig::with_base_directory::<&Path>(Some(&directory)),
                 "does not exist", // Note: do not put a platform-dependent path string here
             );
@@ -60,8 +60,8 @@ mod output_config {
 
         #[test]
         fn file_not_directory() {
-            let path = test_utils::make_test_data_path(["config", "empty.json"]);
-            test_utils::assert_error_contains(
+            let path = test_util::make_test_data_path(["config", "empty.json"]);
+            test_util::assert_error_contains(
                 OutputConfig::with_base_directory::<&Path>(Some(&path)),
                 "is not a directory", // Note: do not put a platform-dependent path string here
             );
@@ -77,7 +77,7 @@ mod write_files {
 
     #[test]
     fn count_swap_only() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_output_path(["count_swap_only.wgsl"]);
+        let path = test_util::make_test_output_path(["count_swap_only.wgsl"]);
         assert!(!path.is_file());
         let config = OutputConfig {
             count_swap: Some(Cow::from(&path)),
@@ -95,8 +95,7 @@ mod write_files {
 
     #[test]
     fn create_displacement_goal_default_only() -> Result<(), Box<dyn Error>> {
-        let path =
-            test_utils::make_test_output_path(["create_displacement_goal_default_only.wgsl"]);
+        let path = test_util::make_test_output_path(["create_displacement_goal_default_only.wgsl"]);
         assert!(!path.is_file());
         let config = OutputConfig {
             create_displacement_goal_default: Some(Cow::from(&path)),
@@ -114,7 +113,7 @@ mod write_files {
 
     #[test]
     fn create_permutation_only() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_output_path(["create_permutation_only.wgsl"]);
+        let path = test_util::make_test_output_path(["create_permutation_only.wgsl"]);
         assert!(!path.is_file());
         let config = OutputConfig {
             create_permutation: Some(Cow::from(&path)),
@@ -132,7 +131,7 @@ mod write_files {
 
     #[test]
     fn permute_only() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_output_path(["permute_only.wgsl"]);
+        let path = test_util::make_test_output_path(["permute_only.wgsl"]);
         assert!(!path.is_file());
         let config = OutputConfig {
             permute: Some(Cow::from(&path)),
@@ -150,7 +149,7 @@ mod write_files {
 
     #[test]
     fn swap_only() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_output_path(["swap_only.wgsl"]);
+        let path = test_util::make_test_output_path(["swap_only.wgsl"]);
         assert!(!path.is_file());
         let config = OutputConfig {
             swap: Some(Cow::from(&path)),
@@ -174,23 +173,22 @@ mod write_default_files {
 
     #[test]
     fn all_shaders() -> Result<(), Box<dyn Error>> {
-        let directory = test_utils::make_test_output_path(std::iter::empty::<&Path>());
+        let directory = test_util::make_test_output_path(std::iter::empty::<&Path>());
 
-        let count_swap_path = test_utils::make_test_output_path(["count_swap.wgsl"]);
+        let count_swap_path = test_util::make_test_output_path(["count_swap.wgsl"]);
         assert!(!count_swap_path.is_file());
 
         let create_displacement_goal_default_path =
-            test_utils::make_test_output_path(["create_displacement_goal_default.wgsl"]);
+            test_util::make_test_output_path(["create_displacement_goal_default.wgsl"]);
         assert!(!create_displacement_goal_default_path.is_file());
 
-        let create_permutation_path =
-            test_utils::make_test_output_path(["create_permutation.wgsl"]);
+        let create_permutation_path = test_util::make_test_output_path(["create_permutation.wgsl"]);
         assert!(!create_permutation_path.is_file());
 
-        let permute_path = test_utils::make_test_output_path(["permute.wgsl"]);
+        let permute_path = test_util::make_test_output_path(["permute.wgsl"]);
         assert!(!permute_path.is_file());
 
-        let swap_path = test_utils::make_test_output_path(["swap.wgsl"]);
+        let swap_path = test_util::make_test_output_path(["swap.wgsl"]);
         assert!(!swap_path.is_file());
 
         super::super::write_default_files(Some(directory))?;

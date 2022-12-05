@@ -3,19 +3,19 @@ use image_annealing::compute::{self, Config, OutputStatus, PermuteInput};
 use image_annealing::CandidatePermutation;
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::{assert_step_until_success, assert_step_until_success_async};
-use test_utils::permutation::DimensionsAndPermutation;
+use test_util::algorithm::{assert_step_until_success, assert_step_until_success_async};
+use test_util::permutation::DimensionsAndPermutation;
 
 #[test]
 fn run_once_identity() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::identity();
+    } = test_util::permutation::identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
     let permuted_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::permutation::identity_permute(&original_image),
+        test_util::permutation::identity_permute(&original_image),
     )?);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
@@ -43,11 +43,11 @@ async fn run_once_identity_async_inner() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::identity();
+    } = test_util::permutation::identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
     let permuted_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::permutation::identity_permute(&original_image),
+        test_util::permutation::identity_permute(&original_image),
     )?);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
@@ -82,11 +82,11 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::bit_interpretation_cases();
+    } = test_util::permutation::bit_interpretation_cases();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
     let permuted_image =
-        test_utils::permutation::bit_interpretation_cases_forward_permute(&original_image);
+        test_util::permutation::bit_interpretation_cases_forward_permute(&original_image);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let dispatcher = compute::create_dispatcher_block(&Config {

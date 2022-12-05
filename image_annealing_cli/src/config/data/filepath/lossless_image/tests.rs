@@ -1,27 +1,27 @@
 use super::UnverifiedLosslessImagePath;
 
 fn existing_rgba8_path1() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "stripes.png"])
+    test_util::make_test_data_path_string(["image", "image", "stripes.png"])
 }
 
 fn existing_rgba8_path2() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "green.png"])
+    test_util::make_test_data_path_string(["image", "image", "green.png"])
 }
 
 fn existing_rgba8_path3() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "pastel.png"])
+    test_util::make_test_data_path_string(["image", "image", "pastel.png"])
 }
 
 fn existing_rgba8_path4() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "parque.png"])
+    test_util::make_test_data_path_string(["image", "image", "parque.png"])
 }
 
 fn existing_rgba16_path1() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "red.png"])
+    test_util::make_test_data_path_string(["image", "image", "red.png"])
 }
 
 fn existing_rgba16_path2() -> String {
-    test_utils::make_test_data_path_string(["image", "image", "leopard.png"])
+    test_util::make_test_data_path_string(["image", "image", "leopard.png"])
 }
 
 fn valid_rgba8() -> UnverifiedLosslessImagePath {
@@ -447,15 +447,15 @@ mod lossless_image_path {
         }
 
         fn large_rgba8_path() -> String {
-            test_utils::make_test_data_path_string(["image", "image", "stripes_large.png"])
+            test_util::make_test_data_path_string(["image", "image", "stripes_large.png"])
         }
 
         fn large_rgba16_path() -> String {
-            test_utils::make_test_data_path_string(["image", "image", "red_large.png"])
+            test_util::make_test_data_path_string(["image", "image", "red_large.png"])
         }
 
         fn missing_image_path() -> String {
-            test_utils::make_test_data_path_string(["image", "image", "not_found.png"])
+            test_util::make_test_data_path_string(["image", "image", "not_found.png"])
         }
 
         fn missing_error_message() -> &'static str {
@@ -463,7 +463,7 @@ mod lossless_image_path {
         }
 
         fn non_image_path() -> String {
-            test_utils::make_test_data_path_string(["empty.txt"])
+            test_util::make_test_data_path_string(["empty.txt"])
         }
 
         fn non_image_error_message() -> &'static str {
@@ -577,7 +577,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8(
                         super::missing_image_path(),
                     )),
@@ -587,7 +587,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
                         super::missing_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -598,7 +598,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::missing_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -610,7 +610,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::missing_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -623,7 +623,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16(
                         super::missing_image_path(),
                     )),
@@ -633,7 +633,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
                         super::missing_image_path(),
                         super::super::super::existing_rgba16_path2(),
@@ -644,7 +644,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
                         super::missing_image_path(),
                         super::super::super::existing_rgba8_path1(),
@@ -655,7 +655,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::missing_image_path(),
                         super::super::super::existing_rgba8_path1(),
@@ -671,7 +671,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
                         super::super::super::existing_rgba8_path1(),
                         super::missing_image_path(),
@@ -682,7 +682,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::missing_image_path(),
@@ -694,7 +694,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::missing_image_path(),
@@ -707,7 +707,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
                         super::super::super::existing_rgba16_path1(),
                         super::missing_image_path(),
@@ -718,7 +718,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
                         super::super::super::existing_rgba16_path1(),
                         super::missing_image_path(),
@@ -729,7 +729,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::missing_image_path(),
@@ -745,7 +745,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -757,7 +757,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -770,7 +770,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::super::super::existing_rgba8_path1(),
@@ -786,7 +786,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -803,7 +803,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8(
                         super::non_image_path(),
                     )),
@@ -813,7 +813,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
                         super::non_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -824,7 +824,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::non_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -836,7 +836,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::non_image_path(),
                         super::super::super::existing_rgba8_path2(),
@@ -849,7 +849,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16(
                         super::non_image_path(),
                     )),
@@ -859,7 +859,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
                         super::non_image_path(),
                         super::super::super::existing_rgba16_path2(),
@@ -870,7 +870,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
                         super::non_image_path(),
                         super::super::super::existing_rgba8_path1(),
@@ -881,7 +881,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::non_image_path(),
                         super::super::super::existing_rgba8_path1(),
@@ -897,7 +897,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
                         super::super::super::existing_rgba8_path1(),
                         super::non_image_path(),
@@ -908,7 +908,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::non_image_path(),
@@ -920,7 +920,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::non_image_path(),
@@ -933,7 +933,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
                         super::super::super::existing_rgba16_path1(),
                         super::non_image_path(),
@@ -944,7 +944,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
                         super::super::super::existing_rgba16_path1(),
                         super::non_image_path(),
@@ -955,7 +955,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::non_image_path(),
@@ -971,7 +971,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -983,7 +983,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -996,7 +996,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::super::super::existing_rgba8_path1(),
@@ -1012,7 +1012,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -1029,7 +1029,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x2(
                         super::super::super::existing_rgba8_path1(),
                         super::large_rgba8_path(),
@@ -1040,7 +1040,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::large_rgba8_path(),
@@ -1052,7 +1052,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::large_rgba8_path(),
@@ -1065,7 +1065,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16x2(
                         super::super::super::existing_rgba16_path1(),
                         super::large_rgba16_path(),
@@ -1076,7 +1076,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8(
                         super::super::super::existing_rgba16_path1(),
                         super::large_rgba8_path(),
@@ -1087,7 +1087,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::large_rgba8_path(),
@@ -1103,7 +1103,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x3() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x3(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -1115,7 +1115,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),
@@ -1128,7 +1128,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba16_rgba8x2() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba16Rgba8x2(
                         super::super::super::existing_rgba16_path1(),
                         super::super::super::existing_rgba8_path1(),
@@ -1144,7 +1144,7 @@ mod lossless_image_path {
 
             #[test]
             fn rgba8x4() {
-                test_utils::assert_error_contains(
+                test_util::assert_error_contains(
                     LosslessImagePath::from_input_path(UnverifiedLosslessImagePath::Rgba8x4(
                         super::super::super::existing_rgba8_path1(),
                         super::super::super::existing_rgba8_path2(),

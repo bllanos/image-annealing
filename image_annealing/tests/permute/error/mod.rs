@@ -3,26 +3,26 @@ use image_annealing::compute::{self, Config, OutputStatus, PermuteInput, Permute
 use image_annealing::{CandidatePermutation, ImageDimensions};
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
-use test_utils::permutation::DimensionsAndPermutation;
+use test_util::algorithm::{assert_step_until_error, assert_step_until_success};
+use test_util::permutation::DimensionsAndPermutation;
 
 #[test]
 fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
     let permuted_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::permutation::non_identity_forward_permute(&original_image),
+        test_util::permutation::non_identity_forward_permute(&original_image),
     )?);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let DimensionsAndPermutation {
         permutation: invalid_permutation,
         dimensions: other_dimensions,
-    } = test_utils::permutation::duplicate();
+    } = test_util::permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
     let mut dispatcher = compute::create_dispatcher_block(&Config {
@@ -58,10 +58,10 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let invalid_dimensions =
         ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
+    let image = LosslessImage::Rgba16(Rgba16Image::new(test_util::image::coordinates_to_colors(
         &invalid_dimensions,
     ))?);
 
@@ -88,10 +88,10 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let other_dimensions =
         ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
+    let image = LosslessImage::Rgba16(Rgba16Image::new(test_util::image::coordinates_to_colors(
         &other_dimensions,
     ))?);
 
@@ -118,7 +118,7 @@ fn forget_image() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::identity();
+    } = test_util::permutation::identity();
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
@@ -146,10 +146,10 @@ fn forgot_format() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::identity();
+    } = test_util::permutation::identity();
     let expected_permutation = permutation.clone();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
-    let permuted_image = test_utils::permutation::identity_permute(&original_image);
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
+    let permuted_image = test_util::permutation::identity_permute(&original_image);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let mut dispatcher = compute::create_dispatcher_block(&Config {
@@ -195,8 +195,8 @@ fn format_mismatch() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::identity();
-    let original_image = test_utils::image::coordinates_to_colors(&dimensions);
+    } = test_util::permutation::identity();
+    let original_image = test_util::image::coordinates_to_colors(&dimensions);
     let original_lossless_image = LosslessImage::Rgba16(Rgba16Image::new(original_image)?);
 
     let dispatcher = compute::create_dispatcher_block(&Config {

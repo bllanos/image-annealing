@@ -3,7 +3,7 @@ use super::invert_permutation;
 use crate::compute::conversion::{self, VectorFieldEntry};
 use crate::ImageDimensions;
 use std::error::Error;
-use test_utils::permutation::{self, DimensionsAndPermutation};
+use test_util::permutation::{self, DimensionsAndPermutation};
 
 #[test]
 fn identity() -> Result<(), Box<dyn Error>> {

@@ -4,9 +4,9 @@ use image_annealing::compute::{
 };
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::error::Error;
-use test_utils::algorithm::assert_step_until_success;
-use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
-use test_utils::permutation::DimensionsAndPermutation;
+use test_util::algorithm::assert_step_until_success;
+use test_util::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
+use test_util::permutation::DimensionsAndPermutation;
 
 fn test_swap_pass_sequence<T, U>(
     sequence: SwapPassSequence,
@@ -20,12 +20,12 @@ where
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::eight_cycle();
+    } = test_util::permutation::eight_cycle();
     let expected_permutation_iter = expected_permutation_vectors
         .into_iter()
         .map(|v| conversion::to_image(&dimensions, v.as_ref()));
     let displacement_goal = DisplacementGoal::from_raw_candidate_permutation(
-        test_utils::permutation::eight_cycle2().permutation,
+        test_util::permutation::eight_cycle2().permutation,
     )?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
 
@@ -34,7 +34,7 @@ where
     })?;
     let swap_parameters = SwapParameters {
         sequence,
-        ..test_utils::algorithm::default_swap_parameters()
+        ..test_util::algorithm::default_swap_parameters()
     };
     let mut algorithm = dispatcher.swap(
         SwapInput {
@@ -525,11 +525,11 @@ mod reject_out_of_bounds {
     use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
     use image_annealing::{CandidatePermutation, DisplacementGoal};
     use std::error::Error;
-    use test_utils::algorithm::{
+    use test_util::algorithm::{
         assert_correct_default_swap_full_output, assert_step_until_success,
     };
-    use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
-    use test_utils::permutation::DimensionsAndPermutation;
+    use test_util::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
+    use test_util::permutation::DimensionsAndPermutation;
 
     fn run_test(
         width: usize,
@@ -539,7 +539,7 @@ mod reject_out_of_bounds {
         let DimensionsAndPermutation {
             permutation,
             dimensions,
-        } = test_utils::permutation::identity_with_dimensions(width, height);
+        } = test_util::permutation::identity_with_dimensions(width, height);
         let expected_permutation = permutation.clone();
         let displacement_goal = DisplacementGoal::from_vector_field(conversion::to_image(
             &dimensions,
@@ -550,7 +550,7 @@ mod reject_out_of_bounds {
         let dispatcher = compute::create_dispatcher_block(&Config {
             image_dimensions: dimensions,
         })?;
-        let swap_parameters = test_utils::algorithm::default_swap_parameters();
+        let swap_parameters = test_util::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
                 candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),

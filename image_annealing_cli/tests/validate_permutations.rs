@@ -7,7 +7,7 @@ use std::error::Error;
 #[test]
 fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+        PermutationPath::from_input_path(test_util::make_test_data_path_string([
             "image",
             "permutation",
             "identity_permutation.png",
@@ -25,7 +25,7 @@ fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+        PermutationPath::from_input_path(test_util::make_test_data_path_string([
             "image",
             "permutation",
             "invalid_permutation.png",
@@ -36,14 +36,14 @@ fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
         },
         dispatcher: compute::Config { image_dimensions },
     };
-    test_utils::assert_error_contains(cli::run(config), "out of bounds mapping (x, y, delta_x, delta_y) = (3, 10, 257, 511) for an image of dimensions (width, height) = (20, 25)");
+    test_util::assert_error_contains(cli::run(config), "out of bounds mapping (x, y, delta_x, delta_y) = (3, 10, 257, 511) for an image of dimensions (width, height) = (20, 25)");
     Ok(())
 }
 
 #[test]
 fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+        PermutationPath::from_input_path(test_util::make_test_data_path_string([
             "image", "image", "red.png",
         ]))?;
     let config = Config {
@@ -52,7 +52,7 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
         },
         dispatcher: compute::Config { image_dimensions },
     };
-    test_utils::assert_error_contains(
+    test_util::assert_error_contains(
         cli::run(config),
         &format!("not the expected format of {}", ImageFormat::Rgba8),
     );

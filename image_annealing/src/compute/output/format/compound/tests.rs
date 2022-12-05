@@ -38,7 +38,7 @@ mod new {
 
         #[test]
         fn rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x2Image::new(super::zero_width_rgba8(), super::valid_rgba8()),
                 "width is zero",
             );
@@ -46,7 +46,7 @@ mod new {
 
         #[test]
         fn rgba8x3() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x3Image::new(
                     super::zero_width_rgba8(),
                     super::valid_rgba8(),
@@ -58,7 +58,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::zero_width_rgba8(),
                     super::valid_rgba8(),
@@ -71,7 +71,7 @@ mod new {
 
         #[test]
         fn rgba16x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16x2Image::new(super::zero_width_rgba16(), super::valid_rgba16()),
                 "width is zero",
             );
@@ -79,7 +79,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8Image::new(super::zero_width_rgba16(), super::valid_rgba8()),
                 "width is zero",
             );
@@ -87,7 +87,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8x2Image::new(
                     super::zero_width_rgba16(),
                     super::valid_rgba8(),
@@ -106,7 +106,7 @@ mod new {
 
         #[test]
         fn rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x2Image::new(super::valid_rgba8(), super::zero_width_rgba8()),
                 "width is zero",
             );
@@ -114,7 +114,7 @@ mod new {
 
         #[test]
         fn rgba8x3() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x3Image::new(
                     super::valid_rgba8(),
                     super::zero_width_rgba8(),
@@ -126,7 +126,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::zero_width_rgba8(),
@@ -139,7 +139,7 @@ mod new {
 
         #[test]
         fn rgba16x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16x2Image::new(super::valid_rgba16(), super::zero_width_rgba16()),
                 "width is zero",
             );
@@ -147,7 +147,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8Image::new(super::valid_rgba16(), super::zero_width_rgba8()),
                 "width is zero",
             );
@@ -155,7 +155,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8x2Image::new(
                     super::valid_rgba16(),
                     super::zero_width_rgba8(),
@@ -171,7 +171,7 @@ mod new {
 
         #[test]
         fn rgba8x3() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x3Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),
@@ -183,7 +183,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),
@@ -196,7 +196,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8x2Image::new(
                     super::valid_rgba16(),
                     super::valid_rgba8(),
@@ -212,7 +212,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),
@@ -232,7 +232,7 @@ mod new {
 
         #[test]
         fn rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x2Image::new(super::valid_rgba8(), super::large_rgba8()),
                 super::mismatch_error_message(),
             );
@@ -240,7 +240,7 @@ mod new {
 
         #[test]
         fn rgba8x3() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x3Image::new(
                     super::valid_rgba8(),
                     super::large_rgba8(),
@@ -252,7 +252,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::large_rgba8(),
@@ -265,7 +265,7 @@ mod new {
 
         #[test]
         fn rgba16x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16x2Image::new(super::valid_rgba16(), super::large_rgba16()),
                 super::mismatch_error_message(),
             );
@@ -273,7 +273,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8Image::new(super::valid_rgba16(), super::large_rgba8()),
                 super::mismatch_error_message(),
             );
@@ -281,7 +281,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8x2Image::new(
                     super::valid_rgba16(),
                     super::large_rgba8(),
@@ -297,7 +297,7 @@ mod new {
 
         #[test]
         fn rgba8x3() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x3Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),
@@ -309,7 +309,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),
@@ -322,7 +322,7 @@ mod new {
 
         #[test]
         fn rgba16_rgba8x2() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba16Rgba8x2Image::new(
                     super::valid_rgba16(),
                     super::valid_rgba8(),
@@ -338,7 +338,7 @@ mod new {
 
         #[test]
         fn rgba8x4() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 Rgba8x4Image::new(
                     super::valid_rgba8(),
                     super::valid_rgba8(),

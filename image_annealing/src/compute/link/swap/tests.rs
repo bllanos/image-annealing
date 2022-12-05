@@ -585,7 +585,7 @@ mod swap_pass_sequence {
 
         #[test]
         fn empty() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapPassSequence::from_passes([]),
                 "selection of swap passes is empty",
             );
@@ -634,7 +634,7 @@ mod swap_pass_sequence {
                 SwapPass::OffsetHorizontal,
                 SwapPass::Vertical,
             ];
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapPassSequence::from_passes(passes),
                 "attempt to select horizontal swaps, with offset pass multiple times",
             );
@@ -774,7 +774,7 @@ mod swap_pass_sequence {
         fn existing_pass() {
             let sequence = SwapPassSequence::from(SwapPass::Vertical);
             assert!(sequence.includes_pass(SwapPass::Vertical));
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 sequence.add_pass(SwapPass::Vertical),
                 "attempt to select vertical swaps, no offset pass multiple times",
             );
@@ -885,7 +885,7 @@ mod swap_pass_sequence {
 
         #[test]
         fn empty() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapPassSequence::try_from(SwapPassSet::empty()),
                 "selection of swap passes is empty",
             );

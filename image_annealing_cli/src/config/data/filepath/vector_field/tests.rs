@@ -45,7 +45,7 @@ mod image_path {
 
         #[test]
         fn success() -> Result<(), Box<dyn Error>> {
-            let path = test_utils::make_test_data_path_string(["image", "image", "stripes.png"]);
+            let path = test_util::make_test_data_path_string(["image", "image", "stripes.png"]);
             let expected = (
                 TestImagePath(path.clone()),
                 ImageDimensions::from_image_path(&path)?,
@@ -56,8 +56,8 @@ mod image_path {
 
         #[test]
         fn not_found() {
-            test_utils::assert_error_contains(
-                TestImagePath::from_input_path(test_utils::make_test_data_path_string([
+            test_util::assert_error_contains(
+                TestImagePath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "image",
                     "not_found.png",
@@ -68,8 +68,8 @@ mod image_path {
 
         #[test]
         fn non_image() {
-            test_utils::assert_error_contains(
-                TestImagePath::from_input_path(test_utils::make_test_data_path_string([
+            test_util::assert_error_contains(
+                TestImagePath::from_input_path(test_util::make_test_data_path_string([
                     "empty.txt",
                 ])),
                 "The file extension `.\"txt\"` was not recognized as an image format",
@@ -79,7 +79,7 @@ mod image_path {
 
     #[test]
     fn from_output_path() {
-        let path = test_utils::make_test_data_path_string(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path_string(["image", "image", "stripes.png"]);
         let expected = TestImagePath(path.clone());
         assert_eq!(TestImagePath::from_output_path(path), expected);
     }
@@ -97,7 +97,7 @@ mod permutation_path {
 
     #[test]
     fn as_ref_path() {
-        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
         assert_eq!(
             <PermutationPath as AsRef<Path>>::as_ref(&PermutationPath::from_raw_clone(
                 path.to_str().unwrap()
@@ -137,7 +137,7 @@ mod displacement_goal_path {
 
     #[test]
     fn as_ref_path() {
-        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
         assert_eq!(
             <DisplacementGoalPath as AsRef<Path>>::as_ref(&DisplacementGoalPath::from_raw_clone(
                 path.to_str().unwrap()

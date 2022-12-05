@@ -24,7 +24,7 @@ mod try_new {
 
     #[test]
     fn negative_width() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             ImageDimensions::try_new(-1, 1),
             "failed to convert -1 to the required type for dimensions",
         )
@@ -32,7 +32,7 @@ mod try_new {
 
     #[test]
     fn negative_height() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             ImageDimensions::try_new(1, -1),
             "failed to convert -1 to the required type for dimensions",
         )
@@ -40,12 +40,12 @@ mod try_new {
 
     #[test]
     fn zero_width() {
-        test_utils::assert_error_contains(ImageDimensions::try_new(0, 1), "width is zero")
+        test_util::assert_error_contains(ImageDimensions::try_new(0, 1), "width is zero")
     }
 
     #[test]
     fn zero_height() {
-        test_utils::assert_error_contains(ImageDimensions::try_new(1, 0), "height is zero")
+        test_util::assert_error_contains(ImageDimensions::try_new(1, 0), "height is zero")
     }
 
     #[test]
@@ -73,7 +73,7 @@ mod from_image_path {
 
     #[test]
     fn from_image_path() -> Result<(), Box<dyn Error>> {
-        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
         let dim = ImageDimensions::from_image_path(path)?;
         assert_eq!(dim.width(), 20);
         assert_eq!(dim.height(), 25);
@@ -82,8 +82,8 @@ mod from_image_path {
 
     #[test]
     fn missing_image() {
-        let path = test_utils::make_test_data_path(["image", "image", "not_found.png"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["image", "image", "not_found.png"]);
+        test_util::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "No such file or directory",
         );
@@ -91,8 +91,8 @@ mod from_image_path {
 
     #[test]
     fn non_image() {
-        let path = test_utils::make_test_data_path(["empty.txt"]);
-        test_utils::assert_error_contains(
+        let path = test_util::make_test_data_path(["empty.txt"]);
+        test_util::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "The file extension `.\"txt\"` was not recognized as an image format",
         );
@@ -106,7 +106,7 @@ mod make_linear_index {
     #[test]
     fn negative_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_linear_index(-1, 0),
             "failed to convert -1 to the required type for coordinates",
         );
@@ -116,7 +116,7 @@ mod make_linear_index {
     #[test]
     fn negative_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_linear_index(0, -1),
             "failed to convert -1 to the required type for coordinates",
         );
@@ -126,7 +126,7 @@ mod make_linear_index {
     #[test]
     fn large_x() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_linear_index(3, 0),
             "x = 3 is out of bounds (width, height) = (3, 5)",
         );
@@ -136,7 +136,7 @@ mod make_linear_index {
     #[test]
     fn large_y() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_linear_index(0, 5),
             "y = 5 is out of bounds (width, height) = (3, 5)",
         );
@@ -167,7 +167,7 @@ mod make_coordinates {
     #[test]
     fn negative() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_coordinates(-1),
             "failed to convert -1 to the required type for coordinates",
         );
@@ -177,7 +177,7 @@ mod make_coordinates {
     #[test]
     fn large() -> Result<(), Box<dyn Error>> {
         let dim = ImageDimensions::try_new(3, 5)?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             dim.make_coordinates(15),
             "linear index 15 is out of bounds (width, height) = (3, 5)",
         );
@@ -232,7 +232,7 @@ mod try_from_extent {
 
     #[test]
     fn zero_depth() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             <ImageDimensions as TryFrom<wgpu::Extent3d>>::try_from(wgpu::Extent3d {
                 width: 63,
                 height: 64,
@@ -244,7 +244,7 @@ mod try_from_extent {
 
     #[test]
     fn zero_width() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             <ImageDimensions as TryFrom<wgpu::Extent3d>>::try_from(wgpu::Extent3d {
                 width: 0,
                 height: 64,
@@ -256,7 +256,7 @@ mod try_from_extent {
 
     #[test]
     fn zero_height() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             <ImageDimensions as TryFrom<wgpu::Extent3d>>::try_from(wgpu::Extent3d {
                 width: 63,
                 height: 0,
@@ -268,7 +268,7 @@ mod try_from_extent {
 
     #[test]
     fn large_depth() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             <ImageDimensions as TryFrom<wgpu::Extent3d>>::try_from(wgpu::Extent3d {
                 width: 63,
                 height: 64,

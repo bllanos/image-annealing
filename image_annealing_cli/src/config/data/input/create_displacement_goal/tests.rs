@@ -43,18 +43,18 @@ mod create_displacement_goal_input_config {
                 },
             );
             let (displacement_goal_path, image_dimensions) =
-                DisplacementGoalPath::from_input_path(test_utils::make_test_data_path_string([
+                DisplacementGoalPath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "displacement_goal",
                     "identity_displacement_goal.png",
                 ]))?;
             let (candidate_permutation_path, _) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+                PermutationPath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
                 ]))?;
-            let image_path = LosslessImagePath::Rgba8(test_utils::make_test_data_path_string([
+            let image_path = LosslessImagePath::Rgba8(test_util::make_test_data_path_string([
                 "image",
                 "image",
                 "stripes.png",
@@ -79,7 +79,7 @@ mod create_displacement_goal_input_config {
                     height: 25,
                 },
             );
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
                 "width is zero",
             );
@@ -89,7 +89,7 @@ mod create_displacement_goal_input_config {
         fn no_input() {
             let unverified_config =
                 UnverifiedCreateDisplacementGoalInputConfig::Input(Default::default());
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
                 "at least one input must be provided when specifying input data as opposed to image dimensions",
             );
@@ -105,7 +105,7 @@ mod create_displacement_goal_input_config {
                     ..Default::default()
                 },
             );
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -121,7 +121,7 @@ mod create_displacement_goal_input_config {
                     ..Default::default()
                 },
             );
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -137,7 +137,7 @@ mod create_displacement_goal_input_config {
                     ..Default::default()
                 },
             );
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -156,7 +156,7 @@ mod create_displacement_goal_input_config {
                     ..Default::default()
                 },
             );
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
             "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
         );

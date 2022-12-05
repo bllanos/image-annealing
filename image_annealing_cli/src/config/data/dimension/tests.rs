@@ -19,7 +19,7 @@ mod unverified_image_dimensions_config {
 
         #[test]
         fn zero_width() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 <UnverifiedImageDimensionsConfig as TryInto<ImageDimensions>>::try_into(
                     UnverifiedImageDimensionsConfig {
                         width: 0,
@@ -32,7 +32,7 @@ mod unverified_image_dimensions_config {
 
         #[test]
         fn zero_height() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 <UnverifiedImageDimensionsConfig as TryInto<ImageDimensions>>::try_into(
                     UnverifiedImageDimensionsConfig {
                         width: 20,

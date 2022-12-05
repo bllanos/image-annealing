@@ -46,7 +46,7 @@ mod config_try_from_unverified_config {
                 displacement_goal_output_path_no_extension: String::from("displacement_goal_out"),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(r, "width is zero");
+            test_util::assert_error_contains(r, "width is zero");
         }
     }
 
@@ -94,7 +94,7 @@ mod config_try_from_unverified_config {
                 permutation_output_path_no_extension: String::from("permutation_out"),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(r, "width is zero");
+            test_util::assert_error_contains(r, "width is zero");
         }
     }
 
@@ -121,7 +121,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+                PermutationPath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
@@ -132,7 +132,7 @@ mod config_try_from_unverified_config {
                     algorithm: AlgorithmConfig::Permute {
                         candidate_permutation: candidate_permutation_path,
                         original_image: LosslessImagePath::Rgba8(
-                            test_utils::make_test_data_path_string([
+                            test_util::make_test_data_path_string([
                                 "image",
                                 "image",
                                 "stripes.png"
@@ -160,7 +160,7 @@ mod config_try_from_unverified_config {
                 ),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 r,
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -180,7 +180,7 @@ mod config_try_from_unverified_config {
                 ),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 r,
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -200,7 +200,7 @@ mod config_try_from_unverified_config {
                 ),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
             r,
             "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
         );
@@ -256,7 +256,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+                PermutationPath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
@@ -267,7 +267,7 @@ mod config_try_from_unverified_config {
                     algorithm: AlgorithmConfig::Swap {
                         candidate_permutation: candidate_permutation_path,
                         displacement_goal: DisplacementGoalPath::from_raw(
-                            test_utils::make_test_data_path_string([
+                            test_util::make_test_data_path_string([
                                 "image",
                                 "displacement_goal",
                                 "identity_displacement_goal.png"
@@ -295,7 +295,7 @@ mod config_try_from_unverified_config {
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 r,
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -314,7 +314,7 @@ mod config_try_from_unverified_config {
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 r,
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );
@@ -333,7 +333,7 @@ mod config_try_from_unverified_config {
                 parameters: make_unverified_swap_parameters(),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
             r,
             "mismatch in image dimensions, (width, height) = (20, 25) and (width, height) = (21, 25)",
         );
@@ -357,7 +357,7 @@ mod config_try_from_unverified_config {
                 },
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(r, "2 is not less than one");
+            test_util::assert_error_contains(r, "2 is not less than one");
         }
     }
 
@@ -377,7 +377,7 @@ mod config_try_from_unverified_config {
             };
             let r: Config = unverified_config.try_into()?;
             let (candidate_permutation_path, image_dimensions) =
-                PermutationPath::from_input_path(test_utils::make_test_data_path_string([
+                PermutationPath::from_input_path(test_util::make_test_data_path_string([
                     "image",
                     "permutation",
                     "identity_permutation.png",
@@ -400,7 +400,7 @@ mod config_try_from_unverified_config {
                 candidate_permutation: String::from("../test_data/image/permutation/not_found.png"),
             };
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 r,
                 "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
             );

@@ -5,15 +5,15 @@ use image_annealing::{
 };
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::{assert_step_until_error, assert_step_until_success};
-use test_utils::permutation::{assert_is_identity, DimensionsAndPermutation};
+use test_util::algorithm::{assert_step_until_error, assert_step_until_success};
+use test_util::permutation::{assert_is_identity, DimensionsAndPermutation};
 
 #[test]
 fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
@@ -41,13 +41,13 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let expected_permutation = permutation.clone();
 
     let DimensionsAndPermutation {
         permutation: invalid_permutation,
         dimensions: other_dimensions,
-    } = test_utils::permutation::duplicate();
+    } = test_util::permutation::duplicate();
     assert_eq!(dimensions, other_dimensions);
 
     let mut dispatcher = compute::create_dispatcher_block(&Config {
@@ -85,7 +85,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
@@ -111,7 +111,7 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
     let dimensions = ImageDimensions::try_new(2, 3)?;
     let invalid_dimensions =
         ImageDimensions::try_new(dimensions.width() + 1, dimensions.height()).unwrap();
-    let image = LosslessImage::Rgba16(Rgba16Image::new(test_utils::image::coordinates_to_colors(
+    let image = LosslessImage::Rgba16(Rgba16Image::new(test_util::image::coordinates_to_colors(
         &invalid_dimensions,
     ))?);
 

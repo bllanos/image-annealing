@@ -2,7 +2,7 @@ mod validated_permutation {
     use super::super::manipulation;
     use crate::{ImageDimensions, ImageDimensionsHolder};
     use std::error::Error;
-    use test_utils::permutation::{self, DimensionsAndPermutation};
+    use test_util::permutation::{self, DimensionsAndPermutation};
 
     #[test]
     fn inverse() -> Result<(), Box<dyn Error>> {
@@ -47,7 +47,7 @@ mod validated_permutation {
     mod io {
         use crate::compute::format::{ImageFileReader, ImageFileWriter, VectorFieldImageBuffer};
         use std::error::Error;
-        use test_utils::permutation::{self, DimensionsAndPermutation};
+        use test_util::permutation::{self, DimensionsAndPermutation};
 
         #[test]
         fn success() -> Result<(), Box<dyn Error>> {
@@ -56,7 +56,7 @@ mod validated_permutation {
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             assert_eq!(*validated_permutation.as_ref(), expected);
 
-            let path = test_utils::make_test_output_path_string([
+            let path = test_util::make_test_output_path_string([
                 "image_utils_validation_validated_permutation_io_image",
             ]);
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
@@ -75,8 +75,8 @@ mod validated_permutation {
         fn save_missing_directory() -> Result<(), Box<dyn Error>> {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
-            test_utils::assert_error_contains(
-                validated_permutation.save_add_extension(&test_utils::make_test_output_path([
+            test_util::assert_error_contains(
+                validated_permutation.save_add_extension(&test_util::make_test_output_path([
                     "not_found",
                     "cannot_create",
                 ])),
@@ -92,7 +92,7 @@ mod validate_permutation {
     use crate::compute::conversion::{self, VectorFieldEntry};
     use crate::ImageDimensions;
     use std::error::Error;
-    use test_utils::permutation::{self, DimensionsAndPermutation};
+    use test_util::permutation::{self, DimensionsAndPermutation};
 
     #[test]
     fn identity() -> Result<(), Box<dyn Error>> {
@@ -113,7 +113,7 @@ mod validate_permutation {
                 VectorFieldEntry(1, -1),
             ],
         );
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
         validate_permutation(permutation),
         "out of bounds mapping (x, y, delta_x, delta_y) = (0, 2, 1, -1) for an image of dimensions (width, height) = (1, 3)",
     );
@@ -130,7 +130,7 @@ mod validate_permutation {
                 VectorFieldEntry(0, -1),
             ],
         );
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
         validate_permutation(permutation),
         "out of bounds mapping (x, y, delta_x, delta_y) = (0, 0, 0, -1) for an image of dimensions (width, height) = (1, 3)",
     );
@@ -147,7 +147,7 @@ mod validate_permutation {
                 VectorFieldEntry(0, -1),
             ],
         );
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
         validate_permutation(permutation),
         "out of bounds mapping (x, y, delta_x, delta_y) = (0, 1, -2, 1) for an image of dimensions (width, height) = (1, 3)",
     );
@@ -164,7 +164,7 @@ mod validate_permutation {
                 VectorFieldEntry(0, -1),
             ],
         );
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
         validate_permutation(permutation),
         "out of bounds mapping (x, y, delta_x, delta_y) = (0, 0, 0, 3) for an image of dimensions (width, height) = (1, 3)",
     );
@@ -174,7 +174,7 @@ mod validate_permutation {
     #[test]
     fn duplicate() -> Result<(), Box<dyn Error>> {
         let DimensionsAndPermutation { permutation, .. } = permutation::duplicate();
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
         validate_permutation(permutation),
         "entries (x, y, delta_x, delta_y) = (0, 0, 0, 1) and (x, y, delta_x, delta_y) = (0, 2, 0, -1) both map to location (x, y) = (0, 1)",
     );

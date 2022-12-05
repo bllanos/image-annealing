@@ -14,7 +14,7 @@ mod operation_count_swap {
     #[test]
     fn no_preceding_swaps() {
         let mut system = super::create_system_single_pixel();
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             system.operation_count_swap(SwapPassSequence::all()),
             "not all selected swap passes have occurred since the last count swap operation",
         );
@@ -42,7 +42,7 @@ mod operation_count_swap {
             permutation: None,
             displacement_goal: None,
         })?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             system.operation_count_swap(pass.into()),
             "not all selected swap passes have occurred since the last count swap operation",
         );
@@ -71,7 +71,7 @@ mod output_count_swap {
                 permutation.into_inner(),
             )?),
         })?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             futures::executor::block_on(system.output_count_swap(DevicePollType::Wait, &pass.into())),
             "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
@@ -94,7 +94,7 @@ mod output_count_swap {
             )?),
         })?;
         system.operation_count_swap(pass.into())?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             futures::executor::block_on(system.output_count_swap(DevicePollType::Wait,&SwapPass::Vertical.into())),
             "not all selected swap passes were counted during the last count swap operation, if one was performed",
         );
@@ -108,7 +108,7 @@ mod output_displacement_goal {
     #[test]
     fn no_preceding_operations() {
         let mut system = super::create_system_single_pixel();
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             futures::executor::block_on(system.output_displacement_goal(DevicePollType::Wait)),
             "an output displacement goal field does not exist or has been invalidated",
         );
@@ -121,7 +121,7 @@ mod output_permutation {
     use crate::image_utils::validation;
     use crate::ImageDimensions;
     use std::error::Error;
-    use test_utils::permutation::DimensionsAndPermutation;
+    use test_util::permutation::DimensionsAndPermutation;
 
     #[test]
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
@@ -139,9 +139,9 @@ mod output_permutation {
         let DimensionsAndPermutation {
             permutation,
             dimensions,
-        } = test_utils::permutation::non_identity();
+        } = test_util::permutation::non_identity();
         let image = LosslessImage::Rgba16(Rgba16Image::new(
-            test_utils::image::coordinates_to_colors(&dimensions),
+            test_util::image::coordinates_to_colors(&dimensions),
         )?);
         let mut system = futures::executor::block_on(System::new(&ImageDimensions::try_new(
             dimensions.width(),
@@ -153,7 +153,7 @@ mod output_permutation {
                 validation::vector_field_into_validated_permutation_unchecked(permutation)
             }),
         })?;
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             futures::executor::block_on(system.output_permutation(DevicePollType::Wait)),
             "an output permutation does not exist or has been invalidated",
         );
@@ -168,7 +168,7 @@ mod output_permuted_image {
     #[test]
     fn no_preceding_operations() {
         let mut system = super::create_system_single_pixel();
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             futures::executor::block_on(
                 system.output_permuted_image(DevicePollType::Wait, ImageFormat::Rgba8),
             ),

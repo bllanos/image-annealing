@@ -24,7 +24,7 @@ mod parse_args {
     fn no_config_file() {
         let v = vec![String::from("one")];
         let message = parse_args(v).unwrap_err().unwrap_stderr();
-        test_utils::assert_error_contains::<(), String>(
+        test_util::assert_error_contains::<(), String>(
             Err(message),
             "pass --help for usage information",
         );
@@ -33,7 +33,7 @@ mod parse_args {
     #[test]
     fn valid_config_file() -> Result<(), ParseFailure> {
         let path =
-            test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
+            test_util::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
         let v = vec![String::from("one"), String::from("-c"), path];
         let r = parse_args(v)?;
         assert_eq!(
@@ -55,7 +55,7 @@ mod parse_args {
     #[test]
     fn additional_args() {
         let path =
-            test_utils::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
+            test_util::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
         let v = vec![
             String::from("one"),
             String::from("-c"),
@@ -63,7 +63,7 @@ mod parse_args {
             String::from("other_arg"),
         ];
         let message = parse_args(v).unwrap_err().unwrap_stderr();
-        test_utils::assert_error_contains::<(), String>(
+        test_util::assert_error_contains::<(), String>(
             Err(message),
             "No such command: `other_arg`",
         );

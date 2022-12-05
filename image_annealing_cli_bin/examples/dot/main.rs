@@ -101,7 +101,7 @@ mod tests {
         #[test]
         fn no_argument() {
             let v = vec![String::from("12")];
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 parse_args(v),
                 "expected a square image side length as a command-line argument",
             );
@@ -110,19 +110,19 @@ mod tests {
         #[test]
         fn negative() {
             let v = vec![String::from("12"), String::from("-1")];
-            test_utils::assert_error_contains(parse_args(v), "invalid digit found in string");
+            test_util::assert_error_contains(parse_args(v), "invalid digit found in string");
         }
 
         #[test]
         fn fraction() {
             let v = vec![String::from("12"), String::from("1.5")];
-            test_utils::assert_error_contains(parse_args(v), "invalid digit found in string");
+            test_util::assert_error_contains(parse_args(v), "invalid digit found in string");
         }
 
         #[test]
         fn zero() {
             let v = vec![String::from("12"), String::from("0")];
-            test_utils::assert_error_contains(parse_args(v), "width is zero");
+            test_util::assert_error_contains(parse_args(v), "width is zero");
         }
 
         #[test]

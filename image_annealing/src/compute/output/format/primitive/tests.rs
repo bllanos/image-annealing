@@ -22,9 +22,9 @@ mod vector_field_image_buffer {
 
     #[test]
     fn load_unexpected_format() {
-        let path = test_utils::make_test_data_path(["image", "image", "red.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "red.png"]);
 
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             VectorFieldImageBuffer::load(path),
             &format!("not the expected format of {}", ImageFormat::Rgba8),
         );
@@ -37,9 +37,9 @@ mod rgba16_image_buffer {
 
     #[test]
     fn load_unexpected_format() {
-        let path = test_utils::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
 
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             Rgba16ImageBuffer::load(path),
             &format!("not the expected format of {}", ImageFormat::Rgba16),
         );

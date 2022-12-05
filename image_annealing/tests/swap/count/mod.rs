@@ -1,9 +1,9 @@
 use image_annealing::compute::{self, Config, OutputStatus, SwapInput, SwapParameters, SwapPass};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
 use std::error::Error;
-use test_utils::algorithm::{assert_correct_default_swap_full_output, assert_step_until_success};
-use test_utils::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
-use test_utils::permutation::DimensionsAndPermutation;
+use test_util::algorithm::{assert_correct_default_swap_full_output, assert_step_until_success};
+use test_util::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
+use test_util::permutation::DimensionsAndPermutation;
 
 mod sum_at_least_two_elements_per_invocation {
     use super::super::border;
@@ -67,8 +67,8 @@ fn skip_count_swap() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::reflect_around_center();
-    let expected_permutation = test_utils::operation::swap(&permutation);
+    } = test_util::permutation::reflect_around_center();
+    let expected_permutation = test_util::operation::swap(&permutation);
     let displacement_goal =
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();

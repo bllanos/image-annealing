@@ -5,20 +5,20 @@ use image_annealing::{
 };
 use std::default::Default;
 use std::error::Error;
-use test_utils::algorithm::{assert_step_until_success, assert_step_until_success_async};
-use test_utils::permutation::{assert_is_identity, DimensionsAndPermutation};
+use test_util::algorithm::{assert_step_until_success, assert_step_until_success_async};
+use test_util::permutation::{assert_is_identity, DimensionsAndPermutation};
 
 #[test]
 fn run_once_all_inputs() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let displacement_goal = DisplacementGoal::from_raw_candidate_permutation(permutation.clone())?;
     let expected_output_displacement_goal = displacement_goal.clone();
     let expected_permutation = permutation.clone();
     let lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::image::coordinates_to_colors(&dimensions),
+        test_util::image::coordinates_to_colors(&dimensions),
     )?);
     let expected_image = lossless_image.clone();
 
@@ -100,10 +100,10 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
     let DimensionsAndPermutation {
         permutation,
         dimensions,
-    } = test_utils::permutation::non_identity();
+    } = test_util::permutation::non_identity();
     let displacement_goal = DisplacementGoal::from_raw_candidate_permutation(permutation.clone())?;
     let lossless_image = LosslessImage::Rgba16(Rgba16Image::new(
-        test_utils::image::coordinates_to_colors(&dimensions),
+        test_util::image::coordinates_to_colors(&dimensions),
     )?);
 
     let mut dispatcher = compute::create_dispatcher_block(&Config {

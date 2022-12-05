@@ -181,7 +181,7 @@ mod algorithm {
 
         #[test]
         fn zero_step() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 super::ZeroStepAlgorithm::new().step_until(OutputStatus::NoNewOutput),
                 "ZeroStepAlgorithm error",
             );
@@ -191,7 +191,7 @@ mod algorithm {
         fn one_step() -> Result<(), Box<dyn Error>> {
             let mut algorithm = super::OneStepAlgorithm::new();
             algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?;
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 super::OneStepAlgorithm::new().step_until(OutputStatus::FinalFullOutput),
                 "OneStepAlgorithm error",
             );
@@ -202,7 +202,7 @@ mod algorithm {
         fn two_step() -> Result<(), Box<dyn Error>> {
             let mut algorithm = super::TwoStepAlgorithm::new();
             algorithm.step_until(OutputStatus::FinalPartialAndFullOutput)?;
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 super::TwoStepAlgorithm::new().step_until(OutputStatus::FinalFullOutput),
                 "TwoStepAlgorithm error",
             );
@@ -263,7 +263,7 @@ mod algorithm {
 
         #[test]
         fn zero_step() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 super::ZeroStepAlgorithm::new().step_until_finished(),
                 "ZeroStepAlgorithm error",
             );
@@ -281,7 +281,7 @@ mod algorithm {
 
         #[test]
         fn one_step_unfinished() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 OneStepUnfinishedAlgorithm::new().step_until_finished(),
                 "OneStepUnfinishedAlgorithm error",
             );

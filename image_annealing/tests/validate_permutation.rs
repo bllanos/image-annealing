@@ -1,10 +1,10 @@
 use image_annealing::compute::{self, Config, OutputStatus, ValidatePermutationInput};
 use image_annealing::{CandidatePermutation, ImageDimensions};
 use std::error::Error;
-use test_utils::algorithm::{
+use test_util::algorithm::{
     assert_step_until_error, assert_step_until_success, assert_step_until_success_async,
 };
-use test_utils::permutation::{self, DimensionsAndPermutation};
+use test_util::permutation::{self, DimensionsAndPermutation};
 
 #[test]
 fn run_once_identity() -> Result<(), Box<dyn Error>> {

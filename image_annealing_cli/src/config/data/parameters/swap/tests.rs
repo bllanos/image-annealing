@@ -23,7 +23,7 @@ mod swap_stop_threshold_try_from_unverified_swap_stop_threshold {
 
     #[test]
     fn invalid_acceptance_fraction() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             SwapStopThreshold::try_from(UnverifiedSwapStopThreshold::SwapAcceptanceFraction(-1.0)),
             "-1 is negative",
         );
@@ -51,7 +51,7 @@ mod iteration_count {
 
     #[test]
     fn try_from_zero() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             IterationCount::try_from(UnverifiedIterationCount(0)),
             "iteration count cannot be zero",
         );
@@ -84,7 +84,7 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
 
         #[test]
         fn iteration_count_zero() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapStopConfig::try_from(UnverifiedSwapStopConfig::Bounded {
                     iteration_count: UnverifiedIterationCount(0),
                     threshold: None,
@@ -110,7 +110,7 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
 
         #[test]
         fn threshold_one() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapStopConfig::try_from(UnverifiedSwapStopConfig::Bounded {
                     iteration_count: UnverifiedIterationCount(1),
                     threshold: Some(UnverifiedSwapStopThreshold::SwapAcceptanceFraction(1.0)),
@@ -140,7 +140,7 @@ mod swap_stop_config_try_from_unverified_swap_stop_config {
 
         #[test]
         fn threshold_one() {
-            test_utils::assert_error_contains(
+            test_util::assert_error_contains(
                 SwapStopConfig::try_from(UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapAcceptanceFraction(1.0),
                 )),
@@ -240,7 +240,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
 
     #[test]
     fn stop_threshold_one() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapAcceptanceFraction(1.0),
@@ -255,7 +255,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
 
     #[test]
     fn empty_sequence() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapsAccepted(0),
@@ -270,7 +270,7 @@ mod swap_parameters_config_try_from_unverified_swap_parameters_config {
 
     #[test]
     fn duplicate_pass() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             SwapParametersConfig::try_from(UnverifiedSwapParametersConfig {
                 stop: UnverifiedSwapStopConfig::Unbounded(
                     UnverifiedSwapStopThreshold::SwapsAccepted(0),

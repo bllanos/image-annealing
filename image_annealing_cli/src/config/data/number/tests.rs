@@ -16,7 +16,7 @@ mod nonnegative_rational_number {
 
     #[test]
     fn infinite() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             NonnegativeRationalNumber::new(f64::INFINITY),
             "inf is not finite",
         );
@@ -24,7 +24,7 @@ mod nonnegative_rational_number {
 
     #[test]
     fn nan() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             NonnegativeRationalNumber::new(f64::NAN),
             "NaN is not finite",
         );
@@ -32,7 +32,7 @@ mod nonnegative_rational_number {
 
     #[test]
     fn negative() {
-        test_utils::assert_error_contains(NonnegativeRationalNumber::new(-1.0), "-1 is negative");
+        test_util::assert_error_contains(NonnegativeRationalNumber::new(-1.0), "-1 is negative");
     }
 
     #[test]
@@ -61,7 +61,7 @@ mod nonnegative_proper_fraction {
 
     #[test]
     fn one() {
-        test_utils::assert_error_contains(
+        test_util::assert_error_contains(
             NonnegativeProperFraction::new(1.0),
             "1 is not less than one",
         );
@@ -69,7 +69,7 @@ mod nonnegative_proper_fraction {
 
     #[test]
     fn negative() {
-        test_utils::assert_error_contains(NonnegativeProperFraction::new(-1.0), "-1 is negative");
+        test_util::assert_error_contains(NonnegativeProperFraction::new(-1.0), "-1 is negative");
     }
 
     #[test]
