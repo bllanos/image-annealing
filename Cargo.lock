@@ -602,6 +602,7 @@ dependencies = [
  "futures",
  "futures-intrusive",
  "image_annealing",
+ "image_annealing_cli_util",
  "parking_lot",
  "serde",
  "serde_json",
@@ -619,6 +620,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "image_annealing_cli_util"
+version = "0.1.0"
+dependencies = [
+ "test_util",
+]
+
+[[package]]
 name = "image_annealing_shader"
 version = "0.1.0"
 dependencies = [
@@ -631,6 +639,7 @@ name = "image_annealing_shader_cli"
 version = "0.1.0"
 dependencies = [
  "bpaf",
+ "image_annealing_cli_util",
  "image_annealing_shader",
  "test_util",
 ]

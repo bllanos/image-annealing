@@ -1,0 +1,13 @@
+[package]
+name = "image_annealing_cli_util"
+version = "0.1.0"
+authors = ["Bernard Llanos"]
+edition = "2021"
+description = "Common utilities library for command-line programs for the image_annealing crates"
+keywords = ["image","graphics","cli"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+
+[dev-dependencies]
+test_util = { path = "../test_util" }

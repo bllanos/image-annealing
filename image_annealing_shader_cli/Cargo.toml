@@ -9,6 +9,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 bpaf = { version = "0.7.7", features = ["autocomplete", "derive"] }
+image_annealing_cli_util = { path = "../image_annealing_cli_util" }
 image_annealing_shader = { path = "../image_annealing_shader" }
 
 [dev-dependencies]

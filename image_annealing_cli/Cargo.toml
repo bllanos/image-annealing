@@ -12,6 +12,7 @@ bpaf = { version = "0.7.7", features = ["autocomplete", "derive"] }
 futures = "0.3.25"
 futures-intrusive = "0.5.0"
 image_annealing = { path = "../image_annealing" }
+image_annealing_cli_util = { path = "../image_annealing_cli_util" }
 parking_lot = "0.12.1"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.87"

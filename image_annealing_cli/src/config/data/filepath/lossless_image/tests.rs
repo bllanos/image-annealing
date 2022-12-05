@@ -459,7 +459,7 @@ mod lossless_image_path {
         }
 
         fn missing_error_message() -> &'static str {
-            "does not exist in the filesystem"
+            "does not exist"
         }
 
         fn non_image_path() -> String {

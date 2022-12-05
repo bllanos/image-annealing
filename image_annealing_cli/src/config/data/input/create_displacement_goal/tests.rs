@@ -107,7 +107,7 @@ mod create_displacement_goal_input_config {
             );
             test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -123,7 +123,7 @@ mod create_displacement_goal_input_config {
             );
             test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -139,7 +139,7 @@ mod create_displacement_goal_input_config {
             );
             test_util::assert_error_contains(
                 CreateDisplacementGoalInputConfig::from_config(unverified_config),
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 

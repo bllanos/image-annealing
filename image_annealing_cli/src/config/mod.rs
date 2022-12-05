@@ -12,4 +12,3 @@ pub use data::{
     UnverifiedSwapStopConfig, UnverifiedSwapStopThreshold,
 };
 pub use io::parse_config_file;
-pub use io::FileNotFoundError;

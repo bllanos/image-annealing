@@ -162,7 +162,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_util::assert_error_contains(
                 r,
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -182,7 +182,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_util::assert_error_contains(
                 r,
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -297,7 +297,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_util::assert_error_contains(
                 r,
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -316,7 +316,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_util::assert_error_contains(
                 r,
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
 
@@ -402,7 +402,7 @@ mod config_try_from_unverified_config {
             let r = <Config as TryFrom<UnverifiedConfig>>::try_from(unverified_config);
             test_util::assert_error_contains(
                 r,
-                "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
+                "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
     }

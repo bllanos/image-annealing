@@ -1,5 +1,5 @@
-use super::super::super::io::{convert_and_check_input_path, convert_path_separators};
 use image_annealing::ImageDimensions;
+use image_annealing_cli_util::io;
 use std::error::Error;
 use std::fmt;
 use std::path::Path;
@@ -17,13 +17,13 @@ where
     fn from_input_path<T: AsRef<str>>(
         unverified_path: T,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
-        let path = convert_and_check_input_path(unverified_path)?;
+        let path = io::convert_and_check_input_file_path(unverified_path)?;
         let dimensions = ImageDimensions::from_image_path(&path)?;
         Ok((Self::from_raw(path), dimensions))
     }
 
     fn from_output_path<T: AsRef<str>>(path_no_extension: T) -> Self {
-        Self::from_raw(convert_path_separators(path_no_extension))
+        Self::from_raw(io::convert_path_separators(path_no_extension))
     }
 }
 

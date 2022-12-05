@@ -7,19 +7,13 @@ mod parse_config_file {
     #[test]
     fn missing_config_file() {
         let path = test_util::make_test_data_path(["config", "not_found.json"]);
-        test_util::assert_error_contains(
-            parse_config_file(path),
-            "does not exist in the filesystem",
-        );
+        test_util::assert_error_contains(parse_config_file(path), "does not exist");
     }
 
     #[test]
     fn directory_not_file() {
         let path = test_util::make_test_data_path(["config"]);
-        test_util::assert_error_contains(
-            parse_config_file(path),
-            "does not exist in the filesystem",
-        );
+        test_util::assert_error_contains(parse_config_file(path), "is not a file");
     }
 
     #[test]
@@ -55,71 +49,5 @@ mod parse_config_file {
     fn invalid_create_permutation_config_file() {
         let path = test_util::make_test_data_path(["config", "create_permutation", "invalid.json"]);
         test_util::assert_error_contains(parse_config_file(path), "width is zero");
-    }
-}
-
-mod check_input_path {
-    use super::super::check_input_path;
-    use std::error::Error;
-    use std::path::Path;
-
-    #[test]
-    fn absent_file() {
-        let path = test_util::make_test_data_path(["none.png"]);
-        test_util::assert_error_contains(
-            check_input_path(path),
-            "does not exist in the filesystem", // Note: do not put a platform-dependent path string here
-        );
-    }
-
-    #[test]
-    fn not_a_file() {
-        let path = test_util::make_test_data_path::<Vec<&Path>, &Path>(Vec::new());
-        test_util::assert_error_contains(check_input_path(path), "file");
-    }
-
-    #[test]
-    fn valid_file() -> Result<(), Box<dyn Error>> {
-        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
-        Ok(check_input_path(path)?)
-    }
-}
-
-mod convert_path_separators {
-    use super::super::convert_path_separators;
-    use std::path::MAIN_SEPARATOR;
-
-    #[test]
-    fn windows_path() {
-        let filepath = String::from("one\\two\\three\\..\\.\\end.txt");
-        let expected = filepath.clone();
-        let converted = convert_path_separators(filepath);
-        if MAIN_SEPARATOR == '\\' {
-            assert_eq!(converted, expected);
-        } else {
-            assert!(converted.find('\\').is_none());
-            assert!(converted.find(MAIN_SEPARATOR).is_some());
-        }
-    }
-
-    #[test]
-    fn unix_path() {
-        let filepath = String::from("one/two/three/.././end.txt");
-        let expected = filepath.clone();
-        let converted = convert_path_separators(filepath);
-        if MAIN_SEPARATOR == '/' {
-            assert_eq!(converted, expected);
-        } else {
-            assert!(converted.find('/').is_none());
-            assert!(converted.find(MAIN_SEPARATOR).is_some());
-        }
-    }
-
-    #[test]
-    fn no_separators() {
-        let filepath = String::from("end.txt");
-        let expected = filepath.clone();
-        let converted = convert_path_separators(filepath);
-        assert_eq!(converted, expected);
     }
 }

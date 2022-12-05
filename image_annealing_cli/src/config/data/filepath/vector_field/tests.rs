@@ -62,7 +62,7 @@ mod image_path {
                     "image",
                     "not_found.png",
                 ])),
-                "does not exist in the filesystem",
+                "does not exist",
             );
         }
 
