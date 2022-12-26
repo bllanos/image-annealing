@@ -2,6 +2,7 @@ use super::super::super::resource::texture::{LosslessImageTexture, TextureDataty
 use super::{
     ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, ImageFormat, ImageFormatError,
 };
+use crate::compute::conversion::VectorFieldEntry;
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use image::{io::Reader as ImageReader, GenericImageView, ImageBuffer};
 use std::error::Error;
@@ -64,6 +65,19 @@ impl ImageFileWriter
         self.save(&output_path)?;
         Ok(output_path)
     }
+}
+
+pub fn identity(dimensions: &ImageDimensions) -> VectorFieldImageBuffer {
+    VectorFieldImageBuffer::from_pixel(
+        dimensions.width().try_into().unwrap(),
+        dimensions.height().try_into().unwrap(),
+        VectorFieldEntry::identity().to_pixel(),
+    )
+}
+
+pub fn is_identity(image: &VectorFieldImageBuffer) -> bool {
+    let identity_pixel = VectorFieldEntry::identity().to_pixel();
+    image.pixels().all(|px| *px == identity_pixel)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

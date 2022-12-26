@@ -1,5 +1,5 @@
 use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
-use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions};
+use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensions, VectorField};
 use std::default::Default;
 use std::error::Error;
 use test_util::algorithm::{
@@ -14,7 +14,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_util::permutation::non_identity();
-    let displacement_goal = test_util::displacement_goal::identity(&dimensions);
+    let displacement_goal = DisplacementGoal::identity(&dimensions);
     let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
 
     let dispatcher = compute::create_dispatcher_block(&Config {
@@ -22,7 +22,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             displacement_goal: Some(displacement_goal),
         },
         &test_util::algorithm::default_swap_parameters(),
@@ -42,14 +42,14 @@ fn invalid_displacement_goal_dimensions() -> Result<(), Box<dyn Error>> {
         dimensions,
     } = test_util::permutation::non_identity();
     let other_dimensions = ImageDimensions::try_new(dimensions.width() + 1, dimensions.height())?;
-    let displacement_goal = test_util::displacement_goal::identity(&other_dimensions);
+    let displacement_goal = DisplacementGoal::identity(&other_dimensions);
 
     let dispatcher = compute::create_dispatcher_block(&Config {
         image_dimensions: dimensions,
     })?;
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             displacement_goal: Some(displacement_goal),
         },
         &test_util::algorithm::default_swap_parameters(),
@@ -74,7 +74,7 @@ fn forget_displacement_goal() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             ..Default::default()
         },
         &test_util::algorithm::default_swap_parameters(),
@@ -110,7 +110,9 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     let swap_parameters = test_util::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(invalid_permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                invalid_permutation,
+            )?),
             displacement_goal: Some(displacement_goal),
         },
         &swap_parameters,
@@ -120,7 +122,9 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                permutation.clone(),
+            )?),
             displacement_goal: Some(DisplacementGoal::from_vector_field(
                 expected_displacement_goal.clone(),
             )?),

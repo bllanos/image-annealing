@@ -8,6 +8,10 @@ pub type VectorFieldEntryComponent = i16;
 pub struct VectorFieldEntry(pub VectorFieldEntryComponent, pub VectorFieldEntryComponent);
 
 impl VectorFieldEntry {
+    pub fn identity() -> Self {
+        Self(0, 0)
+    }
+
     pub fn from_pixel(px: &VectorFieldImageBufferPixel) -> Self {
         VectorFieldEntry(
             VectorFieldEntryComponent::from_be_bytes([px[0], px[1]]),

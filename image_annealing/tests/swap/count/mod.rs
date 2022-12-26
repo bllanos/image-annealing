@@ -79,7 +79,9 @@ fn skip_count_swap() -> Result<(), Box<dyn Error>> {
     let swap_parameters = SwapParameters::from_sequence(SwapPass::Horizontal.into());
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                permutation.clone(),
+            )?),
             displacement_goal: Some(displacement_goal),
         },
         &swap_parameters,

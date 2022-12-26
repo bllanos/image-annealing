@@ -28,7 +28,7 @@ fn run_once_all_inputs() -> Result<(), Box<dyn Error>> {
     let mut algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
             displacement_goal: Some(displacement_goal),
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             image: Some(lossless_image),
         },
         &Default::default(),
@@ -112,7 +112,7 @@ fn run_twice() -> Result<(), Box<dyn Error>> {
     let mut algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
             displacement_goal: Some(displacement_goal),
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             image: Some(lossless_image),
         },
         &Default::default(),

@@ -62,7 +62,7 @@ fn permute_lossless_image(original_image: LosslessImage) -> Result<(), Box<dyn E
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_image.clone()),
         },
         &Default::default(),

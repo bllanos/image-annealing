@@ -1,9 +1,9 @@
-use super::manipulation;
+use super::{manipulation, VectorField};
 use super::{ImageDimensions, ImageDimensionsHolder};
 use crate::compute::conversion::VectorFieldEntry;
 use crate::compute::format::{
-    ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image, VectorFieldImageBuffer,
-    VectorFieldImageBufferComponent,
+    self, ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image,
+    VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
 use std::error::Error;
 use std::fmt;
@@ -65,7 +65,62 @@ impl fmt::Display for PermutationFlaw {
 
 impl Error for PermutationFlaw {}
 
-pub type CandidatePermutation = Rgba8Image;
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CandidatePermutation(Rgba8Image);
+
+impl CandidatePermutation {
+    pub fn from_vector_field_image(image: Rgba8Image) -> Self {
+        Self(image)
+    }
+
+    pub fn from_vector_field(image: image::RgbaImage) -> Result<Self, Box<dyn Error>> {
+        Ok(Self(Rgba8Image::new(image)?))
+    }
+}
+
+impl AsRef<VectorFieldImageBuffer> for CandidatePermutation {
+    fn as_ref(&self) -> &VectorFieldImageBuffer {
+        self.0.as_ref()
+    }
+}
+
+impl PartialEq<VectorFieldImageBuffer> for CandidatePermutation {
+    fn eq(&self, other: &VectorFieldImageBuffer) -> bool {
+        self.as_ref() == other
+    }
+}
+
+impl ImageDimensionsHolder for CandidatePermutation {
+    fn dimensions(&self) -> &ImageDimensions {
+        self.0.dimensions()
+    }
+}
+
+impl VectorField for CandidatePermutation {
+    fn identity(dimensions: &ImageDimensions) -> Self {
+        Self(Rgba8Image::new(format::identity(dimensions)).unwrap())
+    }
+
+    fn into_inner(self) -> VectorFieldImageBuffer {
+        self.0.into_inner()
+    }
+
+    fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
+        self.0.as_ref().as_raw().as_slice()
+    }
+}
+
+impl ImageFileReader for CandidatePermutation {
+    fn load<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+        Ok(Self(<Rgba8Image as ImageFileReader>::load(path)?))
+    }
+}
+
+impl From<ValidatedPermutation> for CandidatePermutation {
+    fn from(value: ValidatedPermutation) -> Self {
+        Self::from_vector_field(value.into_inner()).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidatedPermutation {
@@ -74,14 +129,6 @@ pub struct ValidatedPermutation {
 }
 
 impl ValidatedPermutation {
-    pub fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
-        self.data.as_raw().as_slice()
-    }
-
-    pub fn into_inner(self) -> VectorFieldImageBuffer {
-        self.data
-    }
-
     pub fn inverse(&self) -> Self {
         Self {
             data: manipulation::invert_permutation(self),
@@ -96,9 +143,32 @@ impl AsRef<VectorFieldImageBuffer> for ValidatedPermutation {
     }
 }
 
+impl PartialEq<VectorFieldImageBuffer> for ValidatedPermutation {
+    fn eq(&self, other: &VectorFieldImageBuffer) -> bool {
+        self.as_ref() == other
+    }
+}
+
 impl ImageDimensionsHolder for ValidatedPermutation {
     fn dimensions(&self) -> &ImageDimensions {
         &self.dimensions
+    }
+}
+
+impl VectorField for ValidatedPermutation {
+    fn identity(dimensions: &ImageDimensions) -> Self {
+        Self {
+            data: format::identity(dimensions),
+            dimensions: *dimensions,
+        }
+    }
+
+    fn into_inner(self) -> VectorFieldImageBuffer {
+        self.data
+    }
+
+    fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
+        self.data.as_raw().as_slice()
     }
 }
 

@@ -24,7 +24,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -57,7 +57,7 @@ async fn run_once_identity_async_inner() -> Result<(), Box<dyn Error>> {
     .await?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -94,7 +94,7 @@ fn bit_interpretation_cases() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),

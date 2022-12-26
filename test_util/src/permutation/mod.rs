@@ -1,7 +1,7 @@
 use image::ImageBuffer;
 use image_annealing::compute::conversion::{self, VectorFieldEntry};
-use image_annealing::compute::format::{Rgba16ImageBuffer, VectorFieldImageBuffer};
-use image_annealing::ImageDimensions;
+use image_annealing::compute::format::{self, Rgba16ImageBuffer, VectorFieldImageBuffer};
+use image_annealing::{ImageDimensions, VectorField};
 
 pub struct DimensionsAndPermutation {
     pub permutation: VectorFieldImageBuffer,
@@ -13,9 +13,8 @@ where
     T: TryInto<usize> + std::fmt::Debug + std::fmt::Display + Copy,
 {
     let dimensions = ImageDimensions::try_new(width, height).unwrap();
-    let v = vec![VectorFieldEntry(0, 0); dimensions.count()];
     DimensionsAndPermutation {
-        permutation: conversion::to_image(&dimensions, &v),
+        permutation: format::identity(&dimensions),
         dimensions,
     }
 }
@@ -161,7 +160,7 @@ pub fn eight_cycle2() -> DimensionsAndPermutation {
 
 pub fn bit_interpretation_cases() -> DimensionsAndPermutation {
     let dimensions = ImageDimensions::try_new(513, 513).unwrap();
-    let mut v = vec![VectorFieldEntry(0, 0); dimensions.count()];
+    let mut v = vec![VectorFieldEntry::identity(); dimensions.count()];
     // One cycle
     v[0] = VectorFieldEntry(1, 128); // (0, 0) to (1, 128)
     v[65665] = VectorFieldEntry(128, 1); // (1, 128) to (129, 129)
@@ -273,9 +272,6 @@ pub fn line_with_first_texel_moved(
     }
 }
 
-pub fn assert_is_identity<T: AsRef<VectorFieldImageBuffer>>(permutation: T) {
-    let converted_permutation = conversion::to_vec(permutation.as_ref());
-    assert!(converted_permutation
-        .iter()
-        .all(|element| *element == VectorFieldEntry(0, 0)));
+pub fn assert_is_identity<T: VectorField>(permutation: &T) {
+    assert!(permutation.is_identity());
 }

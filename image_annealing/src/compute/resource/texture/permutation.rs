@@ -1,7 +1,7 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::data::TextureData;
 use super::{Texture, TextureDatatype};
-use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation};
+use crate::{ImageDimensions, ImageDimensionsHolder, ValidatedPermutation, VectorField};
 use std::num::NonZeroU32;
 
 pub struct PermutationTexture;

@@ -3,6 +3,7 @@ use super::super::OutputStatus;
 use super::{CompletionStatus, CompletionStatusHolder};
 use crate::image_utils::check_dimensions_match2;
 use crate::image_utils::validation::{self, CandidatePermutation, ValidatedPermutation};
+use crate::VectorField;
 use std::error::Error;
 
 #[derive(Default)]

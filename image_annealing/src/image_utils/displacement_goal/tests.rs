@@ -1,8 +1,8 @@
 mod displacement_goal {
     use super::super::validation;
     use super::super::DisplacementGoal;
-    use crate::compute::format::Rgba8Image;
-    use crate::{CandidatePermutation, ImageDimensions, ImageDimensionsHolder};
+    use crate::compute::format::{self, Rgba8Image};
+    use crate::{CandidatePermutation, ImageDimensions, ImageDimensionsHolder, VectorField};
     use std::error::Error;
     use test_util::permutation::{self, DimensionsAndPermutation};
 
@@ -38,8 +38,9 @@ mod displacement_goal {
     fn from_candidate_permutation() -> Result<(), Box<dyn Error>> {
         let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
         let expected = validation::validate_permutation(permutation.clone())?.inverse();
-        let displacement_goal =
-            DisplacementGoal::from_candidate_permutation(CandidatePermutation::new(permutation)?)?;
+        let displacement_goal = DisplacementGoal::from_candidate_permutation(
+            CandidatePermutation::from_vector_field(permutation)?,
+        )?;
         assert_eq!(displacement_goal.as_ref(), expected.as_ref());
         Ok(())
     }
@@ -81,6 +82,27 @@ mod displacement_goal {
         let expected = ImageDimensions::from_image(&permutation)?;
         let displacement_goal = DisplacementGoal::from_vector_field(permutation)?;
         assert_eq!(*displacement_goal.dimensions(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn eq_image_buffer() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation {
+            mut permutation, ..
+        } = permutation::non_identity();
+        let displacement_goal = DisplacementGoal::from_vector_field(permutation.clone())?;
+        assert_eq!(displacement_goal, permutation);
+        permutation.put_pixel(0, 0, image::Rgba([0, 0, 0, 2]));
+        assert_ne!(displacement_goal, permutation);
+        Ok(())
+    }
+
+    #[test]
+    fn identity() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::try_new(2, 3)?;
+        let displacement_goal = DisplacementGoal::identity(&dimensions);
+        assert_eq!(displacement_goal.dimensions(), &dimensions);
+        assert!(format::is_identity(displacement_goal.as_ref()));
         Ok(())
     }
 

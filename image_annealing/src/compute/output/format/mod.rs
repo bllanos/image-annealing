@@ -10,8 +10,8 @@ pub use compound::{
 };
 pub use dynamic::{ImageFormat, ImageFormatError, LosslessImage};
 pub use primitive::{
-    Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent, Rgba8Image, VectorFieldImageBuffer,
-    VectorFieldImageBufferComponent, VectorFieldImageBufferPixel,
+    identity, is_identity, Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent, Rgba8Image,
+    VectorFieldImageBuffer, VectorFieldImageBufferComponent, VectorFieldImageBufferPixel,
 };
 
 pub trait ImageFileReader {

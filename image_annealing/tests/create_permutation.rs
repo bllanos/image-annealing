@@ -85,7 +85,7 @@ fn overwrite_permute() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -124,7 +124,9 @@ fn overwrite_swap() -> Result<(), Box<dyn Error>> {
     let swap_parameters = test_util::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                permutation.clone(),
+            )?),
             displacement_goal: Some(displacement_goal),
         },
         &swap_parameters,

@@ -1,7 +1,7 @@
-use super::manipulation;
 use super::validation::{self, CandidatePermutation, ValidatedPermutation};
+use super::{manipulation, VectorField};
 use crate::compute::format::{
-    ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image,
+    self, ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, Rgba8Image,
     VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
 use crate::{ImageDimensions, ImageDimensionsHolder};
@@ -32,14 +32,6 @@ impl DisplacementGoal {
     ) -> Result<Self, Box<dyn Error>> {
         Self::from_raw_candidate_permutation(candidate_permutation.into_inner())
     }
-
-    pub fn into_inner(self) -> VectorFieldImageBuffer {
-        self.0.into_inner()
-    }
-
-    pub fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
-        self.0.as_ref().as_raw().as_slice()
-    }
 }
 
 impl AsRef<VectorFieldImageBuffer> for DisplacementGoal {
@@ -48,9 +40,29 @@ impl AsRef<VectorFieldImageBuffer> for DisplacementGoal {
     }
 }
 
+impl PartialEq<VectorFieldImageBuffer> for DisplacementGoal {
+    fn eq(&self, other: &VectorFieldImageBuffer) -> bool {
+        self.as_ref() == other
+    }
+}
+
 impl ImageDimensionsHolder for DisplacementGoal {
     fn dimensions(&self) -> &ImageDimensions {
         self.0.dimensions()
+    }
+}
+
+impl VectorField for DisplacementGoal {
+    fn identity(dimensions: &ImageDimensions) -> Self {
+        Self(Rgba8Image::new(format::identity(dimensions)).unwrap())
+    }
+
+    fn into_inner(self) -> VectorFieldImageBuffer {
+        self.0.into_inner()
+    }
+
+    fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent] {
+        self.0.as_ref().as_raw().as_slice()
     }
 }
 

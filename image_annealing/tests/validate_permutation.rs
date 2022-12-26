@@ -18,7 +18,7 @@ fn run_once_identity() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation::new(permutation)?,
+            candidate_permutation: CandidatePermutation::from_vector_field(permutation)?,
         },
         &Default::default(),
     );
@@ -41,7 +41,7 @@ async fn run_once_identity_async_inner() -> Result<(), Box<dyn Error>> {
     .await?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation::new(permutation)?,
+            candidate_permutation: CandidatePermutation::from_vector_field(permutation)?,
         },
         &Default::default(),
     );
@@ -75,7 +75,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation::new(invalid_image)?,
+            candidate_permutation: CandidatePermutation::from_vector_field(invalid_image)?,
         },
         &Default::default(),
     );
@@ -84,7 +84,7 @@ fn run_twice_invalid_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation::new(permutation)?,
+            candidate_permutation: CandidatePermutation::from_vector_field(permutation)?,
         },
         &Default::default(),
     );
@@ -108,7 +108,7 @@ fn invalid_dimensions() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.validate_permutation(
         ValidatePermutationInput {
-            candidate_permutation: CandidatePermutation::new(permutation)?,
+            candidate_permutation: CandidatePermutation::from_vector_field(permutation)?,
         },
         &Default::default(),
     );

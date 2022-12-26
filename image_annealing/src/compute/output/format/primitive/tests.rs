@@ -46,6 +46,40 @@ mod rgba16_image_buffer {
     }
 }
 
+mod identity {
+    use crate::ImageDimensions;
+    use std::error::Error;
+
+    #[test]
+    fn identity() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::try_new(2, 3)?;
+        let image = super::super::identity(&dimensions);
+        assert_eq!(ImageDimensions::from_image(&image)?, dimensions);
+        assert!(super::super::is_identity(&image));
+        Ok(())
+    }
+}
+
+mod is_identity {
+    use crate::ImageDimensions;
+    use std::error::Error;
+
+    #[test]
+    fn identity() -> Result<(), Box<dyn Error>> {
+        assert!(super::super::is_identity(&super::super::identity(
+            &ImageDimensions::try_new(2, 3)?
+        )));
+        Ok(())
+    }
+
+    #[test]
+    fn non_identity() {
+        let mut image = image::RgbaImage::from_pixel(2, 3, image::Rgba([0; 4]));
+        image.put_pixel(1, 2, image::Rgba([0, 0, 0, 1]));
+        assert!(!super::super::is_identity(&image));
+    }
+}
+
 mod rgba8_image {
     use super::super::Rgba8Image;
     use std::error::Error;

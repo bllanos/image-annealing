@@ -28,7 +28,9 @@ where
     let swap_parameters = test_util::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                permutation.clone(),
+            )?),
             displacement_goal: Some(displacement_goal),
         },
         &swap_parameters,

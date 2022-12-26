@@ -10,6 +10,11 @@ mod vector_field_entry {
     use std::error::Error;
 
     #[test]
+    fn identity() {
+        assert_eq!(VectorFieldEntry::identity(), VectorFieldEntry(0, 0));
+    }
+
+    #[test]
     fn from_pixel() -> Result<(), Box<dyn Error>> {
         let dimensions = ImageDimensions::try_new(3, 5)?;
         let vector = super::make_vector();

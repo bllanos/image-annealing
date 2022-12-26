@@ -1,3 +1,5 @@
+use crate::compute::format::{self, VectorFieldImageBuffer, VectorFieldImageBufferComponent};
+
 mod dimension;
 pub mod displacement_goal;
 mod manipulation;
@@ -9,3 +11,20 @@ pub(crate) use dimension::{
 pub use dimension::{
     DimensionsMismatchError, ImageDimensions, ImageDimensionsHolder, InvalidDimensionError,
 };
+
+pub trait VectorField:
+    AsRef<VectorFieldImageBuffer> + PartialEq<VectorFieldImageBuffer> + ImageDimensionsHolder
+{
+    fn identity(dimensions: &ImageDimensions) -> Self;
+
+    fn into_inner(self) -> VectorFieldImageBuffer;
+
+    fn as_raw_slice(&self) -> &[VectorFieldImageBufferComponent];
+
+    fn is_identity(&self) -> bool {
+        format::is_identity(self.as_ref())
+    }
+}
+
+#[cfg(test)]
+mod tests;

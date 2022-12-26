@@ -55,7 +55,9 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
-            candidate_permutation: Some(CandidatePermutation::new(invalid_permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                invalid_permutation,
+            )?),
             ..Default::default()
         },
         &Default::default(),
@@ -65,7 +67,7 @@ fn run_twice_invalid_permutation_valid() -> Result<(), Box<dyn Error>> {
     dispatcher = algorithm.return_to_dispatcher();
     algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             ..Default::default()
         },
         &Default::default(),
@@ -93,7 +95,7 @@ fn invalid_permutation_dimensions() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             ..Default::default()
         },
         &Default::default(),

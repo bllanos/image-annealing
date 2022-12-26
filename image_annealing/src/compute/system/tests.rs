@@ -8,7 +8,7 @@ fn create_system_single_pixel() -> System {
 mod operation_count_swap {
     use super::super::super::link::swap::{SwapPass, SwapPassSequence};
     use super::super::{DevicePollType, SwapOperationInput};
-    use crate::DisplacementGoal;
+    use crate::{DisplacementGoal, VectorField};
     use std::error::Error;
 
     #[test]
@@ -53,7 +53,7 @@ mod operation_count_swap {
 mod output_count_swap {
     use super::super::super::link::swap::SwapPass;
     use super::super::{DevicePollType, SwapOperationInput};
-    use crate::DisplacementGoal;
+    use crate::{DisplacementGoal, VectorField};
     use std::error::Error;
 
     #[test]
@@ -116,10 +116,10 @@ mod output_displacement_goal {
 }
 
 mod output_permutation {
-    use super::super::super::format::{LosslessImage, Rgba16Image, VectorFieldImageBuffer};
+    use super::super::super::format::{LosslessImage, Rgba16Image};
     use super::super::{DevicePollType, PermuteOperationInput, System};
     use crate::image_utils::validation;
-    use crate::ImageDimensions;
+    use crate::{ImageDimensions, ImageDimensionsHolder, VectorField};
     use std::error::Error;
     use test_util::permutation::DimensionsAndPermutation;
 
@@ -127,10 +127,8 @@ mod output_permutation {
     fn no_preceding_operations() -> Result<(), Box<dyn Error>> {
         let mut system = super::create_system_single_pixel();
         let output = futures::executor::block_on(system.output_permutation(DevicePollType::Wait))?;
-        assert_eq!(
-            output.as_ref(),
-            &VectorFieldImageBuffer::from_pixel(1, 1, image::Rgba([0, 0, 0, 0]))
-        );
+        assert_eq!(output.dimensions(), &ImageDimensions::try_new(1, 1)?);
+        assert!(output.is_identity());
         Ok(())
     }
 

@@ -28,7 +28,9 @@ mod accept_all_swap {
         let swap_parameters = test_util::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                    permutation.clone(),
+                )?),
                 displacement_goal: Some(displacement_goal),
             },
             &swap_parameters,
@@ -67,7 +69,9 @@ mod accept_all_swap {
         let swap_parameters = test_util::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                    permutation.clone(),
+                )?),
                 displacement_goal: Some(displacement_goal),
             },
             &swap_parameters,
@@ -114,7 +118,9 @@ mod accept_all_swap {
         let swap_parameters = test_util::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                    permutation.clone(),
+                )?),
                 displacement_goal: Some(displacement_goal),
             },
             &swap_parameters,
@@ -140,12 +146,11 @@ mod accept_all_swap {
 mod select_swap {
     use image_annealing::compute::conversion::{self, VectorFieldEntry};
     use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
-    use image_annealing::CandidatePermutation;
+    use image_annealing::{CandidatePermutation, DisplacementGoal, VectorField};
     use std::error::Error;
     use test_util::algorithm::{
         assert_correct_default_swap_full_output, assert_step_until_success,
     };
-    use test_util::displacement_goal;
     use test_util::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_util::permutation::DimensionsAndPermutation;
 
@@ -164,7 +169,7 @@ mod select_swap {
             VectorFieldEntry(0, 0),
         ];
         let expected_permutation = conversion::to_image(&dimensions, &v);
-        let displacement_goal = displacement_goal::identity(&dimensions);
+        let displacement_goal = DisplacementGoal::identity(&dimensions);
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let dispatcher = compute::create_dispatcher_block(&Config {
@@ -173,7 +178,9 @@ mod select_swap {
         let swap_parameters = test_util::algorithm::default_swap_parameters();
         let mut algorithm = dispatcher.swap(
             SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                    permutation.clone(),
+                )?),
                 displacement_goal: Some(displacement_goal),
             },
             &swap_parameters,
@@ -201,12 +208,11 @@ mod swap_acceptance_threshold {
     use image_annealing::compute::{
         self, Config, OutputStatus, SwapInput, SwapParameters, SwapPass,
     };
-    use image_annealing::CandidatePermutation;
+    use image_annealing::{CandidatePermutation, DisplacementGoal, VectorField};
     use std::error::Error;
     use test_util::algorithm::{
         assert_correct_default_swap_full_output, assert_step_until_success,
     };
-    use test_util::displacement_goal;
     use test_util::operation::{assert_correct_swap_count_output, SwapAcceptedCount};
     use test_util::permutation::DimensionsAndPermutation;
 
@@ -219,7 +225,7 @@ mod swap_acceptance_threshold {
             dimensions,
         } = test_util::permutation::non_identity();
         let expected_permutation = permutation.clone();
-        let displacement_goal = displacement_goal::identity(&dimensions);
+        let displacement_goal = DisplacementGoal::identity(&dimensions);
         let expected_displacement_goal = displacement_goal.as_ref().clone();
 
         let mut dispatcher = compute::create_dispatcher_block(&Config {
@@ -234,7 +240,9 @@ mod swap_acceptance_threshold {
         };
         let mut algorithm = dispatcher.swap(
             SwapInput {
-                candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+                candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                    permutation.clone(),
+                )?),
                 displacement_goal: Some(displacement_goal),
             },
             &swap_parameters,

@@ -1,7 +1,7 @@
 use super::super::super::output::conversion::VectorFieldEntryComponent;
 use super::data::TextureData;
 use super::{Texture, TextureDatatype};
-use crate::{DisplacementGoal, ImageDimensions};
+use crate::{DisplacementGoal, ImageDimensions, VectorField};
 use std::num::NonZeroU32;
 
 pub struct DisplacementGoalTexture;

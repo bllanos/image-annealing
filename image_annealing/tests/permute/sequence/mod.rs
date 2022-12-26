@@ -95,7 +95,7 @@ fn ignore_identity_displacement_goal() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -128,7 +128,7 @@ fn reuse_create_displacement_goal_inputs() -> Result<(), Box<dyn Error>> {
 
     let mut algorithm = dispatcher.create_displacement_goal(
         CreateDisplacementGoalInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             image: Some(original_lossless_image),
             ..Default::default()
         },
@@ -172,7 +172,9 @@ fn reuse_swap_permutation() -> Result<(), Box<dyn Error>> {
     let swap_parameters = test_util::algorithm::default_swap_parameters();
     let mut algorithm = dispatcher.swap(
         SwapInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation.clone())?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                permutation.clone(),
+            )?),
             displacement_goal: Some(displacement_goal),
         },
         &swap_parameters,
@@ -233,7 +235,7 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -259,7 +261,9 @@ fn reuse_image() -> Result<(), Box<dyn Error>> {
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                other_permutation,
+            )?),
             ..Default::default()
         },
         &PermuteParameters {
@@ -297,7 +301,7 @@ fn reuse_permutation() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -355,7 +359,7 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
     })?;
     let mut algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(permutation)?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),
@@ -383,7 +387,9 @@ fn reuse_nothing() -> Result<(), Box<dyn Error>> {
 
     algorithm = dispatcher.permute(
         PermuteInput {
-            candidate_permutation: Some(CandidatePermutation::new(other_permutation)?),
+            candidate_permutation: Some(CandidatePermutation::from_vector_field(
+                other_permutation,
+            )?),
             original_image: Some(original_lossless_image.clone()),
         },
         &Default::default(),

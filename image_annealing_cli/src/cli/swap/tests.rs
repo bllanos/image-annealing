@@ -380,7 +380,7 @@ mod run_swap {
                     .collect::<Vec<_>>();
                 let run_swap_input = RunSwapInput {
                     candidate_permutation: Some(
-                        CandidatePermutation::new(
+                        CandidatePermutation::from_vector_field(
                             test_util::permutation::line_with_first_texel_moved(width, 1)
                                 .permutation,
                         )

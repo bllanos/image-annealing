@@ -1,6 +1,132 @@
+mod candidate_permutation {
+    use super::super::CandidatePermutation;
+    use crate::compute::format::{self, Rgba8Image};
+    use crate::{ImageDimensions, ImageDimensionsHolder, VectorField};
+    use std::error::Error;
+    use test_util::permutation::{self, DimensionsAndPermutation};
+
+    #[test]
+    fn from_vector_field_image() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let expected = permutation.clone();
+        let candidate_permutation =
+            CandidatePermutation::from_vector_field_image(Rgba8Image::new(permutation)?);
+        assert_eq!(*candidate_permutation.as_ref(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn from_vector_field() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let expected = permutation.clone();
+        let candidate_permutation = CandidatePermutation::from_vector_field(permutation)?;
+        assert_eq!(*candidate_permutation.as_ref(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn from_validated_permutation() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let validated_permutation = super::super::validate_permutation(permutation)?;
+        let candidate_permutation = CandidatePermutation::from(validated_permutation.clone());
+        assert_eq!(
+            candidate_permutation.as_ref(),
+            validated_permutation.as_ref()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn eq_image_buffer() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation {
+            mut permutation, ..
+        } = permutation::non_identity();
+        let candidate_permutation = CandidatePermutation::from_vector_field(permutation.clone())?;
+        assert_eq!(candidate_permutation, permutation);
+        permutation.put_pixel(0, 0, image::Rgba([0, 0, 0, 2]));
+        assert_ne!(candidate_permutation, permutation);
+        Ok(())
+    }
+
+    #[test]
+    fn dimensions() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let expected = ImageDimensions::from_image(&permutation)?;
+        let candidate_permutation = CandidatePermutation::from_vector_field(permutation)?;
+        assert_eq!(*candidate_permutation.dimensions(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn into_inner() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let expected = permutation.clone();
+        let candidate_permutation = CandidatePermutation::from_vector_field(permutation)?;
+        assert_eq!(candidate_permutation.into_inner(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn as_raw_slice() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+        let expected = permutation.clone();
+        let candidate_permutation = CandidatePermutation::from_vector_field(permutation)?;
+        assert_eq!(
+            candidate_permutation.as_raw_slice(),
+            expected.as_raw().as_slice()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn identity() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::try_new(2, 3)?;
+        let candidate_permutation = CandidatePermutation::identity(&dimensions);
+        assert_eq!(candidate_permutation.dimensions(), &dimensions);
+        assert!(format::is_identity(candidate_permutation.as_ref()));
+        Ok(())
+    }
+
+    mod io {
+        use super::super::super::CandidatePermutation;
+        use crate::compute::format::{ImageFileReader, ImageFileWriter, VectorFieldImageBuffer};
+        use std::error::Error;
+        use test_util::permutation::{self, DimensionsAndPermutation};
+
+        #[test]
+        fn success() -> Result<(), Box<dyn Error>> {
+            let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
+
+            let path = test_util::make_test_output_path_string([
+                "image_utils_candidate_permutation_io_image",
+            ]);
+            let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
+            assert!(!expected_output_path.is_file());
+
+            let full_output_path = permutation.save_add_extension(path)?;
+            assert_eq!(full_output_path, expected_output_path);
+
+            let input_candidate_permutation = CandidatePermutation::load(&full_output_path)?;
+            assert_eq!(*input_candidate_permutation.as_ref(), permutation);
+
+            Ok(std::fs::remove_file(expected_output_path)?)
+        }
+
+        #[test]
+        fn load_missing_image() {
+            let path = test_util::make_test_data_path(["image", "image", "not_found.png"]);
+            test_util::assert_error_contains(
+                CandidatePermutation::load(path),
+                "No such file or directory",
+            );
+        }
+    }
+}
+
 mod validated_permutation {
-    use super::super::manipulation;
-    use crate::{ImageDimensions, ImageDimensionsHolder};
+    use super::super::{manipulation, ValidatedPermutation};
+    use crate::compute::format;
+    use crate::{ImageDimensions, ImageDimensionsHolder, VectorField};
     use std::error::Error;
     use test_util::permutation::{self, DimensionsAndPermutation};
 
@@ -11,6 +137,18 @@ mod validated_permutation {
         let expected = manipulation::invert_permutation(&validated_permutation);
         let inverse = validated_permutation.inverse();
         assert_eq!(*inverse.as_ref(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn eq_image_buffer() -> Result<(), Box<dyn Error>> {
+        let DimensionsAndPermutation {
+            mut permutation, ..
+        } = permutation::non_identity();
+        let validated_permutation = super::super::validate_permutation(permutation.clone())?;
+        assert_eq!(validated_permutation, permutation);
+        permutation.put_pixel(0, 0, image::Rgba([0, 0, 0, 2]));
+        assert_ne!(validated_permutation, permutation);
         Ok(())
     }
 
@@ -32,6 +170,15 @@ mod validated_permutation {
         let expected = permutation.clone();
         let validated_permutation = super::super::validate_permutation(permutation)?;
         assert_eq!(validated_permutation.into_inner(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn identity() -> Result<(), Box<dyn Error>> {
+        let dimensions = ImageDimensions::try_new(2, 3)?;
+        let permutation = ValidatedPermutation::identity(&dimensions);
+        assert_eq!(permutation.dimensions(), &dimensions);
+        assert!(format::is_identity(permutation.as_ref()));
         Ok(())
     }
 
