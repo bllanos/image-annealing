@@ -6,6 +6,7 @@ mod global;
 mod resource;
 pub mod shader;
 mod type_definitions;
+pub mod validate;
 
 pub use compute::WorkgroupDimensions;
 pub use function::main::SHADER_ENTRY_POINT;

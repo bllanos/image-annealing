@@ -32,8 +32,12 @@ mod parse_args {
 
     #[test]
     fn valid_config_file() -> Result<(), ParseFailure> {
-        let path =
-            test_util::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
+        let path = test_util::make_test_data_path_string([
+            "config",
+            "operation",
+            "create_permutation",
+            "valid.json",
+        ]);
         let v = vec![String::from("one"), String::from("-c"), path];
         let r = parse_args(v)?;
         assert_eq!(
@@ -54,8 +58,12 @@ mod parse_args {
 
     #[test]
     fn additional_args() {
-        let path =
-            test_util::make_test_data_path_string(["config", "create_permutation", "valid.json"]);
+        let path = test_util::make_test_data_path_string([
+            "config",
+            "operation",
+            "create_permutation",
+            "valid.json",
+        ]);
         let v = vec![
             String::from("one"),
             String::from("-c"),

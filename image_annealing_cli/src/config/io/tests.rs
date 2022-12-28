@@ -27,7 +27,12 @@ mod parse_config_file {
 
     #[test]
     fn valid_create_permutation_config_file() -> Result<(), Box<dyn Error>> {
-        let path = test_util::make_test_data_path(["config", "create_permutation", "valid.json"]);
+        let path = test_util::make_test_data_path([
+            "config",
+            "operation",
+            "create_permutation",
+            "valid.json",
+        ]);
         let r = parse_config_file(path)?;
         assert_eq!(
             r,
@@ -47,7 +52,12 @@ mod parse_config_file {
 
     #[test]
     fn invalid_create_permutation_config_file() {
-        let path = test_util::make_test_data_path(["config", "create_permutation", "invalid.json"]);
+        let path = test_util::make_test_data_path([
+            "config",
+            "operation",
+            "create_permutation",
+            "invalid.json",
+        ]);
         test_util::assert_error_contains(parse_config_file(path), "width is zero");
     }
 }

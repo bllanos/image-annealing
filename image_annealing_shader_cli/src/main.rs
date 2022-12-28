@@ -1,14 +1,9 @@
-use image_annealing_shader_cli::args::{self, Options};
-use image_annealing_shader_cli::output;
-use std::error::Error;
+use image_annealing_shader_cli::{args, cli};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let Options { output_directory } = args::make_option_parser().run();
-    match output::write_default_files(output_directory) {
-        Err(err) => {
-            eprintln!("Processing error: {}", err);
-            Err(err)
-        }
-        Ok(_) => Ok(()),
+fn main() {
+    let options = args::make_option_parser().run();
+    if let Err(err) = cli::run(&options) {
+        eprintln!("{}", err);
+        std::process::exit(1);
     }
 }
