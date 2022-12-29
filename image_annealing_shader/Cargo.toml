@@ -8,7 +8,7 @@ keywords = ["image","graphics"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-naga = { version = "0.10.0", features = ["validate", "wgsl-in"] }
+naga = { version = "0.10.0", features = ["span", "validate", "wgsl-in"] }
 
 [dev-dependencies]
 test_util = { path = "../test_util" }

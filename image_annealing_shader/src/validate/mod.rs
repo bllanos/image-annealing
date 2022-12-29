@@ -2,43 +2,36 @@
 //! https://github.com/gfx-rs/naga/blob/master/cli/src/bin/naga.rs
 
 use std::error::Error;
+use std::fmt;
 
-fn print_err(error: impl Error) {
-    eprint!("{}", error);
+#[derive(Debug, Clone)]
+pub enum ShaderValidationError {
+    Parse(naga::front::wgsl::ParseError),
+    Module(naga::WithSpan<naga::valid::ValidationError>),
+}
 
-    let mut e = error.source();
-    if e.is_some() {
-        eprintln!(": ");
-    } else {
-        eprintln!();
-    }
-
-    while let Some(source) = e {
-        eprintln!("\t{}", source);
-        e = source.source();
+impl fmt::Display for ShaderValidationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Parse(err) => write!(f, "unable to parse WGSL: {}", err),
+            Self::Module(err) => write!(f, "shader module validation failed: {}", err),
+        }
     }
 }
 
-pub fn validate_shader(shader: &str) -> Result<(), Box<dyn Error>> {
+impl Error for ShaderValidationError {}
+
+pub fn validate_shader(shader: &str) -> Result<(), ShaderValidationError> {
+    let module =
+        naga::front::wgsl::parse_str(shader).map_err(|err| ShaderValidationError::Parse(err))?;
+
     let mut validator = naga::valid::Validator::new(
         naga::valid::ValidationFlags::all(),
         naga::valid::Capabilities::empty(),
     );
-
-    let module = match naga::front::wgsl::parse_str(shader) {
-        Ok(v) => v,
-        Err(e) => {
-            eprintln!("Unable to parse WGSL. Output the shader to a file and then run Naga's shader validation program for more information (https://github.com/gfx-rs/naga/blob/master/cli/src/bin/naga.rs).");
-            print_err(&e);
-            return Err(Box::new(e));
-        }
-    };
-
-    if let Err(e) = validator.validate(&module) {
-        eprintln!("Validation of WGSL failed. Output the shader to a file and then run Naga's shader validation program for more information (https://github.com/gfx-rs/naga/blob/master/cli/src/bin/naga.rs).");
-        print_err(&e);
-        return Err(Box::new(e));
-    }
+    validator
+        .validate(&module)
+        .map_err(|err| ShaderValidationError::Module(err))?;
 
     Ok(())
 }
