@@ -14,3 +14,6 @@ pub fn parse_config_file<P: AsRef<Path>>(filename: P) -> Result<Config<'static>,
     let config = Config::try_from(unverified_config)?;
     Ok(config)
 }
+
+#[cfg(test)]
+mod tests;

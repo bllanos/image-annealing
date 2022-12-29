@@ -10,7 +10,7 @@ pub enum UnverifiedConfig {
     CreateDisplacementGoal { body: String },
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Config<'a> {
     CreateDisplacementGoal(CreateDisplacementGoalShaderContent<'a>),
 }
@@ -31,3 +31,6 @@ impl<'a> TryFrom<UnverifiedConfig> for Config<'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -35,3 +35,6 @@ pub fn validate_shader(shader: &str) -> Result<(), ShaderValidationError> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests;

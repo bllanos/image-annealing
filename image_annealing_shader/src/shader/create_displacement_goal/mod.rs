@@ -25,7 +25,7 @@ pub fn create_displacement_goal_default<W: Write>(mut writer: W) -> std::io::Res
     main::create_displacement_goal_default(&mut writer)
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CreateDisplacementGoalShaderContent<'a> {
     pub body: Cow<'a, str>,
 }

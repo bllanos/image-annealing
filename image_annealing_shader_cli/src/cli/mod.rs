@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Debug, Clone)]
-pub enum ShaderValidationError {
+enum ShaderValidationError {
     Parse,
     Module,
 }
@@ -34,10 +34,10 @@ pub fn run(options: &Options) -> Result<(), Box<dyn Error>> {
 }
 
 fn assemble_shader(options: &AssembleShaderOptions) -> Result<(), Box<dyn Error>> {
-    let shader = create_shader(&options.config)?;
+    let shader = create_shader(&options.config);
     let mut file_writer = File::create(&options.output_file)?;
     file_writer.write_all(&shader)?;
-    let shader_string = String::from_utf8(shader)?;
+    let shader_string = String::from_utf8(shader).unwrap();
     match validate::validate_shader(&shader_string) {
         Err(validate::ShaderValidationError::Parse(e)) => {
             let output_file_string = options.output_file.to_string_lossy();
@@ -58,14 +58,14 @@ fn output_default_shaders(options: &DefaultShaderOutputOptions) -> Result<(), Bo
     output::write_default_files(options.output_directory.as_ref()).and(Ok(()))
 }
 
-fn create_shader(config: &Config) -> Result<Vec<u8>, Box<dyn Error>> {
+fn create_shader(config: &Config) -> Vec<u8> {
     let mut v: Vec<u8> = Vec::new();
     match config {
         Config::CreateDisplacementGoal(content) => {
-            shader::create_displacement_goal_custom(&mut v, content)?;
+            shader::create_displacement_goal_custom(&mut v, content).unwrap();
         }
     }
-    Ok(v)
+    v
 }
 
 fn emit_annotated_error<E: Error>(
@@ -114,3 +114,6 @@ fn print_err(error: &dyn Error) {
         e = source.source();
     }
 }
+
+#[cfg(test)]
+mod tests;

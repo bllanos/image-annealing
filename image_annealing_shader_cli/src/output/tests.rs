@@ -169,29 +169,32 @@ mod write_files {
 mod write_default_files {
     use image_annealing_shader::shader;
     use std::error::Error;
-    use std::path::Path;
 
     #[test]
     fn all_shaders() -> Result<(), Box<dyn Error>> {
-        let directory = test_util::make_test_output_path(std::iter::empty::<&Path>());
+        let directory = test_util::make_test_output_path([
+            "image_annealing_shader_cli_write_default_files_all_shaders",
+        ]);
+        assert!(!directory.exists());
+        std::fs::create_dir(&directory)?;
 
-        let count_swap_path = test_util::make_test_output_path(["count_swap.wgsl"]);
+        let count_swap_path = directory.join("count_swap.wgsl");
         assert!(!count_swap_path.is_file());
 
         let create_displacement_goal_default_path =
-            test_util::make_test_output_path(["create_displacement_goal_default.wgsl"]);
+            directory.join("create_displacement_goal_default.wgsl");
         assert!(!create_displacement_goal_default_path.is_file());
 
-        let create_permutation_path = test_util::make_test_output_path(["create_permutation.wgsl"]);
+        let create_permutation_path = directory.join("create_permutation.wgsl");
         assert!(!create_permutation_path.is_file());
 
-        let permute_path = test_util::make_test_output_path(["permute.wgsl"]);
+        let permute_path = directory.join("permute.wgsl");
         assert!(!permute_path.is_file());
 
-        let swap_path = test_util::make_test_output_path(["swap.wgsl"]);
+        let swap_path = directory.join("swap.wgsl");
         assert!(!swap_path.is_file());
 
-        super::super::write_default_files(Some(directory))?;
+        super::super::write_default_files(Some(&directory))?;
 
         let mut expected: Vec<u8> = Vec::new();
 
@@ -224,6 +227,7 @@ mod write_default_files {
         assert_eq!(actual, expected);
         std::fs::remove_file(swap_path)?;
 
+        std::fs::remove_dir(directory)?;
         Ok(())
     }
 }
