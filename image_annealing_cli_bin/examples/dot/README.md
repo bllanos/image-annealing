@@ -18,6 +18,7 @@ The example is a [Bash](https://www.gnu.org/software/bash/) script, [`run.sh`](.
    ```bash
    ./image_annealing_cli_bin/examples/dot/run.sh
    ```
+
 4. The script will generate output files in `examples_output/image_annealing_cli_bin_dot` (a new directory that the script creates under the [`../../../examples_output/`](../../../examples_output) directory). You should see a sequence of images in `examples_output/image_annealing_cli_bin_dot/permuted_images` that matches the animation shown above.
 
 ## Generating an animated GIF
@@ -27,6 +28,7 @@ If you have [ImageMagick](https://imagemagick.org/) installed, you can uncomment
 ## What is happening in the animation?
 
 In this example, the CLI is given a [displacement goal](../../../README.md#displacement-goals) wherein:
+
 - Pixels in a disc around the center of the image want to move as far as possible away from the center of the image.
 - Pixels outside the disk want to move to the center of the image.
 

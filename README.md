@@ -102,6 +102,7 @@ Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/comp
 This error can mean several things, but the most common reason is that you have provided an input image that does not have an alpha channel. As mentioned [below](#data-types), the code operates on images with alpha channels.
 
 Other possible causes of this error include:
+
 - Providing an image with 8-bits per color channel, as opposed to 16-bits, or vice versa.
 - Providing an image that does not have four color channels (Red, Green, Blue, and Alpha).
 
@@ -112,6 +113,7 @@ convert -alpha opaque "rgb_image.jpeg" "rgba_image.png"
 ```
 
 The code is strict with respect to input image formats for several reasons:
+
 1. To help users notice when they input the wrong image files by mistake
 2. To allow for easier substitution of general [images](#images) for [vector fields](#vector-fields), which must have four channels, by requiring that general images also have four channels
 3. To simplify the codebase by delegating image format handling to external tools and libraries
@@ -129,6 +131,7 @@ The [operations](#operations) currently implemented manipulate the following kin
 A vector field is an image with Red, Green, Blue, and Alpha color channels, where each pixel stores an 8-bit value for each channel. Vector fields are usually saved as [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) files.
 
 The channels represent the `x` and `y` components of displacement vectors:
+
 1. The Red channel stores the most significant byte of the `x`-component
 2. The Green channel stores the least significant byte of the `x`-component
 3. The Blue channel stores the most significant byte of the `y`-component
@@ -147,6 +150,7 @@ A permutation is a vector field where each pixel stores a vector pointing toward
 For example, if the pixel with coordinates `(2, 3)` stores the vector `(1, -2)`, then the permutation will move the pixel at coordinates `(3, 1)` to coordinates `(2, 3)`.
 
 The code will verify that a vector field satisfies permutation constraints before using it in any operations that assume it is a permutation. The constraints that permutations satisfy are:
+
 1. All vectors point to locations inside the boundaries of the vector field
 2. No two vectors point to the same location
 
@@ -177,6 +181,7 @@ The create permutation operation outputs a [permutation](#permutations) that is 
 #### Swap
 
 Input:
+
 - An initial [permutation](#permutations)
 - A [displacement goal](#displacement-goals)
 - A sequence of swap passes to perform
@@ -185,6 +190,7 @@ Input:
 The swap operation outputs a [permutation](#permutations) by swapping adjacent pixels of the input [permutation](#permutations) so that the permutation is more similar to the input [displacement goal](#displacement-goals). If requested, the operation can also output the number of swaps that were accepted.
 
 There are four possible swap passes:
+
 1. `Horizontal`: Swaps pixels at even `x` coordinates with their neighbors to the right
 2. `Vertical`: Swaps pixels at even `y` coordinates with their neighbors below
 3. `OffsetHorizontal`: Swaps pixels at even `x` coordinates with their neighbors to the left
@@ -231,10 +237,10 @@ If you want to start a conversation outside of GitHub, you can contact us first 
 
 Licensed under either of
 
-* Apache License, Version 2.0
-  ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license
-  ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0
+  ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license
+  ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
