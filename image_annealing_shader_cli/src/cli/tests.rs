@@ -53,7 +53,8 @@ mod assemble_shader {
                 config: (UnverifiedConfig::CreateDisplacementGoal {
                     body: shader_body_path,
                 })
-                .try_into()?,
+                .try_into()
+                .unwrap(),
                 output_file,
             }),
             "No such file or directory",

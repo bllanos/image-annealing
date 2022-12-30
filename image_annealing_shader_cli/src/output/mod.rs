@@ -18,10 +18,9 @@ impl<'a> OutputConfig<'a> {
     pub fn with_base_directory<P: AsRef<Path>>(
         directory: Option<P>,
     ) -> Result<Self, Box<dyn Error>> {
-        let default_path = Path::new(".");
         let path = directory
             .as_ref()
-            .map_or(default_path, <P as AsRef<Path>>::as_ref);
+            .map_or_else(|| Path::new("."), <P as AsRef<Path>>::as_ref);
         image_annealing_cli_util::io::check_directory_path(path)?;
         Ok(Self {
             count_swap: Some(Cow::from(path.join("count_swap.wgsl"))),
