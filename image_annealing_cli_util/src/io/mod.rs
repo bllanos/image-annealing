@@ -76,7 +76,7 @@ pub fn convert_path_separators<T: AsRef<str>>(filepath: T) -> String {
         filepath
     } else {
         let new_separator = path::MAIN_SEPARATOR.to_string();
-        filepath.replace(&['\\', '/'], &new_separator)
+        filepath.replace(['\\', '/'], &new_separator)
     }
 }
 

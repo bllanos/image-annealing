@@ -22,8 +22,7 @@ impl fmt::Display for ShaderValidationError {
 impl Error for ShaderValidationError {}
 
 pub fn validate_shader(shader: &str) -> Result<(), ShaderValidationError> {
-    let module =
-        naga::front::wgsl::parse_str(shader).map_err(|err| ShaderValidationError::Parse(err))?;
+    let module = naga::front::wgsl::parse_str(shader).map_err(ShaderValidationError::Parse)?;
 
     let mut validator = naga::valid::Validator::new(
         naga::valid::ValidationFlags::all(),
@@ -31,7 +30,7 @@ pub fn validate_shader(shader: &str) -> Result<(), ShaderValidationError> {
     );
     validator
         .validate(&module)
-        .map_err(|err| ShaderValidationError::Module(err))?;
+        .map_err(ShaderValidationError::Module)?;
 
     Ok(())
 }

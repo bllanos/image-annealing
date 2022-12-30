@@ -8,7 +8,7 @@ mod validate_shader {
 fn main() {
   let coords : vec2<i32> = 0;
 }";
-        test_util::assert_error_contains(validate_shader(&shader_source), "unable to parse WGSL");
+        test_util::assert_error_contains(validate_shader(shader_source), "unable to parse WGSL");
     }
 
     #[test]
@@ -20,7 +20,7 @@ fn main() {
   textureStore(output_permutation, vec2<i32>(0, 0), vec4<u32>(0u, 0u, 0u, 0u));
 }";
         test_util::assert_error_contains(
-            validate_shader(&shader_source),
+            validate_shader(shader_source),
             "shader module validation failed",
         );
     }
@@ -33,7 +33,7 @@ var output_permutation : texture_storage_2d<rgba8uint, write>;
 fn main() {
   textureStore(output_permutation, vec2<i32>(0, 0), vec4<u32>(0u, 0u, 0u, 0u));
 }";
-        validate_shader(&shader_source)?;
+        validate_shader(shader_source)?;
         Ok(())
     }
 }

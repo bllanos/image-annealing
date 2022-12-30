@@ -152,7 +152,7 @@ mod displacement_goal {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let displacement_goal = DisplacementGoal::from_vector_field(permutation)?;
             test_util::assert_error_contains(
-                displacement_goal.save_add_extension(&test_util::make_test_output_path([
+                displacement_goal.save_add_extension(test_util::make_test_output_path([
                     "not_found",
                     "cannot_create",
                 ])),

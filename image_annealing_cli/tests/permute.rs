@@ -22,13 +22,13 @@ fn permute_valid() -> Result<(), Box<dyn Error>> {
     let input_permutation_path_prefix =
         test_util::make_test_output_path(["cli_permute_input_permutation"]);
     let input_permutation_path =
-        input_permutation.save_add_extension(&input_permutation_path_prefix)?;
+        input_permutation.save_add_extension(input_permutation_path_prefix)?;
 
     let input_image = test_util::image::coordinates_to_colors(&dimensions);
     let permuted_image =
         test_util::permutation::bit_interpretation_cases_forward_permute(&input_image);
     let input_image_path_prefix = test_util::make_test_output_path(["cli_permute_input_image"]);
-    let input_image_path = input_image.save_add_extension(&input_image_path_prefix)?;
+    let input_image_path = input_image.save_add_extension(input_image_path_prefix)?;
 
     let config = Config {
         algorithm: AlgorithmConfig::Permute {

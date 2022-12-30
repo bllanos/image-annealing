@@ -119,7 +119,7 @@ mod convert_and_check_input_file_path {
     #[test]
     fn valid_file_windows_path() -> Result<(), Box<dyn Error>> {
         let path = "..\\test_data\\image\\image\\stripes.png";
-        let converted = convert_and_check_input_file_path(&path)?;
+        let converted = convert_and_check_input_file_path(path)?;
         if MAIN_SEPARATOR == '\\' {
             assert_eq!(converted, path);
         } else {
@@ -132,7 +132,7 @@ mod convert_and_check_input_file_path {
     #[test]
     fn valid_file_unix_path() -> Result<(), Box<dyn Error>> {
         let path = "../test_data/image/image/stripes.png";
-        let converted = convert_and_check_input_file_path(&path)?;
+        let converted = convert_and_check_input_file_path(path)?;
         if MAIN_SEPARATOR == '/' {
             assert_eq!(converted, path);
         } else {

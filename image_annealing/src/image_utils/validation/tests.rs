@@ -223,7 +223,7 @@ mod validated_permutation {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             test_util::assert_error_contains(
-                validated_permutation.save_add_extension(&test_util::make_test_output_path([
+                validated_permutation.save_add_extension(test_util::make_test_output_path([
                     "not_found",
                     "cannot_create",
                 ])),

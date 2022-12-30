@@ -62,7 +62,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     let input_permutation_path_prefix =
         test_util::make_test_output_path(["cli_swap_input_permutation"]);
     let input_permutation_path =
-        input_permutation.save_add_extension(&input_permutation_path_prefix)?;
+        input_permutation.save_add_extension(input_permutation_path_prefix)?;
 
     let input_displacement_goal = conversion::to_image(
         &dimensions,
@@ -78,7 +78,7 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
     let input_displacement_goal_path_prefix =
         test_util::make_test_output_path(["cli_swap_input_displacement_goal"]);
     let input_displacement_goal_path =
-        input_displacement_goal.save_add_extension(&input_displacement_goal_path_prefix)?;
+        input_displacement_goal.save_add_extension(input_displacement_goal_path_prefix)?;
 
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
