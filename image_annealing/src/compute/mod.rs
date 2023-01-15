@@ -13,6 +13,7 @@ pub use dispatch::{
 };
 pub use output::algorithm::create_displacement_goal::{
     CreateDisplacementGoalInput, CreateDisplacementGoalOutput, CreateDisplacementGoalParameters,
+    CreateDisplacementGoalPipelineOperation, CreateDisplacementGoalShaderConfig,
 };
 pub use output::algorithm::create_permutation::{
     CreatePermutationInput, CreatePermutationOutput, CreatePermutationParameters,
@@ -28,5 +29,5 @@ pub use output::algorithm::validate_permutation::{
 };
 pub use output::conversion;
 pub use output::format;
-pub use output::Algorithm;
 pub use output::OutputStatus;
+pub use output::{Algorithm, PipelineConfig, PipelineOperation, WorkgroupGridConfig};

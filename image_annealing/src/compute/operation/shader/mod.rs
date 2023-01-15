@@ -1,3 +1,4 @@
+use image_annealing_shader::CreateDisplacementGoalShaderContent;
 use std::borrow::Cow;
 
 pub mod workgroup;
@@ -32,6 +33,20 @@ pub fn create_displacement_goal_default_shader(device: &wgpu::Device) -> Shader 
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(env!(
                 "CREATE_DISPLACEMENT_GOAL_DEFAULT_SHADER"
             )))),
+        }),
+    }
+}
+
+pub fn create_displacement_goal_custom_shader(
+    device: &wgpu::Device,
+    content: &CreateDisplacementGoalShaderContent,
+) -> Shader {
+    let mut v: Vec<u8> = Vec::new();
+    image_annealing_shader::shader::create_displacement_goal_custom(&mut v, &content).unwrap();
+    Shader {
+        shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("create_displacement_goal_custom_shader_module"),
+            source: wgpu::ShaderSource::Wgsl(Cow::Owned(String::from_utf8(v).unwrap())),
         }),
     }
 }

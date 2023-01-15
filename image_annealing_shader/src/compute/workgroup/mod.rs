@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub struct WorkgroupDimensions(NonZeroU32, NonZeroU32, NonZeroU32);
+pub struct WorkgroupDimensions(pub NonZeroU32, pub NonZeroU32, pub NonZeroU32);
 
 impl WorkgroupDimensions {
     fn texture_patch() -> Self {

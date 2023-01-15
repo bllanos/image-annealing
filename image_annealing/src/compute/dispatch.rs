@@ -15,7 +15,7 @@ use super::output::algorithm::validate_permutation::{
 };
 use super::output::{Algorithm, OutputStatus};
 use super::system::{DevicePollType, System};
-use crate::ImageDimensions;
+use crate::{ImageDimensions, ImageDimensionsHolder};
 use async_trait::async_trait;
 use std::error::Error;
 use std::fmt;
@@ -39,7 +39,7 @@ pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput> + Send;
 pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput> + Send;
 pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput> + Send;
 
-pub trait Dispatcher {
+pub trait Dispatcher: ImageDimensionsHolder {
     fn create_displacement_goal(
         self: Box<Self>,
         input: CreateDisplacementGoalInput,
@@ -151,6 +151,12 @@ impl DispatcherImplementation {
 
     fn clear_algorithm(&mut self) {
         self.algorithm = AlgorithmChoice::None;
+    }
+}
+
+impl ImageDimensionsHolder for DispatcherImplementation {
+    fn dimensions(&self) -> &ImageDimensions {
+        self.system.dimensions()
     }
 }
 

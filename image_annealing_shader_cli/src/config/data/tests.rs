@@ -1,7 +1,7 @@
 mod config_try_from_unverified_config {
     mod create_displacement_goal {
         use super::super::super::{Config, UnverifiedConfig};
-        use image_annealing_shader::shader::CreateDisplacementGoalShaderContent;
+        use image_annealing_shader::CreateDisplacementGoalShaderContent;
         use std::borrow::Cow;
         use std::error::Error;
         use std::fs;

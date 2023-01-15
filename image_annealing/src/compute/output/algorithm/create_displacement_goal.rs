@@ -1,16 +1,44 @@
+use super::super::super::operation::WorkgroupGridDimensions;
+use super::super::super::system::CreateDisplacementGoalPipelineConfig;
 use super::super::super::system::{CreateDisplacementGoalOperationInput, DevicePollType, System};
 use super::super::format::LosslessImage;
 use super::super::OutputStatus;
 use super::validate_permutation::{ValidatePermutation, ValidatePermutationInput};
-use super::{CompletionStatus, CompletionStatusHolder, FinalOutputHolder};
-use crate::image_utils::check_dimensions_match2;
+use super::{
+    CompletionStatus, CompletionStatusHolder, FinalOutputHolder, PipelineConfig, PipelineOperation,
+};
+use crate::image_utils::{check_dimensions_match2, ImageDimensionsHolder};
 use crate::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
 use async_trait::async_trait;
 use std::default::Default;
 use std::error::Error;
 
+pub use super::super::super::system::CreateDisplacementGoalShaderConfig;
+
+pub type CreateDisplacementGoalPipelineOperation<'a> =
+    PipelineOperation<CreateDisplacementGoalShaderConfig<'a>>;
+
+impl CreateDisplacementGoalPipelineOperation<'_> {
+    // Ideally, this would be a method, but it may not be possible to return a `Self` type parameterized with a lifetime.
+    // (See https://stackoverflow.com/questions/57701914/trait-method-which-returns-self-type-with-a-different-type-and-or-lifetime-par)
+    pub fn to_owned<'a>(
+        instance: &CreateDisplacementGoalPipelineOperation<'a>,
+    ) -> CreateDisplacementGoalPipelineOperation<'static> {
+        match instance {
+            PipelineOperation::Set(config) => PipelineOperation::Set(PipelineConfig {
+                shader_config: CreateDisplacementGoalShaderConfig::to_owned(&config.shader_config),
+                workgroup_grid: config.workgroup_grid,
+            }),
+            PipelineOperation::SetDefault => PipelineOperation::SetDefault,
+            PipelineOperation::Preserve => PipelineOperation::Preserve,
+        }
+    }
+}
+
 #[derive(Default)]
-pub struct CreateDisplacementGoalParameters {}
+pub struct CreateDisplacementGoalParameters<'a> {
+    pub pipeline_operation: CreateDisplacementGoalPipelineOperation<'a>,
+}
 
 #[derive(Default)]
 pub struct CreateDisplacementGoalInput {
@@ -28,6 +56,7 @@ pub struct CreateDisplacementGoalOutput {
 
 pub struct CreateDisplacementGoal {
     completion_status: CompletionStatus,
+    pipeline_operation: Option<CreateDisplacementGoalPipelineOperation<'static>>,
     input: CreateDisplacementGoalInput,
     validator: Option<ValidatePermutation>,
     permutation: Option<ValidatedPermutation>,
@@ -37,7 +66,7 @@ pub struct CreateDisplacementGoal {
 impl CreateDisplacementGoal {
     pub fn new(
         mut input: CreateDisplacementGoalInput,
-        _parameters: &CreateDisplacementGoalParameters,
+        parameters: &CreateDisplacementGoalParameters,
     ) -> Self {
         let validator = input.candidate_permutation.take().map(|permutation| {
             ValidatePermutation::new(
@@ -49,6 +78,9 @@ impl CreateDisplacementGoal {
         });
         Self {
             completion_status: CompletionStatus::new(),
+            pipeline_operation: Some(CreateDisplacementGoalPipelineOperation::to_owned(
+                &parameters.pipeline_operation,
+            )),
             input,
             validator,
             permutation: None,
@@ -103,15 +135,36 @@ impl CompletionStatusHolder for CreateDisplacementGoal {
                     check_dimensions_match2(system, image)?;
                 }
 
-                system.operation_create_displacement_goal(
-                    &CreateDisplacementGoalOperationInput {
-                        displacement_goal: self.input.displacement_goal.as_ref(),
-                        permutation: self.permutation.as_ref(),
-                        image: self.input.image.as_ref(),
-                    },
-                )?;
-                self.completion_status = CompletionStatus::Finished;
-                Ok(OutputStatus::FinalFullOutput)
+                match self.pipeline_operation.take() {
+                    Some(PipelineOperation::Set(config)) => {
+                        system.configure_create_displacement_goal_pipeline(Some(
+                            CreateDisplacementGoalPipelineConfig {
+                                shader_config: config.shader_config,
+                                workgroup_grid_dimensions:
+                                    WorkgroupGridDimensions::from_workgroup_grid_config(
+                                        system.dimensions(),
+                                        &config.workgroup_grid,
+                                    ),
+                            },
+                        ));
+                        Ok(OutputStatus::NoNewOutput)
+                    }
+                    Some(PipelineOperation::SetDefault) => {
+                        system.configure_create_displacement_goal_pipeline(None);
+                        Ok(OutputStatus::NoNewOutput)
+                    }
+                    Some(PipelineOperation::Preserve) | None => {
+                        system.operation_create_displacement_goal(
+                            &CreateDisplacementGoalOperationInput {
+                                displacement_goal: self.input.displacement_goal.as_ref(),
+                                permutation: self.permutation.as_ref(),
+                                image: self.input.image.as_ref(),
+                            },
+                        )?;
+                        self.completion_status = CompletionStatus::Finished;
+                        Ok(OutputStatus::FinalFullOutput)
+                    }
+                }
             }
         }
     }

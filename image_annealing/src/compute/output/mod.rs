@@ -7,6 +7,8 @@ pub mod algorithm;
 pub mod conversion;
 pub mod format;
 
+pub use algorithm::{PipelineConfig, PipelineOperation, WorkgroupGridConfig};
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum OutputStatus {
     NoNewOutput,

@@ -6,14 +6,29 @@ use super::pipeline::manager::PipelineManager;
 use crate::image_utils::validation::{self};
 use crate::{DisplacementGoal, ImageDimensions, ValidatedPermutation};
 use std::error::Error;
+use std::fmt;
 
 mod input;
 mod output;
 mod state;
 
+pub use super::pipeline::manager::{
+    CreateDisplacementGoalPipelineConfig, CreateDisplacementGoalShaderConfig,
+};
 pub use input::{CreateDisplacementGoalOperationInput, PermuteOperationInput, SwapOperationInput};
 pub use output::CountSwapOperationOutput;
 use state::ResourceStateManager;
+
+#[derive(Debug, Clone)]
+pub struct NoCreateDisplacementGoalPipelineError;
+
+impl fmt::Display for NoCreateDisplacementGoalPipelineError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "no displacement goal generation pipeline has been set")
+    }
+}
+
+impl Error for NoCreateDisplacementGoalPipelineError {}
 
 pub struct OperationManager {
     resources: ResourceManager,
@@ -32,6 +47,15 @@ impl OperationManager {
             pipelines,
             image_dimensions: *image_dimensions,
         }
+    }
+
+    pub fn configure_create_displacement_goal_pipeline(
+        &mut self,
+        device: &DeviceManager,
+        config: Option<CreateDisplacementGoalPipelineConfig<'static>>,
+    ) {
+        self.pipelines
+            .configure_create_displacement_goal_pipeline(device.device(), config);
     }
 
     pub fn count_swap(
@@ -56,17 +80,22 @@ impl OperationManager {
         device: &DeviceManager,
         input: &CreateDisplacementGoalOperationInput,
     ) -> Result<(), Box<dyn Error>> {
-        let mut encoder = device
-            .device()
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("create_displacement_goal_command_encoder"),
-            });
-        let queue = device.queue();
-        self.state
-            .create_displacement_goal(&self.resources, queue, &mut encoder, input)?;
-        self.pipelines.create_displacement_goal(&mut encoder);
-        queue.submit(Some(encoder.finish()));
-        Ok(())
+        if self.pipelines.has_create_displacement_goal_pipeline() {
+            let mut encoder =
+                device
+                    .device()
+                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                        label: Some("create_displacement_goal_command_encoder"),
+                    });
+            let queue = device.queue();
+            self.state
+                .create_displacement_goal(&self.resources, queue, &mut encoder, input)?;
+            self.pipelines.create_displacement_goal(&mut encoder);
+            queue.submit(Some(encoder.finish()));
+            Ok(())
+        } else {
+            Err(Box::new(NoCreateDisplacementGoalPipelineError))
+        }
     }
 
     pub fn create_permutation(&mut self, device: &DeviceManager) -> Result<(), Box<dyn Error>> {

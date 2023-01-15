@@ -12,7 +12,10 @@ mod run_swap {
         ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
-    use image_annealing::{CandidatePermutation, DisplacementGoal, ValidatedPermutation};
+    use image_annealing::{
+        CandidatePermutation, DisplacementGoal, ImageDimensions, ImageDimensionsHolder,
+        ValidatedPermutation,
+    };
     use std::error::Error;
     use std::fmt;
 
@@ -169,6 +172,12 @@ mod run_swap {
                 &self.run_swap_input.parameters.stop,
                 &self.output_swap_counts,
             )
+        }
+    }
+
+    impl ImageDimensionsHolder for SwapDispatcher {
+        fn dimensions(&self) -> &ImageDimensions {
+            unreachable!()
         }
     }
 

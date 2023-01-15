@@ -8,7 +8,8 @@ use std::error::Error;
 
 pub use super::device::DevicePollType;
 pub use super::operation::manager::{
-    CreateDisplacementGoalOperationInput, PermuteOperationInput, SwapOperationInput,
+    CreateDisplacementGoalOperationInput, CreateDisplacementGoalPipelineConfig,
+    CreateDisplacementGoalShaderConfig, PermuteOperationInput, SwapOperationInput,
 };
 
 pub struct System {
@@ -26,6 +27,14 @@ impl System {
             operations,
             image_dimensions: *image_dimensions,
         })
+    }
+
+    pub fn configure_create_displacement_goal_pipeline(
+        &mut self,
+        config: Option<CreateDisplacementGoalPipelineConfig<'static>>,
+    ) {
+        self.operations
+            .configure_create_displacement_goal_pipeline(&self.device, config)
     }
 
     pub fn operation_count_swap(

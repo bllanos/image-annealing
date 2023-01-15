@@ -1,3 +1,4 @@
+use crate::compute::output::WorkgroupGridConfig;
 use crate::ImageDimensions;
 use image_annealing_shader::WorkgroupDimensions;
 use std::num::NonZeroU32;
@@ -6,6 +7,20 @@ use std::num::NonZeroU32;
 pub struct WorkgroupGridDimensions(NonZeroU32, NonZeroU32, NonZeroU32);
 
 impl WorkgroupGridDimensions {
+    pub fn from_workgroup_grid_config(
+        image_dimensions: &ImageDimensions,
+        config: &WorkgroupGridConfig,
+    ) -> Self {
+        let one = NonZeroU32::new(1).unwrap();
+        match config {
+            WorkgroupGridConfig::BlockSize { width, height } => Self::from_extent(
+                &WorkgroupDimensions(*width, *height, one),
+                image_dimensions.to_extent(),
+            ),
+            WorkgroupGridConfig::Fixed { width, height } => Self(*width, *height, one),
+        }
+    }
+
     pub fn from_image_dimensions_and_stride(
         workgroup_dimensions: &WorkgroupDimensions,
         image_dimensions: &ImageDimensions,

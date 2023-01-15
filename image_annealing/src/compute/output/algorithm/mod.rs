@@ -2,6 +2,7 @@ use super::super::system::{DevicePollType, System};
 use super::{AlreadyFailedError, AlreadyFinishedError, OutputStatus};
 use async_trait::async_trait;
 use std::error::Error;
+use std::num::NonZeroU32;
 
 pub mod create_displacement_goal;
 pub mod create_permutation;
@@ -73,5 +74,36 @@ trait FinalOutputHolder<Output: Send>: CompletionStatusHolder {
                 _ => None,
             }
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WorkgroupGridConfig {
+    BlockSize {
+        width: NonZeroU32,
+        height: NonZeroU32,
+    },
+    Fixed {
+        width: NonZeroU32,
+        height: NonZeroU32,
+    },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PipelineConfig<T: Clone + std::fmt::Debug + Eq + PartialEq> {
+    pub shader_config: T,
+    pub workgroup_grid: WorkgroupGridConfig,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum PipelineOperation<T: Clone + std::fmt::Debug + Eq + PartialEq> {
+    Set(PipelineConfig<T>),
+    SetDefault,
+    Preserve,
+}
+
+impl<T: Clone + std::fmt::Debug + Eq + PartialEq> Default for PipelineOperation<T> {
+    fn default() -> Self {
+        Self::SetDefault
     }
 }

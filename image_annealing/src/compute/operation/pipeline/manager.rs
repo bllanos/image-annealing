@@ -1,16 +1,26 @@
 use super::super::super::link::swap::SwapPass;
 use super::super::super::resource::manager::ResourceManager;
 use super::super::binding::manager::BindingManager;
+use super::super::shader::WorkgroupGridDimensions;
 use super::count_swap::CountSwapPipeline;
 use super::create_displacement_goal::CreateDisplacementGoalPipeline;
 use super::create_permutation::CreatePermutationPipeline;
 use super::permute::PermutePipeline;
 use super::swap::SwapPipeline;
 
+pub use super::create_displacement_goal::CreateDisplacementGoalShaderConfig;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CreateDisplacementGoalPipelineConfig<'a> {
+    pub shader_config: CreateDisplacementGoalShaderConfig<'a>,
+    pub workgroup_grid_dimensions: WorkgroupGridDimensions,
+}
+
 pub struct PipelineManager {
     bindings: BindingManager,
     count_swap_pipeline: CountSwapPipeline,
     create_displacement_goal_pipeline: CreateDisplacementGoalPipeline,
+    create_displacement_goal_workgroup_grid_dimensions: Option<WorkgroupGridDimensions>,
     create_permutation_pipeline: CreatePermutationPipeline,
     permute_pipeline: PermutePipeline,
     swap_pipeline: SwapPipeline,
@@ -29,6 +39,7 @@ impl PipelineManager {
             bindings,
             count_swap_pipeline,
             create_displacement_goal_pipeline,
+            create_displacement_goal_workgroup_grid_dimensions: None,
             create_permutation_pipeline,
             permute_pipeline,
             swap_pipeline,
@@ -46,6 +57,30 @@ impl PipelineManager {
             .dispatch(&mut cpass);
     }
 
+    pub fn has_create_displacement_goal_pipeline(&self) -> bool {
+        self.create_displacement_goal_pipeline.has_pipeline()
+    }
+
+    pub fn configure_create_displacement_goal_pipeline(
+        &mut self,
+        device: &wgpu::Device,
+        config: Option<CreateDisplacementGoalPipelineConfig<'static>>,
+    ) {
+        self.create_displacement_goal_workgroup_grid_dimensions = config
+            .as_ref()
+            .map(
+                |CreateDisplacementGoalPipelineConfig {
+                     workgroup_grid_dimensions,
+                     ..
+                 }| workgroup_grid_dimensions,
+            )
+            .copied();
+        self.create_displacement_goal_pipeline.set_shader(
+            device,
+            config.map(|CreateDisplacementGoalPipelineConfig { shader_config, .. }| shader_config),
+        );
+    }
+
     pub fn create_displacement_goal(&self, encoder: &mut wgpu::CommandEncoder) {
         let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("create_displacement_goal_compute_pass"),
@@ -53,9 +88,13 @@ impl PipelineManager {
         self.create_displacement_goal_pipeline
             .set_pipeline(&mut cpass);
         self.bindings.bind_create_displacement_goal(&mut cpass);
-        self.bindings
-            .create_displacement_goal_default_grid_dimensions()
-            .dispatch(&mut cpass);
+        match self.create_displacement_goal_workgroup_grid_dimensions {
+            Some(workgroup_grid_dimensions) => workgroup_grid_dimensions.dispatch(&mut cpass),
+            None => self
+                .bindings
+                .create_displacement_goal_default_grid_dimensions()
+                .dispatch(&mut cpass),
+        }
     }
 
     pub fn create_permutation(&self, encoder: &mut wgpu::CommandEncoder) {

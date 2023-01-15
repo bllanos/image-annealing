@@ -1,5 +1,5 @@
 use image_annealing_cli_util::io;
-use image_annealing_shader::shader::CreateDisplacementGoalShaderContent;
+use image_annealing_shader::CreateDisplacementGoalShaderContent;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::error::Error;
