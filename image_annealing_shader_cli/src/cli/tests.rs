@@ -8,7 +8,7 @@ mod assemble_shader {
     #[test]
     fn valid_create_displacement_goal_shader() -> Result<(), Box<dyn Error>> {
         let output_file =
-            test_util::make_test_output_path(["cli_assemble_shader_create_displacement_goal"]);
+            test_util::make_test_output_path(["cli_assemble_shader_create_displacement_goal.wgsl"]);
         assert!(!output_file.is_file());
 
         let shader_body_path = test_util::make_test_data_path_string([
@@ -65,7 +65,7 @@ mod assemble_shader {
     #[test]
     fn parse_error() -> Result<(), Box<dyn Error>> {
         let output_file = test_util::make_test_output_path([
-            "cli_assemble_shader_create_displacement_goal_parse_error",
+            "cli_assemble_shader_create_displacement_goal_parse_error.wgsl",
         ]);
         assert!(!output_file.is_file());
 
@@ -103,7 +103,7 @@ mod assemble_shader {
     #[test]
     fn module_error() -> Result<(), Box<dyn Error>> {
         let output_file = test_util::make_test_output_path([
-            "cli_assemble_shader_create_displacement_goal_module_error",
+            "cli_assemble_shader_create_displacement_goal_module_error.wgsl",
         ]);
         assert!(!output_file.is_file());
 
