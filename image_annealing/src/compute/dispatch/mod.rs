@@ -391,3 +391,6 @@ impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
         self
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -8,6 +8,62 @@ fn create_workgroup_dimensions() -> WorkgroupDimensions {
     workgroup_dimensions
 }
 
+mod from_workgroup_grid_config {
+    use super::super::WorkgroupGridDimensions;
+    use crate::compute::output::WorkgroupGridConfig;
+    use crate::ImageDimensions;
+    use std::error::Error;
+    use std::num::NonZeroU32;
+
+    #[test]
+    fn block_size_no_remainder() -> Result<(), Box<dyn Error>> {
+        let width = 2;
+        let height = 3;
+        let config = WorkgroupGridConfig::BlockSize {
+            width: NonZeroU32::new(width).unwrap(),
+            height: NonZeroU32::new(height).unwrap(),
+        };
+        let image_dimensions = ImageDimensions::try_new(width * 2, height * 3)?;
+        let dim = WorkgroupGridDimensions::from_workgroup_grid_config(&image_dimensions, &config);
+        assert_eq!(dim.x(), 2);
+        assert_eq!(dim.y(), 3);
+        assert_eq!(dim.z(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn block_size_remainder() -> Result<(), Box<dyn Error>> {
+        let width = 2;
+        let height = 3;
+        let config = WorkgroupGridConfig::BlockSize {
+            width: NonZeroU32::new(width).unwrap(),
+            height: NonZeroU32::new(height).unwrap(),
+        };
+        let image_dimensions = ImageDimensions::try_new(width * 2 - 1, height * 3 + 1)?;
+        let dim = WorkgroupGridDimensions::from_workgroup_grid_config(&image_dimensions, &config);
+        assert_eq!(dim.x(), 2);
+        assert_eq!(dim.y(), 4);
+        assert_eq!(dim.z(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn fixed() -> Result<(), Box<dyn Error>> {
+        let width = 2;
+        let height = 3;
+        let config = WorkgroupGridConfig::Fixed {
+            width: NonZeroU32::new(width).unwrap(),
+            height: NonZeroU32::new(height).unwrap(),
+        };
+        let image_dimensions = ImageDimensions::try_new(1, 1)?;
+        let dim = WorkgroupGridDimensions::from_workgroup_grid_config(&image_dimensions, &config);
+        assert_eq!(dim.x(), 2);
+        assert_eq!(dim.y(), 3);
+        assert_eq!(dim.z(), 1);
+        Ok(())
+    }
+}
+
 mod from_image_dimensions_and_stride {
     use super::super::WorkgroupGridDimensions;
     use crate::ImageDimensions;

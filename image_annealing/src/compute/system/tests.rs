@@ -50,6 +50,17 @@ mod operation_count_swap {
     }
 }
 
+mod operation_create_displacement_goal {
+    #[test]
+    fn missing_pipeline() {
+        let mut system = super::create_system_single_pixel();
+        test_util::assert_error_contains(
+            system.operation_create_displacement_goal(&Default::default()),
+            "no displacement goal generation compute shader pipeline has been set",
+        );
+    }
+}
+
 mod output_count_swap {
     use super::super::super::link::swap::SwapPass;
     use super::super::{DevicePollType, SwapOperationInput};
