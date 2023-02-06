@@ -5,10 +5,12 @@ use image_annealing::compute::{
 use std::collections::HashSet;
 use std::error::Error;
 
-fn assert_output_vacancies<PartialOutput: Send, FullOutput: Send>(
-    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+fn assert_output_vacancies<T: ?Sized, PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut T,
     statuses: HashSet<OutputStatus>,
-) {
+) where
+    T: Algorithm<PartialOutput, FullOutput>,
+{
     let no_full_statuses = !statuses.iter().any(OutputStatus::is_full);
     if statuses.iter().any(OutputStatus::is_partial) {
         if no_full_statuses {
@@ -20,10 +22,12 @@ fn assert_output_vacancies<PartialOutput: Send, FullOutput: Send>(
     }
 }
 
-async fn assert_output_vacancies_async<PartialOutput: Send, FullOutput: Send>(
-    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+async fn assert_output_vacancies_async<T: ?Sized, PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut T,
     statuses: HashSet<OutputStatus>,
-) {
+) where
+    T: Algorithm<PartialOutput, FullOutput>,
+{
     let no_full_statuses = !statuses.iter().any(OutputStatus::is_full);
     if statuses.iter().any(OutputStatus::is_partial) {
         if no_full_statuses {
@@ -35,10 +39,13 @@ async fn assert_output_vacancies_async<PartialOutput: Send, FullOutput: Send>(
     }
 }
 
-pub fn assert_step_until_success<PartialOutput: Send, FullOutput: Send>(
-    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+pub fn assert_step_until_success<T: ?Sized, PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut T,
     status: OutputStatus,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), Box<dyn Error>>
+where
+    T: Algorithm<PartialOutput, FullOutput>,
+{
     assert!(algorithm.partial_output_block().is_none());
     assert!(algorithm.full_output_block().is_none());
     let mut status_set = HashSet::<OutputStatus>::new();
@@ -59,10 +66,13 @@ pub fn assert_step_until_success<PartialOutput: Send, FullOutput: Send>(
     Ok(())
 }
 
-pub async fn assert_step_until_success_async<PartialOutput: Send, FullOutput: Send>(
-    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+pub async fn assert_step_until_success_async<T: ?Sized, PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut T,
     status: OutputStatus,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), Box<dyn Error>>
+where
+    T: Algorithm<PartialOutput, FullOutput>,
+{
     assert!(algorithm.partial_output().await.is_none());
     assert!(algorithm.full_output().await.is_none());
     let mut status_set = HashSet::<OutputStatus>::new();
@@ -83,11 +93,13 @@ pub async fn assert_step_until_success_async<PartialOutput: Send, FullOutput: Se
     Ok(())
 }
 
-pub fn assert_step_until_error<PartialOutput: Send, FullOutput: Send>(
-    algorithm: &mut dyn Algorithm<PartialOutput, FullOutput>,
+pub fn assert_step_until_error<T: ?Sized, PartialOutput: Send, FullOutput: Send>(
+    algorithm: &mut T,
     status: OutputStatus,
     message: &str,
-) {
+) where
+    T: Algorithm<PartialOutput, FullOutput>,
+{
     crate::assert_error_contains(algorithm.step_until(status), message);
     assert!(algorithm.partial_output_block().is_none());
     assert!(algorithm.full_output_block().is_none());
