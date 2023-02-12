@@ -1,5 +1,5 @@
 use super::super::super::texture::{Texture, TEXTURE_ARRAY_LAYERS};
-use super::super::data::BufferData;
+use super::super::data::{BufferChunkMapper, BufferData};
 use super::super::dimensions::BufferDimensions;
 use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::ImageDimensions;
@@ -55,20 +55,13 @@ impl TextureCopyBufferData {
         }
     }
 
-    pub async fn collect_elements<T>(
+    pub async fn collect_elements<T: BufferChunkMapper>(
         &self,
-        output_chunk_size: usize,
-        output_chunk_mapper: fn(&[u8]) -> T,
         device_manager: &DeviceManager,
         poll_type: DevicePollType,
-    ) -> Vec<T> {
+    ) -> Vec<T::Value> {
         self.0
-            .collect_elements(
-                output_chunk_size,
-                output_chunk_mapper,
-                device_manager,
-                poll_type,
-            )
+            .collect_elements::<T>(device_manager, poll_type)
             .await
     }
 

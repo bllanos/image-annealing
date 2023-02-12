@@ -1,11 +1,9 @@
-use super::super::data::BufferData;
+use super::super::data::{BufferChunkMapper, BufferData};
 use super::super::dimensions::BufferDimensions;
 use super::super::storage::CountSwapOutputStorageBuffer;
 use crate::compute::device::{DeviceManager, DevicePollType};
 use crate::compute::link::swap::CountSwapOutput;
 use crate::compute::operation::WorkgroupGridDimensions;
-
-type BufferElement = CountSwapOutput;
 
 pub struct CountSwapOutputBuffer(BufferData);
 
@@ -13,7 +11,7 @@ impl CountSwapOutputBuffer {
     pub fn new(device: &wgpu::Device) -> Self {
         let buffer_dimensions = BufferDimensions::new_buffer(
             WorkgroupGridDimensions::count_swap().count(),
-            BufferElement::SIZE,
+            <Self as BufferChunkMapper>::CHUNK_SIZE,
         );
         Self(BufferData::create_output_buffer(
             device,
@@ -34,26 +32,27 @@ impl CountSwapOutputBuffer {
         );
     }
 
-    fn output_chunk_mapper(chunk: &[u8]) -> BufferElement {
-        BufferElement::from_ne_bytes(chunk.try_into().unwrap())
-    }
-
     pub async fn collect(
         &self,
         device_manager: &DeviceManager,
         poll_type: DevicePollType,
-    ) -> Vec<BufferElement> {
+    ) -> Vec<<Self as BufferChunkMapper>::Value> {
         self.0
-            .collect_elements(
-                BufferElement::SIZE,
-                Self::output_chunk_mapper,
-                device_manager,
-                poll_type,
-            )
+            .collect_elements::<Self>(device_manager, poll_type)
             .await
     }
 
     pub(in super::super) fn dimensions(&self) -> &BufferDimensions {
         self.0.dimensions()
+    }
+}
+
+impl BufferChunkMapper for CountSwapOutputBuffer {
+    type Value = CountSwapOutput;
+
+    const CHUNK_SIZE: usize = Self::Value::SIZE;
+
+    fn chunk_to_value(chunk: &[u8]) -> Self::Value {
+        Self::Value::from_ne_bytes(chunk.try_into().unwrap())
     }
 }

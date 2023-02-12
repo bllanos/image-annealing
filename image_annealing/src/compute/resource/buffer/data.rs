@@ -2,6 +2,12 @@ use super::dimensions::BufferDimensions;
 use super::map::BufferSliceMapFuture;
 use crate::compute::device::{DeviceManager, DevicePollType};
 
+pub trait BufferChunkMapper {
+    type Value;
+    const CHUNK_SIZE: usize = std::mem::size_of::<Self::Value>();
+    fn chunk_to_value(chunk: &[u8]) -> Self::Value;
+}
+
 pub struct BufferData {
     dimensions: BufferDimensions,
     buffer: wgpu::Buffer,
@@ -73,26 +79,24 @@ impl BufferData {
         )
     }
 
-    pub async fn collect_elements<T>(
+    pub async fn collect_elements<T: BufferChunkMapper>(
         &self,
-        output_chunk_size: usize,
-        output_chunk_mapper: fn(&[u8]) -> T,
         device_manager: &DeviceManager,
         poll_type: DevicePollType,
-    ) -> Vec<T> {
+    ) -> Vec<T::Value> {
         let buffer_slice = self.buffer.slice(..);
         BufferSliceMapFuture::new(&buffer_slice, device_manager, poll_type).await;
         let data = buffer_slice.get_mapped_range();
         let output = match self.dimensions.padding() {
             Some(padding) => data
                 .chunks(padding.padded_bytes_per_row())
-                .flat_map(|c| c[..padding.unpadded_bytes_per_row()].chunks_exact(output_chunk_size))
-                .map(output_chunk_mapper)
-                .collect::<Vec<T>>(),
+                .flat_map(|c| c[..padding.unpadded_bytes_per_row()].chunks_exact(T::CHUNK_SIZE))
+                .map(T::chunk_to_value)
+                .collect::<Vec<T::Value>>(),
             None => data
-                .chunks_exact(output_chunk_size)
-                .map(output_chunk_mapper)
-                .collect::<Vec<T>>(),
+                .chunks_exact(T::CHUNK_SIZE)
+                .map(T::chunk_to_value)
+                .collect::<Vec<T::Value>>(),
         };
         drop(data);
         self.buffer.unmap(); // Free host memory
