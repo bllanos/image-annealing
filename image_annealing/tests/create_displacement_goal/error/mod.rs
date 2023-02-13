@@ -1,5 +1,8 @@
 use image_annealing::compute::format::{LosslessImage, Rgba16Image};
-use image_annealing::compute::{self, Config, CreateDisplacementGoalInput, OutputStatus};
+use image_annealing::compute::{
+    self, Config, CreateDisplacementGoalInput, CreateDisplacementGoalParameters,
+    CreateDisplacementGoalPipelineOperation, OutputStatus,
+};
 use image_annealing::{
     CandidatePermutation, DisplacementGoal, ImageDimensions, ImageDimensionsHolder,
 };
@@ -131,6 +134,27 @@ fn invalid_image_dimensions() -> Result<(), Box<dyn Error>> {
         algorithm.as_mut(),
         OutputStatus::FinalFullOutput,
         "mismatch in image dimensions, (width, height) = (2, 3) and (width, height) = (3, 3)",
+    );
+    Ok(())
+}
+
+#[test]
+fn no_pipeline() -> Result<(), Box<dyn Error>> {
+    let dimensions = ImageDimensions::try_new(2, 3)?;
+
+    let dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })?;
+    let mut algorithm = dispatcher.create_displacement_goal(
+        Default::default(),
+        &CreateDisplacementGoalParameters {
+            pipeline_operation: CreateDisplacementGoalPipelineOperation::Preserve,
+        },
+    );
+    assert_step_until_error(
+        algorithm.as_mut(),
+        OutputStatus::FinalFullOutput,
+        "no displacement goal generation compute shader pipeline has been set",
     );
     Ok(())
 }
