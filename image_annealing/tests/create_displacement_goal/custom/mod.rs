@@ -1,1 +1,2 @@
 mod parameters;
+mod resource;

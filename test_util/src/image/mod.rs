@@ -88,3 +88,7 @@ where
     );
     DimensionsAndRgbaBuffer { image, dimensions }
 }
+
+pub fn nonzero_rgba8_colors() -> DimensionsAndRgba8Buffer {
+    linear_indices_with_bias_to_colors(1)
+}
