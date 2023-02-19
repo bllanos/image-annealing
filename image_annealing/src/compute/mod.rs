@@ -6,7 +6,10 @@ mod output;
 mod resource;
 mod system;
 
-pub use dispatch::{create_dispatcher, create_dispatcher_block, Config, Dispatcher};
+pub use dispatch::{
+    create_dispatcher, create_dispatcher_block, Config, Dispatcher, DispatcherRecycler,
+    RecyclableAlgorithm,
+};
 pub use dispatch::{
     CreateDisplacementGoalAlgorithm, CreatePermutationAlgorithm, PermuteAlgorithm, SwapAlgorithm,
     ValidatePermutationAlgorithm,

@@ -5,11 +5,11 @@ mod run_swap {
     use image_annealing::compute::{
         Algorithm, CreateDisplacementGoalAlgorithm, CreateDisplacementGoalInput,
         CreateDisplacementGoalParameters, CreatePermutationAlgorithm, CreatePermutationInput,
-        CreatePermutationParameters, Dispatcher, OutputStatus, PermuteAlgorithm, PermuteInput,
-        PermuteParameters, SwapAlgorithm, SwapFullOutput, SwapInput, SwapParameters,
-        SwapPartialOutput, SwapPass, SwapPassSequence, SwapPassSequenceSwapRatio,
-        SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm, ValidatePermutationInput,
-        ValidatePermutationParameters,
+        CreatePermutationParameters, Dispatcher, DispatcherRecycler, OutputStatus,
+        PermuteAlgorithm, PermuteInput, PermuteParameters, RecyclableAlgorithm, SwapAlgorithm,
+        SwapFullOutput, SwapInput, SwapParameters, SwapPartialOutput, SwapPass, SwapPassSequence,
+        SwapPassSequenceSwapRatio, SwapPassSwapRatio, SwapRatio, ValidatePermutationAlgorithm,
+        ValidatePermutationInput, ValidatePermutationParameters,
     };
     use image_annealing::image_utils::validation;
     use image_annealing::{
@@ -181,6 +181,12 @@ mod run_swap {
         }
     }
 
+    impl DispatcherRecycler for SwapDispatcher {
+        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
+            self
+        }
+    }
+
     impl Dispatcher for SwapDispatcher {
         fn create_displacement_goal(
             self: Box<Self>,
@@ -347,11 +353,9 @@ mod run_swap {
         fn full_output_block(&mut self) -> Option<SwapFullOutput> {
             unreachable!()
         }
-
-        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-            self
-        }
     }
+
+    impl RecyclableAlgorithm<SwapPartialOutput, SwapFullOutput> for SwapDispatcher {}
 
     fn test_run_swap_with_parameters(
         stop: SwapStopConfig,

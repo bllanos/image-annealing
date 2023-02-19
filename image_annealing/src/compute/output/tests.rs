@@ -36,7 +36,6 @@ mod output_status {
 }
 
 mod algorithm {
-    use super::super::super::dispatch::Dispatcher;
     use super::super::{Algorithm, OutputStatus};
     use async_trait::async_trait;
     use std::error::Error;
@@ -73,10 +72,6 @@ mod algorithm {
         }
 
         fn full_output_block(&mut self) -> Option<()> {
-            unreachable!()
-        }
-
-        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
             unreachable!()
         }
     }
@@ -118,10 +113,6 @@ mod algorithm {
         }
 
         fn full_output_block(&mut self) -> Option<()> {
-            unreachable!()
-        }
-
-        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
             unreachable!()
         }
     }
@@ -169,10 +160,6 @@ mod algorithm {
         fn full_output_block(&mut self) -> Option<()> {
             unreachable!()
         }
-
-        fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
-            unreachable!()
-        }
     }
 
     mod step_until {
@@ -211,7 +198,6 @@ mod algorithm {
     }
 
     mod step_until_finished {
-        use super::super::super::super::dispatch::Dispatcher;
         use super::super::super::{Algorithm, OutputStatus};
         use async_trait::async_trait;
         use std::error::Error;
@@ -253,10 +239,6 @@ mod algorithm {
             }
 
             fn full_output_block(&mut self) -> Option<()> {
-                unreachable!()
-            }
-
-            fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher> {
                 unreachable!()
             }
         }

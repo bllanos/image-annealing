@@ -1,4 +1,3 @@
-use super::dispatch::Dispatcher;
 use async_trait::async_trait;
 use std::error::Error;
 use std::fmt;
@@ -93,8 +92,6 @@ pub trait Algorithm<PartialOutput: Send, FullOutput: Send> {
     async fn full_output(&mut self) -> Option<FullOutput>;
 
     fn full_output_block(&mut self) -> Option<FullOutput>;
-
-    fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher>;
 
     fn step_until(&mut self, status: OutputStatus) -> Result<(), Box<dyn Error>> {
         while self.step()? != status {}

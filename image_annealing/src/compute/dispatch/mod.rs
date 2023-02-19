@@ -33,11 +33,22 @@ pub fn create_dispatcher_block(config: &Config) -> Result<Box<dyn Dispatcher>, B
     futures::executor::block_on(create_dispatcher(config))
 }
 
-pub type CreateDisplacementGoalAlgorithm = dyn Algorithm<(), CreateDisplacementGoalOutput> + Send;
-pub type CreatePermutationAlgorithm = dyn Algorithm<(), CreatePermutationOutput> + Send;
-pub type PermuteAlgorithm = dyn Algorithm<(), PermuteOutput> + Send;
-pub type SwapAlgorithm = dyn Algorithm<SwapPartialOutput, SwapFullOutput> + Send;
-pub type ValidatePermutationAlgorithm = dyn Algorithm<(), ValidatePermutationOutput> + Send;
+pub trait DispatcherRecycler {
+    fn return_to_dispatcher(self: Box<Self>) -> Box<dyn Dispatcher>;
+}
+
+pub trait RecyclableAlgorithm<PartialOutput: Send, FullOutput: Send>:
+    Algorithm<PartialOutput, FullOutput> + DispatcherRecycler
+{
+}
+
+pub type CreateDisplacementGoalAlgorithm =
+    dyn RecyclableAlgorithm<(), CreateDisplacementGoalOutput> + Send;
+pub type CreatePermutationAlgorithm = dyn RecyclableAlgorithm<(), CreatePermutationOutput> + Send;
+pub type PermuteAlgorithm = dyn RecyclableAlgorithm<(), PermuteOutput> + Send;
+pub type SwapAlgorithm = dyn RecyclableAlgorithm<SwapPartialOutput, SwapFullOutput> + Send;
+pub type ValidatePermutationAlgorithm =
+    dyn RecyclableAlgorithm<(), ValidatePermutationOutput> + Send;
 
 pub trait Dispatcher: ImageDimensionsHolder {
     fn create_displacement_goal(
@@ -210,6 +221,13 @@ impl Dispatcher for DispatcherImplementation {
     }
 }
 
+impl DispatcherRecycler for DispatcherImplementation {
+    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
+        self.clear_algorithm();
+        self
+    }
+}
+
 #[async_trait]
 impl Algorithm<(), CreateDisplacementGoalOutput> for DispatcherImplementation {
     fn step(&mut self) -> Result<OutputStatus, Box<dyn Error>> {
@@ -243,11 +261,9 @@ impl Algorithm<(), CreateDisplacementGoalOutput> for DispatcherImplementation {
                 .full_output(&mut self.system, DevicePollType::Wait),
         )
     }
-    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.clear_algorithm();
-        self
-    }
 }
+
+impl RecyclableAlgorithm<(), CreateDisplacementGoalOutput> for DispatcherImplementation {}
 
 #[async_trait]
 impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
@@ -282,11 +298,9 @@ impl Algorithm<(), CreatePermutationOutput> for DispatcherImplementation {
                 .full_output(&mut self.system, DevicePollType::Wait),
         )
     }
-    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.clear_algorithm();
-        self
-    }
 }
+
+impl RecyclableAlgorithm<(), CreatePermutationOutput> for DispatcherImplementation {}
 
 #[async_trait]
 impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
@@ -319,11 +333,9 @@ impl Algorithm<(), PermuteOutput> for DispatcherImplementation {
                 .full_output(&mut self.system, DevicePollType::Wait),
         )
     }
-    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.clear_algorithm();
-        self
-    }
 }
+
+impl RecyclableAlgorithm<(), PermuteOutput> for DispatcherImplementation {}
 
 #[async_trait]
 impl Algorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {
@@ -356,11 +368,9 @@ impl Algorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {
                 .full_output(&mut self.system, DevicePollType::Wait),
         )
     }
-    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.clear_algorithm();
-        self
-    }
 }
+
+impl RecyclableAlgorithm<SwapPartialOutput, SwapFullOutput> for DispatcherImplementation {}
 
 #[async_trait]
 impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
@@ -386,11 +396,9 @@ impl Algorithm<(), ValidatePermutationOutput> for DispatcherImplementation {
     fn full_output_block(&mut self) -> Option<ValidatePermutationOutput> {
         self.algorithm.as_mut_validate_permutation().full_output()
     }
-    fn return_to_dispatcher(mut self: Box<Self>) -> Box<dyn Dispatcher> {
-        self.clear_algorithm();
-        self
-    }
 }
+
+impl RecyclableAlgorithm<(), ValidatePermutationOutput> for DispatcherImplementation {}
 
 #[cfg(test)]
 mod tests;
