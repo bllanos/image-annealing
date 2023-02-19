@@ -158,3 +158,19 @@ fn no_pipeline() -> Result<(), Box<dyn Error>> {
     );
     Ok(())
 }
+
+#[test]
+#[should_panic(expected = "expected ')', found '}'")]
+fn invalid_shader() {
+    let dimensions = ImageDimensions::try_new(2, 3).unwrap();
+
+    let dispatcher = compute::create_dispatcher_block(&Config {
+        image_dimensions: dimensions,
+    })
+    .unwrap();
+    let mut algorithm = dispatcher.create_displacement_goal(
+        Default::default(),
+        &test_util::shader::make_create_displacement_goal_parameters("parse_error"),
+    );
+    algorithm.step_until_finished().unwrap();
+}
