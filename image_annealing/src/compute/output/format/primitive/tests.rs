@@ -106,4 +106,127 @@ mod rgba16_image {
         assert_eq!(wrapped_image.into_inner(), expected);
         Ok(())
     }
+
+    mod byte_manipulation {
+        use super::super::super::{
+            Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent, Rgba8Image,
+        };
+
+        fn make_first_vec() -> Vec<u8> {
+            vec![
+                1, 2, 3, 4, 255, 254, 253, 252, 5, 6, 7, 8, 251, 250, 249, 248, 9, 10, 11, 12, 247,
+                246, 245, 244,
+            ]
+        }
+
+        fn make_second_vec() -> Vec<u8> {
+            vec![
+                13, 14, 15, 16, 243, 242, 241, 240, 17, 18, 19, 20, 239, 238, 237, 236, 21, 22, 23,
+                24, 235, 234, 233, 232,
+            ]
+        }
+
+        fn make_first_image() -> Rgba8Image {
+            Rgba8Image::new(image::RgbaImage::from_vec(2, 3, make_first_vec()).unwrap()).unwrap()
+        }
+
+        fn make_second_image() -> Rgba8Image {
+            Rgba8Image::new(image::RgbaImage::from_vec(2, 3, make_second_vec()).unwrap()).unwrap()
+        }
+
+        fn make_paired_image() -> Rgba16Image {
+            Rgba16Image::new(
+                Rgba16ImageBuffer::from_vec(
+                    2,
+                    3,
+                    make_first_vec()
+                        .into_iter()
+                        .zip(make_second_vec().into_iter())
+                        .map(|(component1, component2)| {
+                            Rgba16ImageBufferComponent::from_ne_bytes([component1, component2])
+                        })
+                        .collect(),
+                )
+                .unwrap(),
+            )
+            .unwrap()
+        }
+
+        mod from_pair {
+            use super::super::super::super::{Rgba16Image, Rgba8Image};
+            use std::error::Error;
+
+            #[test]
+            fn dimensions_mismatch() -> Result<(), Box<dyn Error>> {
+                let larger_image =
+                    Rgba8Image::new(image::RgbaImage::from_pixel(2, 4, image::Rgba([1; 4])))?;
+
+                test_util::assert_error_contains(
+                    Rgba16Image::from_pair(super::make_first_image(), larger_image),
+                    "mismatch in image dimensions, (width, height) = (2, 3) and (width, height) = (2, 4)",
+                );
+                Ok(())
+            }
+
+            #[test]
+            fn from_pair() -> Result<(), Box<dyn Error>> {
+                assert_eq!(
+                    Rgba16Image::from_pair(super::make_first_image(), super::make_second_image())?,
+                    super::make_paired_image()
+                );
+                Ok(())
+            }
+        }
+
+        mod from_raw_pair {
+            use super::super::super::super::Rgba16Image;
+            use std::error::Error;
+
+            #[test]
+            fn dimensions_mismatch() {
+                let larger_image = image::RgbaImage::from_pixel(2, 4, image::Rgba([1; 4]));
+
+                test_util::assert_error_contains(
+                    Rgba16Image::from_raw_pair(super::make_first_image().into_inner(), larger_image),
+                    "mismatch in image dimensions, (width, height) = (2, 3) and (width, height) = (2, 4)",
+                );
+            }
+
+            #[test]
+            fn from_raw_pair() -> Result<(), Box<dyn Error>> {
+                assert_eq!(
+                    Rgba16Image::from_raw_pair(
+                        super::make_first_image().into_inner(),
+                        super::make_second_image().into_inner()
+                    )?,
+                    super::make_paired_image().into_inner()
+                );
+                Ok(())
+            }
+        }
+
+        mod clone_byte {
+            #[test]
+            fn first_byte() {
+                let image = super::make_paired_image();
+                let expected = super::make_first_image();
+                assert_eq!(image.clone_byte(0), expected);
+                assert_eq!(image.clone_first_byte(), expected);
+            }
+
+            #[test]
+            fn second_byte() {
+                let image = super::make_paired_image();
+                let expected = super::make_second_image();
+                assert_eq!(image.clone_byte(1), expected);
+                assert_eq!(image.clone_second_byte(), expected);
+            }
+
+            #[test]
+            #[should_panic(expected = "index out of bounds: the len is 2 but the index is 2")]
+            fn byte_index_out_of_bounds() {
+                super::make_paired_image().clone_byte(2);
+            }
+        }
+    }
 }

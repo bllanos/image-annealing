@@ -3,6 +3,7 @@ use super::{
     ImageFileReader, ImageFileWriter, ImageFileWriterSaveResult, ImageFormat, ImageFormatError,
 };
 use crate::compute::conversion::VectorFieldEntry;
+use crate::image_utils::check_dimensions_match2;
 use crate::{ImageDimensions, ImageDimensionsHolder};
 use image::{io::Reader as ImageReader, GenericImageView, ImageBuffer};
 use std::error::Error;
@@ -167,6 +168,35 @@ impl Rgba16Image {
         Ok(Self { dimensions, image })
     }
 
+    pub fn from_pair(image1: Rgba8Image, image2: Rgba8Image) -> Result<Self, Box<dyn Error>> {
+        let dimensions = check_dimensions_match2(&image1, &image2)?;
+        let image_data: Vec<Rgba16ImageBufferComponent> = image1
+            .as_raw_iter()
+            .zip(image2.as_raw_iter())
+            .map(|(&component1, &component2)| {
+                Rgba16ImageBufferComponent::from_ne_bytes([component1, component2])
+            })
+            .collect();
+        Ok(Self {
+            dimensions: *dimensions,
+            image: Rgba16ImageBuffer::from_vec(
+                dimensions.width().try_into().unwrap(),
+                dimensions.height().try_into().unwrap(),
+                image_data,
+            )
+            .unwrap(),
+        })
+    }
+
+    pub fn from_raw_pair(
+        image1: image::RgbaImage,
+        image2: image::RgbaImage,
+    ) -> Result<Self, Box<dyn Error>> {
+        let wrapped_image1 = Rgba8Image::new(image1)?;
+        let wrapped_image2 = Rgba8Image::new(image2)?;
+        Self::from_pair(wrapped_image1, wrapped_image2)
+    }
+
     pub fn into_inner(self) -> Rgba16ImageBuffer {
         self.image
     }
@@ -195,6 +225,31 @@ impl Rgba16Image {
 
     pub(crate) fn as_raw_iter(&self) -> impl Iterator<Item = &Rgba16ImageBufferComponent> {
         self.image.as_raw().iter()
+    }
+
+    pub fn clone_byte(&self, byte_index: usize) -> Rgba8Image {
+        let image_data = self
+            .as_raw_iter()
+            .map(|&component| {
+                let bytes = component.to_ne_bytes();
+                bytes[byte_index]
+            })
+            .collect();
+        let image = image::RgbaImage::from_vec(
+            self.dimensions.width().try_into().unwrap(),
+            self.dimensions.height().try_into().unwrap(),
+            image_data,
+        )
+        .unwrap();
+        Rgba8Image::new(image).unwrap()
+    }
+
+    pub fn clone_first_byte(&self) -> Rgba8Image {
+        self.clone_byte(0)
+    }
+
+    pub fn clone_second_byte(&self) -> Rgba8Image {
+        self.clone_byte(1)
     }
 }
 
