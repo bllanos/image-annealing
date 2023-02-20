@@ -1,35 +1,14 @@
-use image_annealing::compute::format::VectorFieldImageBuffer;
+use super::CUSTOM_SHADER_ENTRY_POINT;
 use image_annealing::compute::{
     self, Config, CreateDisplacementGoalParameters, CreateDisplacementGoalPipelineOperation,
     CreateDisplacementGoalShaderConfig, OutputStatus, PipelineConfig, WorkgroupGridConfig,
 };
-use image_annealing::{DisplacementGoal, ImageDimensions};
+use image_annealing::ImageDimensions;
 use std::borrow::Cow;
 use std::default::Default;
 use std::error::Error;
 use std::num::NonZeroU32;
 use test_util::algorithm::assert_step_until_success;
-
-const CUSTOM_SHADER_ENTRY_POINT: &str = "entry_point";
-
-fn make_filled_rectangle_displacement_goal(
-    image_dimensions: &ImageDimensions,
-    rectangle_dimensions: &ImageDimensions,
-) -> DisplacementGoal {
-    let mut image = VectorFieldImageBuffer::from_pixel(
-        image_dimensions.width().try_into().unwrap(),
-        image_dimensions.height().try_into().unwrap(),
-        image::Rgba([0; 4]),
-    );
-    let rectangle_width = rectangle_dimensions.width().try_into().unwrap();
-    let rectangle_height = rectangle_dimensions.height().try_into().unwrap();
-    for (x, y, px) in image.enumerate_pixels_mut() {
-        if x < rectangle_width && y < rectangle_height {
-            *px = image::Rgba([1, 2, 3, 4]);
-        }
-    }
-    DisplacementGoal::from_vector_field(image).unwrap()
-}
 
 #[test]
 fn custom_entry_point() -> Result<(), Box<dyn Error>> {
@@ -63,7 +42,7 @@ fn custom_entry_point() -> Result<(), Box<dyn Error>> {
     assert!(output.image.is_none());
     assert_eq!(
         output.output_displacement_goal,
-        make_filled_rectangle_displacement_goal(&dimensions, &dimensions)
+        super::make_filled_rectangle_displacement_goal(&dimensions, &dimensions)
     );
     assert!(algorithm.full_output_block().is_none());
     Ok(())
@@ -101,7 +80,10 @@ fn block_size_workgroup_grid_config() -> Result<(), Box<dyn Error>> {
     assert!(output.image.is_none());
     assert_eq!(
         output.output_displacement_goal,
-        make_filled_rectangle_displacement_goal(&dimensions, &ImageDimensions::try_new(4, 9)?)
+        super::make_filled_rectangle_displacement_goal(
+            &dimensions,
+            &ImageDimensions::try_new(4, 9)?
+        )
     );
     assert!(algorithm.full_output_block().is_none());
     Ok(())
@@ -139,7 +121,10 @@ fn fixed_workgroup_grid_config() -> Result<(), Box<dyn Error>> {
     assert!(output.image.is_none());
     assert_eq!(
         output.output_displacement_goal,
-        make_filled_rectangle_displacement_goal(&dimensions, &ImageDimensions::try_new(4, 9)?)
+        super::make_filled_rectangle_displacement_goal(
+            &dimensions,
+            &ImageDimensions::try_new(4, 9)?
+        )
     );
     assert!(algorithm.full_output_block().is_none());
     Ok(())
