@@ -35,7 +35,7 @@ impl CreateDisplacementGoalPipelineOperation<'_> {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct CreateDisplacementGoalParameters<'a> {
     pub pipeline_operation: CreateDisplacementGoalPipelineOperation<'a>,
 }

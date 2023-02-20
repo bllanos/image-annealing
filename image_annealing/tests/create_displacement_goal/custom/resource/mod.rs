@@ -6,6 +6,8 @@ use test_util::algorithm::assert_step_until_success;
 use test_util::image::DimensionsAndRgba8Buffer;
 use test_util::permutation::DimensionsAndPermutation;
 
+mod image;
+
 #[test]
 fn copy_displacement_goal() -> Result<(), Box<dyn Error>> {
     let DimensionsAndRgba8Buffer { image, dimensions } = test_util::image::nonzero_rgba8_colors();

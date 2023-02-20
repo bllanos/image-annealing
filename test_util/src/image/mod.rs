@@ -1,6 +1,8 @@
 use image::{ImageBuffer, Rgba};
 use image_annealing::compute::format::{
-    Rgba16ImageBuffer, Rgba16ImageBufferComponent, VectorFieldImageBufferComponent,
+    ImageFormat, LosslessImage, Rgba16Image, Rgba16ImageBuffer, Rgba16ImageBufferComponent,
+    Rgba16Rgba8Image, Rgba16Rgba8x2Image, Rgba16x2Image, Rgba8Image, Rgba8x2Image, Rgba8x3Image,
+    Rgba8x4Image, VectorFieldImageBuffer, VectorFieldImageBufferComponent,
 };
 use image_annealing::ImageDimensions;
 
@@ -91,4 +93,311 @@ where
 
 pub fn nonzero_rgba8_colors() -> DimensionsAndRgba8Buffer {
     linear_indices_with_bias_to_colors(1)
+}
+
+pub struct LosslessImageAndByteSection {
+    pub image: LosslessImage,
+    pub byte_index: usize,
+    pub byte_image: VectorFieldImageBuffer,
+}
+
+pub const IMAGE_COMPONENT_BYTE_COUNT: usize = 4;
+
+pub fn lossless_image_with_nonzero_byte(
+    format: ImageFormat,
+    byte_index: usize,
+) -> LosslessImageAndByteSection {
+    assert!(byte_index < IMAGE_COMPONENT_BYTE_COUNT);
+    let DimensionsAndRgba8Buffer { dimensions, image } = nonzero_rgba8_colors();
+    let width = dimensions.width().try_into().unwrap();
+    let height = dimensions.height().try_into().unwrap();
+
+    let zero_rgba8 =
+        image::RgbaImage::from_pixel(width, height, image::Rgba([0; IMAGE_COMPONENT_BYTE_COUNT]));
+    let zero_rgba16 = Rgba16ImageBuffer::from_pixel(
+        width,
+        height,
+        image::Rgba::<Rgba16ImageBufferComponent>([0; IMAGE_COMPONENT_BYTE_COUNT]),
+    );
+
+    let byte_image = image.clone();
+
+    match format {
+        ImageFormat::Rgba8 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8(Rgba8Image::new(byte_image.clone()).unwrap()),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8(Rgba8Image::new(zero_rgba8.clone()).unwrap()),
+                byte_index,
+                byte_image: zero_rgba8,
+            },
+        },
+        ImageFormat::Rgba8x2 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x2(Rgba8x2Image::new(image, zero_rgba8).unwrap()),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x2(Rgba8x2Image::new(zero_rgba8, image).unwrap()),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x2(
+                    Rgba8x2Image::new(zero_rgba8.clone(), zero_rgba8.clone()).unwrap(),
+                ),
+                byte_index,
+                byte_image: zero_rgba8,
+            },
+        },
+        ImageFormat::Rgba8x3 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x3(
+                    Rgba8x3Image::new(image, zero_rgba8.clone(), zero_rgba8).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x3(
+                    Rgba8x3Image::new(zero_rgba8.clone(), image, zero_rgba8).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            2 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x3(
+                    Rgba8x3Image::new(zero_rgba8.clone(), zero_rgba8, image).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x3(
+                    Rgba8x3Image::new(zero_rgba8.clone(), zero_rgba8.clone(), zero_rgba8.clone())
+                        .unwrap(),
+                ),
+                byte_index,
+                byte_image: zero_rgba8,
+            },
+        },
+        ImageFormat::Rgba8x4 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x4(
+                    Rgba8x4Image::new(image, zero_rgba8.clone(), zero_rgba8.clone(), zero_rgba8)
+                        .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x4(
+                    Rgba8x4Image::new(zero_rgba8.clone(), image, zero_rgba8.clone(), zero_rgba8)
+                        .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            2 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x4(
+                    Rgba8x4Image::new(zero_rgba8.clone(), zero_rgba8.clone(), image, zero_rgba8)
+                        .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba8x4(
+                    Rgba8x4Image::new(zero_rgba8.clone(), zero_rgba8.clone(), zero_rgba8, image)
+                        .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+        },
+        ImageFormat::Rgba16 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16(
+                    Rgba16Image::from_raw_pair(image, zero_rgba8).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16(
+                    Rgba16Image::from_raw_pair(zero_rgba8, image).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16(Rgba16Image::new(zero_rgba16).unwrap()),
+                byte_index,
+                byte_image: zero_rgba8,
+            },
+        },
+        ImageFormat::Rgba16x2 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16x2(
+                    Rgba16x2Image::new(
+                        Rgba16Image::from_raw_pair(image, zero_rgba8)
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba16,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16x2(
+                    Rgba16x2Image::new(
+                        Rgba16Image::from_raw_pair(zero_rgba8, image)
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba16,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            2 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16x2(
+                    Rgba16x2Image::new(
+                        zero_rgba16,
+                        Rgba16Image::from_raw_pair(image, zero_rgba8)
+                            .unwrap()
+                            .into_inner(),
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16x2(
+                    Rgba16x2Image::new(
+                        zero_rgba16,
+                        Rgba16Image::from_raw_pair(zero_rgba8, image)
+                            .unwrap()
+                            .into_inner(),
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+        },
+        ImageFormat::Rgba16Rgba8 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8(
+                    Rgba16Rgba8Image::new(
+                        Rgba16Image::from_raw_pair(image, zero_rgba8.clone())
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba8,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8(
+                    Rgba16Rgba8Image::new(
+                        Rgba16Image::from_raw_pair(zero_rgba8.clone(), image)
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba8,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            2 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8(
+                    Rgba16Rgba8Image::new(zero_rgba16, image).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8(
+                    Rgba16Rgba8Image::new(zero_rgba16, zero_rgba8.clone()).unwrap(),
+                ),
+                byte_index,
+                byte_image: zero_rgba8,
+            },
+        },
+        ImageFormat::Rgba16Rgba8x2 => match byte_index {
+            0 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8x2(
+                    Rgba16Rgba8x2Image::new(
+                        Rgba16Image::from_raw_pair(image, zero_rgba8.clone())
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba8.clone(),
+                        zero_rgba8,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            1 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8x2(
+                    Rgba16Rgba8x2Image::new(
+                        Rgba16Image::from_raw_pair(zero_rgba8.clone(), image)
+                            .unwrap()
+                            .into_inner(),
+                        zero_rgba8.clone(),
+                        zero_rgba8,
+                    )
+                    .unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            2 => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8x2(
+                    Rgba16Rgba8x2Image::new(zero_rgba16, image, zero_rgba8).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+            _ => LosslessImageAndByteSection {
+                image: LosslessImage::Rgba16Rgba8x2(
+                    Rgba16Rgba8x2Image::new(zero_rgba16, zero_rgba8, image).unwrap(),
+                ),
+                byte_index,
+                byte_image,
+            },
+        },
+    }
+}
+
+pub fn all_lossless_images_with_nonzero_bytes() -> impl Iterator<Item = LosslessImageAndByteSection>
+{
+    [
+        ImageFormat::Rgba8,
+        ImageFormat::Rgba8x2,
+        ImageFormat::Rgba8x3,
+        ImageFormat::Rgba8x4,
+        ImageFormat::Rgba16,
+        ImageFormat::Rgba16x2,
+        ImageFormat::Rgba16Rgba8,
+        ImageFormat::Rgba16Rgba8x2,
+    ]
+    .iter()
+    .flat_map(|format| {
+        (0..IMAGE_COMPONENT_BYTE_COUNT)
+            .map(|byte_index| lossless_image_with_nonzero_byte(*format, byte_index))
+    })
 }
