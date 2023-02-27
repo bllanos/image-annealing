@@ -1,4 +1,5 @@
-use image_annealing::compute::{self, Config, OutputStatus, SwapInput};
+use image_annealing::compute::conversion::{self, VectorFieldEntry};
+use image_annealing::compute::{self, Config, OutputStatus, SwapInput, SwapPass};
 use image_annealing::{CandidatePermutation, DisplacementGoal, ImageDimensionsHolder};
 use std::default::Default;
 use std::error::Error;
@@ -12,7 +13,7 @@ fn overwrite_swap_displacement_goal() -> Result<(), Box<dyn Error>> {
         permutation,
         dimensions,
     } = test_util::permutation::non_identity();
-    let expected_permutation = test_util::operation::swap(&permutation);
+    let mut expected_permutation = test_util::operation::swap(&permutation);
     let displacement_goal =
         DisplacementGoal::from_raw_candidate_permutation(expected_permutation.clone())?;
     let expected_displacement_goal = displacement_goal.as_ref().clone();
@@ -57,5 +58,36 @@ fn overwrite_swap_displacement_goal() -> Result<(), Box<dyn Error>> {
     assert_is_identity(&output.output_displacement_goal);
     assert_eq!(output.output_displacement_goal.dimensions(), &dimensions);
     assert!(algorithm.full_output_block().is_none());
+
+    dispatcher = algorithm.return_to_dispatcher();
+
+    expected_permutation = conversion::to_image(
+        &dimensions,
+        &[
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(0, 0),
+            VectorFieldEntry(0, 1),
+            VectorFieldEntry(-1, -1),
+            VectorFieldEntry(1, -1),
+            VectorFieldEntry(0, 0),
+        ],
+    );
+
+    let mut algorithm = dispatcher.swap(Default::default(), &swap_parameters);
+    assert_step_until_success(algorithm.as_mut(), OutputStatus::FinalPartialOutput)?;
+
+    let output = algorithm.full_output_block().unwrap();
+    assert!(output.input.is_none());
+    assert_eq!(output.output_permutation.as_ref(), &expected_permutation);
+    assert_eq!(output.pass, SwapPass::Horizontal);
+    assert!(algorithm.full_output_block().is_none());
+
+    assert_correct_swap_count_output(
+        algorithm.as_mut(),
+        &swap_parameters,
+        &dimensions,
+        SwapAcceptedCount::Some(vec![1]),
+    );
+
     Ok(())
 }
