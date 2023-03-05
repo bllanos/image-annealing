@@ -21,16 +21,16 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            InvalidDimensionError::InvalidNumberType(value) => {
+            Self::InvalidNumberType(value) => {
                 write!(
                     f,
                     "failed to convert {} to the required type for dimensions",
                     value
                 )
             }
-            InvalidDimensionError::ZeroWidth => write!(f, "width is zero"),
-            InvalidDimensionError::ZeroHeight => write!(f, "height is zero"),
-            InvalidDimensionError::DepthNotOne => {
+            Self::ZeroWidth => write!(f, "width is zero"),
+            Self::ZeroHeight => write!(f, "height is zero"),
+            Self::DepthNotOne => {
                 write!(f, "depth is not {}", ImageDimensions::DEPTH)
             }
         }
