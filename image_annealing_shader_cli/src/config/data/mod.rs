@@ -5,14 +5,12 @@ use std::borrow::Cow;
 use std::error::Error;
 use std::fs;
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct UnverifiedCreateDisplacementGoalConfig {
     pub body: String,
 }
 
-impl<'a> TryFrom<UnverifiedCreateDisplacementGoalConfig>
-    for CreateDisplacementGoalShaderContent<'a>
-{
+impl TryFrom<UnverifiedCreateDisplacementGoalConfig> for CreateDisplacementGoalShaderContent<'_> {
     type Error = Box<dyn Error>;
 
     fn try_from(value: UnverifiedCreateDisplacementGoalConfig) -> Result<Self, Self::Error> {
@@ -33,7 +31,7 @@ pub enum Config<'a> {
     CreateDisplacementGoal(CreateDisplacementGoalShaderContent<'a>),
 }
 
-impl<'a> TryFrom<UnverifiedConfig> for Config<'a> {
+impl TryFrom<UnverifiedConfig> for Config<'_> {
     type Error = Box<dyn Error>;
 
     fn try_from(value: UnverifiedConfig) -> Result<Self, Self::Error> {

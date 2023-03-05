@@ -603,6 +603,8 @@ dependencies = [
  "futures-intrusive",
  "image_annealing",
  "image_annealing_cli_util",
+ "image_annealing_shader",
+ "image_annealing_shader_cli",
  "parking_lot",
  "serde",
  "serde_json",
