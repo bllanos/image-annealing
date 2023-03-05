@@ -3,7 +3,9 @@ use image_annealing_shader_cli::args::{
     AssembleShaderOptions, DefaultShaderOutputOptions, Options,
 };
 use image_annealing_shader_cli::cli;
-use image_annealing_shader_cli::config::{Config, UnverifiedConfig};
+use image_annealing_shader_cli::config::{
+    Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig,
+};
 use std::error::Error;
 use std::fs;
 
@@ -19,10 +21,11 @@ fn assemble_create_displacement_goal_shader() -> Result<(), Box<dyn Error>> {
         "copy_image.wgsl",
     ]);
 
-    let config: Config = (UnverifiedConfig::CreateDisplacementGoal {
-        body: shader_body_path,
-    })
-    .try_into()?;
+    let config: Config =
+        (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
+            body: shader_body_path,
+        }))
+        .try_into()?;
     let options = Options::Assemble(AssembleShaderOptions {
         config: config.clone(),
         output_file: output_file.clone(),

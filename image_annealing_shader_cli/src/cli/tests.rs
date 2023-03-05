@@ -1,7 +1,7 @@
 mod assemble_shader {
     use super::super::assemble_shader;
     use crate::args::AssembleShaderOptions;
-    use crate::config::{Config, UnverifiedConfig};
+    use crate::config::{Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig};
     use image_annealing_shader::shader;
     use std::error::Error;
 
@@ -17,10 +17,11 @@ mod assemble_shader {
             "copy_image.wgsl",
         ]);
 
-        let config: Config = (UnverifiedConfig::CreateDisplacementGoal {
-            body: shader_body_path,
-        })
-        .try_into()?;
+        let config: Config =
+            (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
+                body: shader_body_path,
+            }))
+            .try_into()?;
         assemble_shader(&AssembleShaderOptions {
             config: config.clone(),
             output_file: output_file.clone(),
@@ -50,9 +51,11 @@ mod assemble_shader {
 
         test_util::assert_error_contains(
             assemble_shader(&AssembleShaderOptions {
-                config: (UnverifiedConfig::CreateDisplacementGoal {
-                    body: shader_body_path,
-                })
+                config: (UnverifiedConfig::CreateDisplacementGoal(
+                    UnverifiedCreateDisplacementGoalConfig {
+                        body: shader_body_path,
+                    },
+                ))
                 .try_into()
                 .unwrap(),
                 output_file,
@@ -75,10 +78,11 @@ mod assemble_shader {
             "parse_error.wgsl",
         ]);
 
-        let config: Config = (UnverifiedConfig::CreateDisplacementGoal {
-            body: shader_body_path,
-        })
-        .try_into()?;
+        let config: Config =
+            (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
+                body: shader_body_path,
+            }))
+            .try_into()?;
         test_util::assert_error_contains(
             assemble_shader(&AssembleShaderOptions {
                 config: config.clone(),
@@ -113,10 +117,11 @@ mod assemble_shader {
             "module_error.wgsl",
         ]);
 
-        let config: Config = (UnverifiedConfig::CreateDisplacementGoal {
-            body: shader_body_path,
-        })
-        .try_into()?;
+        let config: Config =
+            (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
+                body: shader_body_path,
+            }))
+            .try_into()?;
         test_util::assert_error_contains(
             assemble_shader(&AssembleShaderOptions {
                 config: config.clone(),

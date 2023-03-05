@@ -1,5 +1,5 @@
 mod parse_config_file {
-    use super::super::super::{Config, UnverifiedConfig};
+    use super::super::super::{Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig};
     use super::super::parse_config_file;
     use std::error::Error;
 
@@ -39,10 +39,11 @@ mod parse_config_file {
             "create_displacement_goal",
             "copy_image.wgsl",
         ]);
-        let config: Config = (UnverifiedConfig::CreateDisplacementGoal {
-            body: shader_body_path,
-        })
-        .try_into()?;
+        let config: Config =
+            (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
+                body: shader_body_path,
+            }))
+            .try_into()?;
 
         assert_eq!(r, config);
         Ok(())
