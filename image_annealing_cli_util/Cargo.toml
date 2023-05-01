@@ -8,6 +8,8 @@ keywords = ["image","graphics","cli"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+relative-path = { version = "1.8.0", features = ["serde"] }
+serde = { version = "1.0.152", features = ["derive"] }
 
 [dev-dependencies]
 test_util = { path = "../test_util" }

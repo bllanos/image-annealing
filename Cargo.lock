@@ -625,6 +625,8 @@ dependencies = [
 name = "image_annealing_cli_util"
 version = "0.1.0"
 dependencies = [
+ "relative-path",
+ "serde",
  "test_util",
 ]
 
@@ -1018,6 +1020,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "relative-path"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bf2521270932c3c7bed1a59151222bd7643c79310f2916f01925e1e16255698"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
