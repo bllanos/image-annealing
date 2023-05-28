@@ -49,7 +49,7 @@ fn assemble_create_displacement_goal_shader() -> Result<(), Box<dyn Error>> {
 fn output_default_shaders() -> Result<(), Box<dyn Error>> {
     let output_directory =
         test_util::make_test_output_path(["image_annealing_shader_cli_cli_run_default"]);
-    assert!(!output_directory.exists());
+    assert!(!output_directory.try_exists()?);
     std::fs::create_dir(&output_directory)?;
 
     let options = Options::Default(DefaultShaderOutputOptions {

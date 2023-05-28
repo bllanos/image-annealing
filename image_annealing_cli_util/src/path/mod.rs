@@ -11,6 +11,38 @@ pub use input::{
     UnverifiedInputFilePath,
 };
 
+#[derive(Debug)]
+pub enum PathError<T: Error + 'static> {
+    Error(T),
+    IOError(std::io::Error),
+}
+
+impl<T: Error> fmt::Display for PathError<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Error(err) => <T as fmt::Display>::fmt(&err, f),
+            Self::IOError(err) => {
+                write!(f, "io error {}", err)
+            }
+        }
+    }
+}
+
+impl<T: Error + 'static> Error for PathError<T> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(match self {
+            Self::Error(err) => err,
+            Self::IOError(err) => err,
+        })
+    }
+}
+
+impl<T: Error + 'static> From<std::io::Error> for PathError<T> {
+    fn from(err: std::io::Error) -> Self {
+        Self::IOError(err)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct PathNotFoundError(pub PathBuf);
 
@@ -105,16 +137,20 @@ impl Error for ParentPathError {
     }
 }
 
-fn check_directory_path<P: AsRef<Path>>(directory: P) -> Result<(), DirectoryError> {
+fn check_directory_path<P: AsRef<Path>>(directory: P) -> Result<(), PathError<DirectoryError>> {
     let directory = directory.as_ref();
-    if directory.exists() {
+    if directory.try_exists()? {
         if directory.is_dir() {
             Ok(())
         } else {
-            Err(DirectoryError::not_a_directory(directory.to_path_buf()))
+            Err(PathError::Error(DirectoryError::not_a_directory(
+                directory.to_path_buf(),
+            )))
         }
     } else {
-        Err(DirectoryError::not_found(directory.to_path_buf()))
+        Err(PathError::Error(DirectoryError::not_found(
+            directory.to_path_buf(),
+        )))
     }
 }
 

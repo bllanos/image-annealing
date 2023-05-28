@@ -175,7 +175,7 @@ mod write_default_files {
         let directory = test_util::make_test_output_path([
             "image_annealing_shader_cli_write_default_files_all_shaders",
         ]);
-        assert!(!directory.exists());
+        assert!(!directory.try_exists()?);
         std::fs::create_dir(&directory)?;
 
         let count_swap_path = directory.join("count_swap.wgsl");

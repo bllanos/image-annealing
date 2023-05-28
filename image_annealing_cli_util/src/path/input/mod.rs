@@ -1,5 +1,6 @@
 use super::{
-    DirectoryError, FromWithPathContext, NotAFileError, PathNotFoundError, TryFromWithPathContext,
+    DirectoryError, FromWithPathContext, NotAFileError, PathError, PathNotFoundError,
+    TryFromWithPathContext,
 };
 use relative_path::RelativePath;
 use serde::{Deserialize, Serialize};
@@ -50,21 +51,21 @@ pub struct InputFilePath<'a>(pub Cow<'a, Path>);
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
     for InputFilePath<'static>
 {
-    type Error = InputFileError;
+    type Error = PathError<InputFileError>;
 
     fn try_from_with_path_context(
         value: UnverifiedInputFilePath<'a>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
-        if full_path.exists() {
+        if full_path.try_exists()? {
             if full_path.is_file() {
                 Ok(Self(Cow::Owned(full_path)))
             } else {
-                Err(InputFileError::not_a_file(full_path))
+                Err(PathError::Error(InputFileError::not_a_file(full_path)))
             }
         } else {
-            Err(InputFileError::not_found(full_path))
+            Err(PathError::Error(InputFileError::not_found(full_path)))
         }
     }
 }
@@ -77,7 +78,7 @@ pub struct InputDirectoryPath<'a>(Cow<'a, Path>);
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>, P>
     for InputDirectoryPath<'static>
 {
-    type Error = DirectoryError;
+    type Error = PathError<DirectoryError>;
 
     fn try_from_with_path_context(
         value: UnverifiedInputDirectoryPath<'a>,
