@@ -1,4 +1,6 @@
-use super::{DirectoryError, FromWithPathContext, TryFromWithPathContext};
+use super::{
+    DirectoryError, FromWithPathContext, NotAFileError, PathNotFoundError, TryFromWithPathContext,
+};
 use relative_path::RelativePath;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -8,24 +10,37 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone)]
 pub enum InputFileError {
-    NotAFile(PathBuf),
-    NotFound(PathBuf),
+    NotAFile(NotAFileError),
+    NotFound(PathNotFoundError),
+}
+
+impl InputFileError {
+    pub fn not_a_file(path: PathBuf) -> Self {
+        Self::NotAFile(NotAFileError(path))
+    }
+
+    pub fn not_found(path: PathBuf) -> Self {
+        Self::NotFound(PathNotFoundError(path))
+    }
 }
 
 impl fmt::Display for InputFileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::NotAFile(path) => {
-                write!(f, "path '{}' is not a file", path.display())
-            }
-            Self::NotFound(path) => {
-                write!(f, "file '{}' does not exist", path.display())
-            }
+            Self::NotAFile(err) => write!(f, "input {}", err),
+            Self::NotFound(err) => write!(f, "input file {}", err),
         }
     }
 }
 
-impl Error for InputFileError {}
+impl Error for InputFileError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(match self {
+            Self::NotAFile(err) => err,
+            Self::NotFound(err) => err,
+        })
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct UnverifiedInputFilePath<'a>(pub Cow<'a, RelativePath>);
@@ -46,10 +61,10 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
             if full_path.is_file() {
                 Ok(Self(Cow::Owned(full_path)))
             } else {
-                Err(InputFileError::NotAFile(full_path))
+                Err(InputFileError::not_a_file(full_path))
             }
         } else {
-            Err(InputFileError::NotFound(full_path))
+            Err(InputFileError::not_found(full_path))
         }
     }
 }

@@ -12,25 +12,98 @@ pub use input::{
 };
 
 #[derive(Debug, Clone)]
+pub struct PathNotFoundError(pub PathBuf);
+
+impl fmt::Display for PathNotFoundError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "path '{}' does not exist", self.0.display())
+    }
+}
+
+impl Error for PathNotFoundError {}
+
+#[derive(Debug, Clone)]
+pub struct NotAFileError(PathBuf);
+
+impl fmt::Display for NotAFileError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "path '{}' is not a file", self.0.display())
+    }
+}
+
+impl Error for NotAFileError {}
+
+#[derive(Debug, Clone)]
+pub struct NotADirectoryError(PathBuf);
+
+impl fmt::Display for NotADirectoryError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "path '{}' is not a directory", self.0.display())
+    }
+}
+
+impl Error for NotADirectoryError {}
+
+#[derive(Debug, Clone)]
 pub enum DirectoryError {
-    NotADirectory(PathBuf),
-    NotFound(PathBuf),
+    NotADirectory(NotADirectoryError),
+    NotFound(PathNotFoundError),
+}
+
+impl DirectoryError {
+    pub fn not_a_directory(path: PathBuf) -> Self {
+        Self::NotADirectory(NotADirectoryError(path))
+    }
+
+    pub fn not_found(path: PathBuf) -> Self {
+        Self::NotFound(PathNotFoundError(path))
+    }
 }
 
 impl fmt::Display for DirectoryError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::NotADirectory(path) => {
-                write!(f, "path '{}' is not a directory", path.display())
-            }
-            Self::NotFound(path) => {
-                write!(f, "directory '{}' does not exist", path.display())
+            Self::NotADirectory(err) => err.fmt(f),
+            Self::NotFound(err) => {
+                write!(f, "directory {}", err)
             }
         }
     }
 }
 
-impl Error for DirectoryError {}
+impl Error for DirectoryError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(match self {
+            Self::NotADirectory(err) => err,
+            Self::NotFound(err) => err,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ParentPathError(pub DirectoryError);
+
+impl ParentPathError {
+    pub fn not_a_directory(path: PathBuf) -> Self {
+        Self(DirectoryError::not_a_directory(path))
+    }
+
+    pub fn not_found(path: PathBuf) -> Self {
+        Self(DirectoryError::not_found(path))
+    }
+}
+
+impl fmt::Display for ParentPathError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "parent {}", self.0)
+    }
+}
+
+impl Error for ParentPathError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(&self.0)
+    }
+}
 
 fn check_directory_path<P: AsRef<Path>>(directory: P) -> Result<(), DirectoryError> {
     let directory = directory.as_ref();
@@ -38,10 +111,10 @@ fn check_directory_path<P: AsRef<Path>>(directory: P) -> Result<(), DirectoryErr
         if directory.is_dir() {
             Ok(())
         } else {
-            Err(DirectoryError::NotADirectory(directory.to_path_buf()))
+            Err(DirectoryError::not_a_directory(directory.to_path_buf()))
         }
     } else {
-        Err(DirectoryError::NotFound(directory.to_path_buf()))
+        Err(DirectoryError::not_found(directory.to_path_buf()))
     }
 }
 
