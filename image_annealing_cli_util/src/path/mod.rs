@@ -5,10 +5,16 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 
 mod input;
+mod output;
 
 pub use input::{
     InputDirectoryPath, InputFileError, InputFilePath, UnverifiedInputDirectoryPath,
     UnverifiedInputFilePath,
+};
+
+pub use output::{
+    OutputDirectoryError, OutputDirectoryPath, OutputFileError, OutputFilePath, ParentPathError,
+    UnverifiedOutputDirectoryPath, UnverifiedOutputFilePath,
 };
 
 #[derive(Debug)]
@@ -109,31 +115,6 @@ impl Error for DirectoryError {
             Self::NotADirectory(err) => err,
             Self::NotFound(err) => err,
         })
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct ParentPathError(pub DirectoryError);
-
-impl ParentPathError {
-    pub fn not_a_directory(path: PathBuf) -> Self {
-        Self(DirectoryError::not_a_directory(path))
-    }
-
-    pub fn not_found(path: PathBuf) -> Self {
-        Self(DirectoryError::not_found(path))
-    }
-}
-
-impl fmt::Display for ParentPathError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "parent {}", self.0)
-    }
-}
-
-impl Error for ParentPathError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(&self.0)
     }
 }
 

@@ -71,9 +71,9 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct UnverifiedInputDirectoryPath<'a>(Cow<'a, RelativePath>);
+pub struct UnverifiedInputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 
-pub struct InputDirectoryPath<'a>(Cow<'a, Path>);
+pub struct InputDirectoryPath<'a>(pub Cow<'a, Path>);
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>, P>
     for InputDirectoryPath<'static>
@@ -89,3 +89,6 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>
         Ok(Self(Cow::Owned(full_path)))
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -67,6 +67,20 @@ mod input_directory_path {
         }
 
         #[test]
+        fn not_a_directory() {
+            let path = UnverifiedInputDirectoryPath(Cow::Borrowed(RelativePath::new(
+                "image/image/stripes.png",
+            )));
+            test_util::assert_error_contains(
+                InputDirectoryPath::try_from_with_path_context(
+                    path,
+                    test_util::make_test_data_base_path(),
+                ),
+                "is not a directory",
+            );
+        }
+
+        #[test]
         fn valid_directory() -> Result<(), Box<dyn Error>> {
             let relative_path = RelativePath::new(".");
             let unverified_path = UnverifiedInputDirectoryPath(Cow::Borrowed(relative_path));
