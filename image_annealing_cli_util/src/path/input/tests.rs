@@ -1,3 +1,41 @@
+mod check_input_file_path {
+    use super::super::check_input_file_path;
+    use crate::path::FromWithPathContext;
+    use relative_path::RelativePath;
+    use std::error::Error;
+    use std::path::PathBuf;
+
+    #[test]
+    fn absent_file() {
+        let path = PathBuf::from_with_path_context(
+            RelativePath::new("none.png"),
+            test_util::make_test_data_base_path(),
+        );
+        test_util::assert_error_contains(
+            check_input_file_path(path),
+            "does not exist", // Note: do not put a platform-dependent path string here
+        );
+    }
+
+    #[test]
+    fn not_a_file() {
+        let path = PathBuf::from_with_path_context(
+            RelativePath::new("."),
+            test_util::make_test_data_base_path(),
+        );
+        test_util::assert_error_contains(check_input_file_path(path), "is not a file");
+    }
+
+    #[test]
+    fn valid_file() -> Result<(), Box<dyn Error>> {
+        let path = PathBuf::from_with_path_context(
+            RelativePath::new("image/image/stripes.png"),
+            test_util::make_test_data_base_path(),
+        );
+        Ok(check_input_file_path(path)?)
+    }
+}
+
 mod input_file_path {
     mod try_from_unverified_input_file_path {
         use super::super::{InputFilePath, UnverifiedInputFilePath};

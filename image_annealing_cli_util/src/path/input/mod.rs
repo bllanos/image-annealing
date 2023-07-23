@@ -43,6 +43,23 @@ impl Error for InputFileError {
     }
 }
 
+pub fn check_input_file_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<InputFileError>> {
+    let path = path.as_ref();
+    if path.try_exists()? {
+        if path.is_file() {
+            Ok(())
+        } else {
+            Err(PathError::Error(InputFileError::not_a_file(
+                path.to_path_buf(),
+            )))
+        }
+    } else {
+        Err(PathError::Error(InputFileError::not_found(
+            path.to_path_buf(),
+        )))
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct UnverifiedInputFilePath<'a>(pub Cow<'a, RelativePath>);
 
@@ -58,15 +75,8 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
-        if full_path.try_exists()? {
-            if full_path.is_file() {
-                Ok(Self(Cow::Owned(full_path)))
-            } else {
-                Err(PathError::Error(InputFileError::not_a_file(full_path)))
-            }
-        } else {
-            Err(PathError::Error(InputFileError::not_found(full_path)))
-        }
+        check_input_file_path(&full_path)?;
+        Ok(Self(Cow::Owned(full_path)))
     }
 }
 

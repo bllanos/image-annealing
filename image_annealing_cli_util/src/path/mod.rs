@@ -8,8 +8,8 @@ mod input;
 mod output;
 
 pub use input::{
-    InputDirectoryPath, InputFileError, InputFilePath, UnverifiedInputDirectoryPath,
-    UnverifiedInputFilePath,
+    check_input_file_path, InputDirectoryPath, InputFileError, InputFilePath,
+    UnverifiedInputDirectoryPath, UnverifiedInputFilePath,
 };
 
 pub use output::{
