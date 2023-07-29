@@ -13,8 +13,9 @@ pub use input::{
 };
 
 pub use output::{
-    OutputDirectoryError, OutputDirectoryPath, OutputFileError, OutputFilePath, ParentPathError,
-    UnverifiedOutputDirectoryPath, UnverifiedOutputFilePath,
+    check_output_directory_path, check_output_file_path, OutputDirectoryError, OutputDirectoryPath,
+    OutputFileError, OutputFilePath, ParentPathError, UnverifiedOutputDirectoryPath,
+    UnverifiedOutputFilePath,
 };
 
 #[derive(Debug)]
@@ -118,7 +119,9 @@ impl Error for DirectoryError {
     }
 }
 
-fn check_directory_path<P: AsRef<Path>>(directory: P) -> Result<(), PathError<DirectoryError>> {
+pub fn check_input_directory_path<P: AsRef<Path>>(
+    directory: P,
+) -> Result<(), PathError<DirectoryError>> {
     let directory = directory.as_ref();
     if directory.try_exists()? {
         if directory.is_dir() {

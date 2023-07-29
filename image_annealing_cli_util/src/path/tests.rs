@@ -1,5 +1,5 @@
-mod check_directory_path {
-    use super::super::{check_directory_path, FromWithPathContext};
+mod check_input_directory_path {
+    use super::super::{check_input_directory_path, FromWithPathContext};
     use relative_path::RelativePath;
     use std::error::Error;
     use std::path::PathBuf;
@@ -11,7 +11,7 @@ mod check_directory_path {
             test_util::make_test_data_base_path(),
         );
         test_util::assert_error_contains(
-            check_directory_path(path),
+            check_input_directory_path(path),
             "does not exist", // Note: do not put a platform-dependent path string here
         );
     }
@@ -22,7 +22,7 @@ mod check_directory_path {
             RelativePath::new("image/image/stripes.png"),
             test_util::make_test_data_base_path(),
         );
-        test_util::assert_error_contains(check_directory_path(path), "is not a directory");
+        test_util::assert_error_contains(check_input_directory_path(path), "is not a directory");
     }
 
     #[test]
@@ -31,7 +31,7 @@ mod check_directory_path {
             RelativePath::new("."),
             test_util::make_test_data_base_path(),
         );
-        Ok(check_directory_path(path)?)
+        Ok(check_input_directory_path(path)?)
     }
 }
 

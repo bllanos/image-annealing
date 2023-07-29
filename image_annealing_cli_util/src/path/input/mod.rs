@@ -95,7 +95,7 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
-        super::check_directory_path(&full_path)?;
+        super::check_input_directory_path(&full_path)?;
         Ok(Self(Cow::Owned(full_path)))
     }
 }

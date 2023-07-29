@@ -107,7 +107,7 @@ fn check_parent_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<ParentPath
     let parent_path_option = path.parent();
     match parent_path_option {
         Some(parent_path) if parent_path != Path::new("") => {
-            super::check_directory_path(parent_path).map_err(|err| match err {
+            super::check_input_directory_path(parent_path).map_err(|err| match err {
                 PathError::Error(inner_err) => {
                     let path_buf = path.to_path_buf();
                     PathError::Error(match inner_err {
@@ -121,6 +121,49 @@ fn check_parent_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<ParentPath
             })
         }
         _ => Ok(()),
+    }
+}
+
+pub fn check_output_file_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<OutputFileError>> {
+    let path = path.as_ref();
+    if path.try_exists()? {
+        if path.is_file() {
+            Ok(())
+        } else {
+            Err(PathError::Error(OutputFileError::not_a_file(
+                path.to_path_buf(),
+            )))
+        }
+    } else {
+        check_parent_path(&path).map_err(|err| match err {
+            PathError::Error(inner_err) => {
+                PathError::Error(OutputFileError::parent_path(inner_err))
+            }
+            PathError::IOError(inner_err) => PathError::IOError(inner_err),
+        })?;
+        Ok(())
+    }
+}
+
+pub fn check_output_directory_path<P: AsRef<Path>>(
+    path: P,
+) -> Result<(), PathError<OutputDirectoryError>> {
+    let path = path.as_ref();
+    match super::check_input_directory_path(&path) {
+        Err(PathError::Error(DirectoryError::NotFound(_))) => {
+            check_parent_path(&path).map_err(|err| match err {
+                PathError::Error(inner_err) => {
+                    PathError::Error(OutputDirectoryError::parent_path(inner_err))
+                }
+                PathError::IOError(inner_err) => PathError::IOError(inner_err),
+            })?;
+            Ok(())
+        }
+        Err(PathError::Error(DirectoryError::NotADirectory(inner_err))) => Err(PathError::Error(
+            OutputDirectoryError::NotADirectory(inner_err),
+        )),
+        Err(PathError::IOError(inner_err)) => Err(PathError::IOError(inner_err)),
+        Ok(_) => Ok(()),
     }
 }
 
@@ -139,21 +182,8 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputFilePath<'a>, P>
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
-        if full_path.try_exists()? {
-            if full_path.is_file() {
-                Ok(Self(Cow::Owned(full_path)))
-            } else {
-                Err(PathError::Error(OutputFileError::not_a_file(full_path)))
-            }
-        } else {
-            check_parent_path(&full_path).map_err(|err| match err {
-                PathError::Error(inner_err) => {
-                    PathError::Error(OutputFileError::parent_path(inner_err))
-                }
-                PathError::IOError(inner_err) => PathError::IOError(inner_err),
-            })?;
-            Ok(Self(Cow::Owned(full_path)))
-        }
+        check_output_file_path(&full_path)?;
+        Ok(Self(Cow::Owned(full_path)))
     }
 }
 
@@ -172,22 +202,8 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputDirectoryPath<'a
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
-        match super::check_directory_path(&full_path) {
-            Err(PathError::Error(DirectoryError::NotFound(_))) => {
-                check_parent_path(&full_path).map_err(|err| match err {
-                    PathError::Error(inner_err) => {
-                        PathError::Error(OutputDirectoryError::parent_path(inner_err))
-                    }
-                    PathError::IOError(inner_err) => PathError::IOError(inner_err),
-                })?;
-                Ok(Self(Cow::Owned(full_path)))
-            }
-            Err(PathError::Error(DirectoryError::NotADirectory(inner_err))) => Err(
-                PathError::Error(OutputDirectoryError::NotADirectory(inner_err)),
-            ),
-            Err(PathError::IOError(inner_err)) => Err(PathError::IOError(inner_err)),
-            Ok(_) => Ok(Self(Cow::Owned(full_path))),
-        }
+        check_output_directory_path(&full_path)?;
+        Ok(Self(Cow::Owned(full_path)))
     }
 }
 
