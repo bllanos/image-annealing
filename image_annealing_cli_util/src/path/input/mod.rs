@@ -60,9 +60,10 @@ pub fn check_input_file_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<In
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnverifiedInputFilePath<'a>(pub Cow<'a, RelativePath>);
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InputFilePath<'a>(pub Cow<'a, Path>);
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
@@ -80,9 +81,10 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnverifiedInputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InputDirectoryPath<'a>(pub Cow<'a, Path>);
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>, P>

@@ -167,9 +167,10 @@ pub fn check_output_directory_path<P: AsRef<Path>>(
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnverifiedOutputFilePath<'a>(pub Cow<'a, RelativePath>);
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OutputFilePath<'a>(pub Cow<'a, Path>);
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputFilePath<'a>, P>
@@ -187,9 +188,10 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputFilePath<'a>, P>
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnverifiedOutputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OutputDirectoryPath<'a>(pub Cow<'a, Path>);
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputDirectoryPath<'a>, P>
