@@ -81,6 +81,12 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
     }
 }
 
+impl<'a> fmt::Display for InputFilePath<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0.display(), f)
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnverifiedInputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 
@@ -99,6 +105,12 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
         super::check_input_directory_path(&full_path)?;
         Ok(Self(Cow::Owned(full_path)))
+    }
+}
+
+impl<'a> fmt::Display for InputDirectoryPath<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0.display(), f)
     }
 }
 
