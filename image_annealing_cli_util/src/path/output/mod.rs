@@ -1,6 +1,5 @@
 use super::{
-    DirectoryError, FromWithPathContext, NotADirectoryError, NotAFileError, PathError,
-    TryFromWithPathContext,
+    DirectoryError, FromWithPathContext, NotADirectoryError, PathError, TryFromWithPathContext,
 };
 use relative_path::RelativePath;
 use serde::{Deserialize, Serialize};
@@ -36,15 +35,10 @@ impl Error for ParentPathError {
 
 #[derive(Debug, Clone)]
 pub enum OutputFileError {
-    NotAFile(NotAFileError),
     ParentPath(ParentPathError),
 }
 
 impl OutputFileError {
-    pub fn not_a_file(path: PathBuf) -> Self {
-        Self::NotAFile(NotAFileError(path))
-    }
-
     pub fn parent_path(err: ParentPathError) -> Self {
         Self::ParentPath(err)
     }
@@ -53,7 +47,6 @@ impl OutputFileError {
 impl fmt::Display for OutputFileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::NotAFile(err) => write!(f, "output {}", err),
             Self::ParentPath(err) => write!(f, "output file path error, {}", err),
         }
     }
@@ -62,7 +55,6 @@ impl fmt::Display for OutputFileError {
 impl Error for OutputFileError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(match self {
-            Self::NotAFile(err) => err,
             Self::ParentPath(err) => err,
         })
     }
@@ -124,25 +116,16 @@ fn check_parent_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<ParentPath
     }
 }
 
+/// This function does not check whether the path exists and, if so, whether it is a file,
+/// because output file paths are sometimes provided without filename extensions.
+/// File existence cannot be tested if the filename extension has yet to be added.
+/// We cannot safely assume that a path that appears to have an extension will
+/// not have an extension added later.
 pub fn check_output_file_path<P: AsRef<Path>>(path: P) -> Result<(), PathError<OutputFileError>> {
-    let path = path.as_ref();
-    if path.try_exists()? {
-        if path.is_file() {
-            Ok(())
-        } else {
-            Err(PathError::Error(OutputFileError::not_a_file(
-                path.to_path_buf(),
-            )))
-        }
-    } else {
-        check_parent_path(&path).map_err(|err| match err {
-            PathError::Error(inner_err) => {
-                PathError::Error(OutputFileError::parent_path(inner_err))
-            }
-            PathError::IOError(inner_err) => PathError::IOError(inner_err),
-        })?;
-        Ok(())
-    }
+    check_parent_path(path).map_err(|err| match err {
+        PathError::Error(inner_err) => PathError::Error(OutputFileError::parent_path(inner_err)),
+        PathError::IOError(inner_err) => PathError::IOError(inner_err),
+    })
 }
 
 pub fn check_output_directory_path<P: AsRef<Path>>(

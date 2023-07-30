@@ -78,15 +78,6 @@ mod check_output_file_path {
     }
 
     #[test]
-    fn not_a_file() {
-        let path = PathBuf::from_with_path_context(
-            RelativePath::new("."),
-            test_util::make_test_data_base_path(),
-        );
-        test_util::assert_error_contains(check_output_file_path(path), "is not a file");
-    }
-
-    #[test]
     fn existing_file() -> Result<(), Box<dyn Error>> {
         let path = PathBuf::from_with_path_context(
             RelativePath::new("image/image/stripes.png"),
@@ -170,18 +161,6 @@ mod output_file_path {
                     test_util::make_test_data_base_path(),
                 ),
                 "does not exist", // Note: do not put a platform-dependent path string here
-            );
-        }
-
-        #[test]
-        fn not_a_file() {
-            let path = UnverifiedOutputFilePath(Cow::Borrowed(RelativePath::new(".")));
-            test_util::assert_error_contains(
-                OutputFilePath::try_from_with_path_context(
-                    path,
-                    test_util::make_test_data_base_path(),
-                ),
-                "is not a file",
             );
         }
 
