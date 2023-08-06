@@ -47,8 +47,8 @@ fn run_and_save(
                 .full_output_block()
                 .unwrap()
                 .output_displacement_goal;
-            let output_path = displacement_goal.save_add_extension(path)?;
-            println!("Wrote displacement goal to: {:?}", output_path);
+            let output_path = displacement_goal.save_add_extension(&path.0 .0)?;
+            println!("Wrote displacement goal to: {}", output_path.display());
         }
         AlgorithmConfig::CreatePermutation {
             permutation_output_path_no_extension: path,
@@ -57,7 +57,7 @@ fn run_and_save(
                 dispatcher.create_permutation(Default::default(), &Default::default());
             algorithm.step_until_finished()?;
             let permutation = algorithm.full_output_block().unwrap().validated_permutation;
-            let output_path = permutation.save_add_extension(path)?;
+            let output_path = permutation.save_add_extension(&path.0 .0)?;
             println!("Wrote permutation to: {}", output_path.display());
         }
         AlgorithmConfig::Permute {
@@ -76,7 +76,7 @@ fn run_and_save(
             );
             algorithm.step_until_finished()?;
             let img = algorithm.full_output_block().unwrap().permuted_image;
-            let output_path = img.save_add_extension(path.to_vec().as_slice())?;
+            let output_path = img.save_add_extension(path.as_vec().as_slice())?;
             println!("Wrote permuted image to: {:?}", output_path);
         }
         AlgorithmConfig::Swap {

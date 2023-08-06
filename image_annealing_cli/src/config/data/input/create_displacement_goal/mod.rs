@@ -1,23 +1,25 @@
 use super::super::{
-    DisplacementGoalPath, ImagePath, LosslessImagePath, PermutationPath,
-    UnverifiedImageDimensionsConfig, UnverifiedLosslessImagePath,
+    InputDisplacementGoalPath, InputLosslessImagePath, InputPermutationPath,
+    UnverifiedImageDimensionsConfig, UnverifiedInputDisplacementGoalPath,
+    UnverifiedInputLosslessImagePath, UnverifiedInputPermutationPath,
 };
 use image_annealing::ImageDimensions;
 use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
+use std::path::Path;
 
 #[derive(Default, Deserialize)]
-pub struct UnverifiedCreateDisplacementGoalInputDataConfig {
-    displacement_goal: Option<String>,
-    candidate_permutation: Option<String>,
-    image: Option<UnverifiedLosslessImagePath>,
+pub struct UnverifiedCreateDisplacementGoalInputDataConfig<'a> {
+    displacement_goal: Option<UnverifiedInputDisplacementGoalPath<'a>>,
+    candidate_permutation: Option<UnverifiedInputPermutationPath<'a>>,
+    image: Option<UnverifiedInputLosslessImagePath<'a>>,
 }
 
 #[derive(Deserialize)]
-pub enum UnverifiedCreateDisplacementGoalInputConfig {
+pub enum UnverifiedCreateDisplacementGoalInputConfig<'a> {
     ImageDimensions(UnverifiedImageDimensionsConfig),
-    Input(UnverifiedCreateDisplacementGoalInputDataConfig),
+    Input(UnverifiedCreateDisplacementGoalInputDataConfig<'a>),
 }
 
 #[derive(Debug, Clone)]
@@ -44,40 +46,47 @@ fn check_dimensions<T: IntoIterator<Item = ImageDimensions>>(
 }
 
 #[derive(Debug, Default, Eq, PartialEq)]
-pub struct CreateDisplacementGoalInputConfig {
-    pub displacement_goal: Option<DisplacementGoalPath>,
-    pub candidate_permutation: Option<PermutationPath>,
-    pub image: Option<LosslessImagePath>,
+pub struct CreateDisplacementGoalInputConfig<'a> {
+    pub displacement_goal: Option<InputDisplacementGoalPath<'a>>,
+    pub candidate_permutation: Option<InputPermutationPath<'a>>,
+    pub image: Option<InputLosslessImagePath<'a>>,
 }
 
-impl CreateDisplacementGoalInputConfig {
-    pub fn from_config(
+impl CreateDisplacementGoalInputConfig<'static> {
+    pub fn try_from_unverified_with_path_context<'a, P: AsRef<Path>>(
         config: UnverifiedCreateDisplacementGoalInputConfig,
+        base_path: P,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
         Ok(match config {
             UnverifiedCreateDisplacementGoalInputConfig::ImageDimensions(
                 image_dimensions_config,
             ) => (Default::default(), image_dimensions_config.try_into()?),
             UnverifiedCreateDisplacementGoalInputConfig::Input(value) => {
-                let mut displacement_goal: Option<DisplacementGoalPath> = None;
-                let mut candidate_permutation: Option<PermutationPath> = None;
-                let mut image: Option<LosslessImagePath> = None;
+                let mut displacement_goal: Option<InputDisplacementGoalPath> = None;
+                let mut candidate_permutation: Option<InputPermutationPath> = None;
+                let mut image: Option<InputLosslessImagePath> = None;
                 let mut dimensions: Vec<ImageDimensions> = Vec::new();
                 if let Some(path) = value.displacement_goal {
                     let (displacement_goal_checked, displacement_goal_dimensions) =
-                        DisplacementGoalPath::from_input_path(path)?;
+                        InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                            path, &base_path,
+                        )?;
                     displacement_goal = Some(displacement_goal_checked);
                     dimensions.push(displacement_goal_dimensions);
                 }
                 if let Some(path) = value.candidate_permutation {
                     let (candidate_permutation_checked, permutation_dimensions) =
-                        PermutationPath::from_input_path(path)?;
+                        InputPermutationPath::try_from_unverified_with_path_context(
+                            path, &base_path,
+                        )?;
                     candidate_permutation = Some(candidate_permutation_checked);
                     dimensions.push(permutation_dimensions);
                 }
                 if let Some(path) = value.image {
                     let (image_checked, image_dimensions) =
-                        LosslessImagePath::from_input_path(path)?;
+                        InputLosslessImagePath::try_from_unverified_with_path_context(
+                            path, &base_path,
+                        )?;
                     image = Some(image_checked);
                     dimensions.push(image_dimensions);
                 }

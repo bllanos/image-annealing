@@ -1,5 +1,5 @@
 use super::loader;
-use crate::config::{DisplacementGoalPath, PermutationPath, SwapParametersConfig, SwapStopConfig};
+use crate::config::{InputDisplacementGoalPath, InputPermutationPath, OutputPermutationPath, SwapParametersConfig, SwapStopConfig};
 use futures::join;
 use image_annealing::compute::{Dispatcher, SwapInput, SwapParameters};
 use image_annealing::{CandidatePermutation, DisplacementGoal};
@@ -13,9 +13,9 @@ use output::TaggedPermutationWriter;
 
 pub fn run_and_save_swap(
     dispatcher: Box<dyn Dispatcher>,
-    candidate_permutation: &PermutationPath,
-    displacement_goal: &DisplacementGoalPath,
-    permutation_output_path_prefix: &PermutationPath,
+    candidate_permutation: &InputPermutationPath,
+    displacement_goal: &InputDisplacementGoalPath,
+    permutation_output_path_prefix: &OutputPermutationPath,
     parameters: &SwapParametersConfig,
 ) -> Result<(), Box<dyn Error>> {
     let mut iter = run_swap(

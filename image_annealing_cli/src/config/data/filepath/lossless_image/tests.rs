@@ -178,16 +178,6 @@ mod unverified_lossless_image_path {
         }
     }
 
-    #[test]
-    fn from_raw_clone() {
-        let paths = &["1"];
-        let expected = UnverifiedLosslessImagePath::Rgba8(String::from(paths[0]));
-        assert_eq!(
-            UnverifiedLosslessImagePath::from_raw_clone(ImageFormat::Rgba8, paths),
-            expected
-        );
-    }
-
     mod format {
         use super::super::super::ImageFormat;
 

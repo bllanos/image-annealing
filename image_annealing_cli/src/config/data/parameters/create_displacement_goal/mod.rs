@@ -3,59 +3,70 @@ use image_annealing::compute::{
     CreateDisplacementGoalParameters, CreateDisplacementGoalPipelineOperation,
     CreateDisplacementGoalShaderConfig, PipelineConfig,
 };
+use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
 use image_annealing_shader_cli::config::UnverifiedCreateDisplacementGoalConfig;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::error::Error;
+use std::path::Path;
 
 #[derive(Clone, Deserialize)]
-pub struct UnverifiedCreateDisplacementGoalShaderConfig {
-    pub content: UnverifiedCreateDisplacementGoalConfig,
+pub struct UnverifiedCreateDisplacementGoalShaderConfig<'a> {
+    pub content: UnverifiedCreateDisplacementGoalConfig<'a>,
     pub entry_point: String,
 }
 
-impl TryFrom<UnverifiedCreateDisplacementGoalShaderConfig>
-    for CreateDisplacementGoalShaderConfig<'_>
+impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoalShaderConfig<'a>, P>
+    for CreateDisplacementGoalShaderConfig<'static>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from(value: UnverifiedCreateDisplacementGoalShaderConfig) -> Result<Self, Self::Error> {
+    fn try_from_with_path_context(
+        value: UnverifiedCreateDisplacementGoalShaderConfig<'a>,
+        base_path: P,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
-            content: value.content.try_into()?,
+            content: value.content.try_into_with_path_context(base_path)?,
             entry_point: Cow::Owned(value.entry_point),
         })
     }
 }
 
-impl TryFrom<UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig>>
-    for PipelineConfig<CreateDisplacementGoalShaderConfig<'_>>
+impl<'a, P: AsRef<Path>>
+    TryFromWithPathContext<
+        UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>,
+        P,
+    > for PipelineConfig<CreateDisplacementGoalShaderConfig<'static>>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from(
-        value: UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig>,
+    fn try_from_with_path_context(
+        value: UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>,
+        base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            shader_config: value.shader_config.try_into()?,
+            shader_config: value.shader_config.try_into_with_path_context(base_path)?,
             workgroup_grid: value.workgroup_grid.try_into()?,
         })
     }
 }
 
-pub type UnverifiedCreateDisplacementGoalPipelineOperationConfig =
-    UnverifiedPipelineOperationConfig<UnverifiedCreateDisplacementGoalShaderConfig>;
+pub type UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a> =
+    UnverifiedPipelineOperationConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>;
 
-impl TryFrom<UnverifiedCreateDisplacementGoalPipelineOperationConfig>
-    for CreateDisplacementGoalPipelineOperation<'_>
+impl<'a, P: AsRef<Path>>
+    TryFromWithPathContext<UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>, P>
+    for CreateDisplacementGoalPipelineOperation<'static>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from(
-        value: UnverifiedCreateDisplacementGoalPipelineOperationConfig,
+    fn try_from_with_path_context(
+        value: UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>,
+        base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(match value {
             UnverifiedPipelineOperationConfig::Set(inner_value) => {
-                Self::Set(inner_value.try_into()?)
+                Self::Set(inner_value.try_into_with_path_context(base_path)?)
             }
             UnverifiedPipelineOperationConfig::SetDefault => Self::SetDefault,
         })
@@ -63,20 +74,24 @@ impl TryFrom<UnverifiedCreateDisplacementGoalPipelineOperationConfig>
 }
 
 #[derive(Clone, Default, Deserialize)]
-pub struct UnverifiedCreateDisplacementGoalParametersConfig {
-    pub pipeline_operation: UnverifiedCreateDisplacementGoalPipelineOperationConfig,
+pub struct UnverifiedCreateDisplacementGoalParametersConfig<'a> {
+    pub pipeline_operation: UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>,
 }
 
-impl TryFrom<UnverifiedCreateDisplacementGoalParametersConfig>
-    for CreateDisplacementGoalParameters<'_>
+impl<'a, P: AsRef<Path>>
+    TryFromWithPathContext<UnverifiedCreateDisplacementGoalParametersConfig<'a>, P>
+    for CreateDisplacementGoalParameters<'static>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from(
-        value: UnverifiedCreateDisplacementGoalParametersConfig,
+    fn try_from_with_path_context(
+        value: UnverifiedCreateDisplacementGoalParametersConfig<'a>,
+        base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            pipeline_operation: value.pipeline_operation.try_into()?,
+            pipeline_operation: value
+                .pipeline_operation
+                .try_into_with_path_context(base_path)?,
         })
     }
 }

@@ -1,5 +1,5 @@
 use super::TaggedPermutation;
-use crate::config::PermutationPath;
+use crate::config::OutputPermutationPath;
 use futures_intrusive::buffer::ArrayBuf;
 use futures_intrusive::channel::{self, TrySendError};
 use image_annealing::compute::format::{ImageFileWriter, ImageFileWriterSaveResult};
@@ -8,7 +8,7 @@ use std::thread;
 
 fn save_tagged_permutation(
     tagged_permutation: TaggedPermutation,
-    path_prefix: &PermutationPath,
+    path_prefix: &OutputPermutationPath,
 ) -> ImageFileWriterSaveResult {
     let path_no_extension = format!(
         "{}_round_{}_pass_{}_{}",
@@ -50,8 +50,8 @@ pub struct TaggedPermutationWriter {
 impl TaggedPermutationWriter {
     const CHANNEL_CAPACITY: usize = 1;
 
-    pub fn new(path_prefix: &PermutationPath) -> Self {
-        let path_prefix_clone = path_prefix.clone();
+    pub fn new<'a>(path_prefix: &OutputPermutationPath<'a>) -> Self {
+        let path_prefix_static = OutputPermutationPath::to_owned(path_prefix);
         let (permutation_sender, permutation_receiver) = mpsc::sync_channel(Self::CHANNEL_CAPACITY);
         let (path_sender, path_receiver) = channel::shared::generic_channel(Self::CHANNEL_CAPACITY);
 
@@ -60,7 +60,7 @@ impl TaggedPermutationWriter {
 
             match message {
                 Ok(tagged_permutation) => {
-                    let result = save_tagged_permutation(tagged_permutation, &path_prefix_clone);
+                    let result = save_tagged_permutation(tagged_permutation, &path_prefix_static);
                     // `TaggedPermutationWriter` currently assumes that at most one `TaggedPermutation`
                     // is being saved at a time, and that the caller always collects the
                     // filepath of the saved permutation before submitting another permutation.

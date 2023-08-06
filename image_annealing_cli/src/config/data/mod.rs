@@ -1,6 +1,8 @@
 use image_annealing::{compute, DimensionsMismatchError, ImageDimensions};
+use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
 use serde::Deserialize;
 use std::error::Error;
+use std::path::Path;
 
 mod dimension;
 mod filepath;
@@ -10,8 +12,11 @@ mod parameters;
 
 pub use dimension::UnverifiedImageDimensionsConfig;
 pub use filepath::{
-    DisplacementGoalPath, ImagePath, LosslessImagePath, PermutationPath,
-    UnverifiedLosslessImagePath,
+    InputDisplacementGoalPath, InputLosslessImagePath, InputPermutationPath,
+    OutputDisplacementGoalPath, OutputLosslessImagePath, OutputPermutationPath,
+    UnverifiedInputDisplacementGoalPath, UnverifiedInputLosslessImagePath,
+    UnverifiedInputPermutationPath, UnverifiedOutputDisplacementGoalPath,
+    UnverifiedOutputLosslessImagePath, UnverifiedOutputPermutationPath,
 };
 pub use input::{
     CreateDisplacementGoalInputConfig, UnverifiedCreateDisplacementGoalInputConfig,
@@ -42,80 +47,84 @@ fn check_dimensions_match2<'a>(
 }
 
 #[derive(Deserialize)]
-pub enum UnverifiedConfig {
+pub enum UnverifiedConfig<'a> {
     CreateDisplacementGoal {
-        input: UnverifiedCreateDisplacementGoalInputConfig,
-        displacement_goal_output_path_no_extension: String,
+        input: UnverifiedCreateDisplacementGoalInputConfig<'a>,
+        displacement_goal_output_path_no_extension: UnverifiedOutputDisplacementGoalPath<'a>,
     },
     CreatePermutation {
         image_dimensions: UnverifiedImageDimensionsConfig,
-        permutation_output_path_no_extension: String,
+        permutation_output_path_no_extension: UnverifiedOutputPermutationPath<'a>,
     },
     Permute {
-        candidate_permutation: String,
-        original_image: UnverifiedLosslessImagePath,
-        permuted_image_output_path_no_extension: UnverifiedLosslessImagePath,
+        candidate_permutation: UnverifiedInputPermutationPath<'a>,
+        original_image: UnverifiedInputLosslessImagePath<'a>,
+        permuted_image_output_path_no_extension: UnverifiedOutputLosslessImagePath<'a>,
     },
     Swap {
-        candidate_permutation: String,
-        displacement_goal: String,
-        permutation_output_path_prefix: String,
+        candidate_permutation: UnverifiedInputPermutationPath<'a>,
+        displacement_goal: UnverifiedInputDisplacementGoalPath<'a>,
+        permutation_output_path_prefix: UnverifiedOutputPermutationPath<'a>,
         parameters: UnverifiedSwapParametersConfig,
     },
     ValidatePermutation {
-        candidate_permutation: String,
+        candidate_permutation: UnverifiedInputPermutationPath<'a>,
     },
 }
 
 #[derive(Debug, PartialEq)]
-pub enum AlgorithmConfig {
+pub enum AlgorithmConfig<'a> {
     CreateDisplacementGoal {
-        input: CreateDisplacementGoalInputConfig,
-        displacement_goal_output_path_no_extension: DisplacementGoalPath,
+        input: CreateDisplacementGoalInputConfig<'a>,
+        displacement_goal_output_path_no_extension: OutputDisplacementGoalPath<'a>,
     },
     CreatePermutation {
-        permutation_output_path_no_extension: PermutationPath,
+        permutation_output_path_no_extension: OutputPermutationPath<'a>,
     },
     Permute {
-        candidate_permutation: PermutationPath,
-        original_image: LosslessImagePath,
-        permuted_image_output_path_no_extension: LosslessImagePath,
+        candidate_permutation: InputPermutationPath<'a>,
+        original_image: InputLosslessImagePath<'a>,
+        permuted_image_output_path_no_extension: OutputLosslessImagePath<'a>,
     },
     Swap {
-        candidate_permutation: PermutationPath,
-        displacement_goal: DisplacementGoalPath,
-        permutation_output_path_prefix: PermutationPath,
+        candidate_permutation: InputPermutationPath<'a>,
+        displacement_goal: InputDisplacementGoalPath<'a>,
+        permutation_output_path_prefix: OutputPermutationPath<'a>,
         parameters: SwapParametersConfig,
     },
     ValidatePermutation {
-        candidate_permutation: PermutationPath,
+        candidate_permutation: InputPermutationPath<'a>,
     },
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Config {
-    pub algorithm: AlgorithmConfig,
+pub struct Config<'a> {
+    pub algorithm: AlgorithmConfig<'a>,
     pub dispatcher: compute::Config,
 }
 
-impl TryFrom<UnverifiedConfig> for Config {
+impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedConfig<'a>, P> for Config<'static> {
     type Error = Box<dyn Error>;
 
-    fn try_from(value: UnverifiedConfig) -> Result<Self, Self::Error> {
+    fn try_from_with_path_context(
+        value: UnverifiedConfig<'a>,
+        base_path: P,
+    ) -> Result<Self, Self::Error> {
         let (algorithm_config, image_dimensions) = match value {
             UnverifiedConfig::CreateDisplacementGoal {
                 input,
                 displacement_goal_output_path_no_extension,
             } => {
                 let (input_checked, image_dimensions) =
-                    CreateDisplacementGoalInputConfig::from_config(input)?;
+                    CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                        input, &base_path,
+                    )?;
                 (
                     AlgorithmConfig::CreateDisplacementGoal {
                         input: input_checked,
                         displacement_goal_output_path_no_extension:
-                            DisplacementGoalPath::from_output_path(
-                                displacement_goal_output_path_no_extension,
-                            ),
+                            displacement_goal_output_path_no_extension
+                                .try_into_with_path_context(&base_path)?,
                     },
                     image_dimensions,
                 )
@@ -125,9 +134,8 @@ impl TryFrom<UnverifiedConfig> for Config {
                 permutation_output_path_no_extension,
             } => (
                 AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath::from_output_path(
-                        permutation_output_path_no_extension,
-                    ),
+                    permutation_output_path_no_extension: permutation_output_path_no_extension
+                        .try_into_with_path_context(&base_path)?,
                 },
                 image_dimensions.try_into()?,
             ),
@@ -137,18 +145,23 @@ impl TryFrom<UnverifiedConfig> for Config {
                 permuted_image_output_path_no_extension,
             } => {
                 let (candidate_permutation_checked, permutation_dimensions) =
-                    PermutationPath::from_input_path(candidate_permutation)?;
+                    InputPermutationPath::try_from_unverified_with_path_context(
+                        candidate_permutation,
+                        &base_path,
+                    )?;
                 let (original_image_checked, image_dimensions) =
-                    LosslessImagePath::from_input_path(original_image)?;
+                    InputLosslessImagePath::try_from_unverified_with_path_context(
+                        original_image,
+                        &base_path,
+                    )?;
                 check_dimensions_match2(&image_dimensions, &permutation_dimensions)?;
                 (
                     AlgorithmConfig::Permute {
                         candidate_permutation: candidate_permutation_checked,
                         original_image: original_image_checked,
                         permuted_image_output_path_no_extension:
-                            LosslessImagePath::from_output_path(
-                                permuted_image_output_path_no_extension,
-                            ),
+                            permuted_image_output_path_no_extension
+                                .try_into_with_path_context(&base_path)?,
                     },
                     image_dimensions,
                 )
@@ -160,17 +173,22 @@ impl TryFrom<UnverifiedConfig> for Config {
                 parameters,
             } => {
                 let (candidate_permutation_checked, permutation_dimensions) =
-                    PermutationPath::from_input_path(candidate_permutation)?;
+                    InputPermutationPath::try_from_unverified_with_path_context(
+                        candidate_permutation,
+                        &base_path,
+                    )?;
                 let (displacement_goal_checked, displacement_goal_dimensions) =
-                    DisplacementGoalPath::from_input_path(displacement_goal)?;
+                    InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                        displacement_goal,
+                        &base_path,
+                    )?;
                 check_dimensions_match2(&permutation_dimensions, &displacement_goal_dimensions)?;
                 (
                     AlgorithmConfig::Swap {
                         candidate_permutation: candidate_permutation_checked,
                         displacement_goal: displacement_goal_checked,
-                        permutation_output_path_prefix: PermutationPath::from_output_path(
-                            permutation_output_path_prefix,
-                        ),
+                        permutation_output_path_prefix: permutation_output_path_prefix
+                            .try_into_with_path_context(&base_path)?,
                         parameters: parameters.try_into()?,
                     },
                     permutation_dimensions,
@@ -180,7 +198,10 @@ impl TryFrom<UnverifiedConfig> for Config {
                 candidate_permutation,
             } => {
                 let (candidate_permutation_path, image_dimensions) =
-                    PermutationPath::from_input_path(candidate_permutation)?;
+                    InputPermutationPath::try_from_unverified_with_path_context(
+                        candidate_permutation,
+                        &base_path,
+                    )?;
                 (
                     AlgorithmConfig::ValidatePermutation {
                         candidate_permutation: candidate_permutation_path,

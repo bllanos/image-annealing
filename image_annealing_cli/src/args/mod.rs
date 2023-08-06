@@ -8,10 +8,10 @@ use bpaf::{Bpaf, ShellComp};
 struct Options {
     /// Path of the configuration file describing the operation to run
     #[bpaf(long, short, argument::<String>("CONFIG_FILE"), complete_shell(ShellComp::File { mask: Some("*.json") }), parse(config::parse_config_file))]
-    config: Config,
+    config: Config<'static>,
 }
 
-pub fn parse_args<T>(args: T) -> Result<Config, ParseFailure>
+pub fn parse_args<T>(args: T) -> Result<Config<'static>, ParseFailure>
 where
     T: IntoIterator<Item = String>,
 {
