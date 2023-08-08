@@ -1,6 +1,7 @@
 use relative_path::{RelativePath, RelativePathBuf};
 use std::borrow::Cow;
 use std::error::Error;
+use std::ffi::OsStr;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -194,18 +195,31 @@ impl<T: AsRef<Path>, P: AsRef<Path>> TryFromWithPathContext<T, P> for RelativePa
     }
 }
 
-pub fn make_base_path<'a, P: AsRef<Path>>(base_path: P, candidate_path: &'a Path) -> Cow<'a, Path> {
-    if candidate_path.is_absolute() {
+pub fn make_base_path<'a, P: AsRef<Path>, E, O>(
+    candidate_path: &'a Path,
+    make_context_path: O,
+) -> Result<Cow<'a, Path>, E>
+where
+    O: FnOnce() -> Result<P, E>,
+{
+    Ok(if candidate_path.is_absolute() {
         Cow::Borrowed(candidate_path)
     } else {
-        Cow::Owned(base_path.as_ref().join(candidate_path))
-    }
+        Cow::Owned(make_context_path()?.as_ref().join(candidate_path))
+    })
 }
 
 pub fn make_base_path_using_current_directory<'a>(
     candidate_path: &'a Path,
-) -> std::io::Result<Cow<'a, Path>> {
-    std::io::Result::Ok(make_base_path(std::env::current_dir()?, candidate_path))
+) -> Result<Cow<'a, Path>, std::io::Error> {
+    make_base_path(candidate_path, std::env::current_dir)
+}
+
+pub fn make_base_path_using_environment_variable<'a, T: AsRef<OsStr>>(
+    candidate_path: &'a Path,
+    environment_variable_key: T,
+) -> Result<Cow<'a, Path>, std::env::VarError> {
+    make_base_path(candidate_path, || std::env::var(environment_variable_key))
 }
 
 #[cfg(test)]

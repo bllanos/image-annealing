@@ -647,6 +647,7 @@ dependencies = [
  "image_annealing_cli_util",
  "image_annealing_shader",
  "naga",
+ "relative-path",
  "serde",
  "serde_json",
  "test_util",
@@ -1167,7 +1168,9 @@ version = "0.1.0"
 dependencies = [
  "image",
  "image_annealing",
+ "image_annealing_cli_util",
  "image_annealing_shader",
+ "relative-path",
 ]
 
 [[package]]

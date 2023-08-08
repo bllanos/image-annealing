@@ -10,11 +10,11 @@ use std::num::NonZeroU32;
 pub fn load_create_displacement_goal_shader_content(
     shader_name: &str,
 ) -> CreateDisplacementGoalShaderContent<'static> {
-    let path = super::make_test_data_path([
-        "shader",
-        "create_displacement_goal",
-        &format!("{}.wgsl", shader_name),
-    ]);
+    let path = crate::path::absolute_input_file(&format!(
+        "shader/create_displacement_goal/{}.wgsl",
+        shader_name
+    ))
+    .0;
     CreateDisplacementGoalShaderContent {
         body: Cow::Owned(fs::read_to_string(path).unwrap()),
     }
