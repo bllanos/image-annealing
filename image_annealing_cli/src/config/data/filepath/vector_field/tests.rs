@@ -1,170 +1,275 @@
-mod image_path {
-    use super::super::ImagePath;
-    use std::fmt;
+use image_annealing_cli_util::path::{UnverifiedInputFilePath, UnverifiedOutputFilePath};
+
+fn non_image_path() -> UnverifiedInputFilePath<'static> {
+    test_util::path::relative_input_file("empty.txt")
+}
+
+fn non_image_error_message() -> &'static str {
+    "The file extension `.\"txt\"` was not recognized as an image format"
+}
+
+fn missing_directory_path() -> UnverifiedOutputFilePath<'static> {
+    test_util::path::relative_output_file("not_found/cannot_create")
+}
+
+fn missing_error_message() -> &'static str {
+    "does not exist"
+}
+
+mod input_permutation_path {
+    use super::super::InputPermutationPath;
+    use image_annealing_cli_util::path::InputFilePath;
+    use std::borrow::Cow;
     use std::path::Path;
 
-    #[derive(Clone, Debug, PartialEq, Eq)]
-    struct TestImagePath(String);
-
-    impl fmt::Display for TestImagePath {
-        fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-            unreachable!()
-        }
-    }
-
-    impl AsRef<Path> for TestImagePath {
-        fn as_ref(&self) -> &Path {
-            unreachable!()
-        }
-    }
-
-    impl AsRef<str> for TestImagePath {
-        fn as_ref(&self) -> &str {
-            unreachable!()
-        }
-    }
-
-    impl ImagePath for TestImagePath {
-        fn from_raw<T: Into<String>>(path: T) -> Self {
-            Self(path.into())
-        }
-    }
-
-    #[test]
-    fn from_raw_clone() {
-        let path = "1";
-        let expected = TestImagePath(String::from(path));
-        assert_eq!(TestImagePath::from_raw_clone(path), expected);
-    }
-
-    mod from_input_path {
-        use super::super::super::ImagePath;
-        use super::TestImagePath;
+    mod from_unverified_path {
+        use super::super::super::{InputPermutationPath, UnverifiedInputPermutationPath};
         use image_annealing::ImageDimensions;
+        use image_annealing_cli_util::path::{
+            InputFilePath, TryFromWithPathContext, TryIntoWithPathContext,
+        };
         use std::error::Error;
 
         #[test]
         fn success() -> Result<(), Box<dyn Error>> {
-            let path = test_util::make_test_data_path_string(["image", "image", "stripes.png"]);
-            let expected = (
-                TestImagePath(path.clone()),
-                ImageDimensions::from_image_path(&path)?,
+            let unverified_path =
+                test_util::path::relative_input_file("image/permutation/identity_permutation.png");
+            assert_eq!(
+                InputPermutationPath::try_from_unverified_with_path_context(
+                    UnverifiedInputPermutationPath(unverified_path.clone()),
+                    test_util::path::base_input().0,
+                )?,
+                (
+                    InputPermutationPath(
+                        unverified_path
+                            .clone()
+                            .try_into_with_path_context(test_util::path::base_input().0)?
+                    ),
+                    ImageDimensions::from_image_path(
+                        InputFilePath::try_from_with_path_context(
+                            unverified_path,
+                            test_util::path::base_input().0,
+                        )
+                        .unwrap()
+                        .0,
+                    )
+                    .unwrap()
+                )
             );
-            assert_eq!(TestImagePath::from_input_path(path)?, expected);
             Ok(())
         }
 
         #[test]
         fn not_found() {
             test_util::assert_error_contains(
-                TestImagePath::from_input_path(test_util::make_test_data_path_string([
-                    "image",
-                    "image",
-                    "not_found.png",
-                ])),
-                "does not exist",
+                InputPermutationPath::try_from_unverified_with_path_context(
+                    UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                        "image/permutation/not_found.png",
+                    )),
+                    test_util::path::base_input().0,
+                ),
+                super::super::missing_error_message(),
             );
         }
 
         #[test]
         fn non_image() {
             test_util::assert_error_contains(
-                TestImagePath::from_input_path(test_util::make_test_data_path_string([
-                    "empty.txt",
-                ])),
-                "The file extension `.\"txt\"` was not recognized as an image format",
+                InputPermutationPath::try_from_unverified_with_path_context(
+                    UnverifiedInputPermutationPath(super::super::non_image_path()),
+                    test_util::path::base_input().0,
+                ),
+                super::super::non_image_error_message(),
             );
         }
     }
 
     #[test]
-    fn from_output_path() {
-        let path = test_util::make_test_data_path_string(["image", "image", "stripes.png"]);
-        let expected = TestImagePath(path.clone());
-        assert_eq!(TestImagePath::from_output_path(path), expected);
-    }
-}
-
-mod permutation_path {
-    use super::super::{ImagePath, PermutationPath};
-    use std::path::Path;
-
-    #[test]
     fn display() {
-        let path = "1";
-        assert_eq!(PermutationPath::from_raw_clone(path).to_string(), path);
-    }
-
-    #[test]
-    fn as_ref_path() {
-        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
+        let path_string = "permutation.png";
         assert_eq!(
-            <PermutationPath as AsRef<Path>>::as_ref(&PermutationPath::from_raw_clone(
-                path.to_str().unwrap()
-            )),
-            path
-        );
-    }
-
-    #[test]
-    fn as_ref_str() {
-        let path = "1";
-        assert_eq!(
-            <PermutationPath as AsRef<str>>::as_ref(&PermutationPath::from_raw_clone(path)),
-            path
-        );
-    }
-
-    #[test]
-    fn from_raw() {
-        let path = "1";
-        assert_eq!(
-            <PermutationPath as AsRef<str>>::as_ref(&PermutationPath::from_raw(String::from(path))),
-            path
+            InputPermutationPath(InputFilePath(Cow::Borrowed(Path::new(path_string)))).to_string(),
+            path_string
         );
     }
 }
 
-mod displacement_goal_path {
-    use super::super::{DisplacementGoalPath, ImagePath};
+mod output_permutation_path {
+    use super::super::OutputPermutationPath;
+    use image_annealing_cli_util::path::OutputFilePath;
+    use std::borrow::Cow;
     use std::path::Path;
+
+    mod from_unverified_path {
+        use super::super::super::{OutputPermutationPath, UnverifiedOutputPermutationPath};
+        use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
+        use std::error::Error;
+
+        #[test]
+        fn success() -> Result<(), Box<dyn Error>> {
+            let unverified_path = test_util::unique_relative_output_file!();
+            assert_eq!(
+                OutputPermutationPath::try_from_with_path_context(
+                    UnverifiedOutputPermutationPath(unverified_path.clone()),
+                    test_util::path::base_output().0,
+                )?,
+                OutputPermutationPath(
+                    unverified_path.try_into_with_path_context(test_util::path::base_output().0)?
+                )
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn missing_directory() {
+            test_util::assert_error_contains(
+                OutputPermutationPath::try_from_with_path_context(
+                    UnverifiedOutputPermutationPath(super::super::missing_directory_path()),
+                    test_util::path::base_output().0,
+                ),
+                super::super::missing_error_message(),
+            );
+        }
+    }
 
     #[test]
     fn display() {
-        let path = "1";
-        assert_eq!(DisplacementGoalPath::from_raw_clone(path).to_string(), path);
-    }
-
-    #[test]
-    fn as_ref_path() {
-        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
+        let path_string = "permutation";
         assert_eq!(
-            <DisplacementGoalPath as AsRef<Path>>::as_ref(&DisplacementGoalPath::from_raw_clone(
-                path.to_str().unwrap()
-            )),
-            path
+            OutputPermutationPath(OutputFilePath(Cow::Borrowed(Path::new(path_string))))
+                .to_string(),
+            path_string
         );
     }
+}
 
-    #[test]
-    fn as_ref_str() {
-        let path = "1";
-        assert_eq!(
-            <DisplacementGoalPath as AsRef<str>>::as_ref(&DisplacementGoalPath::from_raw_clone(
-                path
-            )),
-            path
-        );
+mod input_displacement_goal_path {
+    use super::super::InputDisplacementGoalPath;
+    use image_annealing_cli_util::path::InputFilePath;
+    use std::borrow::Cow;
+    use std::path::Path;
+
+    mod from_unverified_path {
+        use super::super::super::{InputDisplacementGoalPath, UnverifiedInputDisplacementGoalPath};
+        use image_annealing::ImageDimensions;
+        use image_annealing_cli_util::path::{
+            InputFilePath, TryFromWithPathContext, TryIntoWithPathContext,
+        };
+        use std::error::Error;
+
+        #[test]
+        fn success() -> Result<(), Box<dyn Error>> {
+            let unverified_path = test_util::path::relative_input_file(
+                "image/displacement_goal/identity_displacement_goal.png",
+            );
+            assert_eq!(
+                InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                    UnverifiedInputDisplacementGoalPath(unverified_path.clone()),
+                    test_util::path::base_input().0,
+                )?,
+                (
+                    InputDisplacementGoalPath(
+                        unverified_path
+                            .clone()
+                            .try_into_with_path_context(test_util::path::base_input().0)?
+                    ),
+                    ImageDimensions::from_image_path(
+                        InputFilePath::try_from_with_path_context(
+                            unverified_path,
+                            test_util::path::base_input().0,
+                        )
+                        .unwrap()
+                        .0,
+                    )
+                    .unwrap()
+                )
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn not_found() {
+            test_util::assert_error_contains(
+                InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                    UnverifiedInputDisplacementGoalPath(test_util::path::relative_input_file(
+                        "image/displacement_goal/not_found.png",
+                    )),
+                    test_util::path::base_input().0,
+                ),
+                super::super::missing_error_message(),
+            );
+        }
+
+        #[test]
+        fn non_image() {
+            test_util::assert_error_contains(
+                InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                    UnverifiedInputDisplacementGoalPath(super::super::non_image_path()),
+                    test_util::path::base_input().0,
+                ),
+                super::super::non_image_error_message(),
+            );
+        }
     }
 
     #[test]
-    fn from_raw() {
-        let path = "1";
+    fn display() {
+        let path_string = "displacement_goal.png";
         assert_eq!(
-            <DisplacementGoalPath as AsRef<str>>::as_ref(&DisplacementGoalPath::from_raw(
-                String::from(path)
-            )),
-            path
+            InputDisplacementGoalPath(InputFilePath(Cow::Borrowed(Path::new(path_string))))
+                .to_string(),
+            path_string
+        );
+    }
+}
+
+mod output_displacement_goal_path {
+    use super::super::OutputDisplacementGoalPath;
+    use image_annealing_cli_util::path::OutputFilePath;
+    use std::borrow::Cow;
+    use std::path::Path;
+
+    mod from_unverified_path {
+        use super::super::super::{
+            OutputDisplacementGoalPath, UnverifiedOutputDisplacementGoalPath,
+        };
+        use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
+        use std::error::Error;
+
+        #[test]
+        fn success() -> Result<(), Box<dyn Error>> {
+            let unverified_path = test_util::unique_relative_output_file!();
+            assert_eq!(
+                OutputDisplacementGoalPath::try_from_with_path_context(
+                    UnverifiedOutputDisplacementGoalPath(unverified_path.clone()),
+                    test_util::path::base_output().0,
+                )?,
+                OutputDisplacementGoalPath(
+                    unverified_path.try_into_with_path_context(test_util::path::base_output().0)?
+                )
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn missing_directory() {
+            test_util::assert_error_contains(
+                OutputDisplacementGoalPath::try_from_with_path_context(
+                    UnverifiedOutputDisplacementGoalPath(super::super::missing_directory_path()),
+                    test_util::path::base_output().0,
+                ),
+                super::super::missing_error_message(),
+            );
+        }
+    }
+
+    #[test]
+    fn display() {
+        let path_string = "displacement_goal";
+        assert_eq!(
+            OutputDisplacementGoalPath(OutputFilePath(Cow::Borrowed(Path::new(path_string))))
+                .to_string(),
+            path_string
         );
     }
 }

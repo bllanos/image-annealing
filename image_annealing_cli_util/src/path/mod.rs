@@ -28,7 +28,7 @@ pub enum PathError<T: Error + 'static> {
 impl<T: Error> fmt::Display for PathError<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Error(err) => <T as fmt::Display>::fmt(&err, f),
+            Self::Error(err) => <T as fmt::Display>::fmt(err, f),
             Self::IOError(err) => {
                 write!(f, "io error {}", err)
             }
@@ -195,10 +195,10 @@ impl<T: AsRef<Path>, P: AsRef<Path>> TryFromWithPathContext<T, P> for RelativePa
     }
 }
 
-pub fn make_base_path<'a, P: AsRef<Path>, E, O>(
-    candidate_path: &'a Path,
+pub fn make_base_path<P: AsRef<Path>, E, O>(
+    candidate_path: &Path,
     make_context_path: O,
-) -> Result<Cow<'a, Path>, E>
+) -> Result<Cow<Path>, E>
 where
     O: FnOnce() -> Result<P, E>,
 {
@@ -209,16 +209,16 @@ where
     })
 }
 
-pub fn make_base_path_using_current_directory<'a>(
-    candidate_path: &'a Path,
-) -> Result<Cow<'a, Path>, std::io::Error> {
+pub fn make_base_path_using_current_directory(
+    candidate_path: &Path,
+) -> Result<Cow<Path>, std::io::Error> {
     make_base_path(candidate_path, std::env::current_dir)
 }
 
-pub fn make_base_path_using_environment_variable<'a, T: AsRef<OsStr>>(
-    candidate_path: &'a Path,
+pub fn make_base_path_using_environment_variable<T: AsRef<OsStr>>(
+    candidate_path: &Path,
     environment_variable_key: T,
-) -> Result<Cow<'a, Path>, std::env::VarError> {
+) -> Result<Cow<Path>, std::env::VarError> {
     make_base_path(candidate_path, || std::env::var(environment_variable_key))
 }
 

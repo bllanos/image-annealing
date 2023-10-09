@@ -4,23 +4,27 @@ use image_annealing::compute::format::{
 use image_annealing::{compute, DisplacementGoal, ImageDimensions, ImageDimensionsHolder};
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{
-    AlgorithmConfig, Config, CreateDisplacementGoalInputConfig, DisplacementGoalPath, ImagePath,
-    LosslessImagePath, PermutationPath,
+    AlgorithmConfig, Config, CreateDisplacementGoalInputConfig, InputDisplacementGoalPath,
+    InputLosslessImagePath, InputPermutationPath, OutputDisplacementGoalPath,
+    UnverifiedInputDisplacementGoalPath, UnverifiedInputLosslessImagePath,
+    UnverifiedInputPermutationPath,
 };
+use image_annealing_cli_util::path::OutputFilePath;
+use std::borrow::Cow;
 use std::error::Error;
 use test_util::permutation;
 
 #[test]
 fn create_displacement_goal_valid() -> Result<(), Box<dyn Error>> {
-    let path = test_util::make_test_output_path_string(["cli_create_displacement_goal"]);
-    let full_output_path = VectorFieldImageBuffer::make_filename(&path);
+    let path = OutputDisplacementGoalPath(test_util::unique_absolute_output_file!());
+    let full_output_path = VectorFieldImageBuffer::make_filename(&path.0 .0);
     assert!(!full_output_path.is_file());
 
     let dimensions = ImageDimensions::try_new(3, 4)?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: Default::default(),
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(path),
+            displacement_goal_output_path_no_extension: path,
         },
         dispatcher: compute::Config {
             image_dimensions: dimensions,
@@ -39,19 +43,20 @@ fn create_displacement_goal_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn create_displacement_goal_invalid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "invalid_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/invalid_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: CreateDisplacementGoalInputConfig {
                 candidate_permutation: Some(candidate_permutation_path),
                 ..Default::default()
             },
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(
-                test_util::make_test_output_path_string(["cli_create_displacement_goal_invalid"]),
+            displacement_goal_output_path_no_extension: OutputDisplacementGoalPath(
+                test_util::unique_absolute_output_file!(),
             ),
         },
         dispatcher: compute::Config { image_dimensions },
@@ -63,19 +68,20 @@ fn create_displacement_goal_invalid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
     let (displacement_goal_path, image_dimensions) =
-        DisplacementGoalPath::from_input_path(test_util::make_test_data_path_string([
-            "image", "image", "red.png",
-        ]))?;
+        InputDisplacementGoalPath::try_from_unverified_with_path_context(
+            UnverifiedInputDisplacementGoalPath(test_util::path::relative_input_file(
+                "image/image/red.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: CreateDisplacementGoalInputConfig {
                 displacement_goal: Some(displacement_goal_path),
                 ..Default::default()
             },
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(
-                test_util::make_test_output_path_string([
-                    "cli_create_displacement_goal_invalid_displacement_goal_format",
-                ]),
+            displacement_goal_output_path_no_extension: OutputDisplacementGoalPath(
+                test_util::unique_absolute_output_file!(),
             ),
         },
         dispatcher: compute::Config { image_dimensions },
@@ -90,19 +96,20 @@ fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image", "image", "red.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/image/red.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: CreateDisplacementGoalInputConfig {
                 candidate_permutation: Some(candidate_permutation_path),
                 ..Default::default()
             },
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(
-                test_util::make_test_output_path_string([
-                    "cli_create_displacement_goal_invalid_permutation_format",
-                ]),
+            displacement_goal_output_path_no_extension: OutputDisplacementGoalPath(
+                test_util::unique_absolute_output_file!(),
             ),
         },
         dispatcher: compute::Config { image_dimensions },
@@ -116,18 +123,21 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn invalid_image_format() -> Result<(), Box<dyn Error>> {
-    let image_path = test_util::make_test_data_path_string(["image", "image", "stripes.png"]);
-    let image_dimensions = ImageDimensions::from_image_path(&image_path)?;
+    let (image_path, image_dimensions) =
+        InputLosslessImagePath::try_from_unverified_with_path_context(
+            UnverifiedInputLosslessImagePath::Rgba16(test_util::path::relative_input_file(
+                "image/image/stripes.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: CreateDisplacementGoalInputConfig {
-                image: Some(LosslessImagePath::Rgba16(image_path)),
+                image: Some(image_path),
                 ..Default::default()
             },
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(
-                test_util::make_test_output_path_string([
-                    "cli_create_displacement_goal_invalid_image_format",
-                ]),
+            displacement_goal_output_path_no_extension: OutputDisplacementGoalPath(
+                test_util::unique_absolute_output_file!(),
             ),
         },
         dispatcher: compute::Config { image_dimensions },
@@ -141,13 +151,15 @@ fn invalid_image_format() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn save_missing_directory() -> Result<(), Box<dyn Error>> {
-    let path = test_util::make_test_output_path_string(["not_found", "cannot_create"]);
-
     let dimensions = ImageDimensions::try_new(3, 4)?;
     let config = Config {
         algorithm: AlgorithmConfig::CreateDisplacementGoal {
             input: Default::default(),
-            displacement_goal_output_path_no_extension: DisplacementGoalPath::from_raw(path),
+            displacement_goal_output_path_no_extension: OutputDisplacementGoalPath(OutputFilePath(
+                Cow::Owned(test_util::path::unverified_absolute_output_path(
+                    "not_found/cannot_create",
+                )),
+            )),
         },
         dispatcher: compute::Config {
             image_dimensions: dimensions,

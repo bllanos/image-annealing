@@ -22,7 +22,7 @@ mod vector_field_image_buffer {
 
     #[test]
     fn load_unexpected_format() {
-        let path = test_util::make_test_data_path(["image", "image", "red.png"]);
+        let path = test_util::path::absolute_input_file("image/image/red.png").0;
 
         test_util::assert_error_contains(
             VectorFieldImageBuffer::load(path),
@@ -37,7 +37,7 @@ mod rgba16_image_buffer {
 
     #[test]
     fn load_unexpected_format() {
-        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::path::absolute_input_file("image/image/stripes.png").0;
 
         test_util::assert_error_contains(
             Rgba16ImageBuffer::load(path),
@@ -141,7 +141,7 @@ mod rgba16_image {
                     3,
                     make_first_vec()
                         .into_iter()
-                        .zip(make_second_vec().into_iter())
+                        .zip(make_second_vec())
                         .map(|(component1, component2)| {
                             Rgba16ImageBufferComponent::from_ne_bytes([component1, component2])
                         })

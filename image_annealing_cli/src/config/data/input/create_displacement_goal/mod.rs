@@ -53,7 +53,7 @@ pub struct CreateDisplacementGoalInputConfig<'a> {
 }
 
 impl CreateDisplacementGoalInputConfig<'static> {
-    pub fn try_from_unverified_with_path_context<'a, P: AsRef<Path>>(
+    pub fn try_from_unverified_with_path_context<P: AsRef<Path>>(
         config: UnverifiedCreateDisplacementGoalInputConfig,
         base_path: P,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {

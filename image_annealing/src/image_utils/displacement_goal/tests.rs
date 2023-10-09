@@ -119,8 +119,7 @@ mod displacement_goal {
             let displacement_goal = DisplacementGoal::from_vector_field(permutation)?;
             assert_eq!(*displacement_goal.as_ref(), expected);
 
-            let path =
-                test_util::make_test_output_path_string(["image_utils_displacement_goal_io_image"]);
+            let path = test_util::unique_absolute_output_file!().0;
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
             assert!(!expected_output_path.is_file());
 
@@ -140,7 +139,7 @@ mod displacement_goal {
 
         #[test]
         fn load_missing_image() {
-            let path = test_util::make_test_data_path(["image", "image", "not_found.png"]);
+            let path = test_util::path::unverified_absolute_input_path("image/image/not_found.png");
             test_util::assert_error_contains(
                 DisplacementGoal::load(path),
                 "No such file or directory",
@@ -152,10 +151,9 @@ mod displacement_goal {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let displacement_goal = DisplacementGoal::from_vector_field(permutation)?;
             test_util::assert_error_contains(
-                displacement_goal.save_add_extension(test_util::make_test_output_path([
-                    "not_found",
-                    "cannot_create",
-                ])),
+                displacement_goal.save_add_extension(
+                    test_util::path::unverified_absolute_output_path("not_found/cannot_create"),
+                ),
                 "No such file or directory",
             );
             Ok(())

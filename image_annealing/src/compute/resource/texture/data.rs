@@ -104,8 +104,10 @@ impl TextureData {
 
     pub fn assert_same_dimensions(texture: &Self, dimensions: &ImageDimensions) {
         assert!(
-            texture.dimensions.width == dimensions.width().try_into().unwrap()
-                && texture.dimensions.height == dimensions.height().try_into().unwrap()
+            <u32 as TryInto<usize>>::try_into(texture.dimensions.width).unwrap()
+                == dimensions.width()
+                && <u32 as TryInto<usize>>::try_into(texture.dimensions.height).unwrap()
+                    == dimensions.height()
         );
     }
 

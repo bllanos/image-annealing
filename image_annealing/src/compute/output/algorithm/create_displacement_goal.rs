@@ -21,8 +21,8 @@ pub type CreateDisplacementGoalPipelineOperation<'a> =
 impl CreateDisplacementGoalPipelineOperation<'_> {
     // Ideally, this would be a method, but it may not be possible to return a `Self` type parameterized with a lifetime.
     // (See https://stackoverflow.com/questions/57701914/trait-method-which-returns-self-type-with-a-different-type-and-or-lifetime-par)
-    pub fn to_owned<'a>(
-        instance: &CreateDisplacementGoalPipelineOperation<'a>,
+    pub fn to_owned(
+        instance: &CreateDisplacementGoalPipelineOperation,
     ) -> CreateDisplacementGoalPipelineOperation<'static> {
         match instance {
             PipelineOperation::Set(config) => PipelineOperation::Set(PipelineConfig {

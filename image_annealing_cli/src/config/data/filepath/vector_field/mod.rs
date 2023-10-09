@@ -16,8 +16,8 @@ pub struct UnverifiedInputPermutationPath<'a>(pub UnverifiedInputFilePath<'a>);
 pub struct InputPermutationPath<'a>(pub InputFilePath<'a>);
 
 impl InputPermutationPath<'static> {
-    pub fn try_from_unverified_with_path_context<'a, P: AsRef<Path>>(
-        unverified_path: UnverifiedInputPermutationPath<'a>,
+    pub fn try_from_unverified_with_path_context<P: AsRef<Path>>(
+        unverified_path: UnverifiedInputPermutationPath,
         base_path: P,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
         let path = InputFilePath::try_from_with_path_context(unverified_path.0, base_path)?;
@@ -60,7 +60,7 @@ impl<'a> fmt::Display for OutputPermutationPath<'a> {
 impl OutputPermutationPath<'_> {
     // Ideally, this would be a method, but it may not be possible to return a `Self` type parameterized with a lifetime.
     // (See https://stackoverflow.com/questions/57701914/trait-method-which-returns-self-type-with-a-different-type-and-or-lifetime-par)
-    pub fn to_owned<'a>(instance: &OutputPermutationPath<'a>) -> OutputPermutationPath<'static> {
+    pub fn to_owned(instance: &OutputPermutationPath) -> OutputPermutationPath<'static> {
         OutputPermutationPath(OutputFilePath(Cow::Owned(
             instance.0 .0.clone().into_owned(),
         )))
@@ -74,8 +74,8 @@ pub struct UnverifiedInputDisplacementGoalPath<'a>(pub UnverifiedInputFilePath<'
 pub struct InputDisplacementGoalPath<'a>(pub InputFilePath<'a>);
 
 impl InputDisplacementGoalPath<'static> {
-    pub fn try_from_unverified_with_path_context<'a, P: AsRef<Path>>(
-        unverified_path: UnverifiedInputDisplacementGoalPath<'a>,
+    pub fn try_from_unverified_with_path_context<P: AsRef<Path>>(
+        unverified_path: UnverifiedInputDisplacementGoalPath,
         base_path: P,
     ) -> Result<(Self, ImageDimensions), Box<dyn Error>> {
         let path = InputFilePath::try_from_with_path_context(unverified_path.0, base_path)?;

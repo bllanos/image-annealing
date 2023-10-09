@@ -27,9 +27,12 @@ impl TextureCopyBufferData {
         let dimensions = texture.dimensions();
         let buffer_dimensions = buffer.0.dimensions();
         assert!(
-            buffer_dimensions.width() == dimensions.width.try_into().unwrap()
-                && buffer_dimensions.height() == dimensions.height.try_into().unwrap()
-                && TEXTURE_ARRAY_LAYERS == dimensions.depth_or_array_layers.try_into().unwrap()
+            buffer_dimensions.width()
+                == <u32 as TryInto<usize>>::try_into(dimensions.width).unwrap()
+                && buffer_dimensions.height()
+                    == <u32 as TryInto<usize>>::try_into(dimensions.height).unwrap()
+                && TEXTURE_ARRAY_LAYERS
+                    == <u32 as TryInto<usize>>::try_into(dimensions.depth_or_array_layers).unwrap()
         );
     }
 

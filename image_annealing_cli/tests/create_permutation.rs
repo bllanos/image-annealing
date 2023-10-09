@@ -1,20 +1,22 @@
 use image_annealing::compute::format::{ImageFileReader, ImageFileWriter, VectorFieldImageBuffer};
 use image_annealing::{compute, CandidatePermutation, ImageDimensions, ImageDimensionsHolder};
 use image_annealing_cli::cli;
-use image_annealing_cli::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
+use image_annealing_cli::config::{AlgorithmConfig, Config, OutputPermutationPath};
+use image_annealing_cli_util::path::OutputFilePath;
+use std::borrow::Cow;
 use std::error::Error;
 use test_util::permutation;
 
 #[test]
 fn create_permutation() -> Result<(), Box<dyn Error>> {
-    let path = test_util::make_test_output_path_string(["cli_create_permutation"]);
-    let full_output_path = VectorFieldImageBuffer::make_filename(&path);
+    let path = OutputPermutationPath(test_util::unique_absolute_output_file!());
+    let full_output_path = VectorFieldImageBuffer::make_filename(&path.0 .0);
     assert!(!full_output_path.is_file());
 
     let dimensions = ImageDimensions::try_new(3, 4)?;
     let config = Config {
         algorithm: AlgorithmConfig::CreatePermutation {
-            permutation_output_path_no_extension: PermutationPath::from_raw(path),
+            permutation_output_path_no_extension: path,
         },
         dispatcher: compute::Config {
             image_dimensions: dimensions,
@@ -32,11 +34,13 @@ fn create_permutation() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn save_missing_directory() -> Result<(), Box<dyn Error>> {
-    let path = test_util::make_test_output_path_string(["not_found", "cannot_create"]);
-
     let config = Config {
         algorithm: AlgorithmConfig::CreatePermutation {
-            permutation_output_path_no_extension: PermutationPath::from_raw(path),
+            permutation_output_path_no_extension: OutputPermutationPath(OutputFilePath(
+                Cow::Owned(test_util::path::unverified_absolute_output_path(
+                    "not_found/cannot_create",
+                )),
+            )),
         },
         dispatcher: compute::Config {
             image_dimensions: ImageDimensions::try_new(3, 4)?,

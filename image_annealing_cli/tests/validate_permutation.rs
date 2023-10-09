@@ -1,17 +1,20 @@
 use image_annealing::compute;
 use image_annealing::compute::format::ImageFormat;
 use image_annealing_cli::cli;
-use image_annealing_cli::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
+use image_annealing_cli::config::{
+    AlgorithmConfig, Config, InputPermutationPath, UnverifiedInputPermutationPath,
+};
 use std::error::Error;
 
 #[test]
 fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "identity_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/identity_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::ValidatePermutation {
             candidate_permutation: candidate_permutation_path,
@@ -25,11 +28,12 @@ fn validate_permutation_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "invalid_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/invalid_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::ValidatePermutation {
             candidate_permutation: candidate_permutation_path,
@@ -43,9 +47,12 @@ fn validate_permutation_invalid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image", "image", "red.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/image/red.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::ValidatePermutation {
             candidate_permutation: candidate_permutation_path,

@@ -97,9 +97,7 @@ mod candidate_permutation {
         fn success() -> Result<(), Box<dyn Error>> {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
 
-            let path = test_util::make_test_output_path_string([
-                "image_utils_candidate_permutation_io_image",
-            ]);
+            let path = test_util::unique_absolute_output_file!().0;
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
             assert!(!expected_output_path.is_file());
 
@@ -114,7 +112,7 @@ mod candidate_permutation {
 
         #[test]
         fn load_missing_image() {
-            let path = test_util::make_test_data_path(["image", "image", "not_found.png"]);
+            let path = test_util::path::unverified_absolute_input_path("image/image/not_found.png");
             test_util::assert_error_contains(
                 CandidatePermutation::load(path),
                 "No such file or directory",
@@ -203,9 +201,7 @@ mod validated_permutation {
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             assert_eq!(*validated_permutation.as_ref(), expected);
 
-            let path = test_util::make_test_output_path_string([
-                "image_utils_validation_validated_permutation_io_image",
-            ]);
+            let path = test_util::unique_absolute_output_file!().0;
             let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
             assert!(!expected_output_path.is_file());
 
@@ -223,10 +219,9 @@ mod validated_permutation {
             let DimensionsAndPermutation { permutation, .. } = permutation::non_identity();
             let validated_permutation = super::super::super::validate_permutation(permutation)?;
             test_util::assert_error_contains(
-                validated_permutation.save_add_extension(test_util::make_test_output_path([
-                    "not_found",
-                    "cannot_create",
-                ])),
+                validated_permutation.save_add_extension(
+                    test_util::path::unverified_absolute_output_path("not_found/cannot_create"),
+                ),
                 "No such file or directory",
             );
             Ok(())

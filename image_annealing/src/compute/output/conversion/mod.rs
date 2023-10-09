@@ -51,7 +51,7 @@ pub fn to_image(dimensions: &ImageDimensions, v: &[VectorFieldEntry]) -> VectorF
         )
         .unwrap()
     } else {
-        panic!("vector length and image dimensions are incompatible.");
+        panic!("vector length and image dimensions are incompatible");
     }
 }
 

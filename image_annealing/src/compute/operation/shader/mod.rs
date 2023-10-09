@@ -42,7 +42,7 @@ pub fn create_displacement_goal_custom_shader(
     content: &CreateDisplacementGoalShaderContent,
 ) -> Shader {
     let mut v: Vec<u8> = Vec::new();
-    image_annealing_shader::shader::create_displacement_goal_custom(&mut v, &content).unwrap();
+    image_annealing_shader::shader::create_displacement_goal_custom(&mut v, content).unwrap();
     Shader {
         shader: device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("create_displacement_goal_custom_shader_module"),

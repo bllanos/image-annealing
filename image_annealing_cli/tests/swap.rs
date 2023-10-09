@@ -6,9 +6,11 @@ use image_annealing::compute::{self, SwapPassSequence};
 use image_annealing::ImageDimensions;
 use image_annealing_cli::cli;
 use image_annealing_cli::config::{
-    AlgorithmConfig, Config, DisplacementGoalPath, ImagePath, IterationCount, PermutationPath,
-    SwapParametersConfig, SwapStopConfig,
+    AlgorithmConfig, Config, InputDisplacementGoalPath, InputPermutationPath, IterationCount,
+    OutputPermutationPath, SwapParametersConfig, SwapStopConfig, UnverifiedInputPermutationPath,
 };
+use image_annealing_cli_util::path::{InputFilePath, OutputFilePath};
+use std::borrow::Cow;
 use std::error::Error;
 use std::num::NonZeroUsize;
 
@@ -31,7 +33,7 @@ fn make_swap_parameters() -> SwapParametersConfig {
 #[test]
 fn swap_valid() -> Result<(), Box<dyn Error>> {
     // Ensure output files do not already exist
-    let path_prefix = test_util::make_test_output_path_string(["cli_swap"]);
+    let path_prefix = test_util::unique_absolute_output_file!();
     let paths_no_extension = [
         format!("{}_round_0_pass_0_vertical", path_prefix),
         format!("{}_round_0_pass_1_offset_vertical", path_prefix),
@@ -59,10 +61,9 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
             VectorFieldEntry(0, 0),
         ],
     );
-    let input_permutation_path_prefix =
-        test_util::make_test_output_path(["cli_swap_input_permutation"]);
+    let input_permutation_path_prefix = test_util::unique_absolute_output_file!();
     let input_permutation_path =
-        input_permutation.save_add_extension(input_permutation_path_prefix)?;
+        input_permutation.save_add_extension(&input_permutation_path_prefix.0)?;
 
     let input_displacement_goal = conversion::to_image(
         &dimensions,
@@ -75,20 +76,19 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
             VectorFieldEntry(0, -3),
         ],
     );
-    let input_displacement_goal_path_prefix =
-        test_util::make_test_output_path(["cli_swap_input_displacement_goal"]);
+    let input_displacement_goal_path_prefix = test_util::unique_absolute_output_file!();
     let input_displacement_goal_path =
-        input_displacement_goal.save_add_extension(input_displacement_goal_path_prefix)?;
+        input_displacement_goal.save_add_extension(&input_displacement_goal_path_prefix.0)?;
 
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
-            candidate_permutation: PermutationPath::from_raw_clone(
-                input_permutation_path.to_str().unwrap(),
-            ),
-            displacement_goal: DisplacementGoalPath::from_raw_clone(
-                input_displacement_goal_path.to_str().unwrap(),
-            ),
-            permutation_output_path_prefix: PermutationPath::from_raw(path_prefix),
+            candidate_permutation: InputPermutationPath(InputFilePath(Cow::Borrowed(
+                &input_permutation_path,
+            ))),
+            displacement_goal: InputDisplacementGoalPath(InputFilePath(Cow::Borrowed(
+                &input_displacement_goal_path,
+            ))),
+            permutation_output_path_prefix: OutputPermutationPath(path_prefix),
             parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config {
@@ -144,23 +144,20 @@ fn swap_valid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn swap_invalid() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "invalid_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/invalid_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath::from_raw(
-                test_util::make_test_data_path_string([
-                    "image",
-                    "displacement_goal",
-                    "identity_displacement_goal.png",
-                ]),
-            ),
-            permutation_output_path_prefix: PermutationPath::from_raw(
-                test_util::make_test_output_path_string(["cli_swap_invalid"]),
+            displacement_goal: InputDisplacementGoalPath(test_util::path::absolute_input_file(
+                "image/displacement_goal/identity_displacement_goal.png",
+            )),
+            permutation_output_path_prefix: OutputPermutationPath(
+                test_util::unique_absolute_output_file!(),
             ),
             parameters: make_swap_parameters(),
         },
@@ -173,21 +170,20 @@ fn swap_invalid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image", "image", "red.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/image/red.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath::from_raw(
-                test_util::make_test_data_path_string([
-                    "image",
-                    "displacement_goal",
-                    "identity_displacement_goal.png",
-                ]),
-            ),
-            permutation_output_path_prefix: PermutationPath::from_raw(
-                test_util::make_test_output_path_string(["cli_swap_invalid_permutation_format"]),
+            displacement_goal: InputDisplacementGoalPath(test_util::path::absolute_input_file(
+                "image/displacement_goal/identity_displacement_goal.png",
+            )),
+            permutation_output_path_prefix: OutputPermutationPath(
+                test_util::unique_absolute_output_file!(),
             ),
             parameters: make_swap_parameters(),
         },
@@ -203,21 +199,20 @@ fn invalid_permutation_format() -> Result<(), Box<dyn Error>> {
 #[test]
 fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "identity_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/identity_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath::from_raw(
-                test_util::make_test_data_path_string(["image", "image", "red.png"]),
-            ),
-            permutation_output_path_prefix: PermutationPath::from_raw(
-                test_util::make_test_output_path_string([
-                    "cli_swap_invalid_displacement_goal_format",
-                ]),
+            displacement_goal: InputDisplacementGoalPath(test_util::path::absolute_input_file(
+                "image/image/red.png",
+            )),
+            permutation_output_path_prefix: OutputPermutationPath(
+                test_util::unique_absolute_output_file!(),
             ),
             parameters: make_swap_parameters(),
         },
@@ -232,24 +227,22 @@ fn invalid_displacement_goal_format() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn save_missing_directory() -> Result<(), Box<dyn Error>> {
-    let path = test_util::make_test_output_path_string(["not_found", "cannot_create"]);
     let (candidate_permutation_path, image_dimensions) =
-        PermutationPath::from_input_path(test_util::make_test_data_path_string([
-            "image",
-            "permutation",
-            "identity_permutation.png",
-        ]))?;
+        InputPermutationPath::try_from_unverified_with_path_context(
+            UnverifiedInputPermutationPath(test_util::path::relative_input_file(
+                "image/permutation/identity_permutation.png",
+            )),
+            test_util::path::base_input().0,
+        )?;
     let config = Config {
         algorithm: AlgorithmConfig::Swap {
             candidate_permutation: candidate_permutation_path,
-            displacement_goal: DisplacementGoalPath::from_raw(
-                test_util::make_test_data_path_string([
-                    "image",
-                    "displacement_goal",
-                    "identity.png",
-                ]),
-            ),
-            permutation_output_path_prefix: PermutationPath::from_raw(path),
+            displacement_goal: InputDisplacementGoalPath(test_util::path::absolute_input_file(
+                "image/displacement_goal/identity_displacement_goal.png",
+            )),
+            permutation_output_path_prefix: OutputPermutationPath(OutputFilePath(Cow::Owned(
+                test_util::path::unverified_absolute_output_path("not_found/cannot_create"),
+            ))),
             parameters: make_swap_parameters(),
         },
         dispatcher: compute::Config { image_dimensions },

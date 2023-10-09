@@ -7,7 +7,7 @@ pub fn swap(vector_field: &VectorFieldImageBuffer) -> VectorFieldImageBuffer {
     let width = vector_field.width();
     let width_less_one = width
         .checked_sub(1u32)
-        .expect("Vector field width is zero.");
+        .expect("vector field width is zero.");
     VectorFieldImageBuffer::from_fn(width, vector_field.height(), |x, y| {
         if x % 2 == 0 {
             if x < width_less_one {

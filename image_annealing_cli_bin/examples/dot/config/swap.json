@@ -1,8 +1,8 @@
 {
   "Swap": {
-    "candidate_permutation": "examples_output/image_annealing_cli_bin_dot/initial_permutation.png",
-    "displacement_goal": "examples_output/image_annealing_cli_bin_dot/displacement_goal.png",
-    "permutation_output_path_prefix": "examples_output/image_annealing_cli_bin_dot/swap_permutations/permutation",
+    "candidate_permutation": "../../../../examples_output/image_annealing_cli_bin_dot/initial_permutation.png",
+    "displacement_goal": "../../../../examples_output/image_annealing_cli_bin_dot/displacement_goal.png",
+    "permutation_output_path_prefix": "../../../../examples_output/image_annealing_cli_bin_dot/swap_permutations/permutation",
     "parameters": {
       "stop": {
         "Bounded": {

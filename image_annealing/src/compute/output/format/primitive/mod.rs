@@ -22,7 +22,7 @@ impl ImageFileReader for ImageBuffer<image::Rgba<u8>, Vec<u8>> {
     fn load<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
         let image = ImageReader::open(&path)?.decode()?;
         image.as_rgba8().ok_or(ImageFormatError::Unexpected {
-            image_name: format!("{}", path.as_ref().display()),
+            image_name: path.as_ref().display().to_string(),
             expected_format: ImageFormat::Rgba8,
         })?;
         Ok(image.into_rgba8())
@@ -35,7 +35,7 @@ impl ImageFileReader
     fn load<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
         let image = ImageReader::open(&path)?.decode()?;
         image.as_rgba16().ok_or(ImageFormatError::Unexpected {
-            image_name: format!("{}", path.as_ref().display()),
+            image_name: path.as_ref().display().to_string(),
             expected_format: ImageFormat::Rgba16,
         })?;
         Ok(image.into_rgba16())

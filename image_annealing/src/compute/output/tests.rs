@@ -39,6 +39,15 @@ mod algorithm {
     use super::super::{Algorithm, OutputStatus};
     use async_trait::async_trait;
     use std::error::Error;
+    use std::task::{Context, Poll};
+
+    fn diverging_poll_fn(_cx: &mut Context<'_>) -> Poll<Option<()>> {
+        unreachable!()
+    }
+
+    async fn make_diverging_future() -> Option<()> {
+        std::future::poll_fn(diverging_poll_fn).await
+    }
 
     struct ZeroStepAlgorithm(usize);
 
@@ -60,7 +69,7 @@ mod algorithm {
         }
 
         async fn partial_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn partial_output_block(&mut self) -> Option<()> {
@@ -68,7 +77,7 @@ mod algorithm {
         }
 
         async fn full_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn full_output_block(&mut self) -> Option<()> {
@@ -101,7 +110,7 @@ mod algorithm {
         }
 
         async fn partial_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn partial_output_block(&mut self) -> Option<()> {
@@ -109,7 +118,7 @@ mod algorithm {
         }
 
         async fn full_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn full_output_block(&mut self) -> Option<()> {
@@ -146,7 +155,7 @@ mod algorithm {
         }
 
         async fn partial_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn partial_output_block(&mut self) -> Option<()> {
@@ -154,7 +163,7 @@ mod algorithm {
         }
 
         async fn full_output(&mut self) -> Option<()> {
-            unreachable!()
+            make_diverging_future().await
         }
 
         fn full_output_block(&mut self) -> Option<()> {
@@ -227,7 +236,7 @@ mod algorithm {
             }
 
             async fn partial_output(&mut self) -> Option<()> {
-                unreachable!()
+                super::make_diverging_future().await
             }
 
             fn partial_output_block(&mut self) -> Option<()> {
@@ -235,7 +244,7 @@ mod algorithm {
             }
 
             async fn full_output(&mut self) -> Option<()> {
-                unreachable!()
+                super::make_diverging_future().await
             }
 
             fn full_output_block(&mut self) -> Option<()> {

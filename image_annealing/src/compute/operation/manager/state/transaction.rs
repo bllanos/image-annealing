@@ -86,13 +86,13 @@ impl ResourceStateManager {
         }
     }
 
-    fn input_permutation<'a>(
+    fn input_permutation(
         &self,
         commit_state: AllResourcesState,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
-        permutation: &Option<&'a ValidatedPermutation>,
+        permutation: &Option<&ValidatedPermutation>,
     ) -> Result<AllResourcesState, InsufficientInputError> {
         match permutation {
             Some(permutation) => {
@@ -120,12 +120,12 @@ impl ResourceStateManager {
         }
     }
 
-    fn input_image<'a>(
+    fn input_image(
         &self,
         commit_state: AllResourcesState,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
-        image: &Option<&'a LosslessImage>,
+        image: &Option<&LosslessImage>,
         accept_missing: bool,
     ) -> Result<AllResourcesState, InsufficientInputError> {
         match image {
@@ -143,13 +143,13 @@ impl ResourceStateManager {
         }
     }
 
-    fn input_displacement_goal<'a>(
+    fn input_displacement_goal(
         &self,
         commit_state: AllResourcesState,
         resources: &ResourceManager,
         queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
-        displacement_goal: &Option<&'a DisplacementGoal>,
+        displacement_goal: &Option<&DisplacementGoal>,
         accept_missing: bool,
     ) -> Result<AllResourcesState, InsufficientInputError> {
         match displacement_goal {

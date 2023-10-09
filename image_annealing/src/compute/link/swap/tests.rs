@@ -1038,7 +1038,7 @@ mod swap_shader_parameters {
         assert_eq!(parameters.displacement, [0, 0]);
         assert_eq!(parameters.offset, [0, 0]);
         assert_eq!(parameters.count_output_offset, layout.segment_start[0]);
-        assert_eq!(parameters.acceptance_threshold, Default::default());
+        assert_eq!(parameters.acceptance_threshold, <f32 as Default>::default());
         Ok(())
     }
 

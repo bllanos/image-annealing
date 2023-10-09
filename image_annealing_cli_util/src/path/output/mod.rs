@@ -132,9 +132,9 @@ pub fn check_output_directory_path<P: AsRef<Path>>(
     path: P,
 ) -> Result<(), PathError<OutputDirectoryError>> {
     let path = path.as_ref();
-    match super::check_input_directory_path(&path) {
+    match super::check_input_directory_path(path) {
         Err(PathError::Error(DirectoryError::NotFound(_))) => {
-            check_parent_path(&path).map_err(|err| match err {
+            check_parent_path(path).map_err(|err| match err {
                 PathError::Error(inner_err) => {
                     PathError::Error(OutputDirectoryError::parent_path(inner_err))
                 }

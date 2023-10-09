@@ -1,11 +1,12 @@
 mod create_displacement_goal_input_config {
 
-    mod from_config {
+    mod from_unverified_config {
         use super::super::super::{
-            CreateDisplacementGoalInputConfig, DisplacementGoalPath, ImagePath, LosslessImagePath,
-            PermutationPath, UnverifiedCreateDisplacementGoalInputConfig,
+            CreateDisplacementGoalInputConfig, InputDisplacementGoalPath, InputLosslessImagePath,
+            InputPermutationPath, UnverifiedCreateDisplacementGoalInputConfig,
             UnverifiedCreateDisplacementGoalInputDataConfig, UnverifiedImageDimensionsConfig,
-            UnverifiedLosslessImagePath,
+            UnverifiedInputDisplacementGoalPath, UnverifiedInputLosslessImagePath,
+            UnverifiedInputPermutationPath,
         };
         use image_annealing::ImageDimensions;
         use std::error::Error;
@@ -21,7 +22,10 @@ mod create_displacement_goal_input_config {
             );
             let expected_config: CreateDisplacementGoalInputConfig = Default::default();
             assert_eq!(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config)?,
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0
+                )?,
                 (expected_config, image_dimensions)
             );
             Ok(())
@@ -29,43 +33,47 @@ mod create_displacement_goal_input_config {
 
         #[test]
         fn valid_input() -> Result<(), Box<dyn Error>> {
+            let unverified_displacement_goal_path =
+                UnverifiedInputDisplacementGoalPath(test_util::path::relative_input_file(
+                    "image/displacement_goal/identity_displacement_goal.png",
+                ));
+            let unverified_candidate_permutation_path = UnverifiedInputPermutationPath(
+                test_util::path::relative_input_file("image/permutation/identity_permutation.png"),
+            );
+            let unverified_lossless_image_path = UnverifiedInputLosslessImagePath::Rgba8(
+                test_util::path::relative_input_file("image/image/stripes.png"),
+            );
             let unverified_config = UnverifiedCreateDisplacementGoalInputConfig::Input(
                 UnverifiedCreateDisplacementGoalInputDataConfig {
-                    displacement_goal: Some(String::from(
-                        "../test_data/image/displacement_goal/identity_displacement_goal.png",
-                    )),
-                    candidate_permutation: Some(String::from(
-                        "../test_data/image/permutation/identity_permutation.png",
-                    )),
-                    image: Some(UnverifiedLosslessImagePath::Rgba8(String::from(
-                        "../test_data/image/image/stripes.png",
-                    ))),
+                    displacement_goal: Some(unverified_displacement_goal_path.clone()),
+                    candidate_permutation: Some(unverified_candidate_permutation_path.clone()),
+                    image: Some(unverified_lossless_image_path.clone()),
                 },
             );
             let (displacement_goal_path, image_dimensions) =
-                DisplacementGoalPath::from_input_path(test_util::make_test_data_path_string([
-                    "image",
-                    "displacement_goal",
-                    "identity_displacement_goal.png",
-                ]))?;
+                InputDisplacementGoalPath::try_from_unverified_with_path_context(
+                    unverified_displacement_goal_path,
+                    test_util::path::base_input().0,
+                )?;
             let (candidate_permutation_path, _) =
-                PermutationPath::from_input_path(test_util::make_test_data_path_string([
-                    "image",
-                    "permutation",
-                    "identity_permutation.png",
-                ]))?;
-            let image_path = LosslessImagePath::Rgba8(test_util::make_test_data_path_string([
-                "image",
-                "image",
-                "stripes.png",
-            ]));
+                InputPermutationPath::try_from_unverified_with_path_context(
+                    unverified_candidate_permutation_path,
+                    test_util::path::base_input().0,
+                )?;
+            let (image_path, _) = InputLosslessImagePath::try_from_unverified_with_path_context(
+                unverified_lossless_image_path,
+                test_util::path::base_input().0,
+            )?;
             let expected_config = CreateDisplacementGoalInputConfig {
                 displacement_goal: Some(displacement_goal_path),
                 candidate_permutation: Some(candidate_permutation_path),
                 image: Some(image_path),
             };
             assert_eq!(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config)?,
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,
+                )?,
                 (expected_config, image_dimensions)
             );
             Ok(())
@@ -80,7 +88,10 @@ mod create_displacement_goal_input_config {
                 },
             );
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,
+                ),
                 "width is zero",
             );
         }
@@ -90,7 +101,9 @@ mod create_displacement_goal_input_config {
             let unverified_config =
                 UnverifiedCreateDisplacementGoalInputConfig::Input(Default::default());
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,),
                 "at least one input must be provided when specifying input data as opposed to image dimensions",
             );
         }
@@ -99,14 +112,19 @@ mod create_displacement_goal_input_config {
         fn invalid_displacement_goal() {
             let unverified_config = UnverifiedCreateDisplacementGoalInputConfig::Input(
                 UnverifiedCreateDisplacementGoalInputDataConfig {
-                    displacement_goal: Some(String::from(
-                        "../test_data/image/displacement_goal/not_found.png",
+                    displacement_goal: Some(UnverifiedInputDisplacementGoalPath(
+                        test_util::path::relative_input_file(
+                            "image/displacement_goal/not_found.png",
+                        ),
                     )),
                     ..Default::default()
                 },
             );
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,
+                ),
                 "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
@@ -115,14 +133,17 @@ mod create_displacement_goal_input_config {
         fn invalid_permutation() {
             let unverified_config = UnverifiedCreateDisplacementGoalInputConfig::Input(
                 UnverifiedCreateDisplacementGoalInputDataConfig {
-                    candidate_permutation: Some(String::from(
-                        "../test_data/image/permutation/not_found.png",
+                    candidate_permutation: Some(UnverifiedInputPermutationPath(
+                        test_util::path::relative_input_file("image/permutation/not_found.png"),
                     )),
                     ..Default::default()
                 },
             );
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,
+                ),
                 "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
@@ -131,14 +152,17 @@ mod create_displacement_goal_input_config {
         fn invalid_image() {
             let unverified_config = UnverifiedCreateDisplacementGoalInputConfig::Input(
                 UnverifiedCreateDisplacementGoalInputDataConfig {
-                    image: Some(UnverifiedLosslessImagePath::Rgba8(String::from(
-                        "../test_data/image/image/not_found.png",
-                    ))),
+                    image: Some(UnverifiedInputLosslessImagePath::Rgba8(
+                        test_util::path::relative_input_file("image/image/not_found.png"),
+                    )),
                     ..Default::default()
                 },
             );
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,
+                ),
                 "does not exist", // Note: do not put a platform-dependent path string here
             );
         }
@@ -147,17 +171,23 @@ mod create_displacement_goal_input_config {
         fn dimensions_mismatch() {
             let unverified_config = UnverifiedCreateDisplacementGoalInputConfig::Input(
                 UnverifiedCreateDisplacementGoalInputDataConfig {
-                    displacement_goal: Some(String::from(
-                        "../test_data/image/displacement_goal/identity_larger_displacement_goal.png",
+                    displacement_goal: Some(UnverifiedInputDisplacementGoalPath(
+                        test_util::path::relative_input_file(
+                            "image/displacement_goal/identity_larger_displacement_goal.png",
+                        ),
                     )),
-                    candidate_permutation: Some(String::from(
-                        "../test_data/image/permutation/identity_permutation.png",
+                    candidate_permutation: Some(UnverifiedInputPermutationPath(
+                        test_util::path::relative_input_file(
+                            "image/permutation/identity_permutation.png",
+                        ),
                     )),
                     ..Default::default()
                 },
             );
             test_util::assert_error_contains(
-                CreateDisplacementGoalInputConfig::from_config(unverified_config),
+                CreateDisplacementGoalInputConfig::try_from_unverified_with_path_context(
+                    unverified_config,
+                    test_util::path::base_input().0,),
             "mismatch in image dimensions, (width, height) = (21, 25) and (width, height) = (20, 25)",
         );
         }

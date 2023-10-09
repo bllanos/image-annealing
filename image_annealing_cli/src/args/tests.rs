@@ -9,9 +9,11 @@ mod options {
 
 mod parse_args {
     use super::super::parse_args;
-    use crate::config::{AlgorithmConfig, Config, ImagePath, PermutationPath};
+    use crate::config::{AlgorithmConfig, Config, OutputPermutationPath};
     use bpaf::ParseFailure;
     use image_annealing::{compute, ImageDimensions};
+    use image_annealing_cli_util::path::OutputFilePath;
+    use std::borrow::Cow;
 
     #[test]
     #[should_panic(expected = "no arguments (not even the program name)")]
@@ -32,21 +34,17 @@ mod parse_args {
 
     #[test]
     fn valid_config_file() -> Result<(), ParseFailure> {
-        let path = test_util::make_test_data_path_string([
-            "config",
-            "operation",
-            "create_permutation",
-            "valid.json",
-        ]);
-        let v = vec![String::from("one"), String::from("-c"), path];
+        let path =
+            test_util::path::absolute_input_file("config/operation/create_permutation/valid.json");
+        let v = vec![String::from("one"), String::from("-c"), path.to_string()];
         let r = parse_args(v)?;
         assert_eq!(
             r,
             Config {
                 algorithm: AlgorithmConfig::CreatePermutation {
-                    permutation_output_path_no_extension: PermutationPath::from_raw_clone(
-                        "permutation_out"
-                    ),
+                    permutation_output_path_no_extension: OutputPermutationPath(OutputFilePath(
+                        Cow::Owned(path.0.parent().unwrap().join("permutation_out"))
+                    ))
                 },
                 dispatcher: compute::Config {
                     image_dimensions: ImageDimensions::try_new(20, 25).unwrap()
@@ -58,16 +56,12 @@ mod parse_args {
 
     #[test]
     fn additional_args() {
-        let path = test_util::make_test_data_path_string([
-            "config",
-            "operation",
-            "create_permutation",
-            "valid.json",
-        ]);
+        let path =
+            test_util::path::absolute_input_file("config/operation/create_permutation/valid.json");
         let v = vec![
             String::from("one"),
             String::from("-c"),
-            path,
+            path.to_string(),
             String::from("other_arg"),
         ];
         let message = parse_args(v).unwrap_err().unwrap_stderr();

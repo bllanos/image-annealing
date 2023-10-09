@@ -62,8 +62,14 @@ mod try_new {
 fn from_image() -> Result<(), Box<dyn Error>> {
     let image = RgbaImage::new(4, 5);
     let dim = ImageDimensions::from_image(&image)?;
-    assert_eq!(dim.width(), image.width().try_into().unwrap());
-    assert_eq!(dim.height(), image.height().try_into().unwrap());
+    assert_eq!(
+        dim.width(),
+        <u32 as TryInto<usize>>::try_into(image.width()).unwrap()
+    );
+    assert_eq!(
+        dim.height(),
+        <u32 as TryInto<usize>>::try_into(image.height()).unwrap()
+    );
     Ok(())
 }
 
@@ -73,7 +79,7 @@ mod from_image_path {
 
     #[test]
     fn from_image_path() -> Result<(), Box<dyn Error>> {
-        let path = test_util::make_test_data_path(["image", "image", "stripes.png"]);
+        let path = test_util::path::absolute_input_file("image/image/stripes.png").0;
         let dim = ImageDimensions::from_image_path(path)?;
         assert_eq!(dim.width(), 20);
         assert_eq!(dim.height(), 25);
@@ -82,7 +88,7 @@ mod from_image_path {
 
     #[test]
     fn missing_image() {
-        let path = test_util::make_test_data_path(["image", "image", "not_found.png"]);
+        let path = test_util::path::unverified_absolute_input_path("image/image/not_found.png");
         test_util::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "No such file or directory",
@@ -91,7 +97,7 @@ mod from_image_path {
 
     #[test]
     fn non_image() {
-        let path = test_util::make_test_data_path(["empty.txt"]);
+        let path = test_util::path::absolute_input_file("empty.txt").0;
         test_util::assert_error_contains(
             ImageDimensions::from_image_path(path),
             "The file extension `.\"txt\"` was not recognized as an image format",

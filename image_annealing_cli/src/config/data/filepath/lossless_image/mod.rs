@@ -8,7 +8,7 @@ use serde::Deserialize;
 use std::error::Error;
 use std::path::Path;
 
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub enum UnverifiedInputLosslessImagePath<'a> {
     Rgba8(UnverifiedInputFilePath<'a>),
     Rgba8x2(UnverifiedInputFilePath<'a>, UnverifiedInputFilePath<'a>),
@@ -48,7 +48,7 @@ impl<'a> UnverifiedInputLosslessImagePath<'a> {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub enum UnverifiedOutputLosslessImagePath<'a> {
     Rgba8(UnverifiedOutputFilePath<'a>),
     Rgba8x2(UnverifiedOutputFilePath<'a>, UnverifiedOutputFilePath<'a>),
@@ -123,7 +123,7 @@ fn check_dimensions_match4<'a>(
     check_dimensions_match2(image_path1, image_path4)
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputLosslessImagePath<'a> {
     Rgba8(InputFilePath<'a>),
     Rgba8x2(InputFilePath<'a>, InputFilePath<'a>),
@@ -268,7 +268,7 @@ impl<'a> InputLosslessImagePath<'static> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum OutputLosslessImagePath<'a> {
     Rgba8(OutputFilePath<'a>),
     Rgba8x2(OutputFilePath<'a>, OutputFilePath<'a>),

@@ -50,7 +50,7 @@ pub struct TaggedPermutationWriter {
 impl TaggedPermutationWriter {
     const CHANNEL_CAPACITY: usize = 1;
 
-    pub fn new<'a>(path_prefix: &OutputPermutationPath<'a>) -> Self {
+    pub fn new(path_prefix: &OutputPermutationPath) -> Self {
         let path_prefix_static = OutputPermutationPath::to_owned(path_prefix);
         let (permutation_sender, permutation_receiver) = mpsc::sync_channel(Self::CHANNEL_CAPACITY);
         let (path_sender, path_receiver) = channel::shared::generic_channel(Self::CHANNEL_CAPACITY);

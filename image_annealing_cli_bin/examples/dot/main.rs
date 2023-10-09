@@ -60,21 +60,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Generating data using image dimensions {}", dimensions);
 
     let mut image_path_no_extension = PathBuf::new();
-    image_path_no_extension
-        .extend(["examples_output", "image_annealing_cli_bin_dot", "image"].into_iter());
+    image_path_no_extension.extend(["examples_output", "image_annealing_cli_bin_dot", "image"]);
     let image_path =
         synthesis::white_dot(&dimensions).save_add_extension(image_path_no_extension)?;
     println!("Saved input image to {}", image_path.display());
 
     let mut displacement_goal_path_no_extension = PathBuf::new();
-    displacement_goal_path_no_extension.extend(
-        [
-            "examples_output",
-            "image_annealing_cli_bin_dot",
-            "displacement_goal",
-        ]
-        .into_iter(),
-    );
+    displacement_goal_path_no_extension.extend([
+        "examples_output",
+        "image_annealing_cli_bin_dot",
+        "displacement_goal",
+    ]);
     let displacement_goal_path =
         synthesis::dot_goal(&dimensions).save_add_extension(displacement_goal_path_no_extension)?;
     println!(

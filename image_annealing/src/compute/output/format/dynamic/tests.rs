@@ -128,34 +128,39 @@ mod lossless_image {
     }
 
     mod io {
-        use std::path::PathBuf;
+        use std::borrow::Cow;
+        use std::path::{Path, PathBuf};
 
         fn assert_not_files(paths: &[PathBuf]) {
             assert!(paths.iter().all(|path| !path.is_file()));
         }
 
-        fn existing_rgba8_path() -> PathBuf {
-            test_util::make_test_data_path(["image", "image", "stripes.png"])
+        fn existing_rgba8_path() -> Cow<'static, Path> {
+            test_util::path::absolute_input_file("image/image/stripes.png").0
         }
 
-        fn existing_rgba16_path() -> PathBuf {
-            test_util::make_test_data_path(["image", "image", "red.png"])
+        fn existing_rgba16_path() -> Cow<'static, Path> {
+            test_util::path::absolute_input_file("image/image/red.png").0
         }
 
-        fn large_rgba8_path() -> PathBuf {
-            test_util::make_test_data_path(["image", "image", "stripes_large.png"])
+        fn large_rgba8_path() -> Cow<'static, Path> {
+            test_util::path::absolute_input_file("image/image/stripes_large.png").0
         }
 
-        fn large_rgba16_path() -> PathBuf {
-            test_util::make_test_data_path(["image", "image", "red_large.png"])
+        fn large_rgba16_path() -> Cow<'static, Path> {
+            test_util::path::absolute_input_file("image/image/red_large.png").0
         }
 
-        fn missing_image_path() -> PathBuf {
-            test_util::make_test_data_path(["image", "image", "not_found.png"])
+        fn missing_image_path() -> Cow<'static, Path> {
+            Cow::Owned(test_util::path::unverified_absolute_input_path(
+                "image/image/not_found.png",
+            ))
         }
 
-        fn missing_directory_path() -> PathBuf {
-            test_util::make_test_output_path(["not_found", "cannot_create"])
+        fn missing_directory_path() -> Cow<'static, Path> {
+            Cow::Owned(test_util::path::unverified_absolute_output_path(
+                "not_found/cannot_create",
+            ))
         }
 
         fn mismatch_error_message() -> &'static str {
@@ -197,9 +202,7 @@ mod lossless_image {
                     _ => unreachable!("Unexpected image format"),
                 }
 
-                let path = test_util::make_test_output_path_string([
-                    "compute_output_format_dynamic_io_rgba8",
-                ]);
+                let path = test_util::unique_absolute_output_file!().0;
                 let expected_output_path = VectorFieldImageBuffer::make_filename(&path);
                 assert!(!expected_output_path.is_file());
 
@@ -240,12 +243,8 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x2_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x2_2",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     VectorFieldImageBuffer::make_filename(&paths[0]),
@@ -305,15 +304,9 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x3_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x3_2",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x3_3",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     VectorFieldImageBuffer::make_filename(&paths[0]),
@@ -383,18 +376,10 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x4_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x4_2",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x4_3",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba8x4_4",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     VectorFieldImageBuffer::make_filename(&paths[0]),
@@ -445,9 +430,7 @@ mod lossless_image {
                     _ => unreachable!("Unexpected image format"),
                 }
 
-                let path = test_util::make_test_output_path_string([
-                    "compute_output_format_dynamic_io_rgba16",
-                ]);
+                let path = test_util::unique_absolute_output_file!().0;
                 let expected_output_path = Rgba16ImageBuffer::make_filename(&path);
                 assert!(!expected_output_path.is_file());
 
@@ -488,12 +471,8 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16x2_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16x2_2",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     Rgba16ImageBuffer::make_filename(&paths[0]),
@@ -547,12 +526,8 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16_rgba8_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16_rgba8_2",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     Rgba16ImageBuffer::make_filename(&paths[0]),
@@ -613,15 +588,9 @@ mod lossless_image {
                 }
 
                 let paths = [
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16_rgba8x2_1",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16_rgba8x2_2",
-                    ]),
-                    test_util::make_test_output_path_string([
-                        "compute_output_format_dynamic_io_rgba16_rgba8x2_3",
-                    ]),
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
                 ];
                 let expected_output_paths = [
                     Rgba16ImageBuffer::make_filename(&paths[0]),
@@ -1065,6 +1034,10 @@ mod lossless_image {
         }
 
         mod first_image_save_error {
+            use super::super::super::super::super::{
+                ImageFileWriter, Rgba16ImageBuffer, VectorFieldImageBuffer,
+            };
+
             #[test]
             fn rgba8() {
                 test_util::assert_error_contains(
@@ -1076,71 +1049,55 @@ mod lossless_image {
 
             #[test]
             fn rgba8x2() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                    super::super::valid_rgba8x2().save_add_extension(&[
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2",
-                        ]),
-                    ]),
+                    super::super::valid_rgba8x2()
+                        .save_add_extension(&[&super::missing_directory_path(), &valid_path]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_first_image_save_error_rgba8x2_2.png",
-                ])]);
+                super::assert_not_files(&[VectorFieldImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba8x3() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_2",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_3",
-                        ]),
+                        &super::missing_directory_path(),
+                        &valid_paths[0],
+                        &valid_paths[1],
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_2.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x3_3.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
                 ]);
             }
 
             #[test]
             fn rgba8x4() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_2",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_3",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_4",
-                        ]),
+                        &super::missing_directory_path(),
+                        &valid_paths[0],
+                        &valid_paths[1],
+                        &valid_paths[2],
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_2.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_3.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba8x4_4.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[2]),
                 ]);
             }
 
@@ -1155,297 +1112,241 @@ mod lossless_image {
 
             #[test]
             fn rgba16x2() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                    super::super::valid_rgba16x2().save_add_extension(&[
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_first_image_save_error_rgba16x2_2",
-                        ]),
-                    ]),
+                    super::super::valid_rgba16x2()
+                        .save_add_extension(&[&super::missing_directory_path(), &valid_path]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_first_image_save_error_rgba16x2_2.png",
-                ])]);
+                super::assert_not_files(&[Rgba16ImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba16_rgba8() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                super::super::valid_rgba16_rgba8().save_add_extension(&[
-                    super::missing_directory_path(),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2",
-                    ]),
-                ]),
-                super::missing_error_message(),
-            );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8_2.png",
-                ])]);
+                    super::super::valid_rgba16_rgba8()
+                        .save_add_extension(&[&super::missing_directory_path(), &valid_path]),
+                    super::missing_error_message(),
+                );
+                super::assert_not_files(&[Rgba16ImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba16_rgba8x2() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
-                super::super::valid_rgba16_rgba8x2().save_add_extension(&[
-                    super::missing_directory_path(),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2",
+                    super::super::valid_rgba16_rgba8x2().save_add_extension(&[
+                        &super::missing_directory_path(),
+                        &valid_paths[0],
+                        &valid_paths[1],
                     ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3",
-                    ]),
-                ]),
-                super::missing_error_message(),
-            );
+                    super::missing_error_message(),
+                );
                 super::assert_not_files(&[
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_2.png",
-                ]),
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_first_image_save_error_rgba16_rgba8x2_3.png",
-                ]),
-            ]);
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                ]);
             }
         }
 
         mod second_image_save_error {
+            use super::super::super::super::super::{
+                ImageFileWriter, Rgba16ImageBuffer, VectorFieldImageBuffer,
+            };
+
             #[test]
             fn rgba8x2() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                    super::super::valid_rgba8x2().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x2_1",
-                        ]),
-                        super::missing_directory_path(),
-                    ]),
+                    super::super::valid_rgba8x2()
+                        .save_add_extension(&[&valid_path, &super::missing_directory_path()]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_second_image_save_error_rgba8x2_1.png",
-                ])]);
+                super::assert_not_files(&[VectorFieldImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba8x3() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_1",
-                        ]),
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_3",
-                        ]),
+                        &valid_paths[0],
+                        &super::missing_directory_path(),
+                        &valid_paths[1],
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_1.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba8x3_3.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
                 ]);
             }
 
             #[test]
             fn rgba8x4() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_1",
-                        ]),
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_3",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_4",
-                        ]),
+                        &valid_paths[0],
+                        &super::missing_directory_path(),
+                        &valid_paths[1],
+                        &valid_paths[2],
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_1.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_3.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba8x4_4.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[2]),
                 ]);
             }
 
             #[test]
             fn rgba16x2() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                    super::super::valid_rgba16x2().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_second_image_save_error_rgba16x2_1",
-                        ]),
-                        super::missing_directory_path(),
-                    ]),
+                    super::super::valid_rgba16x2()
+                        .save_add_extension(&[&valid_path, &super::missing_directory_path()]),
                     super::missing_error_message(),
                 );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_second_image_save_error_rgba16x2_1.png",
-                ])]);
+                super::assert_not_files(&[Rgba16ImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba16_rgba8() {
+                let valid_path = test_util::unique_absolute_output_file!().0;
                 test_util::assert_error_contains(
-                super::super::valid_rgba16_rgba8().save_add_extension(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1",
-                    ]),
-                    super::missing_directory_path(),
-                ]),
-                super::missing_error_message(),
-            );
-                super::assert_not_files(&[test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8_1.png",
-                ])]);
+                    super::super::valid_rgba16_rgba8()
+                        .save_add_extension(&[&valid_path, &super::missing_directory_path()]),
+                    super::missing_error_message(),
+                );
+                super::assert_not_files(&[VectorFieldImageBuffer::make_filename(&valid_path)]);
             }
 
             #[test]
             fn rgba16_rgba8x2() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
-                super::super::valid_rgba16_rgba8x2().save_add_extension(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1",
+                    super::super::valid_rgba16_rgba8x2().save_add_extension(&[
+                        &valid_paths[0],
+                        &super::missing_directory_path(),
+                        &valid_paths[1],
                     ]),
-                    super::missing_directory_path(),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3",
-                    ]),
-                ]),
-                super::missing_error_message(),
-            );
+                    super::missing_error_message(),
+                );
                 super::assert_not_files(&[
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_1.png",
-                ]),
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_second_image_save_error_rgba16_rgba8x2_3.png",
-                ]),
-            ]);
+                    Rgba16ImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                ]);
             }
         }
 
         mod third_image_save_error {
+            use super::super::super::super::super::{
+                ImageFileWriter, Rgba16ImageBuffer, VectorFieldImageBuffer,
+            };
+
             #[test]
             fn rgba8x3() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x3().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_1",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_2",
-                        ]),
-                        super::missing_directory_path(),
+                        &valid_paths[0],
+                        &valid_paths[1],
+                        &super::missing_directory_path(),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_1.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba8x3_2.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
                 ]);
             }
 
             #[test]
             fn rgba8x4() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
                     super::super::valid_rgba8x4().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_1",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_2",
-                        ]),
-                        super::missing_directory_path(),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_4",
-                        ]),
+                        &valid_paths[0],
+                        &valid_paths[1],
+                        &super::missing_directory_path(),
+                        &valid_paths[2],
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_1.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_2.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba8x4_4.png",
-                    ]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[2]),
                 ]);
             }
 
             #[test]
             fn rgba16_rgba8x2() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
                 test_util::assert_error_contains(
-                super::super::valid_rgba16_rgba8x2().save_add_extension(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2",
-                    ]),
-                    super::missing_directory_path(),
-                ]),
-                super::missing_error_message(),
-            );
-                super::assert_not_files(&[
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_1.png",
-                ]),
-                test_util::make_test_output_path([
-                    "compute_output_format_dynamic_io_third_image_save_error_rgba16_rgba8x2_2.png",
-                ]),
-            ]);
-            }
-        }
-
-        mod fourth_image_save_error {
-            #[test]
-            fn rgba8x4() {
-                test_util::assert_error_contains(
-                    super::super::valid_rgba8x4().save_add_extension(&[
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_1",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_2",
-                        ]),
-                        test_util::make_test_output_path([
-                            "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_3",
-                        ]),
-                        super::missing_directory_path(),
+                    super::super::valid_rgba16_rgba8x2().save_add_extension(&[
+                        &valid_paths[0],
+                        &valid_paths[1],
+                        &super::missing_directory_path(),
                     ]),
                     super::missing_error_message(),
                 );
                 super::assert_not_files(&[
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_1.png",
+                    Rgba16ImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                ]);
+            }
+        }
+
+        mod fourth_image_save_error {
+            use super::super::super::super::super::{ImageFileWriter, VectorFieldImageBuffer};
+
+            #[test]
+            fn rgba8x4() {
+                let valid_paths = [
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                    test_util::unique_absolute_output_file!().0,
+                ];
+                test_util::assert_error_contains(
+                    super::super::valid_rgba8x4().save_add_extension(&[
+                        &valid_paths[0],
+                        &valid_paths[1],
+                        &valid_paths[2],
+                        &super::missing_directory_path(),
                     ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_2.png",
-                    ]),
-                    test_util::make_test_output_path([
-                        "compute_output_format_dynamic_io_fourth_image_save_error_rgba8x4_3.png",
-                    ]),
+                    super::missing_error_message(),
+                );
+                super::assert_not_files(&[
+                    VectorFieldImageBuffer::make_filename(&valid_paths[0]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[1]),
+                    VectorFieldImageBuffer::make_filename(&valid_paths[2]),
                 ]);
             }
         }

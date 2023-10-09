@@ -12,8 +12,8 @@ pub struct CreateDisplacementGoalShaderConfig<'a> {
 impl CreateDisplacementGoalShaderConfig<'_> {
     // Ideally, this would be a method, but it may not be possible to return a `Self` type parameterized with a lifetime.
     // (See https://stackoverflow.com/questions/57701914/trait-method-which-returns-self-type-with-a-different-type-and-or-lifetime-par)
-    pub fn to_owned<'a>(
-        instance: &CreateDisplacementGoalShaderConfig<'a>,
+    pub fn to_owned(
+        instance: &CreateDisplacementGoalShaderConfig,
     ) -> CreateDisplacementGoalShaderConfig<'static> {
         CreateDisplacementGoalShaderConfig {
             content: CreateDisplacementGoalShaderContent::to_owned(&instance.content),

@@ -1,5 +1,5 @@
 {
   "CreateDisplacementGoal": {
-    "body": "../test_data/shader/create_displacement_goal/not_found.wgsl"
+    "body": "../../../shader/create_displacement_goal/not_found.wgsl"
   }
 }
