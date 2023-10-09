@@ -10,7 +10,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_path =
                 UnverifiedOutputDisplacementGoalPath(test_util::unique_relative_output_file!());
             let image_dimensions = ImageDimensions::try_new(20, 25)?;
@@ -40,7 +40,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_dimensions() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::CreateDisplacementGoal {
                 input: UnverifiedCreateDisplacementGoalInputConfig::ImageDimensions(
                     UnverifiedImageDimensionsConfig {
@@ -68,7 +68,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_path =
                 UnverifiedOutputPermutationPath(test_util::unique_relative_output_file!());
             let unverified_config = UnverifiedConfig::CreatePermutation {
@@ -96,7 +96,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_dimensions() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::CreatePermutation {
                 image_dimensions: UnverifiedImageDimensionsConfig {
                     width: 0,
@@ -123,7 +123,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_candidate_permutation_path = UnverifiedInputPermutationPath(
                 test_util::path::relative_input_file("image/permutation/identity_permutation.png"),
             );
@@ -165,7 +165,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_permutation() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Permute {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file("image/permutation/not_found.png"),
@@ -186,7 +186,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_image() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Permute {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file(
@@ -209,7 +209,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_dimensions() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Permute {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file(
@@ -271,7 +271,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_candidate_permutation_path = UnverifiedInputPermutationPath(
                 test_util::path::relative_input_file("image/permutation/identity_permutation.png"),
             );
@@ -317,7 +317,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_permutation() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Swap {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file("image/permutation/not_found.png"),
@@ -341,7 +341,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_displacement_goal() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Swap {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file(
@@ -366,7 +366,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_dimensions() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Swap {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file(
@@ -393,7 +393,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_swap_parameters() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::Swap {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file(
@@ -432,7 +432,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_candidate_permutation_path = UnverifiedInputPermutationPath(
                 test_util::path::relative_input_file("image/permutation/identity_permutation.png"),
             );
@@ -459,7 +459,7 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn invalid_permutation() {
-            let base_path = test_util::path::base_output().0;
+            let base_path = test_util::path::base_input().0;
             let unverified_config = UnverifiedConfig::ValidatePermutation {
                 candidate_permutation: UnverifiedInputPermutationPath(
                     test_util::path::relative_input_file("image/permutation/not_found.png"),

@@ -104,7 +104,7 @@ mod relative_path_buf {
                     full_path.clone(),
                     base_path.join("config"),
                 ),
-                "TODO unknown error message",
+                "prefix not found",
             );
         }
 
@@ -114,7 +114,7 @@ mod relative_path_buf {
             let absolute_path = std::env::current_dir()?;
             test_util::assert_error_contains(
                 RelativePathBuf::try_from_with_path_context(absolute_path, base_path),
-                "TODO unknown error message",
+                "path contains non-relative component",
             );
             Ok(())
         }

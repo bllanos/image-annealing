@@ -23,7 +23,7 @@ mod parse_config_file {
         let path = test_util::path::absolute_input_file("config/empty.json");
         test_util::assert_error_contains(
             parse_config_file(path.0),
-            "configuration file deserialization error",
+            "error parsing the contents of",
         );
     }
 

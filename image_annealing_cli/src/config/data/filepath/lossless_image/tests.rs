@@ -657,7 +657,7 @@ mod input_lossless_image_path {
                         InputLosslessImagePath::Rgba16x2(
                             super::super::super::existing_rgba16_path1()
                                 .try_into_with_path_context(test_util::path::base_input().0)?,
-                            super::super::super::existing_rgba16_path1()
+                            super::super::super::existing_rgba16_path2()
                                 .try_into_with_path_context(test_util::path::base_input().0)?
                         ),
                         super::valid_image_dimensions()
@@ -1911,7 +1911,7 @@ mod output_lossless_image_path {
         }
 
         fn missing_error_message() -> &'static str {
-            "No such file or directory"
+            "output file path error, parent path of directory path"
         }
 
         mod first_path_directory_missing {
