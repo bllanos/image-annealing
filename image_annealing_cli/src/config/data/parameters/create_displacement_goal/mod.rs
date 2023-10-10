@@ -13,11 +13,11 @@ use std::path::Path;
 #[derive(Clone, Deserialize)]
 pub struct UnverifiedCreateDisplacementGoalShaderConfig<'a> {
     pub content: UnverifiedCreateDisplacementGoalConfig<'a>,
-    pub entry_point: String,
+    pub entry_point: Cow<'a, str>,
 }
 
 impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoalShaderConfig<'a>, P>
-    for CreateDisplacementGoalShaderConfig<'static>
+    for CreateDisplacementGoalShaderConfig<'a>
 {
     type Error = Box<dyn Error>;
 
@@ -27,7 +27,7 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoal
     ) -> Result<Self, Self::Error> {
         Ok(Self {
             content: value.content.try_into_with_path_context(base_path)?,
-            entry_point: Cow::Owned(value.entry_point),
+            entry_point: value.entry_point,
         })
     }
 }
@@ -36,7 +36,7 @@ impl<'a, P: AsRef<Path>>
     TryFromWithPathContext<
         UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>,
         P,
-    > for PipelineConfig<CreateDisplacementGoalShaderConfig<'static>>
+    > for PipelineConfig<CreateDisplacementGoalShaderConfig<'a>>
 {
     type Error = Box<dyn Error>;
 
@@ -56,7 +56,7 @@ pub type UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a> =
 
 impl<'a, P: AsRef<Path>>
     TryFromWithPathContext<UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>, P>
-    for CreateDisplacementGoalPipelineOperation<'static>
+    for CreateDisplacementGoalPipelineOperation<'a>
 {
     type Error = Box<dyn Error>;
 
@@ -80,7 +80,7 @@ pub struct UnverifiedCreateDisplacementGoalParametersConfig<'a> {
 
 impl<'a, P: AsRef<Path>>
     TryFromWithPathContext<UnverifiedCreateDisplacementGoalParametersConfig<'a>, P>
-    for CreateDisplacementGoalParameters<'static>
+    for CreateDisplacementGoalParameters<'a>
 {
     type Error = Box<dyn Error>;
 
