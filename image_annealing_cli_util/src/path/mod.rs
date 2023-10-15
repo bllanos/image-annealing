@@ -1,12 +1,16 @@
-use relative_path::{RelativePath, RelativePathBuf};
-use std::borrow::Cow;
 use std::error::Error;
-use std::ffi::OsStr;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
+mod conversion;
 mod input;
 mod output;
+
+pub use conversion::{
+    make_base_path, make_base_path_using_current_directory,
+    make_base_path_using_environment_variable, FromWithPathContext, IntoWithPathContext,
+    TryFromWithPathContext, TryIntoWithPathContext,
+};
 
 pub use input::{
     check_input_file_path, InputDirectoryPath, InputFileError, InputFilePath,
@@ -137,89 +141,6 @@ pub fn check_input_directory_path<P: AsRef<Path>>(
             directory.to_path_buf(),
         )))
     }
-}
-
-pub trait FromWithPathContext<T: ?Sized, P: AsRef<Path>>: Sized {
-    fn from_with_path_context(value: T, base_path: P) -> Self;
-}
-
-pub trait IntoWithPathContext<T, P: AsRef<Path>>: Sized {
-    fn into_with_path_context(self, base_path: P) -> T;
-}
-
-impl<T, U, P> IntoWithPathContext<U, P> for T
-where
-    P: AsRef<Path>,
-    U: FromWithPathContext<T, P>,
-{
-    fn into_with_path_context(self, base_path: P) -> U {
-        <U as FromWithPathContext<T, P>>::from_with_path_context(self, base_path)
-    }
-}
-
-pub trait TryFromWithPathContext<T: ?Sized, P: AsRef<Path>>: Sized {
-    type Error;
-
-    fn try_from_with_path_context(value: T, base_path: P) -> Result<Self, Self::Error>;
-}
-
-pub trait TryIntoWithPathContext<T, P: AsRef<Path>>: Sized {
-    type Error;
-
-    fn try_into_with_path_context(self, base_path: P) -> Result<T, Self::Error>;
-}
-
-impl<T, U, P> TryIntoWithPathContext<U, P> for T
-where
-    P: AsRef<Path>,
-    U: TryFromWithPathContext<T, P>,
-{
-    type Error = <U as TryFromWithPathContext<T, P>>::Error;
-
-    fn try_into_with_path_context(self, base_path: P) -> Result<U, Self::Error> {
-        <U as TryFromWithPathContext<T, P>>::try_from_with_path_context(self, base_path)
-    }
-}
-
-impl<P: AsRef<Path>> FromWithPathContext<&RelativePath, P> for PathBuf {
-    fn from_with_path_context(value: &RelativePath, base_path: P) -> Self {
-        value.to_path(base_path)
-    }
-}
-
-impl<T: AsRef<Path>, P: AsRef<Path>> TryFromWithPathContext<T, P> for RelativePathBuf {
-    type Error = Box<dyn Error>;
-
-    fn try_from_with_path_context(value: T, base_path: P) -> Result<Self, Self::Error> {
-        Ok(Self::from_path(value.as_ref().strip_prefix(base_path)?)?)
-    }
-}
-
-pub fn make_base_path<P: AsRef<Path>, E, O>(
-    candidate_path: &Path,
-    make_context_path: O,
-) -> Result<Cow<Path>, E>
-where
-    O: FnOnce() -> Result<P, E>,
-{
-    Ok(if candidate_path.is_absolute() {
-        Cow::Borrowed(candidate_path)
-    } else {
-        Cow::Owned(make_context_path()?.as_ref().join(candidate_path))
-    })
-}
-
-pub fn make_base_path_using_current_directory(
-    candidate_path: &Path,
-) -> Result<Cow<Path>, std::io::Error> {
-    make_base_path(candidate_path, std::env::current_dir)
-}
-
-pub fn make_base_path_using_environment_variable<T: AsRef<OsStr>>(
-    candidate_path: &Path,
-    environment_variable_key: T,
-) -> Result<Cow<Path>, std::env::VarError> {
-    make_base_path(candidate_path, || std::env::var(environment_variable_key))
 }
 
 #[cfg(test)]
