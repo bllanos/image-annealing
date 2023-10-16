@@ -32,6 +32,16 @@ mod make_base_path {
         );
         Ok(())
     }
+
+    #[test]
+    fn error_in_make_context_path() {
+        test_util::assert_error_contains(
+            super::super::make_base_path(Path::new("test.txt"), || {
+                Err::<Cow<Path>, &'static str>("error message")
+            }),
+            "error message",
+        );
+    }
 }
 
 mod make_base_path_using_current_directory {
@@ -50,5 +60,41 @@ mod make_base_path_using_current_directory {
             Cow::<Path>::Owned(full_path)
         );
         Ok(())
+    }
+}
+
+mod make_base_path_using_environment_variable {
+    use crate::env::EnvironmentVariableNotFoundError;
+    use relative_path::RelativePath;
+    use std::borrow::Cow;
+    use std::env;
+    use std::error::Error;
+    use std::path::Path;
+
+    #[test]
+    fn exists() -> Result<(), Box<dyn Error>> {
+        let key = format!("{}.{}.{}", module_path!(), line!(), column!());
+        let value = "environment_variable_value";
+        env::set_var(&key, value);
+        let relative_path = RelativePath::new("image/image/stripes.png");
+        let full_path = relative_path.to_path(value);
+        assert_eq!(
+            super::super::make_base_path_using_environment_variable(
+                &relative_path.to_path(""),
+                &key
+            )?,
+            Cow::<Path>::Owned(full_path)
+        );
+        env::remove_var(&key);
+        Ok(())
+    }
+
+    #[test]
+    fn not_found() {
+        let key = format!("{}.{}.{}", module_path!(), line!(), column!());
+        assert_eq!(
+            super::super::make_base_path_using_environment_variable(Path::new("test.txt"), &key),
+            Err(EnvironmentVariableNotFoundError::new(&key)),
+        );
     }
 }

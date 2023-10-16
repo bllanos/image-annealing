@@ -17,12 +17,8 @@ fn make_base_path(suffix: &str) -> Cow<'static, Path> {
             Path::new(""),
             TEST_UTIL_ROOT_PATH,
         ) {
-            Ok(base_path) => {
-                let mut path = base_path.into_owned();
-                path.push(suffix);
-                path
-            }
-            Err(std::env::VarError::NotPresent) => {
+            Ok(base_path) => base_path.join(suffix),
+            Err(_) => {
                 let mut path = PathBuf::new();
                 path.push("..");
                 path.push(suffix);
@@ -31,23 +27,15 @@ fn make_base_path(suffix: &str) -> Cow<'static, Path> {
                     CARGO_MANIFEST_DIR,
                 ) {
                     Ok(base_path) => base_path.into_owned(),
-                    Err(std::env::VarError::NotPresent) => {
+                    Err(_) => {
                         image_annealing_cli_util::path::make_base_path_using_current_directory(
                             &path,
                         )
                         .unwrap()
                         .into_owned()
                     }
-                    Err(e) => panic!(
-                        "error accessing the {} environment variable, {}",
-                        CARGO_MANIFEST_DIR, e
-                    ),
                 }
             }
-            Err(e) => panic!(
-                "error accessing the {} environment variable, {}",
-                TEST_UTIL_ROOT_PATH, e
-            ),
         },
     )
 }
