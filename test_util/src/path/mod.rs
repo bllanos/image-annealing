@@ -111,37 +111,34 @@ pub fn filepath_to_filename(path: &str) -> String {
 }
 
 #[macro_export]
-macro_rules! unique_relative_output_file {
+macro_rules! unique_filename_string {
     () => {{
-        test_util::path::relative_output_file(&format!(
+        format!(
             "{}-line{}-column{}",
-            test_util::path::filepath_to_filename(file!()),
+            $crate::path::filepath_to_filename(file!()),
             line!(),
             column!()
-        ))
+        )
+    }};
+}
+
+#[macro_export]
+macro_rules! unique_relative_output_file {
+    () => {{
+        $crate::path::relative_output_file(&$crate::unique_filename_string!())
     }};
 }
 
 #[macro_export]
 macro_rules! unique_absolute_output_file {
     () => {{
-        test_util::path::absolute_output_file(&format!(
-            "{}-line{}-column{}",
-            test_util::path::filepath_to_filename(file!()),
-            line!(),
-            column!()
-        ))
+        $crate::path::absolute_output_file(&$crate::unique_filename_string!())
     }};
 }
 
 #[macro_export]
 macro_rules! unique_absolute_output_directory {
     () => {{
-        test_util::path::absolute_output_directory(&format!(
-            "{}-line{}-column{}",
-            test_util::path::filepath_to_filename(file!()),
-            line!(),
-            column!()
-        ))
+        $crate::path::absolute_output_directory(&$crate::unique_filename_string!())
     }};
 }
