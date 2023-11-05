@@ -64,7 +64,7 @@ mod make_base_path_using_current_directory {
 }
 
 mod make_base_path_using_environment_variable {
-    use crate::env::EnvironmentVariableNotFoundError;
+    use crate::env::EnvironmentVariableAccessError;
     use relative_path::RelativePath;
     use std::borrow::Cow;
     use std::env;
@@ -94,7 +94,7 @@ mod make_base_path_using_environment_variable {
         let key = format!("{}.{}.{}", module_path!(), line!(), column!());
         assert_eq!(
             super::super::make_base_path_using_environment_variable(Path::new("test.txt"), &key),
-            Err(EnvironmentVariableNotFoundError::new(&key)),
+            Err(EnvironmentVariableAccessError::new(&key)),
         );
     }
 }

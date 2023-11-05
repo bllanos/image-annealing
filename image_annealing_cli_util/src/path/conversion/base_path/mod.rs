@@ -1,4 +1,4 @@
-use crate::env::EnvironmentVariableNotFoundError;
+use crate::env::{self, EnvironmentVariableAccessError};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -26,11 +26,8 @@ pub fn make_base_path_using_current_directory(
 pub fn make_base_path_using_environment_variable<T: AsRef<OsStr>>(
     candidate_path: &Path,
     environment_variable_key: T,
-) -> Result<Cow<Path>, EnvironmentVariableNotFoundError> {
-    make_base_path(candidate_path, || {
-        std::env::var_os(&environment_variable_key)
-            .ok_or_else(|| EnvironmentVariableNotFoundError::new(&environment_variable_key))
-    })
+) -> Result<Cow<Path>, EnvironmentVariableAccessError> {
+    make_base_path(candidate_path, || env::var_os(environment_variable_key))
 }
 
 #[cfg(test)]
