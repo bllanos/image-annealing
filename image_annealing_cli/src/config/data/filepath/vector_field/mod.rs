@@ -38,13 +38,13 @@ pub struct UnverifiedOutputPermutationPath<'a>(pub UnverifiedOutputFilePath<'a>)
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OutputPermutationPath<'a>(pub OutputFilePath<'a>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputPermutationPath<'a>, P>
+impl TryFromWithPathContext<UnverifiedOutputPermutationPath<'_>>
     for OutputPermutationPath<'static>
 {
     type Error = PathError<OutputFileError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedOutputPermutationPath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedOutputPermutationPath<'_>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(Self(value.0.try_into_with_path_context(base_path)?))
@@ -96,13 +96,13 @@ pub struct UnverifiedOutputDisplacementGoalPath<'a>(pub UnverifiedOutputFilePath
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OutputDisplacementGoalPath<'a>(pub OutputFilePath<'a>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputDisplacementGoalPath<'a>, P>
+impl TryFromWithPathContext<UnverifiedOutputDisplacementGoalPath<'_>>
     for OutputDisplacementGoalPath<'static>
 {
     type Error = PathError<OutputFileError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedOutputDisplacementGoalPath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedOutputDisplacementGoalPath<'_>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(Self(value.0.try_into_with_path_context(base_path)?))

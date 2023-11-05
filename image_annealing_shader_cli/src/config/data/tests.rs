@@ -49,7 +49,7 @@ mod config_try_from_unverified_config {
                 });
 
             let r =
-                <Config as TryFromWithPathContext<UnverifiedConfig, _>>::try_from_with_path_context(
+                <Config as TryFromWithPathContext<UnverifiedConfig>>::try_from_with_path_context(
                     unverified_config,
                     test_util::path::base_input().0,
                 );

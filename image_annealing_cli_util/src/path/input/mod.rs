@@ -66,13 +66,11 @@ pub struct UnverifiedInputFilePath<'a>(pub Cow<'a, RelativePath>);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InputFilePath<'a>(pub Cow<'a, Path>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputFilePath<'a>, P>
-    for InputFilePath<'static>
-{
+impl TryFromWithPathContext<UnverifiedInputFilePath<'_>> for InputFilePath<'static> {
     type Error = PathError<InputFileError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedInputFilePath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedInputFilePath,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
@@ -93,13 +91,11 @@ pub struct UnverifiedInputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InputDirectoryPath<'a>(pub Cow<'a, Path>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedInputDirectoryPath<'a>, P>
-    for InputDirectoryPath<'static>
-{
+impl TryFromWithPathContext<UnverifiedInputDirectoryPath<'_>> for InputDirectoryPath<'static> {
     type Error = PathError<DirectoryError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedInputDirectoryPath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedInputDirectoryPath,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);

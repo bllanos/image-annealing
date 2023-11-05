@@ -16,12 +16,12 @@ pub struct UnverifiedCreateDisplacementGoalShaderConfig<'a> {
     pub entry_point: Cow<'a, str>,
 }
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoalShaderConfig<'a>, P>
+impl<'a> TryFromWithPathContext<UnverifiedCreateDisplacementGoalShaderConfig<'a>>
     for CreateDisplacementGoalShaderConfig<'a>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
+    fn try_from_with_path_context<P: AsRef<Path>>(
         value: UnverifiedCreateDisplacementGoalShaderConfig<'a>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
@@ -32,15 +32,14 @@ impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoal
     }
 }
 
-impl<'a, P: AsRef<Path>>
+impl<'a>
     TryFromWithPathContext<
         UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>,
-        P,
     > for PipelineConfig<CreateDisplacementGoalShaderConfig<'a>>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
+    fn try_from_with_path_context<P: AsRef<Path>>(
         value: UnverifiedPipelineConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
@@ -54,13 +53,12 @@ impl<'a, P: AsRef<Path>>
 pub type UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a> =
     UnverifiedPipelineOperationConfig<UnverifiedCreateDisplacementGoalShaderConfig<'a>>;
 
-impl<'a, P: AsRef<Path>>
-    TryFromWithPathContext<UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>, P>
+impl<'a> TryFromWithPathContext<UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>>
     for CreateDisplacementGoalPipelineOperation<'a>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
+    fn try_from_with_path_context<P: AsRef<Path>>(
         value: UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
@@ -78,13 +76,12 @@ pub struct UnverifiedCreateDisplacementGoalParametersConfig<'a> {
     pub pipeline_operation: UnverifiedCreateDisplacementGoalPipelineOperationConfig<'a>,
 }
 
-impl<'a, P: AsRef<Path>>
-    TryFromWithPathContext<UnverifiedCreateDisplacementGoalParametersConfig<'a>, P>
+impl<'a> TryFromWithPathContext<UnverifiedCreateDisplacementGoalParametersConfig<'a>>
     for CreateDisplacementGoalParameters<'a>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
+    fn try_from_with_path_context<P: AsRef<Path>>(
         value: UnverifiedCreateDisplacementGoalParametersConfig<'a>,
         base_path: P,
     ) -> Result<Self, Self::Error> {

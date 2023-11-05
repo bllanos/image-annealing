@@ -13,13 +13,13 @@ pub struct UnverifiedCreateDisplacementGoalConfig<'a> {
     pub body: UnverifiedInputFilePath<'a>,
 }
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedCreateDisplacementGoalConfig<'a>, P>
+impl TryFromWithPathContext<UnverifiedCreateDisplacementGoalConfig<'_>>
     for CreateDisplacementGoalShaderContent<'static>
 {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedCreateDisplacementGoalConfig<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedCreateDisplacementGoalConfig,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let path = InputFilePath::try_from_with_path_context(value.body, base_path)?;
@@ -39,11 +39,11 @@ pub enum Config<'a> {
     CreateDisplacementGoal(CreateDisplacementGoalShaderContent<'a>),
 }
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedConfig<'a>, P> for Config<'static> {
+impl TryFromWithPathContext<UnverifiedConfig<'_>> for Config<'static> {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedConfig<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedConfig,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(match value {

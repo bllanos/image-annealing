@@ -324,13 +324,13 @@ impl<'a> OutputLosslessImagePath<'a> {
     }
 }
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputLosslessImagePath<'a>, P>
+impl TryFromWithPathContext<UnverifiedOutputLosslessImagePath<'_>>
     for OutputLosslessImagePath<'static>
 {
     type Error = PathError<OutputFileError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedOutputLosslessImagePath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedOutputLosslessImagePath<'_>,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         Ok(match value {

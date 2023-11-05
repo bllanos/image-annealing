@@ -156,13 +156,11 @@ pub struct UnverifiedOutputFilePath<'a>(pub Cow<'a, RelativePath>);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OutputFilePath<'a>(pub Cow<'a, Path>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputFilePath<'a>, P>
-    for OutputFilePath<'static>
-{
+impl TryFromWithPathContext<UnverifiedOutputFilePath<'_>> for OutputFilePath<'static> {
     type Error = PathError<OutputFileError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedOutputFilePath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedOutputFilePath,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);
@@ -183,13 +181,11 @@ pub struct UnverifiedOutputDirectoryPath<'a>(pub Cow<'a, RelativePath>);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OutputDirectoryPath<'a>(pub Cow<'a, Path>);
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedOutputDirectoryPath<'a>, P>
-    for OutputDirectoryPath<'static>
-{
+impl TryFromWithPathContext<UnverifiedOutputDirectoryPath<'_>> for OutputDirectoryPath<'static> {
     type Error = PathError<OutputDirectoryError>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedOutputDirectoryPath<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedOutputDirectoryPath,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let full_path = PathBuf::from_with_path_context(&value.0, base_path);

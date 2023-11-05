@@ -103,11 +103,11 @@ pub struct Config<'a> {
     pub dispatcher: compute::Config,
 }
 
-impl<'a, P: AsRef<Path>> TryFromWithPathContext<UnverifiedConfig<'a>, P> for Config<'static> {
+impl TryFromWithPathContext<UnverifiedConfig<'_>> for Config<'static> {
     type Error = Box<dyn Error>;
 
-    fn try_from_with_path_context(
-        value: UnverifiedConfig<'a>,
+    fn try_from_with_path_context<P: AsRef<Path>>(
+        value: UnverifiedConfig,
         base_path: P,
     ) -> Result<Self, Self::Error> {
         let (algorithm_config, image_dimensions) = match value {
