@@ -3,6 +3,7 @@ mod assemble_shader {
     use crate::args::AssembleShaderOptions;
     use crate::config::{Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig};
     use image_annealing_cli_util::path::TryIntoWithPathContext;
+    use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
     use image_annealing_shader::shader;
     use std::error::Error;
 
@@ -11,8 +12,9 @@ mod assemble_shader {
         let output_file = test_util::unique_absolute_output_file!();
         assert!(!output_file.0.is_file());
 
-        let shader_body_path =
-            test_util::path::relative_input_file("shader/create_displacement_goal/copy_image.wgsl");
+        let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+            "shader/create_displacement_goal/copy_image.wgsl",
+        ));
 
         let config: Config =
             (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
@@ -41,8 +43,9 @@ mod assemble_shader {
     fn missing_output_directory() -> Result<(), Box<dyn Error>> {
         let output_file =
             test_util::path::unverified_absolute_output_path("not_found/cannot_create");
-        let shader_body_path =
-            test_util::path::relative_input_file("shader/create_displacement_goal/copy_image.wgsl");
+        let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+            "shader/create_displacement_goal/copy_image.wgsl",
+        ));
 
         test_util::assert_error_contains(
             assemble_shader(&AssembleShaderOptions {
@@ -64,9 +67,9 @@ mod assemble_shader {
         let output_file = test_util::unique_absolute_output_file!();
         assert!(!output_file.0.is_file());
 
-        let shader_body_path = test_util::path::relative_input_file(
+        let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
             "shader/create_displacement_goal/parse_error.wgsl",
-        );
+        ));
 
         let config: Config =
             (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
@@ -99,9 +102,9 @@ mod assemble_shader {
         let output_file = test_util::unique_absolute_output_file!();
         assert!(!output_file.0.is_file());
 
-        let shader_body_path = test_util::path::relative_input_file(
+        let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
             "shader/create_displacement_goal/module_error.wgsl",
-        );
+        ));
 
         let config: Config =
             (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {

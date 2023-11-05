@@ -2,21 +2,24 @@ use image_annealing::compute::{
     CreateDisplacementGoalParameters, CreateDisplacementGoalPipelineOperation,
     CreateDisplacementGoalShaderConfig, PipelineConfig, WorkgroupGridConfig,
 };
+use image_annealing_cli_util::path::TryFromWithPathContext;
+use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
 use image_annealing_shader::{CreateDisplacementGoalShaderContent, SHADER_ENTRY_POINT};
 use std::borrow::Cow;
-use std::fs;
 use std::num::NonZeroU32;
 
 pub fn load_create_displacement_goal_shader_content(
     shader_name: &str,
 ) -> CreateDisplacementGoalShaderContent<'static> {
-    let path = crate::path::absolute_input_file(&format!(
-        "shader/create_displacement_goal/{}.wgsl",
-        shader_name
-    ))
-    .0;
+    let relative_path = format!("shader/create_displacement_goal/{}.wgsl", shader_name);
+    let path = UnverifiedInputTextFilePath(crate::path::relative_input_file(&relative_path));
     CreateDisplacementGoalShaderContent {
-        body: Cow::Owned(fs::read_to_string(path).unwrap()),
+        body: Cow::Owned(<String as TryFromWithPathContext<
+            UnverifiedInputTextFilePath,
+        >>::try_from_with_path_context(
+            path,
+            crate::path::base_input().0
+        ).unwrap()),
     }
 }
 

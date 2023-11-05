@@ -1,4 +1,5 @@
 use image_annealing_cli_util::path::TryIntoWithPathContext;
+use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
 use image_annealing_shader::shader;
 use image_annealing_shader_cli::args::{
     AssembleShaderOptions, DefaultShaderOutputOptions, Options,
@@ -15,8 +16,9 @@ fn assemble_create_displacement_goal_shader() -> Result<(), Box<dyn Error>> {
     let output_file = test_util::unique_absolute_output_file!();
     assert!(!output_file.0.is_file());
 
-    let shader_body_path =
-        test_util::path::relative_input_file("shader/create_displacement_goal/copy_image.wgsl");
+    let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+        "shader/create_displacement_goal/copy_image.wgsl",
+    ));
 
     let config: Config =
         (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {

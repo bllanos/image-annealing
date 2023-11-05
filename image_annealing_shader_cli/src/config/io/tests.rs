@@ -2,6 +2,7 @@ mod parse_config_file {
     use super::super::super::{Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig};
     use super::super::parse_config_file;
     use image_annealing_cli_util::path::TryIntoWithPathContext;
+    use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
     use std::error::Error;
 
     #[test]
@@ -32,8 +33,9 @@ mod parse_config_file {
         );
         let r = parse_config_file(path.0)?;
 
-        let shader_body_path =
-            test_util::path::relative_input_file("shader/create_displacement_goal/copy_image.wgsl");
+        let shader_body_path = UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+            "shader/create_displacement_goal/copy_image.wgsl",
+        ));
         let config: Config =
             (UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
                 body: shader_body_path,

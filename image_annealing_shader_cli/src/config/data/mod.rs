@@ -1,16 +1,14 @@
-use image_annealing_cli_util::path::{
-    InputFilePath, TryFromWithPathContext, TryIntoWithPathContext, UnverifiedInputFilePath,
-};
+use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
+use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
 use image_annealing_shader::CreateDisplacementGoalShaderContent;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::error::Error;
-use std::fs;
 use std::path::Path;
 
 #[derive(Clone, Deserialize)]
 pub struct UnverifiedCreateDisplacementGoalConfig<'a> {
-    pub body: UnverifiedInputFilePath<'a>,
+    pub body: UnverifiedInputTextFilePath<'a>,
 }
 
 impl TryFromWithPathContext<UnverifiedCreateDisplacementGoalConfig<'_>>
@@ -22,9 +20,9 @@ impl TryFromWithPathContext<UnverifiedCreateDisplacementGoalConfig<'_>>
         value: UnverifiedCreateDisplacementGoalConfig,
         base_path: P,
     ) -> Result<Self, Self::Error> {
-        let path = InputFilePath::try_from_with_path_context(value.body, base_path)?;
+        let body = <String as TryFromWithPathContext<UnverifiedInputTextFilePath<'_>>>::try_from_with_path_context(value.body, base_path)?;
         Ok(CreateDisplacementGoalShaderContent {
-            body: Cow::Owned(fs::read_to_string(path.0)?),
+            body: Cow::Owned(body),
         })
     }
 }

@@ -3,19 +3,18 @@ mod config_try_from_unverified_config {
         use super::super::super::{
             Config, UnverifiedConfig, UnverifiedCreateDisplacementGoalConfig,
         };
-        use image_annealing_cli_util::path::{
-            InputFilePath, TryFromWithPathContext, TryIntoWithPathContext,
-        };
+        use image_annealing_cli_util::path::{TryFromWithPathContext, TryIntoWithPathContext};
+        use image_annealing_cli_util::text::UnverifiedInputTextFilePath;
         use image_annealing_shader::CreateDisplacementGoalShaderContent;
         use std::borrow::Cow;
         use std::error::Error;
-        use std::fs;
 
         #[test]
         fn valid() -> Result<(), Box<dyn Error>> {
-            let shader_body_path = test_util::path::relative_input_file(
-                "shader/create_displacement_goal/copy_image.wgsl",
-            );
+            let shader_body_path =
+                UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+                    "shader/create_displacement_goal/copy_image.wgsl",
+                ));
             let unverified_config =
                 UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
                     body: shader_body_path.clone(),
@@ -26,12 +25,11 @@ mod config_try_from_unverified_config {
             assert_eq!(
                 r,
                 Config::CreateDisplacementGoal(CreateDisplacementGoalShaderContent {
-                    body: Cow::Owned(fs::read_to_string(
-                        InputFilePath::try_from_with_path_context(
-                            shader_body_path,
-                            test_util::path::base_input().0
-                        )?
-                        .0
+                    body: Cow::Owned(<String as TryFromWithPathContext<
+                        UnverifiedInputTextFilePath,
+                    >>::try_from_with_path_context(
+                        shader_body_path,
+                        test_util::path::base_input().0
                     )?),
                 })
             );
@@ -40,9 +38,10 @@ mod config_try_from_unverified_config {
 
         #[test]
         fn missing_body() {
-            let shader_body_path = test_util::path::relative_input_file(
-                "shader/create_displacement_goal/not_found.wgsl",
-            );
+            let shader_body_path =
+                UnverifiedInputTextFilePath(test_util::path::relative_input_file(
+                    "shader/create_displacement_goal/not_found.wgsl",
+                ));
             let unverified_config =
                 UnverifiedConfig::CreateDisplacementGoal(UnverifiedCreateDisplacementGoalConfig {
                     body: shader_body_path,
