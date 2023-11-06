@@ -17,7 +17,6 @@ image_annealing_shader = { path = "../image_annealing_shader" }
 image_annealing_shader_cli = { path = "../image_annealing_shader_cli" }
 parking_lot = "0.12.1"
 serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.91"
 
 [dev-dependencies]
 async-trait = "0.1.60"

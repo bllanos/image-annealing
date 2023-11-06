@@ -1,4 +1,4 @@
-use crate::config::{self, Config};
+use crate::config::{Config, UnverifiedConfig};
 use bpaf::{Bpaf, ShellComp};
 use std::path::PathBuf;
 
@@ -7,7 +7,7 @@ use std::path::PathBuf;
 /// Assemble and validate a shader
 pub struct AssembleShaderOptions {
     /// Path of the configuration file for creating the shader
-    #[bpaf(long, short, argument::<String>("CONFIG_FILE"), complete_shell(ShellComp::File { mask: Some("*.json") }), parse(config::parse_config_file))]
+    #[bpaf(long, short, argument::<String>("CONFIG_FILE"), complete_shell(ShellComp::File { mask: Some("*.json") }), parse(image_annealing_cli_util::config::io::parse_config_file::<Config, UnverifiedConfig, String>))]
     pub config: Config<'static>,
     /// Path of the shader file to output
     #[bpaf(long, short('f'), argument("OUTPUT_FILE"), complete_shell(ShellComp::File { mask: Some("*.wgsl") }))]

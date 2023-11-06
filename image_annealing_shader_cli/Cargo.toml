@@ -15,7 +15,6 @@ image_annealing_shader = { path = "../image_annealing_shader" }
 naga = { version = "0.10.0", features = ["span", "validate", "wgsl-in"] }
 relative-path = "1.8.0"
 serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.91"
 
 [dev-dependencies]
 test_util = { path = "../test_util" }

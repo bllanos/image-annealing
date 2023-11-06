@@ -1,4 +1,4 @@
-use crate::config::{self, Config};
+use crate::config::{Config, UnverifiedConfig};
 pub use bpaf::ParseFailure;
 use bpaf::{Bpaf, ShellComp};
 
@@ -7,7 +7,7 @@ use bpaf::{Bpaf, ShellComp};
 /// Run individual operations
 struct Options {
     /// Path of the configuration file describing the operation to run
-    #[bpaf(long, short, argument::<String>("CONFIG_FILE"), complete_shell(ShellComp::File { mask: Some("*.json") }), parse(config::parse_config_file))]
+    #[bpaf(long, short, argument::<String>("CONFIG_FILE"), complete_shell(ShellComp::File { mask: Some("*.json") }), parse(image_annealing_cli_util::config::io::parse_config_file::<Config, UnverifiedConfig,  String>))]
     config: Config<'static>,
 }
 

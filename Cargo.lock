@@ -607,7 +607,6 @@ dependencies = [
  "image_annealing_shader_cli",
  "parking_lot",
  "serde",
- "serde_json",
  "test_util",
 ]
 
@@ -650,7 +649,6 @@ dependencies = [
  "naga",
  "relative-path",
  "serde",
- "serde_json",
  "test_util",
 ]
 
