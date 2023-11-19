@@ -1,14 +1,16 @@
 <!-- omit in toc -->
 # 2D Permutation Toolbox
 
-Tools for developing algorithms that work with permutations of data in 2D grids (i.e. images).
+Tools for developing algorithms that work with permutations of data in 2D grids (such as images).
 
 <!-- omit in toc -->
 ## Example
 
-![White dot on a black background being transformed into a black star on a white background](./image_annealing_cli_bin/examples/dot/animation.gif)
+TODO The example will be recreated.
 
-Instructions for running the example are in [`image_annealing_cli_bin/examples/dot/README.md`](./image_annealing_cli_bin/examples/dot/README.md). Before running the example, follow the [repository setup instructions](#setup) below.
+<!-- ![White dot on a black background being transformed into a black star on a white background](./image_annealing_cli_bin/examples/dot/animation.gif) -->
+
+<!-- Instructions for running the example are in [`image_annealing_cli_bin/examples/dot/README.md`](./image_annealing_cli_bin/examples/dot/README.md). Before running the example, follow the [repository setup instructions](#setup) below. -->
 
 <!-- omit in toc -->
 ## Table of Contents
@@ -16,7 +18,7 @@ Instructions for running the example are in [`image_annealing_cli_bin/examples/d
 - [Problem description](#problem-description)
   - [Description using an analogy](#description-using-an-analogy)
   - [Abstract description](#abstract-description)
-  - [Why permutations?](#why-permutations)
+  - [Why permute images?](#why-permute-images)
     - [Advantages of permutations](#advantages-of-permutations)
     - [Disadvantages of permutations](#disadvantages-of-permutations)
 - [Setup](#setup)
@@ -35,7 +37,6 @@ Instructions for running the example are in [`image_annealing_cli_bin/examples/d
     - [Create permutation](#create-permutation)
     - [Swap](#swap)
     - [Permute](#permute)
-    - [Validate permutation](#validate-permutation)
 - [Vision and future development](#vision-and-future-development)
   - [Planned development](#planned-development)
 - [Contributing](#contributing)
@@ -50,9 +51,9 @@ Suppose there is a crowd of people in a room. You want to determine the path tha
 
 ### Abstract description
 
-Find a permutation of data arranged in a 2D grid by swapping adjacent data elements in an attempt to decrease the value of some cost function that evaluates permutations. There is no guarantee that you will find a permutation corresponding to a global minimum of the cost function, but you will at least obtain a sequence of intermediate permutations (wherein each element moves at most one unit of distance) that relates the initial and final arrangements of the data.
+Find a permutation of data arranged in a 2D grid by swapping data elements in an attempt to decrease the value of some cost function that evaluates permutations. There is no guarantee that you will find a permutation corresponding to a global minimum of the cost function, but you will at least obtain a sequence of intermediate permutations that relates the initial and final arrangements of the data. You can choose the swap pattern so that, for example, each element moves at most one unit of distance between intermediate permutations, providing a continuous path for each element.
 
-### Why permutations?
+### Why permute images?
 
 Images can be modelled as functions mapping pixel coordinates to colors. We think most image processing algorithms focus on the output of the mapping, modifying the colors. There are overlooked opportunities to explore operations on the input of the mapping, the coordinates. We want to experiment with rearranging the structures of images.
 
@@ -78,7 +79,7 @@ In this project, we use [simulated annealing](https://mathworld.wolfram.com/Simu
 
 This project is written in [Rust](https://www.rust-lang.org/), and uses the [wgpu](https://wgpu.rs/) library to parallelize image processing algorithms on the GPU. GPU shader programs are currently written in [WGSL (WebGPU Shading Language)](https://gpuweb.github.io/gpuweb/wgsl/).
 
-We provide a command-line interface (CLI) that exposes the main functionality of the codebase. Therefore, you do not need to work with Rust code directly, but you still Rust development tools for the code to build. Presently, the CLI is best documented by the [example](./image_annealing_cli_bin/examples/dot/README.md).
+We provide a command-line interface (CLI) that exposes the main functionality of the codebase. Therefore, you do not need to work with Rust code directly, but you still Rust development tools for the code to build. Presently, the CLI is best documented by the [example](#example).
 
 ### Supported platforms
 
@@ -87,15 +88,15 @@ The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but h
 ### Getting started
 
 1. [Install Rust](https://www.rust-lang.org/learn/get-started)
-2. Try running the [example](./image_annealing_cli_bin/examples/dot/README.md). The script that runs the example will also build the code.
+2. Try running the [example](#example). The script that runs the example will also build the code.
 
 ## Troubleshooting
 
 ### Code panics with errors such as BadDisplay, BadContext, or NotInitialized
 
-You may need to tell [wgpu](https://wgpu.rs/) to use a particular graphics backend.
+You may need to tell [wgpu](https://wgpu.rs/) to use a particular graphics backend. Refer to [wgpu's documentation](https://docs.rs/wgpu/latest/wgpu/struct.Backends.html) for a list of backends.
 
-Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/compute/device.rs) to the backend you wish to use. Refer to [wgpu's documentation](https://docs.rs/wgpu/latest/wgpu/struct.Backends.html) for a list of backends. In the future, we may allow the backend to be set by an easier method, such as an environment variable, for example.
+<!-- TODO Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/compute/device.rs) to the backend you wish to use. In the future, we may allow the backend to be set by an easier method, such as an environment variable, for example. -->
 
 ### Error message: actual format of image ... is not the expected format of 8/16-bit RGBA
 
@@ -184,25 +185,21 @@ Input:
 
 - An initial [permutation](#permutations)
 - A [displacement goal](#displacement-goals)
-- A sequence of swap passes to perform
+- A sequence of swap patterns to evaluate
 - A swap cost threshold that determines whether a given swap of two pixels will be accepted
 
-The swap operation outputs a [permutation](#permutations) by swapping adjacent pixels of the input [permutation](#permutations) so that the permutation is more similar to the input [displacement goal](#displacement-goals). If requested, the operation can also output the number of swaps that were accepted.
+The swap operation outputs a [permutation](#permutations) by swapping pixels of the input [permutation](#permutations) so that the permutation is more similar to the input [displacement goal](#displacement-goals). If requested, the operation can also output the number of swaps that were accepted.
 
-There are four possible swap passes:
+A swap pattern is a vector defining the relative position of the pixel to swap with the current pixel. Any vector can be used, but there are four predefined swap patterns for convenience:
 
-1. `Horizontal`: Swaps pixels at even `x` coordinates with their neighbors to the right
-2. `Vertical`: Swaps pixels at even `y` coordinates with their neighbors below
-3. `OffsetHorizontal`: Swaps pixels at even `x` coordinates with their neighbors to the left
-4. `OffsetVertical`: Swaps pixels at even `y` coordinates with their neighbors above
+1. `Right`: Swaps pixels at even `x` coordinates with their neighbors to the right (swap vector `[1, 0]`)
+2. `Up`: Swaps pixels at even `y` coordinates with their neighbors above (swap vector `[0, -1]`)
+3. `Left`: Swaps pixels at even `x` coordinates with their neighbors to the left (swap vector `[-1, 0]`)
+4. `Down`: Swaps pixels at even `y` coordinates with their neighbors below (swap vector `[0, 1]`)
 
 #### Permute
 
 The permute operation takes a [permutation](#permutations), and an [image](#images). It outputs an [image](#images) that is the result of permuting the input [image](#images) according to the input [permutation](#permutations).
-
-#### Validate permutation
-
-The validate permutation operation takes a [vector field](#vector-fields), and checks whether it satisfies [permutation](#permutations) constraints.
 
 ## Vision and future development
 
@@ -210,22 +207,23 @@ We hope to build a set of programmatic interfaces and command-line tools that he
 
 We do not intend to develop graphical user interfaces in this repository because there are too many possible requirements to satisfy.
 
+See [vision.md](docs/vision.md) for more information about the project's goals.
+
 ### Planned development
 
 The following is a list of tasks that we hope to complete in the future, time-permitting. It is not an exhaustive list. The order of the items does not necessarily indicate the order in which they may be completed.
 
 - Allowing the [swap operation](#swap) to use custom swap cost functions
-- New operations that will generate data directly on the GPU that currently must be provided as input from the CPU:
+- Operations that will generate data directly on the GPU that would otherwise need to be generated by client code:
   - Displacement goal generation
   - Image generation
 - More documentation
 - Detailed guidelines and tips for contributing to the project
-- Improvements to user-friendliness, such as more descriptive error messages
 - Leverage more tools, libraries, and frameworks to improve the code, development processes, and collaboration
 
 ## Contributing
 
-You are welcome to contribute to the repository. We hope to add more documentation and instructions to make contributing easier. You can [contact us](#contact) to discuss contribution ideas.
+You are welcome to contribute to the repository. We hope to add more documentation and instructions to make contributing easier, and have some initial guidelines in [CONTRIBUTING.md](CONTRIBUTING.md). You can also [contact us](#contact) to discuss contribution ideas.
 
 ## Contact
 
