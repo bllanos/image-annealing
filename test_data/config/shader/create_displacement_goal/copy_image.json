@@ -1,5 +1,0 @@
-{
-  "CreateDisplacementGoal": {
-    "body": "../../../shader/create_displacement_goal/copy_image.wgsl"
-  }
-}
