@@ -13,4 +13,4 @@ license = "MIT OR Apache-2.0"
 version = "0.1.0"
 
 [workspace.dependencies]
-bpaf = { version = "0.9.8", features = ["autocomplete", "derive"] }
+bpaf = { version = "0.9.8", features = ["autocomplete", "derive", "docgen"] }

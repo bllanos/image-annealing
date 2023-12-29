@@ -1,3 +1,5 @@
+use image_annealing_cli::arg;
+
 fn main() {
-    println!("Hello, world!");
+    let _ = arg::make_option_parser().run();
 }
