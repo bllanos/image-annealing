@@ -1,0 +1,16 @@
+[workspace]
+members = [
+    "image_annealing_cli",
+]
+resolver = "2"
+
+[workspace.package]
+authors = ["Bernard Llanos"]
+description = "Tools for developing algorithms that work with permutations of data in 2D grids"
+edition = "2021"
+keywords = ["image","graphics"]
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+
+[workspace.dependencies]
+bpaf = { version = "0.9.8", features = ["autocomplete", "derive"] }

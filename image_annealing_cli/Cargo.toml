@@ -1,0 +1,10 @@
+[package]
+name = "image_annealing_cli"
+description = "Command-line interface for developing algorithms that work with permutations of data in 2D grids"
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+bpaf = { workspace = true }
