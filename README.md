@@ -24,19 +24,21 @@ TODO The example will be recreated.
 - [Setup](#setup)
   - [Supported platforms](#supported-platforms)
   - [Getting started](#getting-started)
+- [Documentation](#documentation)
+  - [Command-line interfaces](#command-line-interfaces)
 - [Troubleshooting](#troubleshooting)
   - [Code panics with errors such as BadDisplay, BadContext, or NotInitialized](#code-panics-with-errors-such-as-baddisplay-badcontext-or-notinitialized)
-  - [Error message: actual format of image ... is not the expected format of 8/16-bit RGBA](#error-message-actual-format-of-image--is-not-the-expected-format-of-816-bit-rgba)
 - [Usage overview](#usage-overview)
   - [Data types](#data-types)
-    - [Vector fields](#vector-fields)
+    - [Map](#map)
+      - [Landing maps](#landing-maps)
+      - [Launch maps](#launch-maps)
       - [Permutations](#permutations)
-      - [Displacement goals](#displacement-goals)
-    - [Images](#images)
+    - [Data](#data)
   - [Operations](#operations)
-    - [Create permutation](#create-permutation)
+    - [Creation operations](#creation-operations)
     - [Swap](#swap)
-    - [Permute](#permute)
+    - [Map data](#map-data)
 - [Vision and future development](#vision-and-future-development)
   - [Planned development](#planned-development)
 - [Contributing](#contributing)
@@ -47,7 +49,7 @@ TODO The example will be recreated.
 
 ### Description using an analogy
 
-Suppose there is a crowd of people in a room. You want to determine the path that each person takes over time. Each person may either have a destination they want to reach, or may want to be closer to either specific people, or to people matching a certain description. In brief, the criteria that determine how people move are arbitrary.
+Suppose there is a crowd of people in a room. You want to determine the path that each person takes over time. Each person may have a destination they want to reach, or may want to be closer to specific people, or to people matching a certain description. In brief, the criteria that determine how people move are arbitrary.
 
 ### Abstract description
 
@@ -79,16 +81,22 @@ In this project, we use [simulated annealing](https://mathworld.wolfram.com/Simu
 
 This project is written in [Rust](https://www.rust-lang.org/), and uses the [wgpu](https://wgpu.rs/) library to parallelize image processing algorithms on the GPU. GPU shader programs are currently written in [WGSL (WebGPU Shading Language)](https://gpuweb.github.io/gpuweb/wgsl/).
 
-We provide a command-line interface (CLI) that exposes the main functionality of the codebase. Therefore, you do not need to work with Rust code directly, but you still Rust development tools for the code to build. Presently, the CLI is best documented by the [example](#example).
+We also provide command-line programs (CLI) so that you do not need to work with Rust code directly, but you still need Rust development tools to build the programs.
 
 ### Supported platforms
 
-The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but has been developed on Linux, primarily targeting Vulkan, and occasionally targeting OpenGL. WebAssembly support has not yet been explored, and will require additional development.
+The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but has been developed on Linux, primarily targeting Vulkan, and occasionally targeting OpenGL. [WebAssembly](https://webassembly.org/) support has not yet been explored, and will require additional development.
 
 ### Getting started
 
 1. [Install Rust](https://www.rust-lang.org/learn/get-started)
 2. Try running the [example](#example). The script that runs the example will also build the code.
+
+## Documentation
+
+### Command-line interfaces
+
+- The main command-line program, which manipulates images, is documented in [image_annealing_cli.md](docs/image_annealing_cli.md).
 
 ## Troubleshooting
 
@@ -98,127 +106,114 @@ You may need to tell [wgpu](https://wgpu.rs/) to use a particular graphics backe
 
 <!-- TODO Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/compute/device.rs) to the backend you wish to use. In the future, we may allow the backend to be set by an easier method, such as an environment variable, for example. -->
 
-### Error message: actual format of image ... is not the expected format of 8/16-bit RGBA
-
-This error can mean several things, but the most common reason is that you have provided an input image that does not have an alpha channel. As mentioned [below](#data-types), the code operates on images with alpha channels.
-
-Other possible causes of this error include:
-
-- Providing an image with 8-bits per color channel, as opposed to 16-bits, or vice versa.
-- Providing an image that does not have four color channels (Red, Green, Blue, and Alpha).
-
-We recommend using a tool such as [ImageMagick](https://imagemagick.org/) to pre-process images before providing them as inputs. For example, the following ImageMagick command converts a JPEG image to a PNG image with an alpha channel ([reference](https://imagemagick.org/script/command-line-options.php#alpha)):
-
-```bash
-convert -alpha opaque "rgb_image.jpeg" "rgba_image.png"
-```
-
-The code is strict with respect to input image formats for several reasons:
-
-1. To help users notice when they input the wrong image files by mistake
-2. To allow for easier substitution of general [images](#images) for [vector fields](#vector-fields), which must have four channels, by requiring that general images also have four channels
-3. To simplify the codebase by delegating image format handling to external tools and libraries
-
 ## Usage overview
 
 In this section, we give a high-level overview of how to use the code by explaining key data types and operations.
 
 ### Data types
 
-The [operations](#operations) currently implemented manipulate the following kinds of data:
+The [operations](#operations) currently implemented manipulate the types of data described below.
 
-#### Vector fields
+#### Map
 
-A vector field is an image with Red, Green, Blue, and Alpha color channels, where each pixel stores an 8-bit value for each channel. Vector fields are usually saved as [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) files.
+A map is a 2D grid of 2D vectors describing how elements located in the cells of the grid move to other cells in the grid.
 
-The channels represent the `x` and `y` components of displacement vectors:
+In memory, a map is an array of pairs of 16-bit [big-endian][endianness] [two's complement integers](https://en.wikipedia.org/wiki/Two%27s_complement), stored in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order) such that it represents a 2D array.
 
-1. The Red channel stores the most significant byte of the `x`-component
-2. The Green channel stores the least significant byte of the `x`-component
-3. The Blue channel stores the most significant byte of the `y`-component
-4. The Alpha channel stores the least significant byte of the `x`-component
+The first and second integer in a pair represent the `x` and `y` components, respectively, of a displacement vector associated with the position of the pair in the grid.
 
-Displacement vectors have signed components. The Red and Green channels, and the Blue and Alpha channels, represent 16-bit [two's complement integers](https://en.wikipedia.org/wiki/Two%27s_complement).
+- Vectors with positive `x`-components point to the right.
+- Vectors with positive `y`-components point downwards.
 
-Vector fields follow the texture coordinates system, with the top-left pixel having coordinates `(0, 0)`, the `x` coordinates increasing to the right, and the `y` coordinates increasing downwards.
+The coordinates of cells in a map follow image [texture coordinate conventions](https://gpuweb.github.io/gpuweb/#coordinate-systems), except that integer values are used for coordinates, not fractions between zero and one.
 
-Vector fields are interpreted as being either of the following:
+Maps are interpreted as being either of the following:
+
+##### Landing maps
+
+A landing map is a map where each cell stores a vector pointing towards the source cell whose element will be moved into the current cell.
+
+For example, if the cell with coordinates `(2, 3)` stores the vector `(1, -2)`, then the map will move the element at coordinates `(3, 1)` to coordinates `(2, 3)`.
+
+##### Launch maps
+
+A launch map is a map that represents where each element wants to move. A key operation in the code modifies a landing map so that it better approximates a launch map. Using this operation (the [swap operation](#swap)), you can trade the hard problem of finding a permutation for the easier problem of specifying a launch map.
+
+Each cell in a launch map stores a vector pointing towards the goal location.
+
+For example, if the cell with coordinates `(2, 3)` stores the vector `(1, -2)`, then the element in this cell wants to move to the cell with coordinates `(3, 1)`.
+
+Note that a launch map can be created from a landing map by inverting the landing map, **if** the landing map is invertible. For example, if the cell with coordinates `(2, 3)` in a landing map stores the vector `(1, -2)`, then in the corresponding launch map, the cell with coordinates `(3, 1)` stores the vector `(-1, 2)`.
+
+Vectors in launch maps point towards destinations, whereas vectors in landing maps point towards sources.
 
 ##### Permutations
 
-A permutation is a vector field where each pixel stores a vector pointing towards the source pixel that will be moved towards the current pixel.
+Permutations are not (yet) explicitly represented as a data type in the code. A permutation is a map that is invertible (i.e. a [bijection](https://en.wikipedia.org/wiki/Bijection)). This means that:
 
-For example, if the pixel with coordinates `(2, 3)` stores the vector `(1, -2)`, then the permutation will move the pixel at coordinates `(3, 1)` to coordinates `(2, 3)`.
+1. All vectors point to cells inside the boundaries of the map
+2. No two vectors point to the same cell
 
-The code will verify that a vector field satisfies permutation constraints before using it in any operations that assume it is a permutation. The constraints that permutations satisfy are:
+Another way of defining a permutation is by construction:
 
-1. All vectors point to locations inside the boundaries of the vector field
-2. No two vectors point to the same location
+1. The identity map, where each cell stores the vector `(0, 0)`, is a permutation.
+2. Any map generated from a permutation by a [swap operation](#swap) is itself a permutation.
 
-##### Displacement goals
+#### Data
 
-A displacement goal is a vector field that represents where each pixel wants to move. Vector fields do not need to be satisfy any constraints to be displacement goals. A key operation in the code modifies a permutation so that it better approximates a displacement goal. Using this operation (the [swap operation](#swap)), you can trade the hard problem of finding a permutation for the easier problem of specifying a displacement goal.
+"Data" means data elements in the grids that are moved around by [maps](#map). As this project is usually used to manipulate images, we have chosen to interpret data as 16-bit depth four-channel images.
 
-Each pixel in a displacement goal stores a vector pointing towards the goal location.
-
-For example, if the pixel with coordinates `(2, 3)` stores the vector `(1, -2)`, then this pixel wants to move to coordinates `(3, 1)`.
-
-Note that a displacement goal can be created from a permutation by inverting the permutation. Vectors in displacement goals point towards destinations, whereas vectors in permutations point towards sources.
-
-#### Images
-
-Images are images with Red, Green, Blue, and Alpha color channels, where each pixel stores either an 8-bit value or a 16-bit value for each channel.
-
-Images are the data that can be permuted.
+In memory, data is an array of quadruplets of 16-bit [big-endian][endianness] values, stored in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order) such that it represents a 2D array.
 
 ### Operations
 
 This section describes the operations in the code at a high level (omitting some details).
 
-#### Create permutation
+#### Creation operations
 
-The create permutation operation outputs a [permutation](#permutations) that is an identity permutation. An identity permutation preserves the location of every pixel.
+There are operations for creating values of all kinds of [data types](#data-types), including identity [maps](#map).
 
 #### Swap
 
 Input:
 
-- An initial [permutation](#permutations)
-- A [displacement goal](#displacement-goals)
-- A sequence of swap patterns to evaluate
-- A swap cost threshold that determines whether a given swap of two pixels will be accepted
+- An input [launch map](#launch-maps) or [landing map](#landing-maps)
+- A reference map of the other type ([landing map](#landing-maps) or [launch map](#launch-maps), respectively)
+- A swap pattern to evaluate
+- A swap cost threshold that determines whether a given swap of two elements will be accepted
 
-The swap operation outputs a [permutation](#permutations) by swapping pixels of the input [permutation](#permutations) so that the permutation is more similar to the input [displacement goal](#displacement-goals). If requested, the operation can also output the number of swaps that were accepted.
+The default swap cost function results in an output map that is more similar to the reference map. The swap operation produces the output map by swapping elements of the input map (without modifying the input map). If requested, the operation can also output statistics concerning the number of swaps that were accepted and the swap costs.
 
-A swap pattern is a vector defining the relative position of the pixel to swap with the current pixel. Any vector can be used, but there are four predefined swap patterns for convenience:
+A swap pattern is expressed as a vector defining the relative position of the element to swap with the current element. Any vector can be used, but there are four common swap patterns:
 
-1. `Right`: Swaps pixels at even `x` coordinates with their neighbors to the right (swap vector `[1, 0]`)
-2. `Up`: Swaps pixels at even `y` coordinates with their neighbors above (swap vector `[0, -1]`)
-3. `Left`: Swaps pixels at even `x` coordinates with their neighbors to the left (swap vector `[-1, 0]`)
-4. `Down`: Swaps pixels at even `y` coordinates with their neighbors below (swap vector `[0, 1]`)
+1. `Right`: Swaps elements at even `x` coordinates with their neighbors to the right (swap vector `[1, 0]`)
+2. `Up`: Swaps elements at even `y` coordinates with their neighbors above (swap vector `[0, -1]`)
+3. `Left`: Swaps elements at even `x` coordinates with their neighbors to the left (swap vector `[-1, 0]`)
+4. `Down`: Swaps elements at even `y` coordinates with their neighbors below (swap vector `[0, 1]`)
 
-#### Permute
+#### Map data
 
-The permute operation takes a [permutation](#permutations), and an [image](#images). It outputs an [image](#images) that is the result of permuting the input [image](#images) according to the input [permutation](#permutations).
+The map operation takes a [landing map](#landing-maps) and [data](#data). It outputs data that is the result of moving the input data elements according to the displacement vectors in the map.
+
+There is no operation for applying a [landing map](#landing-maps) to data because a landing map may map multiple elements to the same location. We do not know of a way to resolve such collisions that will satisfy the requirements of all use cases.
 
 ## Vision and future development
 
-We hope to build a set of programmatic interfaces and command-line tools that help developers experiment with 2D permutations and approximate optimization algorithms that operate on permutations. Developers can use the code to run systematic experiments, and can incorporate the data and algorithms that result from their experiments into other works, such as graphical user interfaces.
-
-We do not intend to develop graphical user interfaces in this repository because there are too many possible requirements to satisfy.
+We hope to build a set of programmatic interfaces and command-line tools that help users experiment with 2D permutations and with approximate optimization algorithms that operate on permutations. Users can use the code to run systematic experiments, and can incorporate the data and algorithms that result from their experiments into other works, such as graphical user interfaces.
 
 See [vision.md](docs/vision.md) for more information about the project's goals.
 
+<!-- TODO update -->
 ### Planned development
 
 The following is a list of tasks that we hope to complete in the future, time-permitting. It is not an exhaustive list. The order of the items does not necessarily indicate the order in which they may be completed.
 
-- Allowing the [swap operation](#swap) to use custom swap cost functions
-- Operations that will generate data directly on the GPU that would otherwise need to be generated by client code:
-  - Displacement goal generation
-  - Image generation
-- More documentation
-- Detailed guidelines and tips for contributing to the project
+- Allow the [swap operation](#swap) to use custom swap cost functions
+- Implement operations that will generate data directly on the GPU that would otherwise need to be generated by client code:
+  - Launch map generation
+  - (Image) data generation
+- Add more documentation
+- Write more detailed guidelines and tips for contributing to the project
 - Leverage more tools, libraries, and frameworks to improve the code, development processes, and collaboration
 
 ## Contributing
@@ -243,3 +238,5 @@ Licensed under either of
 at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+
+[endianness]: https://en.wikipedia.org/wiki/Endianness

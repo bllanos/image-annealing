@@ -12,7 +12,7 @@ mod options {
     #[test]
     fn check_that_markdown_documentation_is_current() {
         let option_parser = make_option_parser();
-        let app_name = crate::crate_name();
+        let app_name: &'static str = env!("CARGO_PKG_NAME");
         let markdown = option_parser.render_markdown(app_name);
 
         let mut documentation_path = PathBuf::new();
