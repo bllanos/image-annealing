@@ -13,4 +13,4 @@ See [vision.md](docs/vision.md) for more information about the project's goals, 
 
 ## Development guidelines and lessons learned
 
-See [learning.md](docs/learning.md) for guidelines and resources relating to development, as well as strategies learned from experience.
+See [learning.md](docs/learning.md) for guidelines and resources relating to development, as well as strategies learned from experience. [vision.md](docs/vision.md) also contains development guidelines.

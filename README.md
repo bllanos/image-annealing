@@ -65,27 +65,27 @@ Images can be modelled as functions mapping pixel coordinates to colors. We thin
 
 - Permutations are linear operators
 - Permutations are invertible
-- Permutations can be applied to any kind of data, not only to numbers
-- Permuting numbers does not result in round-off (quantization) error
+- Permutations can be applied to sequences of any kind of data, not only to sequences of numbers
+- Permuting sequences of numbers does not result in round-off (quantization) error
 - Permutations preserve cardinality (area, in the case of digital images)
 - Any permutation can be decomposed into a sequence of permutations wherein each element is either stationary or trades places with its nearest neighbors
 - The motions of elements according to a permutation can be evaluated in parallel
 
 #### Disadvantages of permutations
 
-Finding a permutation that satisfies a given set of criteria is usually a hard combinatorial optimization problem. The [travelling salesperson problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem) is an example of such a problem.
+Finding a permutation that satisfies a given set of criteria is usually a hard combinatorial optimization problem. The [traveling salesperson problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem) is an example of such a problem.
 
 In this project, we use [simulated annealing](https://mathworld.wolfram.com/SimulatedAnnealing.html) to optimize permutations. Simulated annealing is easy to parallelize because each trade can be evaluated using only local information.
 
 ## Setup
 
-This project is written in [Rust](https://www.rust-lang.org/), and uses the [wgpu](https://wgpu.rs/) library to parallelize image processing algorithms on the GPU. GPU shader programs are currently written in [WGSL (WebGPU Shading Language)](https://gpuweb.github.io/gpuweb/wgsl/).
+This project is written in [Rust](https://www.rust-lang.org/), and uses the [wgpu][wgpu] library to parallelize image processing algorithms on the GPU. GPU shader programs are currently written in [WGSL (WebGPU Shading Language)](https://gpuweb.github.io/gpuweb/wgsl/).
 
 We also provide command-line programs (CLI) so that you do not need to work with Rust code directly, but you still need Rust development tools to build the programs.
 
 ### Supported platforms
 
-The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but has been developed on Linux, primarily targeting Vulkan, and occasionally targeting OpenGL. [WebAssembly](https://webassembly.org/) support has not yet been explored, and will require additional development.
+The code may work on all platforms that [wgpu][wgpu] supports, but has been developed on Linux, primarily targeting Vulkan, and occasionally targeting OpenGL. [WebAssembly](https://webassembly.org/) support has not yet been explored, and would require additional development.
 
 ### Getting started
 
@@ -102,7 +102,7 @@ The code may work on all platforms that [wgpu](https://wgpu.rs/) supports, but h
 
 ### Code panics with errors such as BadDisplay, BadContext, or NotInitialized
 
-You may need to tell [wgpu](https://wgpu.rs/) to use a particular graphics backend. Refer to [wgpu's documentation](https://docs.rs/wgpu/latest/wgpu/struct.Backends.html) for a list of backends.
+You may need to tell [wgpu][wgpu] to use a particular graphics backend. Refer to [wgpu's documentation](https://docs.rs/wgpu/latest/wgpu/struct.Backends.html) for a list of backends.
 
 <!-- TODO Try changing `wgpu::Backends::all()` in [`device.rs`](./image_annealing/src/compute/device.rs) to the backend you wish to use. In the future, we may allow the backend to be set by an easier method, such as an environment variable, for example. -->
 
@@ -118,14 +118,14 @@ The [operations](#operations) currently implemented manipulate the types of data
 
 A map is a 2D grid of 2D vectors describing how elements located in the cells of the grid move to other cells in the grid.
 
-In memory, a map is an array of pairs of 16-bit [big-endian][endianness] [two's complement integers](https://en.wikipedia.org/wiki/Two%27s_complement), stored in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order) such that it represents a 2D array.
+In memory, a map is an array of pairs of 16-bit [big-endian][endianness] [two's complement integers](https://en.wikipedia.org/wiki/Two%27s_complement), stored in [row-major order][row_major_order] such that it represents a 2D array.
 
 The first and second integer in a pair represent the `x` and `y` components, respectively, of a displacement vector associated with the position of the pair in the grid.
 
 - Vectors with positive `x`-components point to the right.
 - Vectors with positive `y`-components point downwards.
 
-The coordinates of cells in a map follow image [texture coordinate conventions](https://gpuweb.github.io/gpuweb/#coordinate-systems), except that integer values are used for coordinates, not fractions between zero and one.
+The coordinates of cells in a map follow image [texture coordinate conventions](https://gpuweb.github.io/gpuweb/#coordinate-systems), except that integer values are used for coordinates, not fractions between zero and one. If the grid has `m` rows and `n` columns (i.e. its height is `m` and its width is `n`), then the coordinates of the top left, top right, bottom left, and bottom right cells are `(0, 0)`, `(n - 1, 0)`, `(0, m - 1)`, and `(n - 1, m - 1)`, respectively.
 
 Maps are interpreted as being either of the following:
 
@@ -157,13 +157,29 @@ Permutations are not (yet) explicitly represented as a data type in the code. A 
 Another way of defining a permutation is by construction:
 
 1. The identity map, where each cell stores the vector `(0, 0)`, is a permutation.
-2. Any map generated from a permutation by a [swap operation](#swap) is itself a permutation.
+
+2. A map that rearranges the elements of a grid to change the dimensions of the grid without changing the number of cells in the grid is a permutation. Such a map can be constructed using a row-major scheme for ordering cells as follows:
+
+   Given:
+
+   - Initial dimensions m1 rows by n1 columns
+   - Final dimensions m2 rows by n2 columns
+
+   then the cell with coordinates `(x, y)` in the map stores the vector `(mod(y * n2 + x, n1) - x, floor((y * n2 + x) / n1) - y)`, where `mod()` is the modulus function and `floor()` is the floor function.
+
+   Proof:
+
+   1. A cell with coordinates `(x, y)` in the reshaped grid has a row-major index of `k = y * n2 + x`.
+   2. The cell with row-major index `k` in the original grid has coordinates `(mod(k, n1), floor(k / n1))`.
+   3. The vector from the coordinates in the reshaped grid to the coordinates in the original grid, for the cell with row-major index `k` is `(mod(k, n1) - x, floor(k / n1) - y) = (mod(y * n2 + x, n1) - x, floor((y * n2 + x) / n1) - y)`.
+
+3. Any map generated from a permutation by a [swap operation](#swap) is itself a permutation.
 
 #### Data
 
 "Data" means data elements in the grids that are moved around by [maps](#map). As this project is usually used to manipulate images, we have chosen to interpret data as 16-bit depth four-channel images.
 
-In memory, data is an array of quadruplets of 16-bit [big-endian][endianness] values, stored in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order) such that it represents a 2D array.
+In memory, data is an array of quadruplets of 16-bit [big-endian][endianness] values, stored in [row-major order][row_major_order] such that it represents a 2D array.
 
 ### Operations
 
@@ -186,16 +202,16 @@ The default swap cost function results in an output map that is more similar to 
 
 A swap pattern is expressed as a vector defining the relative position of the element to swap with the current element. Any vector can be used, but there are four common swap patterns:
 
-1. `Right`: Swaps elements at even `x` coordinates with their neighbors to the right (swap vector `[1, 0]`)
-2. `Up`: Swaps elements at even `y` coordinates with their neighbors above (swap vector `[0, -1]`)
-3. `Left`: Swaps elements at even `x` coordinates with their neighbors to the left (swap vector `[-1, 0]`)
-4. `Down`: Swaps elements at even `y` coordinates with their neighbors below (swap vector `[0, 1]`)
+1. `Right`: Swaps elements at even `x` coordinates with their neighbors to the right (swap vector `(1, 0)`)
+2. `Up`: Swaps elements at even `y` coordinates with their neighbors above (swap vector `(0, -1)`)
+3. `Left`: Swaps elements at even `x` coordinates with their neighbors to the left (swap vector `(-1, 0)`)
+4. `Down`: Swaps elements at even `y` coordinates with their neighbors below (swap vector `(0, 1)`)
 
 #### Map data
 
 The map operation takes a [landing map](#landing-maps) and [data](#data). It outputs data that is the result of moving the input data elements according to the displacement vectors in the map.
 
-There is no operation for applying a [landing map](#landing-maps) to data because a landing map may map multiple elements to the same location. We do not know of a way to resolve such collisions that will satisfy the requirements of all use cases.
+There is no operation for applying a [launch map](#launch-maps) to data because a launch map may map multiple elements to the same location. We do not know of a way to resolve such collisions that will satisfy the requirements of all use cases.
 
 ## Vision and future development
 
@@ -203,7 +219,7 @@ We hope to build a set of programmatic interfaces and command-line tools that he
 
 See [vision.md](docs/vision.md) for more information about the project's goals.
 
-<!-- TODO update -->
+<!-- TODO Update this section -->
 ### Planned development
 
 The following is a list of tasks that we hope to complete in the future, time-permitting. It is not an exhaustive list. The order of the items does not necessarily indicate the order in which they may be completed.
@@ -240,3 +256,5 @@ at your option.
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
 [endianness]: https://en.wikipedia.org/wiki/Endianness
+[row_major_order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
+[wgpu]: https://wgpu.rs/

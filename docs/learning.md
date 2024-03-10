@@ -31,52 +31,52 @@ We developed the following guidelines through experience. We have not seen some 
 
 ### Newtypes
 
-The newtype pattern is explained in [The Rust Programming Language](https://doc.rust-lang.org/book/ch19-04-advanced-types.html). We learned that some newtypes are not helpful.
+The newtype pattern is explained in [The Rust Programming Language](https://doc.rust-lang.org/book/ch19-04-advanced-types.html#using-the-newtype-pattern-for-type-safety-and-abstraction). We learned that some newtypes are not helpful.
 
 #### Use cases for newtypes
 
-- The type is needed to maintain invariants. Normally this means it is a return type of a function in the library.
+1. The type is needed to maintain invariants. Normally this means it is a return type of a function in the library.
 
-- If a function accepts a parameter of a given type, it should be designed to accept any possible value of that type. In other words, [functions should be total functions][using-types-effectively].
+2. If a function accepts a parameter of a given type, it should be designed to accept any possible value of that type. In other words, [functions should be total functions][using-types-effectively].
 
-  It is preferable to use a newtype for a parameter that restricts the possible values the parameter can have than to allow the parameter to have a type that allows a wider range of values, some of which cannot be handled by the function. In the latter case, the function must return an error for certain values of the parameter, and would be a partial function, not a total function.
+   It is preferable to use a newtype for a parameter that restricts the possible values the parameter can have than to allow the parameter to have a type with values that cannot be handled by the function. In the latter case, the function must return an error for certain values of the parameter, and would be a partial function, not a total function.
 
-  On the other hand, sometimes the need to construct a newtype makes client code more verbose. There is a tradeoff between readability and strictness.
+   On the other hand, sometimes the need to construct a newtype makes client code more verbose. There is a tradeoff between readability and strictness.
 
-- The type represents a computation that has been performed and therefore does not need to be repeated wherever the type is used.
+3. The type represents a computation that has been performed and therefore does not need to be repeated wherever the type is used.
 
 #### Cases where newtypes should not be used
 
-- The newtype would ensure data matches a certain structure that can be expressed [directly using the type system][using-types-effectively] rather than implicitly using data validation functions.
+1. The newtype would ensure data matches a certain structure that can be expressed [directly using the type system][using-types-effectively] rather than implicitly using data validation functions.
 
-  For example, instead of having a type like:
+   For example, instead of having a type like:
 
-  ```rust
-  // The string has spaces to separate the parts of the name,
-  // but we need a constructor to enforce this convention.
-  struct PersonFullName(String);
-  ```
+   ```rust
+   // The string must contain spaces to separate the parts of the name,
+   // and we need a constructor to enforce this convention.
+   struct PersonFullName(String);
+   ```
 
-  use
+   use
 
-  ```rust
-  struct PersonPartOfName(String); // A string containing only letters
+   ```rust
+   struct PersonPartOfName(String); // A string containing only letters
 
-  // Represents the possibility of spaces between parts of the name using types
-  struct PersonFullName {
-    parts_of_name: Vec<PersonPartOfName>
-  }
-  ```
+   // Represents the possibility of spaces between parts of the name using types
+   struct PersonFullName {
+     parts_of_name: Vec<PersonPartOfName>
+   }
+   ```
 
-- The newtype represents statements that may not be facts. For example, do not create a newtype that represents a file that is known to exist. The file could cease to exist during the lifetime of the corresponding value of that newtype.
+2. The newtype represents statements that may not be facts. For example, do not create a newtype that represents a file that is known to exist. The file could cease to exist during the lifetime of the newtype value.
 
-- Multiple newtypes would represent data that all have the same interface (i.e. behaviour during operations) but that are not interchangeable, yet the newtypes are private and any accidental interchange of the data would cause unit tests to fail. If the tests would need to be written regardless of whether or not newtypes are used for the data, then the newtypes do not provide any benefit.
+3. Multiple newtypes would represent data that all have the same interface (i.e. behavior during operations) but that are not interchangeable, yet the newtypes are private and any accidental interchange of the data would cause unit tests to fail. If the tests would need to be written regardless of whether or not newtypes are used for the data, then the newtypes do not provide any benefit.
 
-- The newtype would only serve as a semantic label and is not required for correctness. For example, do not create separate newtypes like `FirstImage` and `SecondImage` if both images can have any possible contents and if their order ("first" vs. "second") is a extrinsic property, not an intrinsic property. In this example, one could use a type such as `ImagePair(Image, Image)` instead.
+4. The newtype would only serve as a semantic label and is not required for correctness. For example, do not create separate newtypes like `FirstImage` and `SecondImage` if both images can have any possible contents and if their order ("first" vs. "second") is a extrinsic property, not an intrinsic property. In this example, one could use a type such as `ImagePair(Image, Image)` instead.
 
 ### Generic programming
 
-1. Generic type parameters should be treated like regular function data parameters. If client code would not be interested in passing different types for a type parameter, the parameter should be removed, just like one would remove data parameters that client code does not care about. Generic type parameters can otherwise leak implementation details.
+1. Generic parameters should be treated like regular function data parameters. If client code would not be interested in passing different types for a generic parameter, the parameter should be removed, just like one would remove data parameters that client code does not care about. Generic parameters can otherwise leak implementation details.
 
 ### Error handling
 
@@ -94,15 +94,61 @@ The newtype pattern is explained in [The Rust Programming Language](https://doc.
 
    For example, if an image is provided as input and its dimensions do not match the dimensions of a buffer that would store it, reallocate the buffer instead of returning an error. Assume the caller is aware of the size mismatch and understands that the program will need to reallocate the buffer.
 
-   This guideline is connected to the importance of making [functions total functions][using-types-effectively]
+   This guideline supports [making functions total functions][using-types-effectively].
 
 ### Testing
 
-1. Implement tests as Rust [unit tests](https://doc.rust-lang.org/book/ch11-03-test-organization.html#unit-tests), even if they have the semantics of integration tests. Separate Rust [integration tests](https://doc.rust-lang.org/book/ch11-03-test-organization.html#integration-tests) are only needed for tests that cannot be run in parallel with other tests.
+1. Implement tests as Rust [unit tests](https://doc.rust-lang.org/book/ch11-03-test-organization.html#unit-tests), even if they have the semantics of integration tests. Use Rust [integration tests](https://doc.rust-lang.org/book/ch11-03-test-organization.html#integration-tests) only for tests that cannot be run in parallel with other tests.
+
+2. Prefer only writing expressions that can panic inside tests, not inside production code. Panicking is a form of [effect](vision.md#side-effects), and also makes code harder to test, because tests of panic cases must use the [`should_panic`](https://doc.rust-lang.org/book/ch11-01-writing-tests.html#checking-for-panics-with-should_panic) attribute.
+
+   1. An assertion (e.g. `assert!()`) outside of test code is usually one of the following:
+
+      1. A statement of a precondition of a function: Refactoring the function can sometimes convert it into a [total function][using-types-effectively] that does not have the precondition.
+
+      2. An internal consistency check inside a function: Splitting the function into smaller functions may allow tests to be written that are equivalent to the former consistency check. Sometimes refactoring can eliminate the need for any consistency check.
+
+         If it is certain that a consistency check will never fail, remove it. Tests can increase one's confidence that a consistency check will never fail.
+
+      3. A statement of a postcondition of a function: Add tests that verify the postcondition, and remove the postcondition check from the function's code.
+
+   2. Other expressions that can panic are usually one of the following:
+
+      1. Cases that should never panic in practice.
+
+         If the panic expression is inside a conditional statement, it is equivalent to an assertion and should be handled as described above. For example:
+
+         ```rust
+         if input.size == 0 {
+             panic!();
+         }
+         ```
+
+         If the panic expression is inside a third-party function and there is sufficient information to determine that the function should never panic, this is acceptable. For example:
+
+         ```rust
+         let value = std::num::NonZeroUsize::new(0).unwrap();
+         ```
+
+         Such cases can often be rewritten using unsafe code, for example:
+
+         ```rust
+         let value = unsafe { std::num::NonZeroUsize::new_unchecked(0) };
+         ```
+
+         We suggest avoiding unsafe code except where it provides significant performance benefits, as future code maintenance and refactoring can sometimes violate preconditions that are required to prevent undefined behavior.
+
+      2. Cases that may occur in practice, meaning that panicking is being used as an error handling technique. [Use `Result` in preference to panicking](https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html).
+
+      3. `match` statement arms that include `unreachable!()`. Try to use a control flow structure other than `match`, or try to narrow the type of value that the `match` statement is operating on in order to eliminate the unreachable arm.
+
+3. Within tests, only place expressions expressions that can panic in test functions (functions annotated with `#[test]`), not in test helper functions. Doing so makes the assertion portion of tests more obvious and makes it easier to write tests for test helper functions as needed.
+
+4. Write tests for test helper functions (such as functions in the [`test_util`](../test_util/) crate), but only to test error cases. The intention of tests of test helper functions is to verify that test helper functions can detect deviations from expected behavior such that tests of production code will fail when production code deviates from expected behavior. Do not write tests for the success cases within test helper functions, otherwise code test coverage reports will not be able to identify unused test helper functions. Success cases should already be covered by tests of production code.
 
 ## Resources
 
-We found the following resources helpful. Each one is listed alongside the date that it was used. Be mindful that, if a date is far in the past, then the resource may no longer exist or may have changed substantially since. The list is not exhaustive.
+We found the following resources helpful. Each one is listed alongside the date that it was most heavily used. Be mindful that, if a date is far in the past, then the resource may no longer exist or may have changed substantially since. The list is not exhaustive.
 
 ### Core Rust programming language resources
 
