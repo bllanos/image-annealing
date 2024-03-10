@@ -1,6 +1,9 @@
 [workspace]
 members = [
     "image_annealing_cli",
+    "image_annealing_cli_util",
+    "image_annealing_operation",
+    "test_util",
 ]
 resolver = "2"
 
@@ -14,3 +17,4 @@ version = "0.1.0"
 
 [workspace.dependencies]
 bpaf = { version = "0.9.8", features = ["autocomplete", "derive", "docgen"] }
+wgpu = "0.19.1"

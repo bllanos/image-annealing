@@ -1,0 +1,8 @@
+[package]
+name = "image_annealing_cli_util"
+description = "Utility library for command-line interfaces"
+authors.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+version.workspace = true

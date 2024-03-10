@@ -1,6 +1,7 @@
 [package]
 name = "image_annealing_cli"
 description = "Command-line interface for working with permutations of data in 2D grids"
+authors.workspace = true
 edition.workspace = true
 keywords.workspace = true
 license.workspace = true
@@ -8,3 +9,8 @@ version.workspace = true
 
 [dependencies]
 bpaf = { workspace = true }
+image_annealing_cli_util = { path = "../image_annealing_cli_util" }
+image_annealing_operation = { path = "../image_annealing_operation" }
+
+[dev-dependencies]
+test_util = { path = "../test_util" }

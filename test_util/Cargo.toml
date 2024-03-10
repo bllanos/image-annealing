@@ -1,0 +1,8 @@
+[package]
+name = "test_util"
+description = "Utility library for tests"
+authors.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+version.workspace = true

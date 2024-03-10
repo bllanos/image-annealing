@@ -1,0 +1,11 @@
+[package]
+name = "image_annealing_operation"
+description = "High-level operations library for algorithms operating on permutations of data in 2D grids that encapsulates GPU processing"
+authors.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+wgpu = { workspace = true }
