@@ -102,7 +102,7 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
             url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::Inaccessible
+            outcome: UrlWriteContent::inaccessible()
         }]));
     }
 
@@ -145,7 +145,7 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
             url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::Content(WriteContent::IoError),
+            outcome: UrlWriteContent::io_error(),
         }]));
     }
 
@@ -187,7 +187,7 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
             url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::Content(WriteContent::Data(Cow::Borrowed(file_content))),
+            outcome: UrlWriteContent::from_data(Cow::Borrowed(file_content)),
         }]));
     }
 
@@ -229,7 +229,7 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
             url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::Content(WriteContent::Data(Cow::Borrowed(file_content))),
+            outcome: UrlWriteContent::from_data(Cow::Borrowed(file_content)),
         }]));
     }
 }

@@ -1,4 +1,4 @@
-use super::io::{ReadAction, WriteAction, WriteObserver, WriterObserverPair};
+use super::io::{ReadAction, WriteAction, WriteContent, WriteObserver, WriterObserverPair};
 use crate::TestError;
 use std::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
@@ -87,6 +87,22 @@ pub struct UrlWriteAction<Url> {
 pub enum UrlWriteContent<T: std::fmt::Debug + Eq> {
     Content(T),
     Inaccessible,
+}
+
+impl<T: std::fmt::Debug + Eq> UrlWriteContent<T> {
+    pub fn inaccessible() -> Self {
+        Self::Inaccessible
+    }
+}
+
+impl<T: std::fmt::Debug + Eq> UrlWriteContent<WriteContent<T>> {
+    pub fn from_data(data: T) -> Self {
+        Self::Content(WriteContent::Data(data))
+    }
+
+    pub fn io_error() -> Self {
+        Self::Content(WriteContent::IoError)
+    }
 }
 
 #[derive(Debug, Eq)]
