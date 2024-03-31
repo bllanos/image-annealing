@@ -1,8 +1,14 @@
 use std::error::Error;
 use std::fmt;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TestError(pub String);
+
+impl<T: Into<String>> From<T> for TestError {
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
 
 impl fmt::Display for TestError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

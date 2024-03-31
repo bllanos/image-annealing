@@ -1,17 +1,21 @@
 mod check_that_file_is_current_and_create_new_file {
-    use crate::mock::url::{
-        ReadableUrlOpener, UrlContent, UrlWithContent, WritableUrl, WritableUrlAction,
-        WritableUrlOpener,
-    };
+    use crate::mock::io::WriteAction;
     use std::borrow::Cow;
     use std::path::Path;
 
-    type UrlWriteRecord<'a> = crate::mock::url::UrlWriteRecord<UrlWithContent<'a, Path>, &'a Path>;
+    type ReadAction<'a> = crate::mock::io::ReadAction<Cow<'a, str>>;
+    type WriteContent<'a> = crate::mock::io::WriteContent<Cow<'a, str>>;
+    type UrlReadAction<'a> = crate::mock::url::UrlReadAction<Cow<'a, Path>, Cow<'a, str>>;
+    type UrlWriteAction<'a> = crate::mock::url::UrlWriteAction<Cow<'a, Path>>;
+    type UrlWrite<'a> = crate::mock::url::UrlWrite<Cow<'a, Path>, WriteContent<'a>>;
+    type UrlWriteContent<'a> = crate::mock::url::UrlWriteContent<WriteContent<'a>>;
+    type ReadableUrlOpener<'a> = crate::mock::url::ReadableUrlOpener<Cow<'a, Path>, Cow<'a, str>>;
+    type WritableUrlOpener<'a> = crate::mock::url::WritableUrlOpener<Cow<'a, Path>>;
 
     #[test]
     fn file_is_missing_is_an_error() {
-        let mut readable_url_opener = ReadableUrlOpener::new(&[]);
-        let mut writable_url_opener = WritableUrlOpener::<'_, Path>::new(&[]);
+        let mut readable_url_opener = ReadableUrlOpener::new([]);
+        let mut writable_url_opener = WritableUrlOpener::new([]);
         let file_path = "file path";
         let file_extension = "test";
         let file_content = "file content";
@@ -25,9 +29,9 @@ mod check_that_file_is_current_and_create_new_file {
         );
 
         let full_path = Path::new(file_path).with_extension(file_extension);
-        assert!(crate::test_result_equals_string(result, &format!("failed to open file to check for up-to-date content at path {}: URL {:?} is not in the set of mock readable URLs", full_path.display(), full_path)));
-        assert_eq!(readable_url_opener.url_read_records(), &[full_path]);
-        assert!(writable_url_opener.is_url_write_records_empty());
+        assert!(crate::test_result_equals_string(result, &format!("failed to open file to check for up-to-date content at path {}: URL {:?} is inaccessible for reading", full_path.display(), full_path)));
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_path]));
+        assert!(writable_url_opener.is_url_writes_empty());
     }
 
     #[test]
@@ -35,12 +39,13 @@ mod check_that_file_is_current_and_create_new_file {
         let file_path = "file path";
         let file_extension = "test";
         let full_path = Path::new(file_path).with_extension(file_extension);
-        let readable_files = [UrlWithContent {
+        let error = "expected read error";
+        let readable_files = [UrlReadAction {
             url: Cow::Borrowed(full_path.as_path()),
-            content: UrlContent::IoError,
+            action: ReadAction::from_error(error),
         }];
-        let mut readable_url_opener = ReadableUrlOpener::new(&readable_files);
-        let mut writable_url_opener = WritableUrlOpener::<'_, Path>::new(&[]);
+        let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
+        let mut writable_url_opener = WritableUrlOpener::new([]);
         let file_content = "file content";
 
         let result = super::super::check_that_file_is_current_and_create_new_file(
@@ -51,12 +56,16 @@ mod check_that_file_is_current_and_create_new_file {
             file_content,
         );
 
-        assert!(crate::test_result_equals_string(result, &format!("failed to read line 0 from file to check for up-to-date content at path {}: error reading from mock url {:?}", full_path.display(), full_path)));
-        assert_eq!(
-            readable_url_opener.url_read_records(),
-            &[full_path.as_path()]
-        );
-        assert!(writable_url_opener.is_url_write_records_empty());
+        assert!(crate::test_result_equals_string(
+            result,
+            &format!(
+                "failed to read line 0 from file to check for up-to-date content at path {}: {}",
+                full_path.display(),
+                error
+            )
+        ));
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_path.as_path()]));
+        assert!(writable_url_opener.is_url_writes_empty());
     }
 
     #[test]
@@ -66,12 +75,12 @@ mod check_that_file_is_current_and_create_new_file {
         let full_input_path = Path::new(file_path).with_extension(file_extension);
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
-        let readable_files = [UrlWithContent {
+        let readable_files = [UrlReadAction {
             url: Cow::Borrowed(full_input_path.as_path()),
-            content: UrlContent::String(Cow::Borrowed("outdated file content")),
+            action: ReadAction::from_data(Cow::Borrowed("outdated file content")),
         }];
-        let mut readable_url_opener = ReadableUrlOpener::new(&readable_files);
-        let mut writable_url_opener = WritableUrlOpener::<'_, Path>::new(&[]);
+        let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
+        let mut writable_url_opener = WritableUrlOpener::new([]);
         let file_content = "file content";
 
         let result = super::super::check_that_file_is_current_and_create_new_file(
@@ -85,18 +94,16 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(crate::test_result_equals_string(
             result,
             &format!(
-                "failed to open an updated file at path {}: URL {:?} is not in the set of mock writable URLs",
-                full_output_path.display(), full_output_path
+                "failed to open an updated file at path {}: URL {:?} is inaccessible for writing",
+                full_output_path.display(),
+                full_output_path
             )
         ));
-        assert_eq!(
-            readable_url_opener.url_read_records(),
-            &[full_input_path.as_path()]
-        );
-        assert_eq!(
-            writable_url_opener.url_write_records(),
-            &[UrlWriteRecord::Inaccessible(full_output_path.as_path())]
-        );
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
+        assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
+            url: Cow::Borrowed(full_output_path.as_path()),
+            outcome: UrlWriteContent::Inaccessible
+        }]));
     }
 
     #[test]
@@ -106,16 +113,17 @@ mod check_that_file_is_current_and_create_new_file {
         let full_input_path = Path::new(file_path).with_extension(file_extension);
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
-        let readable_files = [UrlWithContent {
+        let readable_files = [UrlReadAction {
             url: Cow::Borrowed(full_input_path.as_path()),
-            content: UrlContent::String(Cow::Borrowed("outdated file content")),
+            action: ReadAction::from_data(Cow::Borrowed("outdated file content")),
         }];
-        let writable_files = [WritableUrl {
+        let error = "expected write error";
+        let writable_files = [UrlWriteAction {
             url: Cow::Borrowed(full_output_path.as_path()),
-            action: WritableUrlAction::IoError,
+            action: WriteAction::from_error(error),
         }];
-        let mut readable_url_opener = ReadableUrlOpener::new(&readable_files);
-        let mut writable_url_opener = WritableUrlOpener::new(&writable_files);
+        let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
+        let mut writable_url_opener = WritableUrlOpener::new(writable_files);
         let file_content = "file content";
 
         let result = super::super::check_that_file_is_current_and_create_new_file(
@@ -129,22 +137,16 @@ mod check_that_file_is_current_and_create_new_file {
         assert!(crate::test_result_equals_string(
             result,
             &format!(
-                "failed to write to an updated file at path {}: error writing to mock url {:?}",
+                "failed to write to an updated file at path {}: {}",
                 full_output_path.display(),
-                full_output_path
+                error
             )
         ));
-        assert_eq!(
-            readable_url_opener.url_read_records(),
-            &[full_input_path.as_path()]
-        );
-        assert_eq!(
-            writable_url_opener.url_write_records(),
-            &[UrlWriteRecord::WriteResult(UrlWithContent {
-                url: Cow::Borrowed(full_output_path.as_path()),
-                content: UrlContent::IoError,
-            })]
-        );
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
+        assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
+            url: Cow::Borrowed(full_output_path.as_path()),
+            outcome: UrlWriteContent::Content(WriteContent::IoError),
+        }]));
     }
 
     #[test]
@@ -154,16 +156,16 @@ mod check_that_file_is_current_and_create_new_file {
         let full_input_path = Path::new(file_path).with_extension(file_extension);
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
-        let readable_files = [UrlWithContent {
+        let readable_files = [UrlReadAction {
             url: Cow::Borrowed(full_input_path.as_path()),
-            content: UrlContent::String(Cow::Borrowed("outdated file content\nmatching line")),
+            action: ReadAction::from_data(Cow::Borrowed("outdated file content\nmatching line")),
         }];
-        let writable_files = [WritableUrl {
+        let writable_files = [UrlWriteAction {
             url: Cow::Borrowed(full_output_path.as_path()),
-            action: WritableUrlAction::Data,
+            action: WriteAction::Data,
         }];
-        let mut readable_url_opener = ReadableUrlOpener::new(&readable_files);
-        let mut writable_url_opener = WritableUrlOpener::new(&writable_files);
+        let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
+        let mut writable_url_opener = WritableUrlOpener::new(writable_files);
         let file_content = "file content\nmatching line";
 
         let result = super::super::check_that_file_is_current_and_create_new_file(
@@ -182,17 +184,11 @@ mod check_that_file_is_current_and_create_new_file {
                 full_output_path.display()
             )
         ));
-        assert_eq!(
-            readable_url_opener.url_read_records(),
-            &[full_input_path.as_path()]
-        );
-        assert_eq!(
-            writable_url_opener.url_write_records(),
-            &[UrlWriteRecord::WriteResult(UrlWithContent {
-                url: Cow::Borrowed(full_output_path.as_path()),
-                content: UrlContent::String(Cow::Borrowed(file_content)),
-            })]
-        );
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
+        assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
+            url: Cow::Borrowed(full_output_path.as_path()),
+            outcome: UrlWriteContent::Content(WriteContent::Data(Cow::Borrowed(file_content))),
+        }]));
     }
 
     #[test]
@@ -202,16 +198,16 @@ mod check_that_file_is_current_and_create_new_file {
         let full_input_path = Path::new(file_path).with_extension(file_extension);
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
-        let readable_files = [UrlWithContent {
+        let readable_files = [UrlReadAction {
             url: Cow::Borrowed(full_input_path.as_path()),
-            content: UrlContent::String(Cow::Borrowed("matching line\noutdated file content")),
+            action: ReadAction::from_data(Cow::Borrowed("matching line\noutdated file content")),
         }];
-        let writable_files = [WritableUrl {
+        let writable_files = [UrlWriteAction {
             url: Cow::Borrowed(full_output_path.as_path()),
-            action: WritableUrlAction::Data,
+            action: WriteAction::Data,
         }];
-        let mut readable_url_opener = ReadableUrlOpener::new(&readable_files);
-        let mut writable_url_opener = WritableUrlOpener::new(&writable_files);
+        let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
+        let mut writable_url_opener = WritableUrlOpener::new(writable_files);
         let file_content = "matching line\nfile content";
 
         let result = super::super::check_that_file_is_current_and_create_new_file(
@@ -230,16 +226,10 @@ mod check_that_file_is_current_and_create_new_file {
                 full_output_path.display()
             )
         ));
-        assert_eq!(
-            readable_url_opener.url_read_records(),
-            &[full_input_path.as_path()]
-        );
-        assert_eq!(
-            writable_url_opener.url_write_records(),
-            &[UrlWriteRecord::WriteResult(UrlWithContent {
-                url: Cow::Borrowed(full_output_path.as_path()),
-                content: UrlContent::String(Cow::Borrowed(file_content)),
-            })]
-        );
+        assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
+        assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
+            url: Cow::Borrowed(full_output_path.as_path()),
+            outcome: UrlWriteContent::Content(WriteContent::Data(Cow::Borrowed(file_content))),
+        }]));
     }
 }
