@@ -1,16 +1,15 @@
 mod check_that_file_is_current_and_create_new_file {
     use crate::mock::io::WriteAction;
-    use std::borrow::Cow;
     use std::path::Path;
 
-    type ReadAction<'a> = crate::mock::io::ReadAction<Cow<'a, str>>;
-    type WriteContent<'a> = crate::mock::io::WriteContent<Cow<'a, str>>;
-    type UrlReadAction<'a> = crate::mock::url::UrlReadAction<Cow<'a, Path>, Cow<'a, str>>;
-    type UrlWriteAction<'a> = crate::mock::url::UrlWriteAction<Cow<'a, Path>>;
-    type UrlWrite<'a> = crate::mock::url::UrlWrite<Cow<'a, Path>, WriteContent<'a>>;
+    type ReadAction<'a> = crate::mock::io::ReadAction<&'a str>;
+    type WriteContent<'a> = crate::mock::io::WriteContent<&'a str>;
+    type UrlReadAction<'a> = crate::mock::url::UrlReadAction<&'a Path, &'a str>;
+    type UrlWriteAction<'a> = crate::mock::url::UrlWriteAction<&'a Path>;
+    type UrlWrite<'a> = crate::mock::url::UrlWrite<&'a Path, WriteContent<'a>>;
     type UrlWriteContent<'a> = crate::mock::url::UrlWriteContent<WriteContent<'a>>;
-    type ReadableUrlOpener<'a> = crate::mock::url::ReadableUrlOpener<Cow<'a, Path>, Cow<'a, str>>;
-    type WritableUrlOpener<'a> = crate::mock::url::WritableUrlOpener<Cow<'a, Path>>;
+    type ReadableUrlOpener<'a> = crate::mock::url::ReadableUrlOpener<&'a Path, &'a str>;
+    type WritableUrlOpener<'a> = crate::mock::url::WritableUrlOpener<&'a Path>;
 
     #[test]
     fn file_is_missing_is_an_error() {
@@ -41,7 +40,7 @@ mod check_that_file_is_current_and_create_new_file {
         let full_path = Path::new(file_path).with_extension(file_extension);
         let error = "expected read error";
         let readable_files = [UrlReadAction {
-            url: Cow::Borrowed(full_path.as_path()),
+            url: full_path.as_path(),
             action: ReadAction::from_error(error),
         }];
         let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
@@ -76,8 +75,8 @@ mod check_that_file_is_current_and_create_new_file {
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
         let readable_files = [UrlReadAction {
-            url: Cow::Borrowed(full_input_path.as_path()),
-            action: ReadAction::from_data(Cow::Borrowed("outdated file content")),
+            url: full_input_path.as_path(),
+            action: ReadAction::from_data("outdated file content"),
         }];
         let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
         let mut writable_url_opener = WritableUrlOpener::new([]);
@@ -101,7 +100,7 @@ mod check_that_file_is_current_and_create_new_file {
         ));
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
-            url: Cow::Borrowed(full_output_path.as_path()),
+            url: full_output_path.as_path(),
             outcome: UrlWriteContent::inaccessible()
         }]));
     }
@@ -114,12 +113,12 @@ mod check_that_file_is_current_and_create_new_file {
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
         let readable_files = [UrlReadAction {
-            url: Cow::Borrowed(full_input_path.as_path()),
-            action: ReadAction::from_data(Cow::Borrowed("outdated file content")),
+            url: full_input_path.as_path(),
+            action: ReadAction::from_data("outdated file content"),
         }];
         let error = "expected write error";
         let writable_files = [UrlWriteAction {
-            url: Cow::Borrowed(full_output_path.as_path()),
+            url: full_output_path.as_path(),
             action: WriteAction::from_error(error),
         }];
         let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
@@ -144,7 +143,7 @@ mod check_that_file_is_current_and_create_new_file {
         ));
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
-            url: Cow::Borrowed(full_output_path.as_path()),
+            url: full_output_path.as_path(),
             outcome: UrlWriteContent::io_error(),
         }]));
     }
@@ -157,11 +156,11 @@ mod check_that_file_is_current_and_create_new_file {
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
         let readable_files = [UrlReadAction {
-            url: Cow::Borrowed(full_input_path.as_path()),
-            action: ReadAction::from_data(Cow::Borrowed("outdated file content\nmatching line")),
+            url: full_input_path.as_path(),
+            action: ReadAction::from_data("outdated file content\nmatching line"),
         }];
         let writable_files = [UrlWriteAction {
-            url: Cow::Borrowed(full_output_path.as_path()),
+            url: full_output_path.as_path(),
             action: WriteAction::Data,
         }];
         let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
@@ -186,8 +185,8 @@ mod check_that_file_is_current_and_create_new_file {
         ));
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
-            url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::from_data(Cow::Borrowed(file_content)),
+            url: full_output_path.as_path(),
+            outcome: UrlWriteContent::from_data(file_content),
         }]));
     }
 
@@ -199,11 +198,11 @@ mod check_that_file_is_current_and_create_new_file {
         let full_output_path =
             Path::new(file_path).with_extension(format!("{}.new", file_extension));
         let readable_files = [UrlReadAction {
-            url: Cow::Borrowed(full_input_path.as_path()),
-            action: ReadAction::from_data(Cow::Borrowed("matching line\noutdated file content")),
+            url: full_input_path.as_path(),
+            action: ReadAction::from_data("matching line\noutdated file content"),
         }];
         let writable_files = [UrlWriteAction {
-            url: Cow::Borrowed(full_output_path.as_path()),
+            url: full_output_path.as_path(),
             action: WriteAction::Data,
         }];
         let mut readable_url_opener = ReadableUrlOpener::new(readable_files);
@@ -228,8 +227,8 @@ mod check_that_file_is_current_and_create_new_file {
         ));
         assert!(readable_url_opener.is_url_reads_set_equal(&[full_input_path.as_path()]));
         assert!(writable_url_opener.is_url_writes_equal(&[UrlWrite {
-            url: Cow::Borrowed(full_output_path.as_path()),
-            outcome: UrlWriteContent::from_data(Cow::Borrowed(file_content)),
+            url: full_output_path.as_path(),
+            outcome: UrlWriteContent::from_data(file_content),
         }]));
     }
 }
