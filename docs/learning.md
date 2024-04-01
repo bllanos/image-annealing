@@ -78,6 +78,12 @@ The newtype pattern is explained in [The Rust Programming Language](https://doc.
 
 1. Generic parameters should be treated like regular function data parameters. If client code would not be interested in passing different types for a generic parameter, the parameter should be removed, just like one would remove data parameters that client code does not care about. Generic parameters can otherwise leak implementation details.
 
+2. Where possible, avoid specifying the storage characteristics of generic data.
+
+   For example, prefer using `T` instead of wrappers around `T`, such as `std::borrow::Cow<T>` or `Box<T>`. Since wrapper types add runtime overhead, it is better if client code decides whether to pass a wrapped type as a generic type parameter than if the generic code internally uses a wrapper type. For example, it should ideally be possible for client code to pass `X`, `std::borrow::Cow<'a, X>` or `Box<X>` as values for a generic type parameter `T`.
+
+   To allow generic code to accommodate both plain types and wrapped types as arguments for generic type parameters, you may find a type bound of `Deref` useful, as many wrapper types implement `Deref`. For example, convert `T: AsRef<U>` to `T: Deref` where `<T as Deref>::Target: AsRef<U>` so that client code can use either `X` or `Cow<'a, X>` for `T` where `X: AsRef<U>`.
+
 ### Error handling
 
 1. Avoid using [`Box<dyn Error>`](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html). Instead, define concrete error types that allow errors to be inspected programmatically, for the following reasons:
