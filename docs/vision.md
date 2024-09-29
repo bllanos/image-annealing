@@ -107,7 +107,11 @@ The definition of a side-effect is somewhat vague. An [article on algebraic effe
 
 2. Mutation (`mut`)
 
-3. Code that selects control flow patterns, such as how Rust `Future`s are run to completion, or how the process accommodates asynchronous GPU operations.
+3. Code that selects control flow patterns, such as:
+
+   1. Using mutexes and other multi-threading control mechanisms
+   2. Choosing how Rust `Future`s are run to completion
+   3. Choosing how to manage asynchronous GPU operations
 
 4. [Panicking](https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html).
 

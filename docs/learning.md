@@ -177,11 +177,14 @@ We found the following resources helpful. Each one is listed alongside the date 
 1. (2020) [Learn Wgpu](https://sotrh.github.io/learn-wgpu/)
 2. (2020) [wgpu wiki](https://github.com/gfx-rs/wgpu/wiki)
 3. (2021) [WebGPU Shading Language](https://gpuweb.github.io/gpuweb/wgsl/)
+4. (2024) [WebGPU Best Practices](https://toji.dev/webgpu-best-practices/)
 
 ### Software design
 
-1. (2023) [Unit Testing Principles, Practices, and Patterns](https://www.manning.com/books/unit-testing), by  Vladimir Khorikov, Manning Publications, published January 2020 (ISBN 9781617296277)
+1. (2023) [Unit Testing Principles, Practices, and Patterns](https://www.manning.com/books/unit-testing), by Vladimir Khorikov, Manning Publications, published January 2020 (ISBN 9781617296277)
 2. (2023) [The Grug Brained Developer](https://grugbrain.dev/), probably written by Carson Gross
 3. (2023) [Worse Is Better](https://www.dreamsongs.com/WorseIsBetter.html), by Richard P. Gabriel
+4. (2024) [Command Line Programs for the Blind](http://eklhad.net/philosophy.html), by Karl Dahlke
+5. (2024) [Crux: Cross-platform app development in Rust](https://redbadger.github.io/crux/)
 
 [using-types-effectively]: https://elbeno.com/presentations/using-types-effectively/presentation.html
