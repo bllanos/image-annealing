@@ -11,6 +11,13 @@ Tools for developing algorithms that work with permutations of data in 2D grids 
 Instructions for running the example are in [`image_annealing_cli_bin/examples/dot/README.md`](./image_annealing_cli_bin/examples/dot/README.md). Before running the example, follow the [repository setup instructions](#setup) below.
 
 <!-- omit in toc -->
+## Project status
+
+**September 29, 2024**
+
+This project is on hold since I think further development would yield diminishing returns with respect to learning. I learned many things while working on this project, and I was in the process of rewriting it from scratch based on the insights gained (see the [new documentation](https://github.com/bllanos/image-annealing/tree/wgpu-initialization/docs)). At present, it seems more interesting to apply what I learned to a new project instead of bringing the [new code](https://github.com/bllanos/image-annealing/tree/wgpu-initializatio) for this project to feature parity with the version on the `main` branch.
+
+<!-- omit in toc -->
 ## Table of Contents
 
 - [Problem description](#problem-description)
